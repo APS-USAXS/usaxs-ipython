@@ -1,0 +1,23 @@
+print(__file__)
+import portable_mds.sqlite.mds as pmqsm
+import bluesky as bs
+import bluesky.plans as bp
+from bluesky.callbacks import LiveTable, LivePlot
+
+# TODO: change this call to avoid a warning when using the sqlite backend
+# /APSshare/anaconda3/BlueSky/lib/python3.5/site-packages/databroker/databroker.py
+# the code says: This module exists for back-compatability only
+# Find the right one now.
+import databroker
+
+mds_config = {
+    'directory': '/share1/bluesky/mds',    # for *.sqlite file each scan
+    'timezone': 'US/Central'
+}
+mds = pmqsm.MDS(config=mds_config)
+
+
+RE = bs.RunEngine({})
+RE.subscribe('all', mds.insert)
+
+db = databroker.Broker(mds, None)
