@@ -1,0 +1,3102 @@
+usaxs@usaxscontrol ~/.../macros/local $ cd
+usaxs@usaxscontrol ~ $ which conda
+/APSshare/anaconda/x86_64/bin/conda
+usaxs@usaxscontrol ~ $ ls .ipython
+extensions  nbextensions  profile_default
+usaxs@usaxscontrol ~ $ conda create -n bluesky python=3.5 ipython matplotlib qt=4 scipy pandas
+Fetching package metadata .......
+Solving package specifications: ..........
+Using Anaconda Cloud api site https://api.anaconda.org
+
+Package plan for installation in environment /home/beams/USAXS/.conda/envs/bluesky:
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    libffi-3.2.1               |                0          36 KB
+    libgfortran-3.0.0          |                1         281 KB
+    mkl-11.3.3                 |                0       122.1 MB
+    openssl-1.0.2j             |                0         3.2 MB
+    readline-6.2               |                2         606 KB
+    sqlite-3.13.0              |                0         4.0 MB
+    xz-5.2.2                   |                0         644 KB
+    zlib-1.2.8                 |                3         101 KB
+    glib-2.43.0                |                1         5.4 MB
+    libpng-1.6.22              |                0         214 KB
+    python-3.5.2               |                0        17.2 MB
+    decorator-4.0.10           |           py35_0          12 KB
+    freetype-2.5.5             |                1         2.5 MB
+    ipython_genutils-0.1.0     |           py35_0          33 KB
+    numpy-1.11.2               |           py35_0         6.1 MB
+    path.py-8.2.1              |           py35_0          47 KB
+    ptyprocess-0.5.1           |           py35_0          19 KB
+    pygments-2.1.3             |           py35_0         1.2 MB
+    pyparsing-2.1.4            |           py35_0          72 KB
+    pytz-2016.7                |           py35_0         176 KB
+    setuptools-27.2.0          |           py35_0         526 KB
+    simplegeneric-0.8.1        |           py35_1           7 KB
+    sip-4.18                   |           py35_0         240 KB
+    six-1.10.0                 |           py35_0          17 KB
+    wcwidth-0.1.7              |           py35_0          21 KB
+    wheel-0.29.0               |           py35_0          82 KB
+    cycler-0.10.0              |           py35_0          11 KB
+    fontconfig-2.11.1          |                6         405 KB
+    pexpect-4.0.1              |           py35_0          66 KB
+    pickleshare-0.7.4          |           py35_0           9 KB
+    pip-9.0.1                  |           py35_0         1.7 MB
+    prompt_toolkit-1.0.8       |           py35_0         322 KB
+    python-dateutil-2.5.3      |           py35_0         237 KB
+    scipy-0.18.1               |      np111py35_0        30.4 MB
+    traitlets-4.3.1            |           py35_0         124 KB
+    ipython-5.1.0              |           py35_0         991 KB
+    pandas-0.19.1              |      np111py35_0        16.2 MB
+    harfbuzz-0.9.39            |                1         1.1 MB
+    pango-1.39.0               |                1         668 KB
+    qt-4.8.7                   |                4        32.7 MB
+    pyqt-4.11.4                |           py35_4         3.3 MB
+    matplotlib-1.5.1           |      np111py35_0         8.4 MB
+    ------------------------------------------------------------
+                                           Total:       261.1 MB
+
+The following NEW packages will be INSTALLED:
+
+    cairo:            1.12.18-6          (soft-link)
+    cycler:           0.10.0-py35_0     
+    decorator:        4.0.10-py35_0     
+    fontconfig:       2.11.1-6          
+    freetype:         2.5.5-1           
+    glib:             2.43.0-1          
+    harfbuzz:         0.9.39-1          
+    ipython:          5.1.0-py35_0      
+    ipython_genutils: 0.1.0-py35_0      
+    libffi:           3.2.1-0           
+    libgfortran:      3.0.0-1           
+    libpng:           1.6.22-0          
+    libxml2:          2.9.2-0            (soft-link)
+    matplotlib:       1.5.1-np111py35_0 
+    mkl:              11.3.3-0          
+    numpy:            1.11.2-py35_0     
+    openssl:          1.0.2j-0          
+    pandas:           0.19.1-np111py35_0
+    pango:            1.39.0-1          
+    path.py:          8.2.1-py35_0      
+    pexpect:          4.0.1-py35_0      
+    pickleshare:      0.7.4-py35_0      
+    pip:              9.0.1-py35_0      
+    pixman:           0.32.6-0           (soft-link)
+    prompt_toolkit:   1.0.8-py35_0      
+    ptyprocess:       0.5.1-py35_0      
+    pygments:         2.1.3-py35_0      
+    pyparsing:        2.1.4-py35_0      
+    pyqt:             4.11.4-py35_4     
+    python:           3.5.2-0           
+    python-dateutil:  2.5.3-py35_0      
+    pytz:             2016.7-py35_0     
+    qt:               4.8.7-4           
+    readline:         6.2-2             
+    scipy:            0.18.1-np111py35_0
+    setuptools:       27.2.0-py35_0     
+    simplegeneric:    0.8.1-py35_1      
+    sip:              4.18-py35_0       
+    six:              1.10.0-py35_0     
+    sqlite:           3.13.0-0          
+    tk:               8.5.18-0           (soft-link)
+    traitlets:        4.3.1-py35_0      
+    wcwidth:          0.1.7-py35_0      
+    wheel:            0.29.0-py35_0     
+    xz:               5.2.2-0           
+    zlib:             1.2.8-3           
+
+Proceed ([y]/n)? n
+
+usaxs@usaxscontrol ~ $ conda create -n bluesky python=3.5 ipython matplotlib qt=4 scipy pandas -c conda-forge
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata .........
+Solving package specifications: ..........
+^CTraceback (most recent call last):
+  File "/APSshare/anaconda/x86_64/bin/conda", line 6, in <module>
+    sys.exit(main())
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main.py", line 120, in main
+    exit_code = args_func(args, p)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main.py", line 130, in args_func
+    exit_code = args.func(args, p)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main_create.py", line 58, in execute
+    install(args, parser, 'create')
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/install.py", line 315, in install
+    update_deps=args.update_deps)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/plan.py", line 494, in install_actions
+    force=force, always_copy=always_copy)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/plan.py", line 352, in ensure_linked_actions
+    elif try_hard_link(fetched_dir, prefix, dist):
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/install.py", line 639, in try_hard_link
+    return not os.path.islink(dst)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/posixpath.py", line 135, in islink
+    st = os.lstat(path)
+KeyboardInterrupt
+^C
+usaxs@usaxscontrol ~ $ wget https://raw.githubusercontent.com/NSLS-II/tutorial/master/environment.yml
+--2016-11-08 14:25:28--  https://raw.githubusercontent.com/NSLS-II/tutorial/master/environment.yml
+Resolving raw.githubusercontent.com... 151.101.44.133
+Connecting to raw.githubusercontent.com|151.101.44.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1085 (1.1K) [text/plain]
+Saving to: \u201cenvironment.yml\u201d
+
+100%[================================================================================================================>] 1,085       --.-K/s   in 0s      
+
+2016-11-08 14:25:28 (411 MB/s) - \u201cenvironment.yml\u201d saved [1085/1085]
+
+usaxs@usaxscontrol ~ $ vi environment.yml 
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+Using Anaconda Cloud api site https://api.anaconda.org
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata ...........
+Solving package specifications: ..........
+Fetching packages ...
+ca-certificate 100% |##########################################################################################################| Time: 0:00:00   1.37 MB/s
+gettext-0.19.7 100% |##########################################################################################################| Time: 0:00:00   8.03 MB/s
+icu-56.1-4.tar 100% |##########################################################################################################| Time: 0:00:01  15.11 MB/s
+jpeg-9b-0.tar. 100% |##########################################################################################################| Time: 0:00:00   2.82 MB/s
+libffi-3.2.1-2 100% |##########################################################################################################| Time: 0:00:02  17.67 kB/s
+libgfortran-3. 100% |##########################################################################################################| Time: 0:00:00   6.78 MB/s
+libiconv-1.14- 100% |##########################################################################################################| Time: 0:00:00   4.01 MB/s
+ncurses-5.9-9. 100% |##########################################################################################################| Time: 0:00:00   2.52 MB/s
+pcre-8.38-1.ta 100% |##########################################################################################################| Time: 0:00:00   2.17 MB/s
+Error: Could not open u'/APSshare/anaconda/x86_64/pkgs/pixman-0.32.6-0.tar.bz2.part' for writing ([Errno 30] Read-only file system: u'/APSshare/anaconda/x86_64/pkgs/pixman-0.32.6-0.tar.bz2.part').
+usaxs@usaxscontrol ~ $ conda config
+usage: conda config [-h] [--json] [--system | --file FILE]
+                    (--get [KEY [KEY ...]] | --add KEY VALUE | --append KEY VALUE | --set KEY VALUE | --remove KEY VALUE | --remove-key KEY)
+                    [-f]
+conda config: error: one of the arguments --get --add --append --set --remove --remove-key is required
+usaxs@usaxscontrol ~ $ conda config --help
+usage: conda config [-h] [--json] [--system | --file FILE]
+                    (--get [KEY [KEY ...]] | --add KEY VALUE | --append KEY VALUE | --set KEY VALUE | --remove KEY VALUE | --remove-key KEY)
+                    [-f]
+
+Modify configuration values in .condarc.  This is modeled after the git
+config command.  Writes to the user .condarc file (/home/beams/USAXS/.condarc) by default.
+
+Options:
+
+optional arguments:
+  -h, --help            Show this help message and exit.
+  --json                Report all output as json. Suitable for using conda
+                        programmatically.
+  --system              Write to the system .condarc file
+                        (/APSshare/anaconda/x86_64/.condarc). Otherwise writes
+                        to the user config file (/home/beams/USAXS/.condarc).
+  --file FILE           Write to the given file. Otherwise writes to the user
+                        config file (/home/beams/USAXS/.condarc) or the file
+                        path given by the 'CONDARC' environment variable, if
+                        it is set (default: /home/beams/USAXS/.condarc).
+  --get [KEY [KEY ...]]
+                        Get a configuration value.
+  --add KEY VALUE       Add one configuration value to the beginning of a list
+                        key. To add to the end of the list, use --append.
+  --append KEY VALUE    Add one configuration value to a list key. The default
+                        behavior is to prepend.
+  --set KEY VALUE       Set a boolean or string key
+  --remove KEY VALUE    Remove a configuration value from a list key. This
+                        removes all instances of the value.
+  --remove-key KEY      Remove a configuration key (and all its values).
+  -f, --force           Write to the config file using the yaml parser. This
+                        will remove any comments or structure from the file.
+
+See http://conda.pydata.org/docs/config.html for details on all the options
+that can go in .condarc.
+
+List keys, like
+
+  channels:
+    - conda
+    - defaults
+
+are modified with the --add and --remove options. For example
+
+    conda config --add channels r
+
+on the above configuration would prepend the key 'r', giving
+
+    channels:
+      - r
+      - conda
+      - defaults
+
+Note that the key 'channels' implicitly contains the key 'defaults' if it has
+not been configured yet.
+
+Boolean keys, like
+
+    always_yes: true
+
+are modified with --set and removed with --remove-key. For example
+
+    conda config --set always_yes false
+
+gives
+
+    always_yes: false
+
+Note that in YAML, "yes", "YES", "on", "true", "True", and "TRUE" are all
+valid ways to spell "true", and "no", "NO", "off", "false", "False", and
+"FALSE", are all valid ways to spell "false".
+
+The .condarc file is YAML, and any valid YAML syntax is allowed.
+
+Examples:
+
+Get the channels defined in the system .condarc:
+
+    conda config --get channels --system
+
+Add the 'foo' Binstar channel:
+
+    conda config --add channels foo
+
+Disable the 'show_channel_urls' option:
+
+    conda config --set show_channel_urls no
+usaxs@usaxscontrol ~ $ conda config --get foo
+usage: conda config [-h] [--json] [--system | --file FILE]
+                    (--get [KEY [KEY ...]] | --add KEY VALUE | --append KEY VALUE | --set KEY VALUE | --remove KEY VALUE | --remove-key KEY)
+                    [-f]
+conda config: error: argument --get: invalid choice: 'foo' (choose from 'channels', 'disallow', 'create_default_packages', 'track_features', 'envs_dirs', 'default_channels', 'add_binstar_token', 'add_anaconda_token', 'add_pip_as_python_dependency', 'always_yes', 'always_copy', 'allow_softlinks', 'auto_update_conda', 'changeps1', 'use_pip', 'offline', 'binstar_upload', 'anaconda_upload', 'show_channel_urls', 'allow_other_channels', 'update_dependencies', 'channel_priority', 'shortcuts')
+usaxs@usaxscontrol ~ $ conda config --get envs_dir
+usage: conda config [-h] [--json] [--system | --file FILE]
+                    (--get [KEY [KEY ...]] | --add KEY VALUE | --append KEY VALUE | --set KEY VALUE | --remove KEY VALUE | --remove-key KEY)
+                    [-f]
+conda config: error: argument --get: invalid choice: 'envs_dir' (choose from 'channels', 'disallow', 'create_default_packages', 'track_features', 'envs_dirs', 'default_channels', 'add_binstar_token', 'add_anaconda_token', 'add_pip_as_python_dependency', 'always_yes', 'always_copy', 'allow_softlinks', 'auto_update_conda', 'changeps1', 'use_pip', 'offline', 'binstar_upload', 'anaconda_upload', 'show_channel_urls', 'allow_other_channels', 'update_dependencies', 'channel_priority', 'shortcuts')
+usaxs@usaxscontrol ~ $ conda config --get envs_dirs
+usaxs@usaxscontrol ~ $ conda config --set envs_dirs ~/.conda_envs
+Error: Error key must be one of root_dir, add_anaconda_token, shortcuts, add_pip_as_python_dependency, ssl_verify, binstar_upload, use_pip, add_binstar_token, always_copy, always_yes, channel_alias, changeps1, channel_priority, show_channel_urls, update_dependencies, allow_softlinks, anaconda_upload, offline, allow_other_channels, auto_update_conda, not envs_dirs
+usaxs@usaxscontrol ~ $ conda config --add envs_dirs ~/.conda_envs
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+Using Anaconda Cloud api site https://api.anaconda.org
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata ...........
+Solving package specifications: ..........
+Fetching packages ...
+ca-certificate 100% |##########################################################################################################| Time: 0:00:00   1.26 MB/s
+gettext-0.19.7 100% |##########################################################################################################| Time: 0:00:01   5.43 MB/s
+icu-56.1-4.tar 100% |##########################################################################################################| Time: 0:00:01  14.34 MB/s
+jpeg-9b-0.tar. 100% |##########################################################################################################| Time: 0:00:00   2.65 MB/s
+libffi-3.2.1-2 100% |##########################################################################################################| Time: 0:00:00 681.19 kB/s
+libgfortran-3. 100% |##########################################################################################################| Time: 0:00:00   8.58 MB/s
+libiconv-1.14- 100% |##########################################################################################################| Time: 0:00:00   4.06 MB/s
+ncurses-5.9-9. 100% |##########################################################################################################| Time: 0:00:00   2.41 MB/s
+pcre-8.38-1.ta 100% |##########################################################################################################| Time: 0:00:00   2.22 MB/s
+pixman-0.32.6- 100% |##########################################################################################################| Time: 0:00:00   6.05 MB/s
+sqlite-3.13.0- 100% |##########################################################################################################| Time: 0:00:00   6.02 MB/s
+tk-8.5.19-0.ta 100% |##########################################################################################################| Time: 0:00:00   3.84 MB/s
+xz-5.2.2-0.tar 100% |##########################################################################################################| Time: 0:00:00   2.78 MB/s
+zlib-1.2.8-3.t 100% |##########################################################################################################| Time: 0:00:00 949.35 kB/s
+glib-2.48.0-4. 100% |##########################################################################################################| Time: 0:00:00   6.42 MB/s
+hdf5-1.8.17-7. 100% |##########################################################################################################| Time: 0:00:01   3.61 MB/s
+libpng-1.6.26- 100% |##########################################################################################################| Time: 0:00:00   1.71 MB/s
+libtiff-4.0.6- 100% |##########################################################################################################| Time: 0:00:00   1.70 MB/s
+libxml2-2.9.4- 100% |##########################################################################################################| Time: 0:00:00   6.24 MB/s
+openblas-0.2.1 100% |##########################################################################################################| Time: 0:00:01  12.41 MB/s
+openssl-1.0.2h 100% |##########################################################################################################| Time: 0:00:00   4.99 MB/s
+readline-6.2-0 100% |##########################################################################################################| Time: 0:00:00   2.25 MB/s
+blas-1.1-openb 100% |##########################################################################################################| Time: 0:00:00 191.25 kB/s
+freetype-2.6.3 100% |##########################################################################################################| Time: 0:00:00   5.61 MB/s
+python-3.5.2-2 100% |##########################################################################################################| Time: 0:00:01  19.01 MB/s
+certifi-2016.9 100% |##########################################################################################################| Time: 0:00:00   1.40 MB/s
+cython-0.25.1- 100% |##########################################################################################################| Time: 0:00:00   9.46 MB/s
+decorator-4.0. 100% |##########################################################################################################| Time: 0:00:00   2.54 MB/s
+fastcache-1.0. 100% |##########################################################################################################| Time: 0:00:00   4.46 MB/s
+fontconfig-2.1 100% |##########################################################################################################| Time: 0:00:00   2.92 MB/s
+mpmath-0.19-py 100% |##########################################################################################################| Time: 0:00:00   2.68 MB/s
+numpy-1.11.2-p 100% |##########################################################################################################| Time: 0:00:00   9.86 MB/s
+pillow-3.4.2-p 100% |##########################################################################################################| Time: 0:00:00   3.91 MB/s
+pyparsing-2.1. 100% |##########################################################################################################| Time: 0:00:00   1.51 MB/s
+pytz-2016.7-py 100% |##########################################################################################################| Time: 0:00:00 417.55 kB/s
+sip-4.18-py35_ 100% |##########################################################################################################| Time: 0:00:00 945.87 kB/s
+six-1.10.0-py3 100% |##########################################################################################################| Time: 0:00:00   1.53 MB/s
+toolz-0.8.0-py 100% |##########################################################################################################| Time: 0:00:00 915.21 kB/s
+cairo-1.12.18- 100% |##########################################################################################################| Time: 0:00:00   3.09 MB/s
+cycler-0.10.0- 100% |##########################################################################################################| Time: 0:00:00 512.76 kB/s
+cytoolz-0.8.0- 100% |##########################################################################################################| Time: 0:00:00   2.42 MB/s
+h5py-2.6.0-np1 100% |##########################################################################################################| Time: 0:00:00   5.87 MB/s
+networkx-1.11- 100% |##########################################################################################################| Time: 0:00:00   4.15 MB/s
+python-dateuti 100% |##########################################################################################################| Time: 0:00:00   1.55 MB/s
+scipy-0.18.1-n 100% |##########################################################################################################| Time: 0:00:02  11.75 MB/s
+setuptools-28. 100% |##########################################################################################################| Time: 0:00:00   2.05 MB/s
+slicerator-0.9 100% |##########################################################################################################| Time: 0:00:00   2.84 MB/s
+sympy-1.0-py35 100% |##########################################################################################################| Time: 0:00:01   3.54 MB/s
+tifffile-0.9.0 100% |##########################################################################################################| Time: 0:00:00   1.11 MB/s
+harfbuzz-1.0.6 100% |##########################################################################################################| Time: 0:00:00   5.60 MB/s
+pandas-0.19.1- 100% |##########################################################################################################| Time: 0:00:01  11.02 MB/s
+wheel-0.29.0-p 100% |##########################################################################################################| Time: 0:00:00 944.41 kB/s
+pango-1.40.1-0 100% |##########################################################################################################| Time: 0:00:00   2.81 MB/s
+pip-9.0.0-py35 100% |##########################################################################################################| Time: 0:00:00   2.93 MB/s
+qt-4.8.7-3.tar 100% |##########################################################################################################| Time: 0:00:02  12.23 MB/s
+pyqt-4.11.4-py 100% |##########################################################################################################| Time: 0:00:00   5.23 MB/s
+matplotlib-1.5 100% |##########################################################################################################| Time: 0:00:02   3.82 MB/s
+scikit-image-0 100% |##########################################################################################################| Time: 0:00:03   9.40 MB/s
+pims-0.3.3-py3 100% |##########################################################################################################| Time: 0:00:00   1.10 MB/s
+Extracting packages ...
+[libxml2             ]|######################################                                                                  ^C                     |  3Traceback (most recent call last):#######################################                                                                           |  40%
+  File "/APSshare/anaconda/x86_64/bin/conda-env", line 6, in <module>
+    sys.exit(conda_env.cli.main.main())
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda_env/cli/main.py", line 68, in main
+    return args_func(args, parser)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main.py", line 130, in args_func
+    exit_code = args.func(args, p)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda_env/cli/main_create.py", line 100, in execute
+    installer.install(prefix, pkg_specs, args, env)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda_env/installers/conda.py", line 20, in install
+    plan.execute_actions(actions, index, verbose=not args.quiet)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/plan.py", line 599, in execute_actions
+    inst.execute_instructions(plan, index, verbose)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/instructions.py", line 135, in execute_instructions
+    cmd(state, arg)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/instructions.py", line 59, in EXTRACT_CMD
+    extract(arg)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/install.py", line 857, in extract
+    t.extractall(path=temp_path)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/tarfile.py", line 2078, in extractall
+    self.extract(tarinfo, path)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/tarfile.py", line 2115, in extract
+    self._extract_member(tarinfo, os.path.join(path, tarinfo.name))
+  File "/APSshare/anaconda/x86_64/lib/python2.7/tarfile.py", line 2208, in _extract_member
+    self.utime(tarinfo, targetpath)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/tarfile.py", line 2329, in utime
+    os.utime(targetpath, (tarinfo.mtime, tarinfo.mtime))
+KeyboardInterrupt
+^Cusaxs@usaxscontrol ~ $ conda config --get envs_dirs
+--add envs_dirs '/home/beams/USAXS/.conda_envs'
+usaxs@usaxscontrol ~ $ vi ~/.con
+.conda/      .conda_envs/ .condarc     .config/     
+usaxs@usaxscontrol ~ $ vi ~/.conda
+.conda/      .conda_envs/ .condarc     
+usaxs@usaxscontrol ~ $ vi ~/.condarc 
+usaxs@usaxscontrol ~ $ conda config --add envs_dirs /share1/bluesky/conda_envs
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+Using Anaconda Cloud api site https://api.anaconda.org
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata ...........
+Solving package specifications: ..........
+Fetching packages ...
+ca-certificate 100% |##########################################################################################################| Time: 0:00:00   1.33 MB/s
+gettext-0.19.7 100% |##########################################################################################################| Time: 0:00:00   6.99 MB/s
+icu-56.1-4.tar 100% |##########################################################################################################| Time: 0:00:02   9.67 MB/s
+jpeg-9b-0.tar. 100% |##########################################################################################################| Time: 0:00:00   2.98 MB/s
+libffi-3.2.1-2 100% |##########################################################################################################| Time: 0:00:00   1.09 MB/s
+libgfortran-3. 100% |##########################################################################################################| Time: 0:00:00  12.98 MB/s
+libiconv-1.14- 100% |##########################################################################################################| Time: 0:00:00   4.67 MB/s
+ncurses-5.9-9. 100% |##########################################################################################################| Time: 0:00:00   3.43 MB/s
+pcre-8.38-1.ta 100% |##########################################################################################################| Time: 0:00:00   1.90 MB/s
+pixman-0.32.6- 100% |##########################################################################################################| Time: 0:00:00   5.99 MB/s
+sqlite-3.13.0- 100% |##########################################################################################################| Time: 0:00:00   7.04 MB/s
+tk-8.5.19-0.ta 100% |##########################################################################################################| Time: 0:00:00   2.87 MB/s
+xz-5.2.2-0.tar 100% |##########################################################################################################| Time: 0:00:00   2.76 MB/s
+zlib-1.2.8-3.t 100% |##########################################################################################################| Time: 0:00:00   1.07 MB/s
+glib-2.48.0-4. 100% |##########################################################################################################| Time: 0:00:01   4.34 MB/s
+hdf5-1.8.17-7. 100% |##########################################################################################################| Time: 0:00:00   6.64 MB/s
+libpng-1.6.26- 100% |##########################################################################################################| Time: 0:00:00   1.56 MB/s
+libtiff-4.0.6- 100% |##########################################################################################################| Time: 0:00:00   2.20 MB/s
+libxml2-2.9.4- 100% |##########################################################################################################| Time: 0:00:00   6.48 MB/s
+openblas-0.2.1 100% |##########################################################################################################| Time: 0:00:00  17.23 MB/s
+openssl-1.0.2h 100% |##########################################################################################################| Time: 0:00:00   4.23 MB/s
+readline-6.2-0 100% |##########################################################################################################| Time: 0:00:00   2.67 MB/s
+blas-1.1-openb 100% |##########################################################################################################| Time: 0:00:00   3.28 MB/s
+freetype-2.6.3 100% |##########################################################################################################| Time: 0:00:00   5.76 MB/s
+python-3.5.2-2 100% |##########################################################################################################| Time: 0:00:03   9.86 MB/s
+certifi-2016.9 100% |##########################################################################################################| Time: 0:00:00   1.04 MB/s
+cython-0.25.1- 100% |##########################################################################################################| Time: 0:00:01   7.60 MB/s
+decorator-4.0. 100% |##########################################################################################################| Time: 0:00:00  14.36 MB/s
+fastcache-1.0. 100% |##########################################################################################################| Time: 0:00:00   1.45 MB/s
+fontconfig-2.1 100% |##########################################################################################################| Time: 0:00:00   2.60 MB/s
+mpmath-0.19-py 100% |##########################################################################################################| Time: 0:00:00   2.35 MB/s
+numpy-1.11.2-p 100% |##########################################################################################################| Time: 0:00:00  10.68 MB/s
+pillow-3.4.2-p 100% |##########################################################################################################| Time: 0:00:00   2.98 MB/s
+pyparsing-2.1. 100% |##########################################################################################################| Time: 0:00:00   1.24 MB/s
+pytz-2016.7-py 100% |##########################################################################################################| Time: 0:00:00   1.47 MB/s
+sip-4.18-py35_ 100% |##########################################################################################################| Time: 0:00:00   1.22 MB/s
+six-1.10.0-py3 100% |##########################################################################################################| Time: 0:00:00   1.09 MB/s
+toolz-0.8.0-py 100% |##########################################################################################################| Time: 0:00:00 529.31 kB/s
+cairo-1.12.18- 100% |##########################################################################################################| Time: 0:00:00   2.80 MB/s
+cycler-0.10.0- 100% |##########################################################################################################| Time: 0:00:00 445.22 kB/s
+cytoolz-0.8.0- 100% |##########################################################################################################| Time: 0:00:00   2.49 MB/s
+h5py-2.6.0-np1 100% |##########################################################################################################| Time: 0:00:00   4.51 MB/s
+networkx-1.11- 100% |##########################################################################################################| Time: 0:00:00   3.18 MB/s
+python-dateuti 100% |##########################################################################################################| Time: 0:00:00 980.42 kB/s
+scipy-0.18.1-n 100% |##########################################################################################################| Time: 0:00:01  19.04 MB/s
+setuptools-28. 100% |##########################################################################################################| Time: 0:00:00   1.39 MB/s
+slicerator-0.9 100% |##########################################################################################################| Time: 0:00:00  18.23 MB/s
+sympy-1.0-py35 100% |##########################################################################################################| Time: 0:00:00   7.23 MB/s
+tifffile-0.9.0 100% |##########################################################################################################| Time: 0:00:00 719.59 kB/s
+harfbuzz-1.0.6 100% |##########################################################################################################| Time: 0:00:00   6.54 MB/s
+pandas-0.19.1- 100% |##########################################################################################################| Time: 0:00:01  12.25 MB/s
+wheel-0.29.0-p 100% |##########################################################################################################| Time: 0:00:00   1.02 MB/s
+pango-1.40.1-0 100% |##########################################################################################################| Time: 0:00:00   3.06 MB/s
+pip-9.0.0-py35 100% |##########################################################################################################| Time: 0:00:00   4.92 MB/s
+qt-4.8.7-3.tar 100% |##########################################################################################################| Time: 0:00:02  11.65 MB/s
+pyqt-4.11.4-py 100% |##########################################################################################################| Time: 0:00:00   7.26 MB/s
+matplotlib-1.5 100% |##########################################################################################################| Time: 0:00:00  12.92 MB/s
+scikit-image-0 100% |##########################################################################################################| Time: 0:00:03   8.72 MB/s
+pims-0.3.3-py3 100% |##########################################################################################################| Time: 0:00:00   1.22 MB/s
+Extracting packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Collecting mongoquery
+  Downloading mongoquery-1.1.0.tar.gz
+Collecting requests
+  Downloading requests-2.11.1-py2.py3-none-any.whl (514kB)
+    100% |\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 522kB 860kB/s 
+Collecting boltons
+  Downloading boltons-16.5.1-py2.py3-none-any.whl (133kB)
+    100% |\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 143kB 1.7MB/s 
+Collecting tzlocal
+  Downloading tzlocal-1.3.tar.gz
+Collecting historydict from git+https://github.com/Nikea/historydict#egg=historydict
+  Cloning https://github.com/Nikea/historydict to /tmp/pip-build-xp0uv302/historydict
+Collecting event_model from git+https://github.com/NSLS-II/event-model#egg=event_model
+  Cloning https://github.com/NSLS-II/event-model to /tmp/pip-build-xp0uv302/event-model
+Unpacking objects: 100% (79/79), done.
+Collecting portable_mds from git+https://github.com/NSLS-II/portable-mds#egg=portable_mds
+  Cloning https://github.com/NSLS-II/portable-mds to /tmp/pip-build-xp0uv302/portable-mds
+    Complete output from command python setup.py egg_info:
+    usage: git rev-list [OPTION] <commit-id>... [ -- paths... ]
+      limiting output:
+        --max-count=nr
+        --max-age=epoch
+        --min-age=epoch
+        --sparse
+        --no-merges
+        --remove-empty
+        --all
+        --branches
+        --tags
+        --remotes
+        --stdin
+        --quiet
+      ordering output:
+        --topo-order
+        --date-order
+        --reverse
+      formatting output:
+        --parents
+        --children
+        --objects | --objects-edge
+        --unpacked
+        --header | --pretty
+        --abbrev=nr | --no-abbrev
+        --abbrev-commit
+        --left-right
+      special purpose:
+        --bisect
+        --bisect-vars
+        --bisect-all
+    Traceback (most recent call last):
+      File "<string>", line 1, in <module>
+      File "/tmp/pip-build-xp0uv302/portable-mds/setup.py", line 11, in <module>
+        version=versioneer.get_version(),
+      File "/tmp/pip-build-xp0uv302/portable-mds/versioneer.py", line 1405, in get_version
+        return get_versions()["version"]
+      File "/tmp/pip-build-xp0uv302/portable-mds/versioneer.py", line 1380, in get_versions
+        pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
+      File "/tmp/pip-build-xp0uv302/portable-mds/versioneer.py", line 1076, in git_pieces_from_vcs
+        pieces["distance"] = int(count_out)  # total number of commits
+    TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
+    
+    ----------------------------------------
+Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-xp0uv302/portable-mds/
+Error: pip returned an error.
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+^CTraceback (most recent call last):
+  File "/APSshare/anaconda/x86_64/bin/conda", line 6, in <module>
+    sys.exit(main())
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main.py", line 94, in main
+    imported = importlib.import_module(module)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/importlib/__init__.py", line 37, in import_module
+    __import__(name)
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/cli/main_list.py", line 18, in <module>
+    from ..egg_info import get_egg_info
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/egg_info.py", line 15, in <module>
+    from .misc import rel_path
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/misc.py", line 18, in <module>
+    from .instructions import RM_FETCHED, FETCH, RM_EXTRACTED, EXTRACT, UNLINK, LINK, SYMLINK_CONDA
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/instructions.py", line 7, in <module>
+    from .fetch import fetch_pkg
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/conda/fetch.py", line 13, in <module>
+    import requests
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/requests/__init__.py", line 59, in <module>
+    from .models import Request, Response, PreparedRequest
+  File "/APSshare/anaconda/x86_64/lib/python2.7/site-packages/requests/models.py", line 8, in <module>
+    """
+KeyboardInterrupt
+usaxs@usaxscontrol ~ $ ^C
+usaxs@usaxscontrol ~ $ vi environment.yml 
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+Using Anaconda Cloud api site https://api.anaconda.org
+Error: prefix already exists: /share1/bluesky/conda_envs/bluesky
+usaxs@usaxscontrol ~ $ rm -rf /share1/bluesky/conda_envs/bluesky/
+usaxs@usaxscontrol ~ $ conda env create -f environment.yml 
+Using Anaconda Cloud api site https://api.anaconda.org
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata ...........
+Solving package specifications: ..........
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Collecting mongoquery
+  Using cached mongoquery-1.1.0.tar.gz
+Collecting requests
+  Using cached requests-2.11.1-py2.py3-none-any.whl
+Collecting boltons
+  Using cached boltons-16.5.1-py2.py3-none-any.whl
+Collecting tzlocal
+  Using cached tzlocal-1.3.tar.gz
+Collecting historydict from git+https://github.com/Nikea/historydict#egg=historydict
+  Cloning https://github.com/Nikea/historydict to /tmp/pip-build-d9gm0vnn/historydict
+Collecting event_model from git+https://github.com/NSLS-II/event-model#egg=event_model
+  Cloning https://github.com/NSLS-II/event-model to /tmp/pip-build-d9gm0vnn/event-model
+Unpacking objects: 100% (79/79), done.
+Collecting databroker from git+https://github.com/NSLS-II/databroker#egg=databroker
+  Cloning https://github.com/NSLS-II/databroker to /tmp/pip-build-d9gm0vnn/databroker
+Collecting bluesky from git+https://github.com/NSLS-II/bluesky#egg=bluesky
+  Cloning https://github.com/NSLS-II/bluesky to /tmp/pip-build-d9gm0vnn/bluesky
+Collecting doct from git+https://github.com/NSLS-II/doct#egg=doct
+  Cloning https://github.com/NSLS-II/doct to /tmp/pip-build-d9gm0vnn/doct
+Collecting ophyd from git+https://github.com/NSLS-II/ophyd#egg=ophyd
+  Cloning https://github.com/NSLS-II/ophyd to /tmp/pip-build-d9gm0vnn/ophyd
+Requirement already satisfied: pytz in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from tzlocal)
+Collecting jsonschema (from bluesky)
+  Downloading jsonschema-2.5.1-py2.py3-none-any.whl
+Collecting traitlets (from bluesky)
+  Downloading traitlets-4.3.1-py2.py3-none-any.whl (74kB)
+    100% |\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 81kB 1.5MB/s 
+Requirement already satisfied: cycler in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/cycler-0.10.0-py3.5.egg (from bluesky)
+Requirement already satisfied: numpy in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from bluesky)
+Requirement already satisfied: matplotlib in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from bluesky)
+Collecting super_state_machine (from bluesky)
+  Downloading super_state_machine-2.0-py2.py3-none-any.whl
+Requirement already satisfied: six in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from doct)
+Collecting humanize (from doct)
+  Downloading humanize-0.5.1.tar.gz
+Collecting prettytable (from doct)
+  Downloading prettytable-0.7.2.zip
+Collecting ipython-genutils (from traitlets->bluesky)
+  Downloading ipython_genutils-0.1.0-py2.py3-none-any.whl
+Requirement already satisfied: decorator in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from traitlets->bluesky)
+Requirement already satisfied: python-dateutil in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from matplotlib->bluesky)
+Requirement already satisfied: pyparsing!=2.0.4,!=2.1.2,>=1.5.6 in /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages (from matplotlib->bluesky)
+Collecting enum34 (from super_state_machine->bluesky)
+  Downloading enum34-1.1.6-py3-none-any.whl
+Building wheels for collected packages: mongoquery, tzlocal, humanize, prettytable
+  Running setup.py bdist_wheel for mongoquery ... done
+  Stored in directory: /home/beams/USAXS/.cache/pip/wheels/bb/07/72/d8a34133fb75af6c3f0cf23913086a43a968e10713ce9b3337
+  Running setup.py bdist_wheel for tzlocal ... done
+  Stored in directory: /home/beams/USAXS/.cache/pip/wheels/80/19/a8/635ad9f4ad8a63b49d073c55cbca31fb5898ce2560ed145a69
+  Running setup.py bdist_wheel for humanize ... done
+  Stored in directory: /home/beams/USAXS/.cache/pip/wheels/d4/80/38/cfbfd95752f71f3812505b948b43383ddc99eedf835fc13b09
+  Running setup.py bdist_wheel for prettytable ... done
+  Stored in directory: /home/beams/USAXS/.cache/pip/wheels/b6/90/7b/1c22b89217d0eba6d5f406e562365ebee804f0d4595b2bdbcd
+Successfully built mongoquery tzlocal humanize prettytable
+Installing collected packages: mongoquery, requests, boltons, tzlocal, historydict, event-model, databroker, jsonschema, ipython-genutils, traitlets, enum34, super-state-machine, bluesky, humanize, prettytable, doct, ophyd
+  Running setup.py install for historydict ... done
+  Running setup.py install for event-model ... done
+  Running setup.py install for databroker ... done
+  Running setup.py install for bluesky ... done
+  Running setup.py install for doct ... done
+  Running setup.py install for ophyd ... done
+Successfully installed bluesky-0.7.0+10.g9881da7 boltons-16.5.1 databroker-0.6.2+10.gd8022be doct-1.0.0 enum34-1.1.6 event-model-1.1.0 historydict-1.1.0 humanize-0.5.1 ipython-genutils-0.1.0 jsonschema-2.5.1 mongoquery-1.1.0 ophyd-0.4.0 prettytable-0.7.2 requests-2.11.1 super-state-machine-2.0 traitlets-4.3.1 tzlocal-1.3
+#
+# To activate this environment, use:
+# $ source activate bluesky
+#
+# To deactivate this environment, use:
+# $ source deactivate
+#
+usaxs@usaxscontrol ~ $ source activate bluesky
+(bluesky) usaxs@usaxscontrol ~ $ which pip
+/share1/bluesky/conda_envs/bluesky/bin/pip
+(bluesky) usaxs@usaxscontrol ~ $ pip install git+https://github.com/NSLS-II/portable-mds#egg=portable_mds
+Collecting portable_mds from git+https://github.com/NSLS-II/portable-mds#egg=portable_mds
+  Cloning https://github.com/NSLS-II/portable-mds to /tmp/pip-build-aghg02hl/portable-mds
+    Complete output from command python setup.py egg_info:
+    usage: git rev-list [OPTION] <commit-id>... [ -- paths... ]
+      limiting output:
+        --max-count=nr
+        --max-age=epoch
+        --min-age=epoch
+        --sparse
+        --no-merges
+        --remove-empty
+        --all
+        --branches
+        --tags
+        --remotes
+        --stdin
+        --quiet
+      ordering output:
+        --topo-order
+        --date-order
+        --reverse
+      formatting output:
+        --parents
+        --children
+        --objects | --objects-edge
+        --unpacked
+        --header | --pretty
+        --abbrev=nr | --no-abbrev
+        --abbrev-commit
+        --left-right
+      special purpose:
+        --bisect
+        --bisect-vars
+        --bisect-all
+    Traceback (most recent call last):
+      File "<string>", line 1, in <module>
+      File "/tmp/pip-build-aghg02hl/portable-mds/setup.py", line 11, in <module>
+        version=versioneer.get_version(),
+      File "/tmp/pip-build-aghg02hl/portable-mds/versioneer.py", line 1405, in get_version
+        return get_versions()["version"]
+      File "/tmp/pip-build-aghg02hl/portable-mds/versioneer.py", line 1380, in get_versions
+        pieces = from_vcs_f(cfg.tag_prefix, root, verbose)
+      File "/tmp/pip-build-aghg02hl/portable-mds/versioneer.py", line 1076, in git_pieces_from_vcs
+        pieces["distance"] = int(count_out)  # total number of commits
+    TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
+    
+    ----------------------------------------
+Command "python setup.py egg_info" failed with error code 1 in /tmp/pip-build-aghg02hl/portable-mds/
+You are using pip version 9.0.0, however version 9.0.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+(bluesky) usaxs@usaxscontrol ~ $ which git
+/usr/bin/git
+(bluesky) usaxs@usaxscontrol ~ $ git install git
+git: 'install' is not a git command. See 'git --help'.
+
+Did you mean this?
+	instaweb
+(bluesky) usaxs@usaxscontrol ~ $ conda install git
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata .......
+Solving package specifications: ..........
+
+Package plan for installation in environment /share1/bluesky/conda_envs/bluesky:
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    expat-2.1.0                |                0         365 KB
+    curl-7.49.0                |                1         543 KB
+    git-2.9.3                  |                0        13.8 MB
+    ------------------------------------------------------------
+                                           Total:        14.7 MB
+
+The following NEW packages will be INSTALLED:
+
+    curl:  7.49.0-1
+    expat: 2.1.0-0 
+    git:   2.9.3-0 
+
+Proceed ([y]/n)? 
+
+Fetching packages ...
+expat-2.1.0-0. 100% |##########################################################################################################| Time: 0:00:00  11.47 MB/s
+curl-7.49.0-1. 100% |##########################################################################################################| Time: 0:00:00  13.00 MB/s
+git-2.9.3-0.ta 100% |##########################################################################################################| Time: 0:00:00  50.91 MB/s
+Extracting packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+(bluesky) usaxs@usaxscontrol ~ $ hash -r
+(bluesky) usaxs@usaxscontrol ~ $ pip install git+https://github.com/NSLS-II/portable-mds#egg=portable_mds
+Collecting portable_mds from git+https://github.com/NSLS-II/portable-mds#egg=portable_mds
+  Cloning https://github.com/NSLS-II/portable-mds to /tmp/pip-build-wuc9wlm4/portable-mds
+Installing collected packages: portable-mds
+  Running setup.py install for portable-mds ... done
+Successfully installed portable-mds-0+untagged.51.ga270d7d
+You are using pip version 9.0.0, however version 9.0.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 2.7.11 |Anaconda 4.0.0 (64-bit)| (default, Dec  6 2015, 18:08:32) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 4.1.2 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: import ophyd
+---------------------------------------------------------------------------
+ImportError                               Traceback (most recent call last)
+<ipython-input-1-a45334022b9a> in <module>()
+----> 1 import ophyd
+
+ImportError: No module named ophyd
+
+In [2]: 
+Do you really want to exit ([y]/n)? y
+(bluesky) usaxs@usaxscontrol ~ $ conda install ipython
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata .......
+Solving package specifications: ..........
+
+Package plan for installation in environment /share1/bluesky/conda_envs/bluesky:
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    ipython_genutils-0.1.0     |           py35_0          33 KB
+    path.py-8.2.1              |           py35_0          47 KB
+    ptyprocess-0.5.1           |           py35_0          19 KB
+    pygments-2.1.3             |           py35_0         1.2 MB
+    simplegeneric-0.8.1        |           py35_1           7 KB
+    wcwidth-0.1.7              |           py35_0          21 KB
+    pexpect-4.0.1              |           py35_0          66 KB
+    pickleshare-0.7.4          |           py35_0           9 KB
+    prompt_toolkit-1.0.8       |           py35_0         322 KB
+    traitlets-4.3.1            |           py35_0         124 KB
+    ipython-5.1.0              |           py35_0         991 KB
+    ------------------------------------------------------------
+                                           Total:         2.8 MB
+
+The following NEW packages will be INSTALLED:
+
+    ipython:          5.1.0-py35_0
+    ipython_genutils: 0.1.0-py35_0
+    path.py:          8.2.1-py35_0
+    pexpect:          4.0.1-py35_0
+    pickleshare:      0.7.4-py35_0
+    prompt_toolkit:   1.0.8-py35_0
+    ptyprocess:       0.5.1-py35_0
+    pygments:         2.1.3-py35_0
+    simplegeneric:    0.8.1-py35_1
+    traitlets:        4.3.1-py35_0
+    wcwidth:          0.1.7-py35_0
+
+Proceed ([y]/n)? 
+
+Fetching packages ...
+ipython_genuti 100% |##########################################################################################################| Time: 0:00:00   7.21 MB/s
+path.py-8.2.1- 100% |##########################################################################################################| Time: 0:00:00   5.31 MB/s
+ptyprocess-0.5 100% |##########################################################################################################| Time: 0:00:00   6.14 MB/s
+pygments-2.1.3 100% |##########################################################################################################| Time: 0:00:00  18.87 MB/s
+simplegeneric- 100% |##########################################################################################################| Time: 0:00:00   6.56 MB/s
+wcwidth-0.1.7- 100% |##########################################################################################################| Time: 0:00:00   5.73 MB/s
+pexpect-4.0.1- 100% |##########################################################################################################| Time: 0:00:00   7.61 MB/s
+pickleshare-0. 100% |##########################################################################################################| Time: 0:00:00  18.83 MB/s
+prompt_toolkit 100% |##########################################################################################################| Time: 0:00:00   9.36 MB/s
+traitlets-4.3. 100% |##########################################################################################################| Time: 0:00:00   8.71 MB/s
+ipython-5.1.0- 100% |##########################################################################################################| Time: 0:00:00  17.93 MB/s
+Extracting packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 2.7.11 |Anaconda 4.0.0 (64-bit)| (default, Dec  6 2015, 18:08:32) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 4.1.2 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: 
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ which python
+/share1/bluesky/conda_envs/bluesky/bin/python
+(bluesky) usaxs@usaxscontrol ~ $ which ipython
+/share1/bluesky/conda_envs/bluesky/bin/ipython
+(bluesky) usaxs@usaxscontrol ~ $ python
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+[GCC 4.8.2 20140120 (Red Hat 4.8.2-15)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> 
+(bluesky) usaxs@usaxscontrol ~ $ hash -r
+(bluesky) usaxs@usaxscontrol ~ $ ipython
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]:                                                                                                                                                   
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: import ophyd
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-1-a45334022b9a> in <module>()
+----> 1 import ophyd
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/__init__.py in <module>()
+      8 
+      9 # Signals
+---> 10 from .signal import (Signal, EpicsSignal, EpicsSignalRO, DerivedSignal)
+     11 
+     12 # Positioners
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/signal.py in <module>()
+      7 import epics
+      8 
+----> 9 from .utils import (ReadOnlyError, LimitError)
+     10 from .utils.epics_pvs import (pv_form, waveform_to_string,
+     11                               raise_if_disconnected, data_type, data_shape,
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/utils/__init__.py in <module>()
+     12 
+     13 from .errors import *
+---> 14 from .epics_pvs import *
+     15 from .paths import makedirs, make_dir_tree
+     16 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/utils/epics_pvs.py in <module>()
+    120 
+    121 
+--> 122 class MonitorDispatcher(epics.ca.CAThread):
+    123     '''A monitor dispatcher which works with pyepics
+    124 
+
+AttributeError: module 'epics' has no attribute 'ca'
+
+In [2]:                                                                                                                                                   
+Do you really want to exit ([y]/n)? y
+(bluesky) usaxs@usaxscontrol ~ $ conda install epics-base -c tacaswell
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata .........
+Solving package specifications: ..........
+
+Package plan for installation in environment /share1/bluesky/conda_envs/bluesky:
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    epics-base-3.14.12.4       |                0        13.7 MB  tacaswell
+
+The following NEW packages will be INSTALLED:
+
+    epics-base: 3.14.12.4-0 tacaswell
+
+Proceed ([y]/n)? 
+
+Fetching packages ...
+epics-base-3.1 100% |##########################################################################################################| Time: 0:00:00  15.53 MB/s
+Extracting packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: import ophyd
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+<ipython-input-1-a45334022b9a> in <module>()
+----> 1 import ophyd
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/__init__.py in <module>()
+      8 
+      9 # Signals
+---> 10 from .signal import (Signal, EpicsSignal, EpicsSignalRO, DerivedSignal)
+     11 
+     12 # Positioners
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/signal.py in <module>()
+      7 import epics
+      8 
+----> 9 from .utils import (ReadOnlyError, LimitError)
+     10 from .utils.epics_pvs import (pv_form, waveform_to_string,
+     11                               raise_if_disconnected, data_type, data_shape,
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/utils/__init__.py in <module>()
+     12 
+     13 from .errors import *
+---> 14 from .epics_pvs import *
+     15 from .paths import makedirs, make_dir_tree
+     16 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/utils/epics_pvs.py in <module>()
+    120 
+    121 
+--> 122 class MonitorDispatcher(epics.ca.CAThread):
+    123     '''A monitor dispatcher which works with pyepics
+    124 
+
+AttributeError: module 'epics' has no attribute 'ca'
+
+In [2]:                                                                                                                                                   
+Do you really want to exit ([y]/n)? y
+(bluesky) usaxs@usaxscontrol ~ $ pip install pyepics
+Collecting pyepics
+  Downloading pyepics-3.2.6.tar.gz (2.4MB)
+    100% |\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 2.4MB 266kB/s 
+Building wheels for collected packages: pyepics
+  Running setup.py bdist_wheel for pyepics ... done
+  Stored in directory: /home/beams/USAXS/.cache/pip/wheels/4c/b5/2c/130ae305f5ac43eeb2fb0421bb006cb358027becd61a9cbd4c
+Successfully built pyepics
+Installing collected packages: pyepics
+Successfully installed pyepics-3.2.6
+You are using pip version 9.0.0, however version 9.0.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: import ophyd
+
+In [2]: from ophyd import EpicsSignal, Device
+
+In [3]: from ophyd import EpicsSignal, Device, EpicsMotor
+
+In [4]: sy = EpicsMotor('9idcLAX:m58:c2:m2')
+---------------------------------------------------------------------------
+OSError                                   Traceback (most recent call last)
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py in initialize_libca()
+    213         load_dll = ctypes.windll.LoadLibrary
+    214     try:
+--> 215         libca = load_dll(dllname)
+    216     except Exception as exc:
+    217         raise ChannelAccessException('loading Epics CA DLL failed: ' + str(exc))
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/ctypes/__init__.py in LoadLibrary(self, name)
+    423 
+    424     def LoadLibrary(self, name):
+--> 425         return self._dlltype(name)
+    426 
+    427 cdll = LibraryLoader(CDLL)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/ctypes/__init__.py in __init__(self, name, mode, handle, use_errno, use_last_error)
+    345 
+    346         if handle is None:
+--> 347             self._handle = _dlopen(self._name, mode)
+    348         else:
+    349             self._handle = handle
+
+OSError: /lib64/libc.so.6: version `GLIBC_2.14' not found (required by /share1/bluesky/conda_envs/bluesky/lib/libca.so)
+---------------------------------------------------------------------------
+OSError                                   Traceback (most recent call last)
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py in initialize_libca()
+    214     try:
+--> 215         libca = load_dll(dllname)
+    216     except Exception as exc:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/ctypes/__init__.py in LoadLibrary(self, name)
+    424     def LoadLibrary(self, name):
+--> 425         return self._dlltype(name)
+    426 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/ctypes/__init__.py in __init__(self, name, mode, handle, use_errno, use_last_error)
+    346         if handle is None:
+--> 347             self._handle = _dlopen(self._name, mode)
+    348         else:
+
+OSError: /lib64/libc.so.6: version `GLIBC_2.14' not found (required by /share1/bluesky/conda_envs/bluesky/lib/libca.so)
+
+During handling of the above exception, another exception occurred:
+
+ChannelAccessException                    Traceback (most recent call last)
+<ipython-input-4-d35977c3162c> in <module>()
+----> 1 sy = EpicsMotor('9idcLAX:m58:c2:m2')
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/epics_motor.py in __init__(self, prefix, read_attrs, configuration_attrs, name, parent, **kwargs)
+     68         super().__init__(prefix, read_attrs=read_attrs,
+     69                          configuration_attrs=configuration_attrs,
+---> 70                          name=name, parent=parent, **kwargs)
+     71 
+     72         # Make the default alias for the user_readback the name of the
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/device.py in __init__(self, prefix, read_attrs, configuration_attrs, name, parent, **kwargs)
+    580 
+    581         # Instantiate non-lazy signals
+--> 582         [getattr(self, attr) for attr, cpt in self._sig_attrs.items()
+    583          if not cpt.lazy]
+    584 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/device.py in <listcomp>(.0)
+    581         # Instantiate non-lazy signals
+    582         [getattr(self, attr) for attr, cpt in self._sig_attrs.items()
+--> 583          if not cpt.lazy]
+    584 
+    585     def wait_for_connection(self, all_signals=False, timeout=2.0):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/device.py in __get__(self, instance, owner)
+    154 
+    155         if self.attr not in instance._signals:
+--> 156             instance._signals[self.attr] = self.create_component(instance)
+    157 
+    158         return instance._signals[self.attr]
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/device.py in create_component(self, instance)
+    109         if self.suffix is not None:
+    110             pv_name = self.maybe_add_prefix(instance, 'suffix', self.suffix)
+--> 111             cpt_inst = self.cls(pv_name, parent=instance, **kwargs)
+    112         else:
+    113             cpt_inst = self.cls(parent=instance, **kwargs)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/signal.py in __init__(self, read_pv, write_pv, pv_kw, put_complete, string, limits, auto_monitor, name, **kwargs)
+    666 
+    667         super().__init__(read_pv, pv_kw=pv_kw, string=string,
+--> 668                          auto_monitor=auto_monitor, name=name, **kwargs)
+    669 
+    670         if write_pv is not None:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/signal.py in __init__(self, read_pv, pv_kw, string, auto_monitor, name, **kwargs)
+    360         self._read_pv = epics.PV(read_pv, form=pv_form,
+    361                                  auto_monitor=auto_monitor,
+--> 362                                  **pv_kw)
+    363 
+    364         with self._lock:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/pv.py in __init__(self, pvname, callback, form, verbose, auto_monitor, connection_callback, connection_timeout)
+    130 
+    131         self.chid = None
+--> 132         if ca.current_context() is None:
+    133             ca.use_initial_context()
+    134         self.context = ca.current_context()
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py in wrapper(*args, **kwds)
+    360         global libca
+    361         if libca is None:
+--> 362             initialize_libca()
+    363         return fcn(*args, **kwds)
+    364     wrapper.__doc__ = fcn.__doc__
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py in initialize_libca()
+    215         libca = load_dll(dllname)
+    216     except Exception as exc:
+--> 217         raise ChannelAccessException('loading Epics CA DLL failed: ' + str(exc))
+    218 
+    219     ca_context = {False:0, True:1}[PREEMPTIVE_CALLBACK]
+
+ChannelAccessException: loading Epics CA DLL failed: /lib64/libc.so.6: version `GLIBC_2.14' not found (required by /share1/bluesky/conda_envs/bluesky/lib/libca.so)
+
+In [5]:                                                                                                                                                   
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ conda install epics-base -c lightsource2
+Using Anaconda Cloud api site https://api.anaconda.org
+Fetching package metadata .........
+Solving package specifications: ..........
+
+Package plan for installation in environment /share1/bluesky/conda_envs/bluesky:
+
+The following packages will be downloaded:
+
+    package                    |            build
+    ---------------------------|-----------------
+    epics-base-3.14.12.5       |                0        14.2 MB  lightsource2
+
+The following packages will be UPDATED:
+
+    epics-base: 3.14.12.4-0 tacaswell --> 3.14.12.5-0 lightsource2
+
+Proceed ([y]/n)? 
+
+Fetching packages ...
+epics-base-3.1 100% |##########################################################################################################| Time: 0:00:02   6.72 MB/s
+Extracting packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Unlinking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+Linking packages ...
+[      COMPLETE      ]|#############################################################################################################################| 100%
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: from ophyd import EpicsSignal, Device, EpicsMotor
+
+In [2]: sy = EpicsMotor('9idcLAX:m58:c2:m2')
+
+In [3]: sy.read()
+Out[3]: 
+OrderedDict([('9idcLAX:m58:c2:m2',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005}),
+             ('9idcLAX:m58:c2:m2_user_setpoint',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005})])
+
+In [4]: sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')
+
+In [5]: sy.read()
+Out[5]: 
+OrderedDict([('sy',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005}),
+             ('sy_user_setpoint',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005})])
+
+In [6]: sy.describe()
+Out[6]: 
+OrderedDict([('sy',
+              {'dtype': 'number',
+               'lower_ctrl_limit': -200.1449999999997,
+               'precision': 3,
+               'shape': [],
+               'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+               'units': 'mm',
+               'upper_ctrl_limit': 127.35499999999985}),
+             ('sy_user_setpoint',
+              {'dtype': 'number',
+               'lower_ctrl_limit': -200.1449999999997,
+               'precision': 3,
+               'shape': [],
+               'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+               'units': 'mm',
+               'upper_ctrl_limit': 127.35499999999985})])
+
+In [7]: sy.signal_names
+Out[7]: 
+['user_offset',
+ 'user_readback',
+ 'user_setpoint',
+ 'motor_egu',
+ 'motor_is_moving',
+ 'motor_done_move',
+ 'motor_stop',
+ 'offset_freeze_switch',
+ 'velocity',
+ 'acceleration',
+ 'set_use_switch',
+ 'high_limit_switch',
+ 'low_limit_switch',
+ 'home_forward',
+ 'home_reverse',
+ 'direction_of_travel']
+
+In [8]: sy.read_attrs
+Out[8]: ['user_readback', 'user_setpoint']
+
+In [9]: sy.read_attrs.append('velocity')
+
+In [10]: sy.read()
+Out[10]: 
+OrderedDict([('sy',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005}),
+             ('sy_user_setpoint',
+              {'timestamp': 1477938599.739726, 'value': -163.10250000000005}),
+             ('sy_velocity', {'timestamp': 1477938599.739726, 'value': 6.0})])
+
+In [11]: sy.describe()
+Out[11]: 
+OrderedDict([('sy',
+              {'dtype': 'number',
+               'lower_ctrl_limit': -200.1449999999997,
+               'precision': 3,
+               'shape': [],
+               'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+               'units': 'mm',
+               'upper_ctrl_limit': 127.35499999999985}),
+             ('sy_user_setpoint',
+              {'dtype': 'number',
+               'lower_ctrl_limit': -200.1449999999997,
+               'precision': 3,
+               'shape': [],
+               'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+               'units': 'mm',
+               'upper_ctrl_limit': 127.35499999999985}),
+             ('sy_velocity',
+              {'dtype': 'number',
+               'lower_ctrl_limit': 0.0,
+               'precision': 3,
+               'shape': [],
+               'source': 'PV:9idcLAX:m58:c2:m2.VELO',
+               'units': 'mm/sec',
+               'upper_ctrl_limit': 6.0})])
+
+In [12]: st = sy.set(-155)
+
+In [13]: /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py:1248: UserWarning: ca.get('9idcLAX:m58:c2:m2.TDIR') timed out after 1.
+  warnings.warn(msg % (name(chid), timeout))
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py:1248: UserWarning: ca.get('9idcLAX:m58:c2:m2.HLS') timed out after 1.00 second.
+  warnings.warn(msg % (name(chid), timeout))
+In [13]: 
+
+In [13]: from ophyd import setup_ophyd
+
+In [14]: setup_ophyd()
+Out[14]: <MonitorDispatcher(monitor_dispatcher, started daemon 140656624256768)>
+
+In [15]: st = sy.set(-160)
+
+In [16]: /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py:1248: UserWarning: ca.get('9idcLAX:m58:c2:m2.TDIR') timed out after 1.
+  warnings.warn(msg % (name(chid), timeout))
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/epics/ca.py:1248: UserWarning: ca.get('9idcLAX:m58:c2:m2.HLS') timed out after 1.00 second.
+  warnings.warn(msg % (name(chid), timeout))
+In [16]: st
+Out[16]: MoveStatus(done=True, pos=sy, elapsed=3.7, success=True, settle_time=0.0)
+
+In [17]:                                                                                                                                                  
+Do you really want to exit ([y]/n)? y
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+
+In [1]: from ophyd import setup_ophyd
+^[[A
+In [2]: setup_ophyd()
+Out[2]: <MonitorDispatcher(monitor_dispatcher, started daemon 140544686671616)>
+
+In [3]: sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-3-bd6f3aaeb3eb> in <module>()
+----> 1 sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')
+
+NameError: name 'EpicsMotor' is not defined
+
+In [4]: from ophyd import EpicsSignal, Device, EpicsMotor
+
+In [5]: sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')
+
+In [6]: import time
+   ...: def status_spammer(st):
+   ...: 
+   ...:     while not st.done:
+   ...:         print(st)
+   ...:         time.sleep(.1)
+   ...:         
+
+In [7]: status_spammer(sy.set(-150))
+MoveStatus(done=False, pos=sy, elapsed=0.0, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.1, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.2, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.3, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.4, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.5, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.6, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.7, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.8, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=0.9, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.0, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.1, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.2, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.3, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.4, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.5, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.6, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.7, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.8, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=1.9, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=2.0, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=2.1, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=2.2, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=2.3, success=False, settle_time=0.0)
+MoveStatus(done=False, pos=sy, elapsed=2.4, success=False, settle_time=0.0)
+
+In [8]: class SampleStage(Device):
+   ...:     x
+   ...:     
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-8-0cd09a35123f> in <module>()
+----> 1 class SampleStage(Device):
+      2     x
+      3 
+
+<ipython-input-8-0cd09a35123f> in SampleStage()
+      1 class SampleStage(Device):
+----> 2     x
+      3 
+
+NameError: name 'x' is not defined
+
+In [9]: from ophyd import EpicsSignal, Device, EpicsMotor, Component as Cpt
+
+In [10]: class SampleStage(Device):
+    ...:     y = Cpt(EpicsMotor, 'm2')
+    ...:     x = Cpt(EpicsMotor, 'm1')
+    ...:     
+
+In [11]: s = SampleStage('9idcLAX:m58:c2:', name='s')
+
+In [12]: s.read()
+Out[12]: 
+OrderedDict([('s_y',
+              {'timestamp': 1478638739.753, 'value': -150.00000000000003}),
+             ('s_y_user_setpoint',
+              {'timestamp': 1478638739.753, 'value': -150.0}),
+             ('s_x', {'timestamp': 1477938593.72306, 'value': 172.19125}),
+             ('s_x_user_setpoint',
+              {'timestamp': 1477938593.72306, 'value': 172.19125})])
+
+In [13]: ? s.put
+Signature: s.put(dev_t, **kwargs)
+Docstring:
+Put a value to all components of the device
+
+Keyword arguments are passed onto each signal.put()
+
+Parameters
+----------
+dev_t : DeviceTuple or tuple
+    The device tuple with the value(s) to put (see get_device_tuple)
+File:      /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/ophyd/device.py
+Type:      method
+
+In [14]: s.get()
+Out[14]: SampleStageTuple(y=EpicsMotorTuple(user_offset=-326.73875000000004, user_readback=-150.00000000000003, user_setpoint=-150.0, motor_egu='mm', motor_is_moving=0, motor_done_move=1, motor_stop=0, offset_freeze_switch=0, velocity=6.0, acceleration=0.2, set_use_switch=0, high_limit_switch=0, low_limit_switch=0, home_forward=0, home_reverse=0, direction_of_travel=1), x=EpicsMotorTuple(user_offset=6.912500000000001, user_readback=172.19125, user_setpoint=172.19125, motor_egu='mm', motor_is_moving=0, motor_done_move=1, motor_stop=0, offset_freeze_switch=0, velocity=6.0, acceleration=0.2, set_use_switch=0, high_limit_switch=0, low_limit_switch=0, home_forward=0, home_reverse=0, direction_of_travel=0))
+
+In [15]: type(s.get())
+Out[15]: ophyd.device.SampleStageTuple
+
+In [16]: s.get().x
+Out[16]: EpicsMotorTuple(user_offset=6.912500000000001, user_readback=172.19125, user_setpoint=172.19125, motor_egu='mm', motor_is_moving=0, motor_done_move=1, motor_stop=0, offset_freeze_switch=0, velocity=6.0, acceleration=0.2, set_use_switch=0, high_limit_switch=0, low_limit_switch=0, home_forward=0, home_reverse=0, direction_of_travel=0)
+
+In [17]: s.get().x.user_setpoint
+Out[17]: 172.19125
+
+In [18]: ? s.set
+Object `s.set` not found.
+
+In [19]: import portable_mds.sqlite.mds as pmqsm
+
+In [20]: mds = pmqsm.MDS(config={'directory': '/share1/blueky/mds', 'timezone': 'US/Central'})
+
+In [21]: import blueksy
+---------------------------------------------------------------------------
+ImportError                               Traceback (most recent call last)
+<ipython-input-21-09301f5e141b> in <module>()
+----> 1 import blueksy
+
+ImportError: No module named 'blueksy'
+
+In [22]: import bluesky
+
+In [23]: RE = bluesky.RunEngine({'purpose': 'demo'})
+
+In [24]: RE.md
+Out[24]: {'purpose': 'demo'}
+
+In [25]: import bluesky.plans as bp
+
+In [26]: from bluesky.plan_tools import pri/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/matplotlib/font_manager.py:273: UserWarning: Ma.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+print/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache us.
+  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
+In [26]: from bluesky.plan_tools import print_summary
+
+In [27]: print_summary(bp.count([s], num=5))
+=================================== Open Run ===================================
+  Read ['s']
+  Read ['s']
+  Read ['s']
+  Read ['s']
+  Read ['s']
+================================== Close Run ===================================
+
+In [28]: list(bp.count([s], num=5))
+Out[28]: 
+[stage: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ open_run: (None), (), {'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"], 'num': 5}, 'detectors': ['s'], 'num_steps': 5, 'plan_name': 'count'},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-602921'},
+ wait: (None), (), {'group': 'trigger-602921'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-d02db0'},
+ wait: (None), (), {'group': 'trigger-d02db0'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-b5ecb1'},
+ wait: (None), (), {'group': 'trigger-b5ecb1'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-814884'},
+ wait: (None), (), {'group': 'trigger-814884'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-081676'},
+ wait: (None), (), {'group': 'trigger-081676'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ close_run: (None), (), {},
+ unstage: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {}]
+
+In [29]: raw+m = list(bp.count([s], num=5))
+  File "<ipython-input-29-d43a145e77c2>", line 1
+    raw+m = list(bp.count([s], num=5))
+                                      ^
+SyntaxError: can't assign to operator
+
+
+In [30]: raw_m = list(bp.count([s], num=5))
+
+In [31]: raw_m[0]
+Out[31]: stage: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {}
+
+In [32]: raw_m[0].command
+Out[32]: 'stage'
+
+In [33]: raw_m[0].obj
+Out[33]: SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])
+
+In [34]: 
+
+In [34]: ? RE.register_command
+Signature: RE.register_command(name, func)
+Docstring:
+Register a new Message command.
+
+Parameters
+----------
+name : str
+func : callable
+    This can be a function or a method. The signature is `f(msg)`.
+File:      /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py
+Type:      method
+
+In [35]: RE(bp.count([s], num=5))
+Out[35]: ['20a6db78-4c63-40f3-bec2-c2fc072eb4d7']
+
+In [36]: RE(bp.count([s], num=5), print)
+start {'purpose': 'demo', 'uid': '6c5a013e-182b-4503-95d9-d9bb19035a04', 'time': 1478640814.0731635, 'detectors': ['s'], 'num_steps': 5, 'plan_type': 'generator', 'scan_id': 2, 'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"], 'num': 5}, 'plan_name': 'count'}
+descriptor {'configuration': {'s': {'data_keys': OrderedDict(), 'data': {}, 'timestamps': {}}}, 'object_keys': {'s': ['s_y', 's_y_user_setpoint', 's_x', 's_x_user_setpoint']}, 'data_keys': {'s_y': {'object_name': 's', 'dtype': 'number', 'precision': 3, 'shape': [], 'lower_ctrl_limit': -200.1449999999997, 'source': 'PV:9idcLAX:m58:c2:m2.RBV', 'upper_ctrl_limit': 127.35499999999985, 'units': 'mm'}, 's_y_user_setpoint': {'object_name': 's', 'dtype': 'number', 'precision': 3, 'shape': [], 'lower_ctrl_limit': -200.1449999999997, 'source': 'PV:9idcLAX:m58:c2:m2.VAL', 'upper_ctrl_limit': 127.35499999999985, 'units': 'mm'}, 's_x': {'object_name': 's', 'dtype': 'number', 'precision': 5, 'shape': [], 'lower_ctrl_limit': -89.93624999999997, 'source': 'PV:9idcLAX:m58:c2:m1.RBV', 'upper_ctrl_limit': 310.06375, 'units': 'mm'}, 's_x_user_setpoint': {'object_name': 's', 'dtype': 'number', 'precision': 5, 'shape': [], 'lower_ctrl_limit': -89.93624999999997, 'source': 'PV:9idcLAX:m58:c2:m1.VAL', 'upper_ctrl_limit': 310.06375, 'units': 'mm'}}, 'time': 1478640814.0851672, 'name': 'primary', 'run_start': '6c5a013e-182b-4503-95d9-d9bb19035a04', 'uid': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d'}
+event {'time': 1478640814.0862055, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d', 'uid': 'be8c6d45-9469-4c62-a5ad-c8075aefd90f', 'seq_num': 1}
+event {'time': 1478640814.0894709, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d', 'uid': '54c05b15-b37a-49ac-802a-f4044d475f02', 'seq_num': 2}
+event {'time': 1478640814.093188, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d', 'uid': 'cde16dbb-9256-4efb-9d44-680c8def2e44', 'seq_num': 3}
+event {'time': 1478640814.09662, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d', 'uid': 'db66e754-5516-402b-92b6-567f50d42b01', 'seq_num': 4}
+event {'time': 1478640814.1011457, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': '81dd9b01-5c6f-458b-8e1b-3d88d873db2d', 'uid': '937e0120-9d4e-4982-b077-6fb6b8af4f63', 'seq_num': 5}
+stop {'time': 1478640814.1023192, 'run_start': '6c5a013e-182b-4503-95d9-d9bb19035a04', 'exit_status': 'success', 'uid': '84207468-0dc2-4a51-a216-0f86b9af3cac', 'reason': ''}
+Out[36]: ['6c5a013e-182b-4503-95d9-d9bb19035a04']
+
+In [37]: RE(bp.count([s], num=5), print)
+start {'purpose': 'demo', 'uid': '443d37a8-593c-4828-b46f-02dd5091ccbd', 'time': 1478640824.7003214, 'detectors': ['s'], 'num_steps': 5, 'plan_type': 'generator', 'scan_id': 3, 'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"], 'num': 5}, 'plan_name': 'count'}
+descriptor {'configuration': {'s': {'data_keys': OrderedDict(), 'data': {}, 'timestamps': {}}}, 'object_keys': {'s': ['s_y', 's_y_user_setpoint', 's_x', 's_x_user_setpoint']}, 'data_keys': {'s_y': {'object_name': 's', 'dtype': 'number', 'precision': 3, 'shape': [], 'lower_ctrl_limit': -200.1449999999997, 'source': 'PV:9idcLAX:m58:c2:m2.RBV', 'upper_ctrl_limit': 127.35499999999985, 'units': 'mm'}, 's_y_user_setpoint': {'object_name': 's', 'dtype': 'number', 'precision': 3, 'shape': [], 'lower_ctrl_limit': -200.1449999999997, 'source': 'PV:9idcLAX:m58:c2:m2.VAL', 'upper_ctrl_limit': 127.35499999999985, 'units': 'mm'}, 's_x': {'object_name': 's', 'dtype': 'number', 'precision': 5, 'shape': [], 'lower_ctrl_limit': -89.93624999999997, 'source': 'PV:9idcLAX:m58:c2:m1.RBV', 'upper_ctrl_limit': 310.06375, 'units': 'mm'}, 's_x_user_setpoint': {'object_name': 's', 'dtype': 'number', 'precision': 5, 'shape': [], 'lower_ctrl_limit': -89.93624999999997, 'source': 'PV:9idcLAX:m58:c2:m1.VAL', 'upper_ctrl_limit': 310.06375, 'units': 'mm'}}, 'time': 1478640824.7133043, 'name': 'primary', 'run_start': '443d37a8-593c-4828-b46f-02dd5091ccbd', 'uid': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9'}
+event {'time': 1478640824.714615, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9', 'uid': '074f3d9f-9288-4d2d-a47a-62991caf7323', 'seq_num': 1}
+event {'time': 1478640824.7203586, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9', 'uid': '3bd08325-7a67-4e99-991b-5054f5a4fca7', 'seq_num': 2}
+event {'time': 1478640824.7249434, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9', 'uid': 'd56fc8b9-d315-40f2-a101-ce364ae36417', 'seq_num': 3}
+event {'time': 1478640824.7292387, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9', 'uid': '9636a039-6418-4a23-a535-15aa9e796d06', 'seq_num': 4}
+event {'time': 1478640824.7337544, 'data': {'s_y': -150.00000000000003, 's_y_user_setpoint': -150.0, 's_x': 172.19125, 's_x_user_setpoint': 172.19125}, 'timestamps': {'s_y': 1478638739.753, 's_y_user_setpoint': 1478638739.753, 's_x': 1477938593.72306, 's_x_user_setpoint': 1477938593.72306}, 'descriptor': 'ca185d7b-a9b7-42b7-a07c-b17aeacc70e9', 'uid': 'b83ccfe0-a9bf-420c-ac32-0b2e3e403283', 'seq_num': 5}
+stop {'time': 1478640824.734813, 'run_start': '443d37a8-593c-4828-b46f-02dd5091ccbd', 'exit_status': 'success', 'uid': 'ed088ed0-96f7-48e1-b9c5-f4db70855df2', 'reason': ''}
+Out[37]: ['443d37a8-593c-4828-b46f-02dd5091ccbd']
+
+In [38]: import pprint
+
+In [39]: RE(bp.count([s], num=5), pprint.pprint)
+---------------------------------------------------------------------------
+AttributeError                            Traceback (most recent call last)
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    985             self.log.error("%r", err)
+--> 986             raise err
+    987         finally:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    883                         try:
+--> 884                             msg = self._plan_stack[-1].send(resp)
+    885                         # We have exhausted the top generator
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in count(detectors, num, delay, md)
+   1964     else:
+-> 1965         return (yield from finite_plan())
+   1966 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in dec_inner(*inner_args, **inner_kwargs)
+     46                 plan = wrapper(plan, *args, **kwargs)
+---> 47                 return (yield from plan)
+     48             return dec_inner
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in stage_wrapper(plan, devices)
+   1484 
+-> 1485     return (yield from finalize_wrapper(inner(), unstage_devices()))
+   1486 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in finalize_wrapper(plan, final_plan, pause_for_debug)
+    996     try:
+--> 997         ret = yield from plan
+    998     except GeneratorExit:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in inner()
+   1482         yield from stage_devices()
+-> 1483         return (yield from plan)
+   1484 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in dec_inner(*inner_args, **inner_kwargs)
+     46                 plan = wrapper(plan, *args, **kwargs)
+---> 47                 return (yield from plan)
+     48             return dec_inner
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in run_wrapper(plan, md)
+    845     """
+--> 846     yield from open_run(md)
+    847     yield from plan
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in open_run(md)
+    922         md = {}
+--> 923     return (yield Msg('open_run', **md))
+    924 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    934                         # raised
+--> 935                         response = yield from coro(msg)
+    936                     # special case `CancelledError` and let the outer
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _open_run(self, msg)
+   1140         doc = dict(uid=self._run_start_uid, time=ttime.time(), **md)
+-> 1141         yield from self.emit(DocumentNames.start, doc)
+   1142         self.log.debug("Emitted RunStart (uid=%r)", doc['uid'])
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/asyncio/coroutines.py in coro(*args, **kw)
+    205         def coro(*args, **kw):
+--> 206             res = func(*args, **kw)
+    207             if isinstance(res, futures.Future) or inspect.isgenerator(res) or \
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in emit(self, name, doc)
+   1947         jsonschema.validate(doc, schemas[name])
+-> 1948         self.dispatcher.process(name, doc)
+   1949 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in process(self, name, doc)
+   1959     def process(self, name, doc):
+-> 1960         exceptions = self.cb_registry.process(name, name.name, doc)
+   1961         for exc, traceback in exceptions:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/utils.py in process(self, sig, *args, **kwargs)
+    265                 try:
+--> 266                     func(*args, **kwargs)
+    267                 except ReferenceError:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/utils.py in __call__(self, *args, **kwargs)
+    346         # invoke the callable and return the result
+--> 347         return mtd(*args, **kwargs)
+    348 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in pprint(object, stream, indent, width, depth, compact)
+     52         compact=compact)
+---> 53     printer.pprint(object)
+     54 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in pprint(self, object)
+    138     def pprint(self, object):
+--> 139         self._format(object, self._stream, 0, 0, {}, 0)
+    140         self._stream.write("\n")
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in _format(self, object, stream, indent, allowance, context, level)
+    175                 return
+--> 176         stream.write(rep)
+    177 
+
+AttributeError: 'dict' object has no attribute 'write'
+
+During handling of the above exception, another exception occurred:
+
+AttributeError                            Traceback (most recent call last)
+<ipython-input-39-5aac25de705a> in <module>()
+----> 1 RE(bp.count([s], num=5), pprint.pprint)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in __call__(self, plan, subs, raise_if_interrupted, **metadata_kw)
+    587                 exc = self._task.exception()
+    588                 if exc is not None:
+--> 589                     raise exc
+    590             if raise_if_interrupted and self._interrupted:
+    591                 raise RunEngineInterrupted("RunEngine was interrupted.")
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/asyncio/tasks.py in _step(***failed resolving arguments***)
+    237                 # We use the `send` method directly, because coroutines
+    238                 # don't have `__iter__` and `__next__` methods.
+--> 239                 result = coro.send(None)
+    240             else:
+    241                 result = coro.throw(exc)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+   1015             if self._run_is_open:
+   1016                 try:
+-> 1017                     yield from self._close_run(Msg('close_run'))
+   1018                 except Exception as exc:
+   1019                     self.log.error("Failed to close run %r. Error: %r",
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _close_run(self, msg)
+   1180                    reason=self._reason)
+   1181         self._clear_run_cache()
+-> 1182         yield from self.emit(DocumentNames.stop, doc)
+   1183         self.log.debug("Emitted RunStop (uid=%r)", doc['uid'])
+   1184         yield from self._reset_checkpoint_state_coro()
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/asyncio/coroutines.py in coro(*args, **kw)
+    204         @functools.wraps(func)
+    205         def coro(*args, **kw):
+--> 206             res = func(*args, **kw)
+    207             if isinstance(res, futures.Future) or inspect.isgenerator(res) or \
+    208                     isinstance(res, CoroWrapper):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in emit(self, name, doc)
+   1946         "Process blocking callbacks and schedule non-blocking callbacks."
+   1947         jsonschema.validate(doc, schemas[name])
+-> 1948         self.dispatcher.process(name, doc)
+   1949 
+   1950 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in process(self, name, doc)
+   1958 
+   1959     def process(self, name, doc):
+-> 1960         exceptions = self.cb_registry.process(name, name.name, doc)
+   1961         for exc, traceback in exceptions:
+   1962             warn("A %r was raised during the processing of a %s "
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/utils.py in process(self, sig, *args, **kwargs)
+    264             for cid, func in list(self.callbacks[sig].items()):
+    265                 try:
+--> 266                     func(*args, **kwargs)
+    267                 except ReferenceError:
+    268                     self._remove_proxy(func)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/utils.py in __call__(self, *args, **kwargs)
+    345             mtd = self.func
+    346         # invoke the callable and return the result
+--> 347         return mtd(*args, **kwargs)
+    348 
+    349     def __eq__(self, other):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in pprint(object, stream, indent, width, depth, compact)
+     51         stream=stream, indent=indent, width=width, depth=depth,
+     52         compact=compact)
+---> 53     printer.pprint(object)
+     54 
+     55 def pformat(object, indent=1, width=80, depth=None, *, compact=False):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in pprint(self, object)
+    137 
+    138     def pprint(self, object):
+--> 139         self._format(object, self._stream, 0, 0, {}, 0)
+    140         self._stream.write("\n")
+    141 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/pprint.py in _format(self, object, stream, indent, allowance, context, level)
+    174                 del context[objid]
+    175                 return
+--> 176         stream.write(rep)
+    177 
+    178     _dispatch = {}
+
+AttributeError: 'dict' object has no attribute 'write'
+
+In [40]: RE(bp.count([s], num=5), lambda name, doc: pprint.pprint((name, doc)))
+('start',
+ {'detectors': ['s'],
+  'num_steps': 5,
+  'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', "
+                              "read_attrs=['y', 'x'], configuration_attrs=[])"],
+                'num': 5},
+  'plan_name': 'count',
+  'plan_type': 'generator',
+  'purpose': 'demo',
+  'scan_id': 5,
+  'time': 1478640898.2842665,
+  'uid': '0a632d81-6bdc-4d4d-9971-cf7c959d83e6'})
+('descriptor',
+ {'configuration': {'s': {'data': {},
+                          'data_keys': OrderedDict(),
+                          'timestamps': {}}},
+  'data_keys': {'s_x': {'dtype': 'number',
+                        'lower_ctrl_limit': -89.93624999999997,
+                        'object_name': 's',
+                        'precision': 5,
+                        'shape': [],
+                        'source': 'PV:9idcLAX:m58:c2:m1.RBV',
+                        'units': 'mm',
+                        'upper_ctrl_limit': 310.06375},
+                's_x_user_setpoint': {'dtype': 'number',
+                                      'lower_ctrl_limit': -89.93624999999997,
+                                      'object_name': 's',
+                                      'precision': 5,
+                                      'shape': [],
+                                      'source': 'PV:9idcLAX:m58:c2:m1.VAL',
+                                      'units': 'mm',
+                                      'upper_ctrl_limit': 310.06375},
+                's_y': {'dtype': 'number',
+                        'lower_ctrl_limit': -200.1449999999997,
+                        'object_name': 's',
+                        'precision': 3,
+                        'shape': [],
+                        'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+                        'units': 'mm',
+                        'upper_ctrl_limit': 127.35499999999985},
+                's_y_user_setpoint': {'dtype': 'number',
+                                      'lower_ctrl_limit': -200.1449999999997,
+                                      'object_name': 's',
+                                      'precision': 3,
+                                      'shape': [],
+                                      'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+                                      'units': 'mm',
+                                      'upper_ctrl_limit': 127.35499999999985}},
+  'name': 'primary',
+  'object_keys': {'s': ['s_y',
+                        's_y_user_setpoint',
+                        's_x',
+                        's_x_user_setpoint']},
+  'run_start': '0a632d81-6bdc-4d4d-9971-cf7c959d83e6',
+  'time': 1478640898.2970262,
+  'uid': 'c59cc10b-9b03-4254-92a5-d5eab14cc121'})
+('event',
+ {'data': {'s_x': 172.19125,
+           's_x_user_setpoint': 172.19125,
+           's_y': -150.00000000000003,
+           's_y_user_setpoint': -150.0},
+  'descriptor': 'c59cc10b-9b03-4254-92a5-d5eab14cc121',
+  'seq_num': 1,
+  'time': 1478640898.2994492,
+  'timestamps': {'s_x': 1477938593.72306,
+                 's_x_user_setpoint': 1477938593.72306,
+                 's_y': 1478638739.753,
+                 's_y_user_setpoint': 1478638739.753},
+  'uid': '8caa6701-996e-4d91-808c-4e9927eae8fe'})
+('event',
+ {'data': {'s_x': 172.19125,
+           's_x_user_setpoint': 172.19125,
+           's_y': -150.00000000000003,
+           's_y_user_setpoint': -150.0},
+  'descriptor': 'c59cc10b-9b03-4254-92a5-d5eab14cc121',
+  'seq_num': 2,
+  'time': 1478640898.304235,
+  'timestamps': {'s_x': 1477938593.72306,
+                 's_x_user_setpoint': 1477938593.72306,
+                 's_y': 1478638739.753,
+                 's_y_user_setpoint': 1478638739.753},
+  'uid': '4c848dbc-ed6a-4dae-a48d-ba3a81e7edef'})
+('event',
+ {'data': {'s_x': 172.19125,
+           's_x_user_setpoint': 172.19125,
+           's_y': -150.00000000000003,
+           's_y_user_setpoint': -150.0},
+  'descriptor': 'c59cc10b-9b03-4254-92a5-d5eab14cc121',
+  'seq_num': 3,
+  'time': 1478640898.3087592,
+  'timestamps': {'s_x': 1477938593.72306,
+                 's_x_user_setpoint': 1477938593.72306,
+                 's_y': 1478638739.753,
+                 's_y_user_setpoint': 1478638739.753},
+  'uid': '35538460-866a-4898-a102-959231cd4ede'})
+('event',
+ {'data': {'s_x': 172.19125,
+           's_x_user_setpoint': 172.19125,
+           's_y': -150.00000000000003,
+           's_y_user_setpoint': -150.0},
+  'descriptor': 'c59cc10b-9b03-4254-92a5-d5eab14cc121',
+  'seq_num': 4,
+  'time': 1478640898.313592,
+  'timestamps': {'s_x': 1477938593.72306,
+                 's_x_user_setpoint': 1477938593.72306,
+                 's_y': 1478638739.753,
+                 's_y_user_setpoint': 1478638739.753},
+  'uid': '4ab84d67-81e8-423a-a6f6-cf1af34901b6'})
+('event',
+ {'data': {'s_x': 172.19125,
+           's_x_user_setpoint': 172.19125,
+           's_y': -150.00000000000003,
+           's_y_user_setpoint': -150.0},
+  'descriptor': 'c59cc10b-9b03-4254-92a5-d5eab14cc121',
+  'seq_num': 5,
+  'time': 1478640898.3167048,
+  'timestamps': {'s_x': 1477938593.72306,
+                 's_x_user_setpoint': 1477938593.72306,
+                 's_y': 1478638739.753,
+                 's_y_user_setpoint': 1478638739.753},
+  'uid': 'c26245b7-760a-4142-ad9d-f5c6e17a08e9'})
+('stop',
+ {'exit_status': 'success',
+  'reason': '',
+  'run_start': '0a632d81-6bdc-4d4d-9971-cf7c959d83e6',
+  'time': 1478640898.3181832,
+  'uid': '1b392539-157c-4f37-be8f-ceb3530d05a0'})
+Out[40]: ['0a632d81-6bdc-4d4d-9971-cf7c959d83e6']
+
+In [41]: from bluesky.callbacks import LiveTable
+
+In [42]: RE(bp.count([s], num=5), LiveTable([s]))
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 15:35:45.4 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         2 | 15:35:45.5 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         3 | 15:35:45.5 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         4 | 15:35:45.5 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         5 | 15:35:45.5 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator count ['d0870c'] (scan num: 6)
+Out[42]: ['d0870ce3-aeaa-4d3e-9ab0-401b617d2d5e']
+
+In [43]: ?LiveTable
+Init signature: LiveTable(fields, *, stream_name='primary', print_header_interval=50, min_width=12, default_prec=3, extra_pad=1, logbook=None)
+Docstring:     
+Live updating table
+
+Parameters
+----------
+fields : list
+     List of fields to add to the table.
+
+stream_name : str, optional
+     The event stream to watch for
+
+print_header_interval : int, optional
+     Reprint the header every this many lines, defaults to 50
+
+min_width : int, optional
+     The minimum width is spaces of the data columns.  Defaults to 12
+
+default_prec : int, optional
+     Precision to use if it can not be found in descriptor, defaults to 3
+
+extra_pad : int, optional
+     Number of extra spaces to put around the printed data, defaults to 1
+
+logbook : callable, optional
+    Must take a sting as the first positional argument
+
+       def logbook(input_str):
+            pass
+File:           /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/callbacks/core.py
+Type:           type
+
+In [44]: ?? LiveTable
+
+In [45]: lt = LiveTable([s])
+
+In [46]: ? lt
+Type:           LiveTable
+String form:    <bluesky.callbacks.core.LiveTable object at 0x7fd310b79940>
+File:           /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/callbacks/core.py
+Signature:      lt(name, doc)
+Docstring:     
+Live updating table
+
+Parameters
+----------
+fields : list
+     List of fields to add to the table.
+
+stream_name : str, optional
+     The event stream to watch for
+
+print_header_interval : int, optional
+     Reprint the header every this many lines, defaults to 50
+
+min_width : int, optional
+     The minimum width is spaces of the data columns.  Defaults to 12
+
+default_prec : int, optional
+     Precision to use if it can not be found in descriptor, defaults to 3
+
+extra_pad : int, optional
+     Number of extra spaces to put around the printed data, defaults to 1
+
+logbook : callable, optional
+    Must take a sting as the first positional argument
+
+       def logbook(input_str):
+            pass
+Call docstring: Dispatch to methods expecting particular doc types.
+
+In [47]: ?lt.__call__
+Signature: lt.__call__(name, doc)
+Docstring: Dispatch to methods expecting particular doc types.
+File:      /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/callbacks/core.py
+Type:      method
+
+In [48]: %matplotlib qt
+
+In [49]: from bluesky.utils import install_qt_kicker
+
+In [50]: install_qt_kicker()
+
+In [51]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 's_y')])
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-51-ad311e7dd965> in <module>()
+----> 1 RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 's_y')])
+
+NameError: name 'LivePlot' is not defined
+
+In [52]: from bluesky.callbacks import LivePlot
+
+In [53]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 15:43:18.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         2 | 15:43:18.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         3 | 15:43:18.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         4 | 15:43:18.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         5 | 15:43:18.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator count ['39b844'] (scan num: 7)
+Out[53]: ['39b844cc-0d94-4dee-b95d-5a8608597a5d']
+
+In [54]: RE.subscribe('all', mds.insert)
+Out[54]: 7
+
+In [55]: ? mds
+Type:        MDS
+String form: <portable_mds.sqlite.mds.MDS object at 0x7fd3118660b8>
+File:        /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/portable_mds/sqlite/mds.py
+Docstring:   <no docstring>
+
+In [56]: import databroker
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/databroker.py:20: UserWarning: No default DataBroker object will be created because the necessary configuration was not found: No module named 'metadatastore'
+  "the necessary configuration was not found: %s" % exc)
+
+In [57]: db = databroker.Broker(mds, None)
+
+In [58]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 15:45:15.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         2 | 15:45:15.2 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         3 | 15:45:15.3 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         4 | 15:45:15.4 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         5 | 15:45:15.5 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator count ['e04103'] (scan num: 8)
+Out[58]: ['e0410386-406d-4f31-af2c-306fc85deb9d']
+
+In [59]: db[-1]
+Out[59]: 
+{'descriptors': [{'configuration': {'s': {'data': {},
+     'data_keys': OrderedDict(),
+     'timestamps': {}}},
+   'data_keys': {'s_x': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_x_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_y': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985},
+    's_y_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985}},
+   'name': 'primary',
+   'object_keys': {'s': ['s_y',
+     's_y_user_setpoint',
+     's_x',
+     's_x_user_setpoint']},
+   'run_start': 'e0410386-406d-4f31-af2c-306fc85deb9d',
+   'time': 1478641514.9868217,
+   'uid': 'ddd4070d-2ec6-4b0c-b386-3cab02955e5d'}],
+ 'start': {'detectors': ['s'],
+  'num_steps': 5,
+  'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"],
+   'num': 5},
+  'plan_name': 'count',
+  'plan_type': 'generator',
+  'purpose': 'demo',
+  'scan_id': 8,
+  'time': 1478641514.9515007,
+  'uid': 'e0410386-406d-4f31-af2c-306fc85deb9d'},
+ 'stop': {'exit_status': 'success',
+  'run_start': 'e0410386-406d-4f31-af2c-306fc85deb9d',
+  'time': 1478641515.631539,
+  'uid': '672ffd8a-8921-4702-8f65-7bdd8d6962e1'}}
+
+In [60]: h = db[-1]
+
+In [61]: h.start
+Out[61]: 
+{'detectors': ['s'],
+ 'num_steps': 5,
+ 'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"],
+  'num': 5},
+ 'plan_name': 'count',
+ 'plan_type': 'generator',
+ 'purpose': 'demo',
+ 'scan_id': 8,
+ 'time': 1478641514.9515007,
+ 'uid': 'e0410386-406d-4f31-af2c-306fc85deb9d'}
+
+In [62]: tpye(h)
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-62-07b14bd9006a> in <module>()
+----> 1 tpye(h)
+
+NameError: name 'tpye' is not defined
+
+In [63]: type(h)
+Out[63]: databroker.core.Header
+
+In [64]: type(h).mro()
+Out[64]: [databroker.core.Header, doct.Document, dict, object]
+
+In [65]: db.get_table(h)
+Out[65]: 
+                        time    s_y  s_y_user_setpoint        s_x  \
+1 2016-11-08 15:45:15.124811 -150.0             -150.0  172.19125   
+2 2016-11-08 15:45:15.251367 -150.0             -150.0  172.19125   
+3 2016-11-08 15:45:15.345234 -150.0             -150.0  172.19125   
+4 2016-11-08 15:45:15.454991 -150.0             -150.0  172.19125   
+5 2016-11-08 15:45:15.551843 -150.0             -150.0  172.19125   
+
+   s_x_user_setpoint  
+1          172.19125  
+2          172.19125  
+3          172.19125  
+4          172.19125  
+5          172.19125  
+
+In [66]: db.get_table(h).plot()
+Out[66]: <matplotlib.axes._subplots.AxesSubplot at 0x7fd2e3d7d518>
+
+In [67]: s.y.name
+Out[67]: 's_y'
+
+In [68]: s.y.name = 'bob'
+
+In [69]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 'bob')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 15:49:30.7 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         2 | 15:49:30.8 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         3 | 15:49:30.9 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         4 | 15:49:31.0 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+|         5 | 15:49:31.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
+LivePlot did not get any data that corresponds to the x axis. bob
+LivePlot did not get any data that corresponds to the y axis. s_x
++-----------+------------+------------+-------------------+------------+-------------------+
+generator count ['48351a'] (scan num: 9)
+Out[69]: ['48351a8b-0fc8-437c-b53f-5ff0cb335627']
+
+In [70]: s.y.user_readback.name = 'bob'
+
+In [71]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 'bob')])
++-----------+------------+------------+------------+-------------------+-------------------+
+|   seq_num |       time |        bob |        s_x | s_x_user_setpoint | s_y_user_setpoint |
++-----------+------------+------------+------------+-------------------+-------------------+
+|         1 | 15:49:59.3 |   -150.000 |  172.19125 |         172.19125 |          -150.000 |
+|         2 | 15:49:59.4 |   -150.000 |  172.19125 |         172.19125 |          -150.000 |
+|         3 | 15:49:59.5 |   -150.000 |  172.19125 |         172.19125 |          -150.000 |
+|         4 | 15:49:59.6 |   -150.000 |  172.19125 |         172.19125 |          -150.000 |
+|         5 | 15:49:59.7 |   -150.000 |  172.19125 |         172.19125 |          -150.000 |
++-----------+------------+------------+------------+-------------------+-------------------+
+generator count ['ab196c'] (scan num: 10)
+Out[71]: ['ab196c9d-f8dc-43bf-9bd7-7f15fb40142d']
+
+In [72]: db.get_table(db[-1]).columns
+Out[72]: Index(['time', 'bob', 's_y_user_setpoint', 's_x', 's_x_user_setpoint'], dtype='object')
+
+In [73]: s.x.user_readback.name = 'bob'
+
+In [74]: RE(bp.count([s], num=5), [LiveTable([s]), LivePlot('s_x', 'bob')])
++-----------+------------+------------+-------------------+-------------------+
+|   seq_num |       time |        bob | s_x_user_setpoint | s_y_user_setpoint |
++-----------+------------+------------+-------------------+-------------------+
+|         1 | 15:50:54.2 |  172.19125 |         172.19125 |          -150.000 |
+|         2 | 15:50:54.3 |  172.19125 |         172.19125 |          -150.000 |
+|         3 | 15:50:54.4 |  172.19125 |         172.19125 |          -150.000 |
+|         4 | 15:50:54.5 |  172.19125 |         172.19125 |          -150.000 |
+|         5 | 15:50:54.5 |  172.19125 |         172.19125 |          -150.000 |
+LivePlot did not get any data that corresponds to the x axis. bob
+LivePlot did not get any data that corresponds to the y axis. s_x
++-----------+------------+------------+-------------------+-------------------+
+generator count ['53fa1b'] (scan num: 11)
+Out[74]: ['53fa1b42-b8d8-4ac8-885a-8f1b552b7220']
+
+In [75]: RE(bp.count([s.x, s.y], num=5), [LiveTable([s]), LivePlot('s_x', 'bob')])
+generator count ['aaf9b8'] (scan num: 12)
+LivePlot did not get any data that corresponds to the x axis. bob
+LivePlot did not get any data that corresponds to the y axis. s_x
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-75-e1a2139d2d61> in <module>()
+----> 1 RE(bp.count([s.x, s.y], num=5), [LiveTable([s]), LivePlot('s_x', 'bob')])
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in __call__(self, plan, subs, raise_if_interrupted, **metadata_kw)
+    587                 exc = self._task.exception()
+    588                 if exc is not None:
+--> 589                     raise exc
+    590             if raise_if_interrupted and self._interrupted:
+    591                 raise RunEngineInterrupted("RunEngine was interrupted.")
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/asyncio/tasks.py in _step(***failed resolving arguments***)
+    237                 # We use the `send` method directly, because coroutines
+    238                 # don't have `__iter__` and `__next__` methods.
+--> 239                 result = coro.send(None)
+    240             else:
+    241                 result = coro.throw(exc)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    984             self.log.error("Run aborted")
+    985             self.log.error("%r", err)
+--> 986             raise err
+    987         finally:
+    988             # call stop() on every movable object we ever set()
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    882                         resp = self._response_stack.pop()
+    883                         try:
+--> 884                             msg = self._plan_stack[-1].send(resp)
+    885                         # We have exhausted the top generator
+    886                         except StopIteration:
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in count(detectors, num, delay, md)
+   1963         return (yield from infinite_plan())
+   1964     else:
+-> 1965         return (yield from finite_plan())
+   1966 
+   1967 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in dec_inner(*inner_args, **inner_kwargs)
+     45                 plan = gen_func(*inner_args, **inner_kwargs)
+     46                 plan = wrapper(plan, *args, **kwargs)
+---> 47                 return (yield from plan)
+     48             return dec_inner
+     49         return dec
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in stage_wrapper(plan, devices)
+   1483         return (yield from plan)
+   1484 
+-> 1485     return (yield from finalize_wrapper(inner(), unstage_devices()))
+   1486 
+   1487 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in finalize_wrapper(plan, final_plan, pause_for_debug)
+    995     cleanup = True
+    996     try:
+--> 997         ret = yield from plan
+    998     except GeneratorExit:
+    999         cleanup = False
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in inner()
+   1481     def inner():
+   1482         yield from stage_devices()
+-> 1483         return (yield from plan)
+   1484 
+   1485     return (yield from finalize_wrapper(inner(), unstage_devices()))
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in dec_inner(*inner_args, **inner_kwargs)
+     45                 plan = gen_func(*inner_args, **inner_kwargs)
+     46                 plan = wrapper(plan, *args, **kwargs)
+---> 47                 return (yield from plan)
+     48             return dec_inner
+     49         return dec
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in run_wrapper(plan, md)
+    845     """
+    846     yield from open_run(md)
+--> 847     yield from plan
+    848     rs_uid = yield from close_run()
+    849     return rs_uid
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in finite_plan()
+   1934         for i in range(num):
+   1935             yield Msg('checkpoint')
+-> 1936             yield from trigger_and_read(detectors)
+   1937             try:
+   1938                 d = next(delay)
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in trigger_and_read(devices, name)
+   1785             plan_stack.append(single_gen(Msg('read', obj)))
+   1786 
+-> 1787     return (yield from rewindable_wrapper(pchain(*plan_stack), rewindable))
+   1788 
+   1789 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in rewindable_wrapper(plan, rewindable)
+   1195                                             restore_rewindable()))
+   1196     else:
+-> 1197         return (yield from plan)
+   1198 
+   1199 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py in pchain(*args)
+    260     rets = deque()
+    261     for p in args:
+--> 262         rets.append((yield from p))
+    263     return tuple(rets)
+    264 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/utils.py in single_gen(msg)
+    119         the input message
+    120     '''
+--> 121     return (yield msg)
+    122 
+    123 
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _run(self)
+    933                         # exceptions (coming in via throw) can be
+    934                         # raised
+--> 935                         response = yield from coro(msg)
+    936                     # special case `CancelledError` and let the outer
+    937                     # exception block deal with it.
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/asyncio/coroutines.py in coro(*args, **kw)
+    204         @functools.wraps(func)
+    205         def coro(*args, **kw):
+--> 206             res = func(*args, **kw)
+    207             if isinstance(res, futures.Future) or inspect.isgenerator(res) or \
+    208                     isinstance(res, CoroWrapper):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/run_engine.py in _read(self, msg)
+   1252                     raise ValueError("Data keys (field names) from {0!r} "
+   1253                                      "collide with those from {1!r}"
+-> 1254                                      "".format(obj, read_obj))
+   1255 
+   1256             # add this object to the cache of things we have read
+
+ValueError: Data keys (field names) from EpicsMotor(prefix='9idcLAX:m58:c2:m2', name='bob', parent='s', settle_time=0.0, timeout=None, read_attrs=['user_readback', 'user_setpoint'], configuration_attrs=['motor_egu']) collide with those from EpicsMotor(prefix='9idcLAX:m58:c2:m1', name='s_x', parent='s', settle_time=0.0, timeout=None, read_attrs=['user_readback', 'user_setpoint'], configuration_attrs=['motor_egu'])
+
+In [76]: s.x.user_readback.name = 's_x'
+
+In [77]: s.y.user_readback.name = 's_y'
+
+In [78]: RE
+Out[78]: <bluesky.run_engine.RunEngine at 0x7fd3110d7518>
+
+In [79]: ? bp.subs_wrapper
+Signature: bp.subs_wrapper(plan, subs)
+Docstring:
+Subscribe callbacks to the document stream; finally, unsubscribe.
+
+Parameters
+----------
+plan : iterable or iterator
+    a generator, list, or similar containing `Msg` objects
+subs : callable, list of callables, or dict of lists of callables
+     Documents of each type are routed to a list of functions.
+     Input is normalized to a dict of lists of functions, like so:
+
+     None -> {'all': [], 'start': [], 'stop': [], 'event': [],
+              'descriptor': []}
+
+     func -> {'all': [func], 'start': [], 'stop': [], 'event': [],
+              'descriptor': []}
+
+     [f1, f2] -> {'all': [f1, f2], 'start': [], 'stop': [], 'event': [],
+                  'descriptor': []}
+
+     {'event': [func]} ->  {'all': [], 'start': [], 'stop': [],
+                            'event': [func], 'descriptor': []}
+
+     Signature of functions must confirm to `f(name, doc)` where
+     name is one of {'all', 'start', 'stop', 'event', 'descriptor'} and
+     doc is a dictionary.
+
+Yields
+------
+msg : Msg
+    messages from plan, with 'subscribe' and 'unsubscribe' messages
+    inserted and appended
+File:      /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py
+Type:      function
+
+In [80]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs]):
+  File "<ipython-input-80-fb2e4e6c5289>", line 3
+    @bp.subs_decorator([list_of_subs]):
+                                      ^
+SyntaxError: invalid syntax
+
+
+In [81]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs])
+    ...:     def inner():
+    ...:         return yield from bp.count(*args)
+  File "<ipython-input-81-ef96d582195c>", line 5
+    return yield from bp.count(*args)
+               ^
+SyntaxError: invalid syntax
+
+
+In [82]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs])
+    ...:     def inner():
+    ...:         return (yield from bp.count(*args))
+    ...:     
+
+In [83]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs])
+    ...:     def inner():
+    ...:         return (yield from bp.count(*args))
+    ...:     
+
+In [84]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs])
+    ...:     def inner():
+    ...:         return (yield from bp.count(*args))
+    ...:     return (yield from inner())
+    ...: 
+
+In [85]: def some_nice_plan(*args):
+    ...:     list_of_subs = make_sub(*args)
+    ...:     @bp.subs_decorator([list_of_subs])
+    ...:     def inner():
+    ...:         return (yield from bp.count(dets, *args))
+    ...:     return (yield from inner())
+    ...: 
+
+In [86]: plt.close('all')
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-86-bdf481315f91> in <module>()
+----> 1 plt.close('all')
+
+NameError: name 'plt' is not defined
+
+In [87]: ? bp.scna
+Object `bp.scna` not found.
+
+In [88]: ? bp.scan
+Signature: bp.scan(detectors, motor, start, stop, num, *, per_step=None, md=None)
+Docstring:
+Scan over one variable in equally spaced steps.
+
+Parameters
+----------
+detectors : list
+    list of 'readable' objects
+motor : object
+    any 'setable' object (motor, temp controller, etc.)
+start : float
+    starting position of motor
+stop : float
+    ending position of motor
+num : int
+    number of steps
+per_step : callable, optional
+    hook for cutomizing action of inner loop (messages per step)
+    Expected signature: ``f(detectors, motor, step)``
+md : dict, optional
+    metadata
+
+See Also
+--------
+:func:`bluesky.plans.relative_scan`
+File:      /share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/bluesky/plans.py
+Type:      function
+
+In [89]: print_summary(bp.scan([s], s.y, -160, -150, 11))
+=================================== Open Run ===================================
+bob -> -160.0
+  Read ['s']
+bob -> -159.0
+  Read ['s']
+bob -> -158.0
+  Read ['s']
+bob -> -157.0
+  Read ['s']
+bob -> -156.0
+  Read ['s']
+bob -> -155.0
+  Read ['s']
+bob -> -154.0
+  Read ['s']
+bob -> -153.0
+  Read ['s']
+bob -> -152.0
+  Read ['s']
+bob -> -151.0
+  Read ['s']
+bob -> -150.0
+  Read ['s']
+================================== Close Run ===================================
+
+In [90]: s.y.name = 's_y'
+
+In [91]: print_summary(bp.scan([s], s.y, -160, -150, 11))
+=================================== Open Run ===================================
+s_y -> -160.0
+  Read ['s']
+s_y -> -159.0
+  Read ['s']
+s_y -> -158.0
+  Read ['s']
+s_y -> -157.0
+  Read ['s']
+s_y -> -156.0
+  Read ['s']
+s_y -> -155.0
+  Read ['s']
+s_y -> -154.0
+  Read ['s']
+s_y -> -153.0
+  Read ['s']
+s_y -> -152.0
+  Read ['s']
+s_y -> -151.0
+  Read ['s']
+s_y -> -150.0
+  Read ['s']
+================================== Close Run ===================================
+
+In [92]: s.read
+Out[92]: <bound method Device.read of SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])>
+
+In [93]: s.read()
+Out[93]: 
+OrderedDict([('s_y',
+              {'timestamp': 1478638739.753, 'value': -150.00000000000003}),
+             ('s_y_user_setpoint',
+              {'timestamp': 1478638739.753, 'value': -150.0}),
+             ('s_x', {'timestamp': 1477938593.72306, 'value': 172.19125}),
+             ('s_x_user_setpoint',
+              {'timestamp': 1477938593.72306, 'value': 172.19125})])
+
+In [94]: RE(bp.scan([s], s.y, -160, -150, 11))
+Out[94]: ['aac4de34-b47a-4a20-a971-ba5003d4ceae']
+
+In [95]: RE(bp.scan([s], s.y, -160, -150, 11), LiveTable([s]))
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:19:00.0 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:19:01.1 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:19:02.2 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:19:03.3 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:19:04.4 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:19:05.5 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:19:06.6 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:19:07.8 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:19:08.8 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:19:09.9 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:19:11.0 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['b341a8'] (scan num: 14)
+Out[95]: ['b341a8b4-45d4-419c-9fe0-b3489ac3859b']
+
+In [96]: 
+
+In [96]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')]))
+  File "<ipython-input-96-54e6e25f277c>", line 1
+    RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')]))
+                                                                                   ^
+SyntaxError: invalid syntax
+
+
+In [97]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:20:44.6 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:20:45.7 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:20:46.8 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:20:47.9 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:20:49.1 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:20:50.2 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:20:51.3 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:20:52.4 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:20:53.6 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:20:54.7 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:20:55.9 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['6f8966'] (scan num: 15)
+Out[97]: ['6f8966c0-f7d7-4f59-9388-90cbabf59491']
+
+In [98]: RE.md
+Out[98]: {'purpose': 'demo', 'scan_id': 15}
+
+In [99]: RE.md['scan_id'] = 0
+
+In [100]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:21:48.7 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:21:49.7 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:21:50.9 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:21:52.1 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:21:53.4 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:21:54.5 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:21:55.7 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:21:56.8 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:21:57.9 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:21:59.1 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:22:00.2 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['1c2e62'] (scan num: 1)
+Out[100]: ['1c2e626b-821a-424d-9e1f-a81213e3e5e8']
+
+In [101]: db['6f896']
+Out[101]: 
+{'descriptors': [{'configuration': {'s': {'data': {},
+     'data_keys': {},
+     'timestamps': {}}},
+   'data_keys': {'s_x': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_x_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_y': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985},
+    's_y_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985}},
+   'name': 'primary',
+   'object_keys': {'s': ['s_y',
+     's_y_user_setpoint',
+     's_x',
+     's_x_user_setpoint']},
+   'run_start': '6f8966c0-f7d7-4f59-9388-90cbabf59491',
+   'time': 1478643644.3834682,
+   'uid': '9b521324-2ca0-497a-96cd-09f39c8f1e07'}],
+ 'start': {'detectors': ['s'],
+  'motors': ['s_y'],
+  'num_steps': 11,
+  'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"],
+   'motor': "EpicsMotor(prefix='9idcLAX:m58:c2:m2', name='s_y', parent='s', settle_time=0.0, timeout=None, read_attrs=['user_readback', 'user_setpoint'], configuration_attrs=['motor_egu'])",
+   'num': 11,
+   'per_step': 'None',
+   'start': -160,
+   'stop': -150},
+  'plan_name': 'scan',
+  'plan_pattern': 'linspace',
+  'plan_pattern_args': {'num': 11, 'start': -160, 'stop': -150},
+  'plan_pattern_module': 'numpy',
+  'plan_type': 'generator',
+  'purpose': 'demo',
+  'scan_id': 15,
+  'time': 1478643641.8927612,
+  'uid': '6f8966c0-f7d7-4f59-9388-90cbabf59491'},
+ 'stop': {'exit_status': 'success',
+  'run_start': '6f8966c0-f7d7-4f59-9388-90cbabf59491',
+  'time': 1478643656.0714853,
+  'uid': '7947f644-0cfb-40e9-92b6-3ca3f899ce5e'}}
+
+In [102]: db['6']
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-102-21b3ee180845> in <module>()
+----> 1 db['6']
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/broker.py in __getitem__(self, key)
+    330     def __getitem__(self, key):
+    331         """Do-What-I-Mean slicing"""
+--> 332         return search(key, self.mds)
+    333 
+    334     def __getattr__(self, key):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/functools.py in wrapper(*args, **kw)
+    741 
+    742     def wrapper(*args, **kw):
+--> 743         return dispatch(args[0].__class__)(*args, **kw)
+    744 
+    745     registry[object] = func
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/broker.py in _(key, mds)
+    231     if len(results) > 1:
+    232         raise ValueError("key=%r matches %d runs. Provide "
+--> 233                          "more characters." % (key, len(results)))
+    234     result, = results
+    235     header = Header.from_run_start(mds, result)
+
+ValueError: key='6' matches 6 runs. Provide more characters.
+
+In [103]: db['6f']
+---------------------------------------------------------------------------
+ValueError                                Traceback (most recent call last)
+<ipython-input-103-5e3b4643a5a4> in <module>()
+----> 1 db['6f']
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/broker.py in __getitem__(self, key)
+    330     def __getitem__(self, key):
+    331         """Do-What-I-Mean slicing"""
+--> 332         return search(key, self.mds)
+    333 
+    334     def __getattr__(self, key):
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/functools.py in wrapper(*args, **kw)
+    741 
+    742     def wrapper(*args, **kw):
+--> 743         return dispatch(args[0].__class__)(*args, **kw)
+    744 
+    745     registry[object] = func
+
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/broker.py in _(key, mds)
+    231     if len(results) > 1:
+    232         raise ValueError("key=%r matches %d runs. Provide "
+--> 233                          "more characters." % (key, len(results)))
+    234     result, = results
+    235     header = Header.from_run_start(mds, result)
+
+ValueError: key='6f' matches 2 runs. Provide more characters.
+
+In [104]: db['6f8']
+Out[104]: 
+{'descriptors': [{'configuration': {'s': {'data': {},
+     'data_keys': {},
+     'timestamps': {}}},
+   'data_keys': {'s_x': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_x_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_y': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985},
+    's_y_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985}},
+   'name': 'primary',
+   'object_keys': {'s': ['s_y',
+     's_y_user_setpoint',
+     's_x',
+     's_x_user_setpoint']},
+   'run_start': '6f8966c0-f7d7-4f59-9388-90cbabf59491',
+   'time': 1478643644.3834682,
+   'uid': '9b521324-2ca0-497a-96cd-09f39c8f1e07'}],
+ 'start': {'detectors': ['s'],
+  'motors': ['s_y'],
+  'num_steps': 11,
+  'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"],
+   'motor': "EpicsMotor(prefix='9idcLAX:m58:c2:m2', name='s_y', parent='s', settle_time=0.0, timeout=None, read_attrs=['user_readback', 'user_setpoint'], configuration_attrs=['motor_egu'])",
+   'num': 11,
+   'per_step': 'None',
+   'start': -160,
+   'stop': -150},
+  'plan_name': 'scan',
+  'plan_pattern': 'linspace',
+  'plan_pattern_args': {'num': 11, 'start': -160, 'stop': -150},
+  'plan_pattern_module': 'numpy',
+  'plan_type': 'generator',
+  'purpose': 'demo',
+  'scan_id': 15,
+  'time': 1478643641.8927612,
+  'uid': '6f8966c0-f7d7-4f59-9388-90cbabf59491'},
+ 'stop': {'exit_status': 'success',
+  'run_start': '6f8966c0-f7d7-4f59-9388-90cbabf59491',
+  'time': 1478643656.0714853,
+  'uid': '7947f644-0cfb-40e9-92b6-3ca3f899ce5e'}}
+
+In [105]: %edit /home/beams/USAXS/.ipython/profile_bluesky/startup/00-startup.py
+Editing... done. Executing edited code...
+
+In [106]:                                                                                                                                                                                                                                                                                                                                                              
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/databroker.py:20: UserWarning: No default DataBroker object will be created because the necessary configuration was not found: No module named 'metadatastore'
+  "the necessary configuration was not found: %s" % exc)
+
+In [1]: s.read()
+Out[1]: 
+OrderedDict([('s_y',
+              {'timestamp': 1478643720.484245, 'value': -150.00000000000003}),
+             ('s_y_user_setpoint',
+              {'timestamp': 1478643720.484245, 'value': -150.0}),
+             ('s_x', {'timestamp': 1477938593.72306, 'value': 172.19125}),
+             ('s_x_user_setpoint',
+              {'timestamp': 1477938593.72306, 'value': 172.19125})])
+
+In [2]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
+---------------------------------------------------------------------------
+NameError                                 Traceback (most recent call last)
+<ipython-input-2-226589fbbe0e> in <module>()
+----> 1 RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
+
+NameError: name 'LiveTable' is not defined
+
+In [3]: from bluesky.callbacks import LiveTable, LivePlot
+
+In [4]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:35:18.1 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:35:19.1 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:35:20.2 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:35:21.4 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:35:22.5 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:35:23.6 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:35:24.7 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:35:25.8 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:35:26.9 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:35:28.0 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:35:29.1 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['a9cac9'] (scan num: 1)
+Out[4]: ['a9cac989-8aee-4172-b5de-d2080e005a79']
+
+In [5]: %matplotlib
+Using matplotlib backend: Qt4Agg
+
+In [6]: %edit /home/beams/USAXS/.ipython/profile_bluesky/startup/00-startup.py
+Editing... done. Executing edited code...
+
+In [7]:                                                                                                                                                                                                                                                                                                                                                                
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/databroker.py:20: UserWarning: No default DataBroker object will be created because the necessary configuration was not found: No module named 'metadatastore'
+  "the necessary configuration was not found: %s" % exc)
+
+In [1]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:38:02.1 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:38:03.2 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:38:04.3 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:38:05.5 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:38:06.6 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:38:07.7 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:38:08.8 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:38:09.9 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:38:11.1 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:38:12.2 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:38:13.3 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['247fb2'] (scan num: 1)
+Out[1]: ['247fb24f-7f65-47ac-bb68-dc8ee1632f0f']
+
+In [2]: plt.show()
+
+In [3]: %matplotlib qt
+
+In [4]: plt.show()
+
+In [5]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:38:35.8 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:38:36.8 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:38:38.0 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:38:39.1 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:38:40.2 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:38:41.3 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:38:42.4 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:38:43.5 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:38:44.7 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:38:45.8 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:38:46.9 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['0ef9d4'] (scan num: 2)
+Out[5]: ['0ef9d481-3a89-4520-a46e-259b608a1cfc']
+
+In [6]: plt.plot(range(55))
+Out[6]: [<matplotlib.lines.Line2D at 0x7f9d14033630>]
+
+In [7]: plt.show()
+
+In [8]:                                                                                                                                                                                                                                                                                                                                                                
+Do you really want to exit ([y]/n)? ^[[72;1R
+Do you really want to exit ([y]/n)? y
+(bluesky) usaxs@usaxscontrol ~ $ ipython 
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+In [1]: %matplotlib qt
+
+In [2]: import matplotlib.pyplot as plt
+
+In [3]: plt.plot(range(55))
+Out[3]: [<matplotlib.lines.Line2D at 0x7fb6140564e0>]
+
+In [4]:                                                                                                                                                                                                                                                                                                                                                                
+Do you really want to exit ([y]/n)? 
+(bluesky) usaxs@usaxscontrol ~ $ ipython --profile=bluesky
+Python 3.5.2 | packaged by conda-forge | (default, Jul 26 2016, 01:32:08) 
+Type "copyright", "credits" or "license" for more information.
+
+IPython 5.1.0 -- An enhanced Interactive Python.
+?         -> Introduction and overview of IPython's features.
+%quickref -> Quick reference.
+help      -> Python's own help system.
+object?   -> Details about 'object', use 'object??' for extra details.
+
+IPython profile: bluesky
+/share1/bluesky/conda_envs/bluesky/lib/python3.5/site-packages/databroker/databroker.py:20: UserWarning: No default DataBroker object will be created because the necessary configuration was not found: No module named 'metadatastore'
+  "the necessary configuration was not found: %s" % exc)
+
+In [1]: RE(bp.scan([s], s.y, -160, -150, 11), [LiveTable([s]), LivePlot('s_x', 's_y')])
++-----------+------------+------------+-------------------+------------+-------------------+
+|   seq_num |       time |        s_x | s_x_user_setpoint |        s_y | s_y_user_setpoint |
++-----------+------------+------------+-------------------+------------+-------------------+
+|         1 | 16:41:30.8 |  172.19125 |         172.19125 |   -160.000 |          -160.000 |
+|         2 | 16:41:31.9 |  172.19125 |         172.19125 |   -159.000 |          -159.000 |
+|         3 | 16:41:33.1 |  172.19125 |         172.19125 |   -158.000 |          -158.000 |
+|         4 | 16:41:34.2 |  172.19125 |         172.19125 |   -157.000 |          -157.000 |
+|         5 | 16:41:35.6 |  172.19125 |         172.19125 |   -156.000 |          -156.000 |
+|         6 | 16:41:36.8 |  172.19125 |         172.19125 |   -155.000 |          -155.000 |
+|         7 | 16:41:37.9 |  172.19125 |         172.19125 |   -154.000 |          -154.000 |
+|         8 | 16:41:39.0 |  172.19125 |         172.19125 |   -153.000 |          -153.000 |
+|         9 | 16:41:40.1 |  172.19125 |         172.19125 |   -152.000 |          -152.000 |
+|        10 | 16:41:41.2 |  172.19125 |         172.19125 |   -151.000 |          -151.000 |
+|        11 | 16:41:42.3 |  172.19125 |         172.19125 |   -150.000 |          -150.000 |
++-----------+------------+------------+-------------------+------------+-------------------+
+generator scan ['c73a14'] (scan num: 1)
+Out[1]: ['c73a14bc-b721-4f12-9f12-f125c31af9b7']
+
+In [2]: db[-1]
+Out[2]: 
+{'descriptors': [{'configuration': {'s': {'data': {},
+     'data_keys': OrderedDict(),
+     'timestamps': {}}},
+   'data_keys': {'s_x': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_x_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -89.93624999999997,
+     'object_name': 's',
+     'precision': 5,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m1.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 310.06375},
+    's_y': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.RBV',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985},
+    's_y_user_setpoint': {'dtype': 'number',
+     'lower_ctrl_limit': -200.1449999999997,
+     'object_name': 's',
+     'precision': 3,
+     'shape': [],
+     'source': 'PV:9idcLAX:m58:c2:m2.VAL',
+     'units': 'mm',
+     'upper_ctrl_limit': 127.35499999999985}},
+   'name': 'primary',
+   'object_keys': {'s': ['s_y',
+     's_y_user_setpoint',
+     's_x',
+     's_x_user_setpoint']},
+   'run_start': 'c73a14bc-b721-4f12-9f12-f125c31af9b7',
+   'time': 1478644890.6882684,
+   'uid': '1e0dc924-babb-4900-9705-3a08155cc1e2'}],
+ 'start': {'detectors': ['s'],
+  'motors': ['s_y'],
+  'num_steps': 11,
+  'plan_args': {'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"],
+   'motor': "EpicsMotor(prefix='9idcLAX:m58:c2:m2', name='s_y', parent='s', settle_time=0.0, timeout=None, read_attrs=['user_readback', 'user_setpoint'], configuration_attrs=['motor_egu'])",
+   'num': 11,
+   'per_step': 'None',
+   'start': -160,
+   'stop': -150},
+  'plan_name': 'scan',
+  'plan_pattern': 'linspace',
+  'plan_pattern_args': {'num': 11, 'start': -160, 'stop': -150},
+  'plan_pattern_module': 'numpy',
+  'plan_type': 'generator',
+  'scan_id': 1,
+  'time': 1478644888.1824749,
+  'uid': 'c73a14bc-b721-4f12-9f12-f125c31af9b7'},
+ 'stop': {'exit_status': 'success',
+  'run_start': 'c73a14bc-b721-4f12-9f12-f125c31af9b7',
+  'time': 1478644902.5368433,
+  'uid': 'd3ab3bfa-f526-4ba4-a04b-9e3057d68e09'}}
+
+In [3]: from bluesky.global_state import gs
+Storing metadata history in a new file at /home/beams/USAXS/.config/bluesky/bluesky_history.db.
+
+In [4]: gs.DETS
+Out[4]: []
+
+In [5]: gs.DETS = [s]
+
+In [6]: import bluesky.spec_api as bsa
+
+In [7]: list(bsa.ct())
+Out[7]: 
+[subscribe: (None), ('all', <bluesky.callbacks.core.LiveTable object at 0x7f9a600c3e10>), {},
+ stage: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ open_run: (None), (), {'count_time': None, 'plan_args': {'num': 1, 'detectors': ["SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])"]}, 'detectors': ['s'], 'plan_name': 'ct', 'num_steps': 1},
+ checkpoint: (None), (), {},
+ trigger: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {'group': 'trigger-eb648f'},
+ wait: (None), (), {'group': 'trigger-eb648f'},
+ create: (None), (), {'name': 'primary'},
+ read: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ save: (None), (), {},
+ close_run: (None), (), {},
+ unstage: (SampleStage(prefix='9idcLAX:m58:c2:', name='s', read_attrs=['y', 'x'], configuration_attrs=[])), (), {},
+ unsubscribe: (None), (), {'token': None}]
+
+In [8]: from bluesky.plan_tools import print_summary
+
+In [9]: print_summary(bsa.ct())
+=================================== Open Run ===================================
+  Read ['s']
+================================== Close Run ===================================
+
+In [10]: print_summary(bsa.ct(), num=5)
+---------------------------------------------------------------------------
+TypeError                                 Traceback (most recent call last)
+<ipython-input-10-2245ba09716a> in <module>()
+----> 1 print_summary(bsa.ct(), num=5)
+
+TypeError: print_summary() got an unexpected keyword argument 'num'
+
+In [11]: print_summary(bsa.ct(num=5))
+=================================== Open Run ===================================
+  Read ['s']
+  Read ['s']
+  Read ['s']
+  Read ['s']
+  Read ['s']
+================================== Close Run ===================================
+
+In [12]: gs.PLOT_Y = 's_y'
+
+In [13]: RE(bsa.ct(num=5))
++-----------+------------+------------+
+|   seq_num |       time |        s_y |
++-----------+------------+------------+
+|         1 | 16:45:39.6 |   -150.000 |
+|         2 | 16:45:39.7 |   -150.000 |
+|         3 | 16:45:39.9 |   -150.000 |
+|         4 | 16:45:40.0 |   -150.000 |
+|         5 | 16:45:40.1 |   -150.000 |
++-----------+------------+------------+
+generator ct ['9d84b3'] (scan num: 2)
+Out[13]: ['9d84b385-3d32-4ee5-8f38-37807a70fbdb']
+
+In [14]: RE(bsa.ct(num=5))
