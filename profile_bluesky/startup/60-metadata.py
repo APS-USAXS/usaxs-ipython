@@ -4,7 +4,7 @@ from datetime import datetime
 
 # Set up default metadata
 
-RE.md['beamline_id'] = 'developer__YOUR_BEAMLINE_HERE'
+RE.md['beamline_id'] = 'APS USAXS 9-ID-C'
 RE.md['proposal_id'] = None
 RE.md['pid'] = os.getpid()
 

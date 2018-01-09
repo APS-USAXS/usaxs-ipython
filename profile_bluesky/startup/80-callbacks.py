@@ -6,8 +6,8 @@ import APS_BlueSky_tools.callbacks
 import APS_BlueSky_tools.filewriters
 
 # collect last scan's documents into doc_collector.documents
-# doc_collector = APS_BlueSky_tools.callbacks.DocumentCollectorCallback()
-# callback_db['doc_collector'] = RE.subscribe(doc_collector.receiver)
+doc_collector = APS_BlueSky_tools.callbacks.DocumentCollectorCallback()
+callback_db['doc_collector'] = RE.subscribe(doc_collector.receiver)
 
 # write scans to SPEC data file
 specwriter = APS_BlueSky_tools.filewriters.SpecWriterCallback()
