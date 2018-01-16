@@ -3,7 +3,7 @@ metadatastore:
     module: 'databroker.headersource.mongo'
     class: 'MDS'
     config:
-        host: 'otz.aps.anl.gov'
+        host: 'usaxsserver.xray.aps.anl.gov'
         port: 27017
         database: 'metadatastore-production-v1'
         timezone: 'US/Central'
@@ -11,6 +11,6 @@ assets:
     module: 'databroker.assets.mongo'
     class: 'Registry'
     config:
-        host: 'otz.aps.anl.gov'
+        host: 'usaxsserver.xray.aps.anl.gov'
         port: 27017
         database: 'filestore-production-v1'
