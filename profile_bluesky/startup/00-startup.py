@@ -27,9 +27,9 @@ import numpy as np
 import bluesky.magics
 
 
-def add_to_wa_motors(*motors):
+def append_wa_motor_list(*motorlist):
 	"""add motors to report in the `wa` command"""
-	BlueskyMagics.positioners += motors
+	BlueskyMagics.positioners += motorlist
 
 
 # Uncomment the following lines to turn on 
