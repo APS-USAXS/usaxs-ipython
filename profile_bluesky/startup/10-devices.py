@@ -10,18 +10,6 @@ from APS_BlueSky_tools.devices import userCalcsDevice
 # Set up custom or complex devices
 
 
-class EpicsMotorWithDial(EpicsMotor):
-	"""
-	add motor record's dial coordinates to EpicsMotor
-	
-	USAGE::
-	
-		m1 = EpicsMotorWithDial('xxx:m1', name='m1')
-	
-	"""
-	dial = Component(EpicsSignal, ".DRBV", write_pv=".DVAL")
-
-
 class UsaxsSampleStageDevice(Device):
 	"""USAXS sample stage"""
 	x = Component(EpicsMotor, '9idcLAX:m58:c2:m1')
