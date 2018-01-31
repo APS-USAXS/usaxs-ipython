@@ -22,7 +22,7 @@ class EpicsMotorWithDial(EpicsMotor):
 	dial = Component(EpicsSignal, ".DRBV", write_pv=".DVAL")
 
 
-class SampleStageDevice(Device):
+class UsaxsSampleStageDevice(Device):
 	"""USAXS sample stage"""
 	x = Component(EpicsMotor, '9idcLAX:m58:c2:m1')
 	y = Component(EpicsMotor, '9idcLAX:m58:c2:m2')
