@@ -10,21 +10,16 @@ from APS_BlueSky_tools.devices import userCalcsDevice
 # Set up custom or complex devices
 
 
-class MotorDialValues(Device):
-	value = Component(EpicsSignalRO, ".DRBV")
-	setpoint = Component(EpicsSignal, ".DVAL")
-
-
-class MyEpicsMotorWithDial(EpicsMotor):
+class EpicsMotorWithDial(EpicsMotor):
 	"""
 	add motor record's dial coordinates to EpicsMotor
 	
 	USAGE::
 	
-		m1 = MyEpicsMotorWithDial('xxx:m1', name='m1')
+		m1 = EpicsMotorWithDial('xxx:m1', name='m1')
 	
 	"""
-	dial = Component(MotorDialValues, "")
+	dial = Component(EpicsSignal, ".DRBV", write_pv=".DVAL")
 
 
 class SampleStageDevice(Device):
