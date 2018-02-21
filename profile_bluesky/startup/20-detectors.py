@@ -7,8 +7,8 @@ aps_current = EpicsSignalRO("S:SRcurrentAI", name="aps_current")
 userCalcs_lax = userCalcsDevice("9idcLAX:", name="userCalcs_lax")
 
 scaler0 = EpicsScaler('9idcLAX:vsc:c0', name='scaler0')
-scaler1 = EpicsScaler('9idcLAX:vsc:c1', name='scaler1')		# ? used
-scaler2 = EpicsScaler('9idcLAX:vsc:c2', name='scaler2')		# ? used
+scaler1 = EpicsScaler('9idcLAX:vsc:c1', name='scaler1')     # ? used
+scaler2 = EpicsScaler('9idcLAX:vsc:c2', name='scaler2')     # ? used
 
 """
 usaxs@usaxscontrol ~/.../startup/spec $ caget 9idcLAX:vsc:c{0,1,2}.NM{1,2,3,4,5,6,7,8}
