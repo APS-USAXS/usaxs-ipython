@@ -108,27 +108,36 @@ append_wa_motor_list(
 # mx = EpicsMotor('9idcLAX:m58:c0:m2', name='mx')  # mx
 # my = EpicsMotor('9idcLAX:m58:c0:m3', name='my')  # my
 # m2rp = EpicsMotor('9idcLAX:pi:c0:m2', name='m2rp')  # USAXS.m2rp
+
+class UsaxsCollimatorStageDevice(Device):
+    """USAXS Collimator (Monochromator) stage"""
+    r = Component(EpicsMotor, '9idcLAX:aero:c3:m1')
+    x = Component(EpicsMotor, '9idcLAX:m58:c0:m2')
+    y = Component(EpicsMotor, '9idcLAX:m58:c0:m3')
+    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m2')
+
+m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
+append_wa_motor_list(
+    m_stage.r, m_stage.x, m_stage.y,
+    m_stage.r2p, 
+)
+
+
 # #msr = EpicsMotor('9idcLAX:xps:c0:m5', name='msr')  # msr
 # msrp = EpicsMotor('9idcLAX:pi:c0:m3', name='msrp')  # USAXS.msrp
 # #mst = EpicsMotor('9idcLAX:xps:c0:m3', name='mst')  # mst
 # msx = EpicsMotor('9idcLAX:m58:c1:m1', name='msx')  # msx
 # msy = EpicsMotor('9idcLAX:m58:c1:m2', name='msy')  # msy
 
-class UsaxsCollimatorStageDevice(Device):
-    """USAXS Analyzer stage"""
-    r = Component(EpicsMotor, '9idcLAX:aero:c3:m1')
-    x = Component(EpicsMotor, '9idcLAX:m58:c0:m2')
-    y = Component(EpicsMotor, '9idcLAX:m58:c0:m3')
-    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m2')
-    sx = Component(EpicsMotor, '9idcLAX:m58:c1:m1')
-    sy = Component(EpicsMotor, '9idcLAX:m58:c1:m2')
-    srp = Component(EpicsMotor, '9idcLAX:pi:c0:m3')
+class UsaxsCollimatorSideReflectionStageDevice(Device):
+    """USAXS Collimator (Monochromator) stage"""
+    x = Component(EpicsMotor, '9idcLAX:m58:c1:m1')
+    y = Component(EpicsMotor, '9idcLAX:m58:c1:m2')
+    rp = Component(EpicsMotor, '9idcLAX:pi:c0:m3')
 
-m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
+ms_stage = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 append_wa_motor_list(
-    m_stage.r, m_stage.x, m_stage.y,
-    m_stage.r2p, 
-    m_stage.sx, m_stage.sy, m_stage.srp
+    m_stage.x, m_stage.y, m_stage.rp
 )
 
 
