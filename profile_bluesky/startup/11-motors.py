@@ -186,19 +186,19 @@ append_wa_motor_list(as_stage.sy, as_stage.srp)
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-# pin_x = EpicsMotor('9idcLAX:mxv:c0:m1', name='pin_x')  # pin_x
-# pin_y = EpicsMotor('9idcLAX:mxv:c0:m8', name='pin_y')  # pin_y
-# pin_z = EpicsMotor('9idcLAX:mxv:c0:m2', name='pin_z')  # pin_z
+# saxs_x = EpicsMotor('9idcLAX:mxv:c0:m1', name='saxs_x')  # saxs_x
+# saxs_y = EpicsMotor('9idcLAX:mxv:c0:m8', name='saxs_y')  # saxs_y
+# saxs_z = EpicsMotor('9idcLAX:mxv:c0:m2', name='saxs_z')  # saxs_z
 
-class PinStageDevice(Device):
-    """USAXS Pin stage"""
+class SaxsDetectorStageDevice(Device):
+    """SAXS detector stage"""
     x = Component(EpicsMotor, '9idcLAX:mxv:c0:m1')
     y = Component(EpicsMotor, '9idcLAX:mxv:c0:m8')
     z = Component(EpicsMotor, '9idcLAX:mxv:c0:m2')
     
-pin_stage = PinStageDevice('', name='pin_stage')
+saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 append_wa_motor_list(
-    pin_stage.x, pin_stage.y, pin_stage.z,
+    saxs_stage.x, saxs_stage.y, saxs_stage.z,
 )
 
 
