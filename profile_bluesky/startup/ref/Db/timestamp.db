@@ -1,0 +1,7 @@
+record(stringin, "$(P)$(TS)")
+{
+  field(DTYP,"Soft Timestamp")
+  field(DESC,"Current Time")
+  field(INP, "@%Y-%m-%dT%H:%M:%S")
+  field(SCAN,"9")
+}

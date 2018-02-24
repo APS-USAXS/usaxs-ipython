@@ -1,0 +1,16 @@
+# This is the streamDevice protocol file for the Watson Marlow 505Du/RL
+#InTerminator = CR;
+OutTerminator = CR;
+ReadTimeout = 100;
+MaxInput = 3;
+ExtraInput = Ignore;
+Stp {
+	out "STP"; in "\n0*";
+}
+Run {
+	out "RUN"; in "\n0>";
+}
+
+Status {
+        out "0"; in "\n0%{:|>|<|/|*|^}"
+}

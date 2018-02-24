@@ -1,0 +1,4 @@
+alias("$(P)$(H)$(F)debug", "$(PA)$(H)$(F)debug")
+alias("$(P)$(H)$(F)gainidx", "$(PA)$(H)$(F)gainidx")
+alias("$(P)$(H)$(F)gain", "$(PA)$(H)$(F)gain")
+alias("$(P)$(H)$(F)femtodesc", "$(PA)$(H)$(F)femtodesc")

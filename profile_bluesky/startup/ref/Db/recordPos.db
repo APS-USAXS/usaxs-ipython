@@ -1,0 +1,50 @@
+# The following records are for recording motor position and the MCS channel
+# number at which they were changed in the arrays $(P)$(Q)$(A)pos and $(P)$(Q)$(A)mcsChan.
+# The arrays are cleared and then the first point is initialized with MCS
+# channel 0 and the motor pos at the time $(P)$(Q)$(A)resetPos is executed.
+# Once initialized, new values are added whenever $(M).RBV posts a value while $(P)traj1:Execute!=0.
+# $(P)$(Q)$(A)pos records $(M).RBV
+# $(P)$(Q)$(A)mcsChan records $(MCS)CurrentChannel
+
+record(transform, "$(P)$(Q)$(A)resetPos") {
+	# We used to be triggered on trajectory build, but the MCS hasn't been erased
+	# at that time, so now we're triggered by USAXSfly.db
+	#field(INPA, "$(P)traj1:Build CP")
+
+	# It doesn't matter what you write to the RES field of a compress record.
+	# Also, RES is handled by special() so you don't want to process.
+	field(OUTA, "$(P)$(Q)$(A)pos.RES NPP")
+	field(OUTB, "$(P)$(Q)$(A)mcsChan.RES NPP")
+	# D is zero.  This will be initial MCS channel
+	field(OUTD, "$(P)$(Q)$(A)recordPos.B NPP")
+	field(INPE, "$(M).RBV")
+	field(OUTE, "$(P)$(Q)$(A)recordPos.A NPP")
+	field(CLCG, "1")
+	field(OUTG, "$(P)$(Q)$(A)recordPos.DISV NPP")
+	field(OUTH, "$(P)$(Q)$(A)recordPos.PROC PP")
+	field(CLCI, "0")
+	field(OUTI, "$(P)$(Q)$(A)recordPos.DISV NPP")
+}
+record(transform, "$(P)$(Q)$(A)recordPos") {
+	field(SDIS, "$(P)traj1:Execute")
+	field(DISV, "0")
+	field(INPA, "$(M).RBV NPP")
+	field(INPB, "$(MCS)CurrentChannel NPP")
+	# The next two links are only to get the record processed.  We can't use
+	# CP links for INPA, INPB, and INPC, because, at reset time, we need to get
+	# the values written to A, B, and C by resetPos, and those values were
+	# written with NPP links, so they will not have been posted.
+	field(INPD, "$(M).RBV CP")
+	field(OUTA, "$(P)$(Q)$(A)pos.PROC PP")
+	field(OUTB, "$(P)$(Q)$(A)mcsChan.PROC PP")
+}
+record(compress, "$(P)$(Q)$(A)pos") {
+	field(NSAM, "3000")
+	field(ALG, "Circular Buffer")
+	field(INP, "$(P)$(Q)$(A)recordPos.A")
+}
+record(compress, "$(P)$(Q)$(A)mcsChan") {
+	field(NSAM, "3000")
+	field(ALG, "Circular Buffer")
+	field(INP, "$(P)$(Q)$(A)recordPos.B")
+}

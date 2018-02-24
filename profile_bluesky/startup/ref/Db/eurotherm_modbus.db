@@ -1,0 +1,160 @@
+# ao record template for register outputs
+record(ao, "$(P)$(TC):SetPointTempWrite") {
+    field(DTYP,"asynInt32")
+    field(OUT,"@asynMask(W_SetPointOut 0 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"1000")
+    field(LOPR,"0")
+    field(PREC,"0")
+}
+
+# ao record template for register outputs
+record(ao, "$(P)$(TC):SetPointPowerWrite") {
+    field(DTYP,"asynInt32")
+    field(OUT,"@asynMask(W_SetPointOut 1 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"100")
+    field(LOPR,"0")
+    field(PREC,"1")
+    field(ASLO,"0.1")
+}
+
+record(mbbo, "$(P)$(TC):ModeWrite") {
+    field(DTYP,"asynInt32")
+    field(OUT,"@asynMask(W_ModeOut 0 16)MODBUS_DATA")
+    field(ZRVL,"0")
+    field(ZRST,"Auto")
+    field(ONVL,"1")
+    field(ONST,"Manual")
+}
+
+#record(mbbo, "$(P)$(TC):ProgramNumberWrite") {
+#    field(DTYP,"asynInt32")
+#    field(OUT,"@asynMask(W_ProgramOut 0 16)MODBUS_DATA")
+#    field(ZRVL,"1")
+#    field(ZRST,"1")
+#    field(ONVL,"2")
+#    field(ONST,"2")
+#    field(TWVL,"3")
+#    field(TWST,"3")
+#    field(THVL,"4")
+#    field(THST,"4")
+#}
+
+
+#record(mbbo, "$(P)$(TC):ProgramStatusWrite") {
+#    field(DTYP,"asynInt32")
+#    field(OUT,"@asynMask(W_ProgramOut 1 16)MODBUS_DATA")
+#    field(ZRVL,"1")
+#    field(ZRST,"Reset")
+#    field(ONVL,"2")
+#    field(ONST,"Run")
+#    field(TWVL,"4")
+#    field(TWST,"Hold")
+#    field(THVL,"8")
+#    field(THST,"Holdback")
+#    field(FRVL,"16")
+#    field(FRST,"Complete")
+#}
+
+
+# ai record template for register outputs
+record(ai, "$(P)$(TC):SetPointSensor") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_SetPointIn 0 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"1")
+    field(LOPR,"0")
+    field(PREC,"0")
+    field(SCAN,"I/O Intr")
+}
+
+# ai record template for register outputs
+record(ai, "$(P)$(TC):SetPointTemp") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_SetPointIn 1 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"1000")
+    field(LOPR,"0")
+    field(PREC,"0")
+    field(SCAN,"I/O Intr")
+}
+
+# ai record template for register outputs
+record(ai, "$(P)$(TC):SetPointPower") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_SetPointIn 2 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"100")
+    field(LOPR,"0")
+    field(PREC,"1")
+    field(ASLO,"0.1")
+    field(SCAN,"I/O Intr")
+}
+
+
+# ai record template for register inputs
+record(ai, "$(P)$(TC):Temp1") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_ProcessIn 0 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"1000")
+    field(LOPR,"0")
+    field(PREC,"0")
+    field(SCAN,"I/O Intr")
+}
+
+# ai record template for register inputs
+record(ai, "$(P)$(TC):Temp2") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_ProcessIn 1 16)MODBUS_DATA")
+    field(LINR,"NO CONVERSION")
+    field(HOPR,"1000")
+    field(LOPR,"0")
+    field(PREC,"0")
+    field(SCAN,"I/O Intr")
+}
+
+record(mbbi, "$(P)$(TC):Mode") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_ModeIn 0 16)MODBUS_DATA")
+    field(ZRVL,"0")
+    field(ZRST,"Auto")
+    field(ONVL,"1")
+    field(ONST,"Manual")
+    field(SCAN,"I/O Intr")
+}
+
+
+
+record(mbbi, "$(P)$(TC):ProgramNumber") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_ProgramIn 0 16)MODBUS_DATA")
+    field(ZRVL,"1")
+    field(ZRST,"1")
+    field(ONVL,"2")
+    field(ONST,"2")
+    field(TWVL,"3")
+    field(TWST,"3")
+    field(THVL,"4")
+    field(THST,"4")
+    field(SCAN,"I/O Intr")
+}
+
+
+record(mbbi, "$(P)$(TC):ProgramStatus") {
+    field(DTYP,"asynInt32")
+    field(INP,"@asynMask(W_ProgramIn 1 16)MODBUS_DATA")
+    field(ZRVL,"1")
+    field(ZRST,"Reset")
+    field(ONVL,"2")
+    field(ONST,"Run")
+    field(TWVL,"4")
+    field(TWST,"Hold")
+    field(THVL,"8")
+    field(THST,"Holdback")
+    field(FRVL,"16")
+    field(FRST,"Complete")
+    field(SCAN,"I/O Intr")
+}
+

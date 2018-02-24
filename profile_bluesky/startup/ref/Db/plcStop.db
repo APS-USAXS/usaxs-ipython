@@ -1,0 +1,48 @@
+#
+# Stop all motors when any of the optical switches trip
+#
+
+record(calcout, "$(P)$(R)allstop0")
+{
+  field(DESC, "Monitor e-stop")
+  field(INPA, "$(P)$(R)X0.VAL  CP NMS")
+  field(CALC, "A")
+  field(OCAL, "1")
+  field(OOPT, "Transition To Zero")
+  field(DOPT, "Use OCAL")
+  field(OUT,  "$(P)allstop  PP MS")
+}
+
+record(calcout, "$(P)$(R)allstop1")
+{
+  field(DESC, "Monitor optical sw 1")
+  field(INPA, "$(P)$(R)X1.VAL  CP NMS")
+  field(CALC, "A")
+  field(OCAL, "1")
+  field(OOPT, "Transition To Zero")
+  field(DOPT, "Use OCAL")
+  field(OUT,  "$(P)allstop  PP MS")
+}
+
+record(calcout, "$(P)$(R)allstop2")
+{
+  field(DESC, "Monitor optical sw 2")
+  field(INPA, "$(P)$(R)X2.VAL  CP NMS")
+  field(CALC, "A")
+  field(OCAL, "1")
+  field(OOPT, "Transition To Zero")
+  field(DOPT, "Use OCAL")
+  field(OUT,  "$(P)allstop  PP MS")
+}
+
+record(calcout, "$(P)$(R)allstop3")
+{
+  field(DESC, "Monitor optical sw 3")
+  field(INPA, "$(P)$(R)X3.VAL  CP NMS")
+  field(CALC, "A")
+  field(OCAL, "1")
+  field(OOPT, "Transition To Zero")
+  field(DOPT, "Use OCAL")
+  field(OUT,  "$(P)allstop  PP MS")
+}
+

@@ -1,0 +1,45 @@
+#
+# file:     thermoorion.db
+# date:     2007 March 22
+# author:   Pete R. Jemian, jemian@anl.gov
+# purpose:  support the ThermoOrion Model 250 A+ pH meter
+
+
+ #  PV (string,   port,        "{P}port",	     NoMon);
+ #  PV (short,    init,        "{P}init",	     Monitor);
+ #  PV (short,    enable,      "{P}enable",	     Monitor);
+ #  PV (int,	  error,       "{P}error",	     NoMon);
+ #  PV (string,   errMsg,      "{P}errMsg",	     NoMon);
+ #  PV (int,	  debug_flag,  "{P}debug",	     Monitor);
+ #  PV (double,   pH,	       "{P}pH", 	     NoMon);
+ #  PV (double,   degc,        "{P}temperature",     NoMon);
+
+record(stringout, "$(P)port")
+record(bo, "$(P)init") {
+	field(DESC, "reinitialize this software")
+	field(ZNAM, "idle")
+	field(ONAM, "init")
+}
+record(bo, "$(P)enable") {
+	field(DESC, "turn on/off this software")
+	field(ZNAM, "disable")
+	field(ONAM, "enable")
+}
+record(bo,        "$(P)error")
+record(stringout, "$(P)errMsg")
+record(longout,   "$(P)debug")
+record(ao, "$(P)pH") {
+	field(DESC, "measured pH")
+	field(EGU,  "pH")
+	field(PREC, "2")
+}
+record(ao, "$(P)C") {
+	field(DESC, "temperature")
+	field(EGU,  "C")
+	field(PREC, "1")
+}
+record(ao, "$(P)mV") {
+	field(DESC, "low-precision number")
+	field(EGU,  "mV")
+	field(PREC, "1")
+}

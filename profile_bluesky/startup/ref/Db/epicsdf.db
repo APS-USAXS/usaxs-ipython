@@ -1,0 +1,142 @@
+########### SVN repository information ###################
+# $Date: 2014-10-22 13:57:26 -0500 (Wed, 22 Oct 2014) $
+# $Author: kpetersn $
+# $Revision: 7566 $
+# $URL: https://subversion.xray.aps.anl.gov/bcdaioc/9idcLAX/trunk/9idcLAXApp/Db/epicsdf.db $
+# $Id: epicsdf.db 7566 2014-10-22 18:57:26Z kpetersn $
+# -- originally from --
+# $! Date: 2011-07-31 23:03:00 -0500 (Sun, 31 Jul 2011) $
+# $! Author: jemian $
+# $! Revision: 580 $
+# $! URL: https://subversion.xor.aps.anl.gov/bcdaext/epicsdf/epics/epicsdf.db $
+# $! Id: epicsdf.db 580 2011-08-01 04:03:00Z jemian $
+########### SVN repository information ###################
+
+# Supports client-side software that watches disk space
+# on a single partition and generates alarms as the free
+# space grows small.  EPICS Alarms are used to signal
+# for attention.  Client-side software will be used to send
+# email when $(P)$(D)df:alarm changes its value.
+# Trip points for the alarms are in .HIGH and .HIHI fields
+# of the "ao" records.
+
+# TODO: make this a waveform record
+record(stringout, "$(P)$(D)df:disk")
+{
+	field(DESC, "disk partition being watched")
+	field(VAL,  "/")
+}
+
+# TODO: make this a waveform record
+record(stringout, "$(P)$(D)df:message")
+{
+	field(DESC, "message to be sent by email")
+	field(VAL,  "$(P)$(D)df: has an alarm")
+}
+
+# TODO: make this a waveform record
+record(stringout, "$(P)$(D)df:email_list")
+{
+	field(DESC, "list of email addresses")
+	field(VAL,  "jemian@anl.gov")
+}
+record(ao, "$(P)$(D)df:total")
+{
+	field(DESC, "total space on the partition")
+	field(EGU,  "MB")
+	field(PREC, "3")
+}
+record(ao, "$(P)$(D)df:free")
+{
+	field(DESC, "free space")
+	field(EGU,  "MB")
+	field(PREC, "3")
+	field(HYST, "5")
+	field(LOW,  "500")
+	field(LOLO, "50")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+	field(FLNK, "$(P)$(D)df:alarm")
+}
+record(ao, "$(P)$(D)df:avail")
+{
+	field(DESC, "available space")
+	field(EGU,  "MB")
+	field(PREC, "3")
+	field(HYST, "5")
+	field(LOW,  "500")
+	field(LOLO, "50")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+	field(FLNK, "$(P)$(D)df:alarm")
+}
+record(ao, "$(P)$(D)df:used")
+{
+	field(DESC, "disk space in use")
+	field(EGU,  "MB")
+	field(PREC, "3")
+}
+record(ao, "$(P)$(D)df:free:pct")
+{
+	field(DESC, "percentage free space")
+	field(EGU,  "%")
+	field(PREC, "2")
+	field(HYST, "0.05")
+	field(LOW,  "5")
+	field(LOLO, "0.5")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+	field(FLNK, "$(P)$(D)df:alarm")
+}
+record(ao, "$(P)$(D)df:used:pct")
+{
+	field(DESC, "percentage free space")
+	field(EGU,  "%")
+	field(PREC, "2")
+	field(HYST, "0.05")
+	field(LOW,  "5")
+	field(LOLO, "0.5")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+	field(FLNK, "$(P)$(D)df:alarm")
+}
+record(ao, "$(P)$(D)df:avail:pct")
+{
+	field(DESC, "percentage available space")
+	field(EGU,  "%")
+	field(PREC, "2")
+	field(HYST, "0.05")
+	field(LOW,  "5")
+	field(LOLO, "0.5")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+	field(FLNK, "$(P)$(D)df:alarm")
+}
+record(ao, "$(P)$(D)df:period")
+{
+	field(DESC, "time between updates")
+	field(EGU,  "s")
+	field(VAL,  "10")
+	field(HOPR, "120")
+	field(LOPR, "1")
+	field(PREC, "1")
+	field(HYST, ".09")
+	field(LOW,  "2")
+	field(LOLO, "1")
+	field(LSV,  "MINOR")
+	field(LLSV, "MAJOR")
+}
+record(calcout, "$(P)$(D)df:alarm")
+{
+	field(DESC, "any non-zero value is an alarm")
+	#field(SCAN, "1 second")
+	#field(SCAN, ".5 second")
+	field(CALC, "A>B?A:B")
+	field(INPA, "$(P)$(D)df:free.SEVR  NPP NMS")
+	field(INPB, "$(P)$(D)df:avail.SEVR  NPP NMS")
+	field(HOPR, "2")
+	field(HIHI, "2")
+	field(HIGH, "1")
+	field(HHSV, "MAJOR")
+	field(HSV,  "MINOR")
+}

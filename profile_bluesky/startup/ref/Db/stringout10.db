@@ -1,0 +1,40 @@
+grecord(stringout,"$(P)string$(N)1")
+{
+     field(DESC, "string$(N)1")
+}
+grecord(stringout,"$(P)string$(N)2")
+{
+     field(DESC, "string$(N)2")
+}
+grecord(stringout,"$(P)string$(N)3")
+{
+     field(DESC, "string$(N)3")
+}
+grecord(stringout,"$(P)string$(N)4")
+{
+     field(DESC, "string$(N)4")
+}
+grecord(stringout,"$(P)string$(N)5")
+{
+     field(DESC, "string$(N)5")
+}
+grecord(stringout,"$(P)string$(N)6")
+{
+     field(DESC, "string$(N)6")
+}
+grecord(stringout,"$(P)string$(N)7")
+{
+     field(DESC, "string$(N)7")
+}
+grecord(stringout,"$(P)string$(N)8")
+{
+     field(DESC, "string$(N)8")
+}
+grecord(stringout,"$(P)string$(N)9")
+{
+     field(DESC, "string$(N)9")
+}
+grecord(stringout,"$(P)string$(M)0")
+{
+     field(DESC, "string$(M)0")
+}
