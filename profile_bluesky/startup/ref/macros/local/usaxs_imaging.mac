@@ -1,0 +1,536 @@
+# $Id: usaxs_imaging.mac 1430 2017-09-06 20:20:08Z ilavsky $
+
+########### SVN repository information ###################
+# $Date: 2017-09-06 15:20:08 -0500 (Wed, 06 Sep 2017) $
+# $Author: ilavsky $
+# $Revision: 1430 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_imaging.mac $
+# $Id: usaxs_imaging.mac 1430 2017-09-06 20:20:08Z ilavsky $
+########### SVN zrepository information ###################
+
+# this is support for usaxs_imaging in USAXS instrument
+# version 1, JIL April 2014
+# 2014-08-11 JIL, version 1 really
+# 2016-06-24, JIL, development to support tomography better. 
+# 2017-03-17, JIL, modify to work with usaxscontrol Linux version of Alta support
+
+#-------------------------------------------------------------------------------
+#############################################################################
+# define ARcenterImaging
+# create proper tune_arImg function with flexible tune range
+# change __MoveARForQ to use the Imaging center or make special copy. 
+# these need to be defined in USAXS_Conf.mac!!!!
+
+global 		UImg_AyImagingCenter		# USAXS Imaging, Ay when using Imaging
+global 		UImg_ArImagingCenter		# USAXS Imaging, Ar when using Imaging
+global 		UImg_dyImagingCenter		# USAXS Imaging, dy when tuning in 2 reflections
+global 		UImg_dxImagingCenter		# USAXS Imaging, dx when tuning in 2 reflections 
+global     UImg_NumImages			# USAXS Imaging number of images collected, more or less always 1
+global     UImg_PathToData			# USAXS Imaging path where Apogee stores data. 
+
+######  epics variable and associated spec functions, FnName returns value
+######  set_FnName XYZ   sets the value
+### UImg_ImageKey 
+##  "0-image, 1-flat field, 2-dark field")
+### UImg_ExposureTime 
+### UImg_Tomo_Rot_Angle 
+### UImg_Img_I0_value
+### UImg_Img_I0_gain 
+### UImg_AxPosition 
+### UImg_WaxsXPosition
+### UImg_FlatFieldImage 
+### UImg_DarkFieldImage 
+### UImg_ExperimentTitle 
+### UImg_ImgHorApperture
+### UImg_ImgVertApperture 
+### UImg_ImgGuardHorApperture  
+### UImg_ImgGuardVertApperture 
+### UImg_Img_Al_Filters 
+### UImg_Img_Ti_Filters 
+### UImg_FilterTransmision 
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+def go_USAXS '{
+    DCMfeedbackON
+    umv ar AR_VAL_CENTER
+    move_ImagingOut
+    preUSAXStune
+}'
+
+######  Imaging support
+def go_Imaging'{
+   DCMfeedbackON
+   useModeImaging
+}'
+
+######  Imaging support
+## this should not be needed as imageUSAXS sets its correct q value also. But can be used for manual work. 
+def __MoveARForQImg '{
+   if( $# != 1) {
+        printf ("__MoveARForQ Qvalue\n");
+        exit;
+   }
+   local _USAXS_Lambda, q_value, AR_ImgValue
+   q_value = $1
+  _USAXS_Lambda = 12.4 / A[en]
+  AR_ImgValue = UImg_ArImagingCenter - (360/PI)*asin(q_value  * _USAXS_Lambda / (4*PI))
+  umv ar AR_ImgValue
+}'
+
+
+## NOTE: Modify go_USAXS to include move to AR_VAL_CENTER
+
+############################################################################################################
+####
+####  general scan macro for USAXS imaging
+####
+#############################################################################
+def imageUSAXS '{
+  if( $# != 7) {
+    printf ("usage: imageUSAXS ImageKey  sx sy qvalue sa ExposureTime \"Sample name\"\n")
+    exit;
+  }
+  local pos_X pos_Y scan_title q_value AR_ImgValue _USAXS_Lambda, pos_AlFi, pos_TiFi, pos_ExpTime
+  local __tmpMsgString   oldAlFilter   oldTiFilter
+  global temp, UImg_NumImages
+  local _ImageKey
+  ImageKey = $1
+  pos_X = $2
+  pos_Y = $3
+  q_value = $4
+  pos_sa = $5
+  pos_ExpTime = $6
+  scan_title = __returnSampleName("$7")
+
+  IfRequestedStopBeforeNextScan
+  
+  #store params to epics...
+  set_UImg_ExposureTime pos_ExpTime
+
+  useModeImaging	## move to Imaging mode, if we are not there. 
+ 			## >>> not true now... note, this will tune the setup if needed... 
+  
+  #calculate q value to go to ...
+  getangles
+  _USAXS_Lambda = 12.4 / A[en]
+  AR_ImgValue = UImg_ArImagingCenter - (360/PI)*asin(q_value  * _USAXS_Lambda / (4*PI))
+  A[ar] = AR_ImgValue
+  A[sx] = pos_X
+  A[sy] = pos_Y
+  A[art] = pos_sa
+  move_em; waitmove                #sample and ar are in place... 
+  IMG_openTiFilterShutter
+  # Set imaging filters 
+  mv_Al_filter UImg_Img_Al_Filters
+  mv_Ti_filter UImg_Img_Ti_Filters
+  set_UImg_FilterTransmision (epics_get("9idcUSX:pf4:trans"))
+  # move to proper sa angle
+  set_UImg_Tomo_Rot_Angle pos_sa
+  #autorange the counters
+  
+  autorange_I0I00amps
+  # set to auto mode
+   modeAutoRange_I0
+   modeAutoRange_I00
+  # collect an image. Time, name and otehrs is coming from pVs 
+  # next is cumbersome way of running  command "USAXSImagingExp    ImageKey  scan_title"    
+   # ImageKey= 0 for sample, ImageKey for Flat Field and ImageKey for Dark field
+  local CmdToRun 
+  CmdToRun = sprintf("%s  %g  \"%s\"", "USAXSImagingExp", ImageKey,  scan_title)
+  eval(CmdToRun)   
+  #A[ar] = UImg_ArImagingCenter
+  move_em; waitmove                #sample and ar are in place... 
+  }'
+
+###################################################################################
+def IMG_openTiFilterShutter  '{
+	epics_put("9idb:BioEnc2B3.VAL","Up")
+	epics_put("9idb:BioEnc2B2.VAL","Up")
+	epics_put("9idb:BioEnc2B1.VAL","Up")
+	epics_put("9idb:BioEnc2B0.VAL","Up")
+	epics_put("9idb:BioEnc1B3.VAL","Up")
+	epics_put("9idb:BioEnc1B2.VAL","Up")
+	epics_put("9idb:BioEnc1B1.VAL","Up")	
+	epics_put("9idb:BioEnc1B0.VAL","Up")
+	mv_Al_filter  UImg_Img_Al_Filters; mv_Ti_filter  UImg_Img_Ti_Filters
+        sleep(0.2)
+}'
+###################################################################################
+###################################################################################
+## modification of tune_ar for imaging needs. 
+###
+def tune_arImaging   '{
+  global USAXS_tune_ar_range          # range for tune ar 
+  global UImg_ArImagingCenter
+  local __range
+  local sbMessage1
+  __range = USAXS_tune_ar_range
+  if( $# == 1 ) { __range = $1 }
+ 
+  sbMessage1 = sprintf("Tunning motor Ar for imaging, starting condition is %g", A[ar])
+  comment "%s" sbMessage1
+  counters cnt_num(I0) cnt_num(trd)
+  plotselect trd
+  tune_usaxs_motor ar __range -1*__range 30 0.1
+      # we are now at the top of the AR rocking curve
+      # let us define the beam center as such
+  waitmove; get_angles;
+  # store AR center
+  UImg_ArImagingCenter = A[ar]
+  # remember the Q calculation needs a new 2theta0
+  set_AR_VAL_CENTER A[ar]
+  # use the current AR encoder position
+  counters cnt_num(I0) cnt_num(upd2)
+  plotselect upd2
+  epics_put("9idcLAX:USAXS:Q.B", epics_get("9idcLAX:USAXS:Q.A"))
+}'
+###################################################################################
+###################################################################################
+def tune_a2rpImaging   '{
+  global USAXS_tune_a2rp_range          # range for tune a2rp 
+  local __range
+  local sbMessage1
+  __range = USAXS_tune_a2rp_range
+  if( $# == 1 ) { __range = $1 }
+  sbMessage1 = sprintf("Tunning motor A2rp for imaging, starting condition is %g", A[a2rp])
+  comment "%s" sbMessage1
+  counters cnt_num(I0) cnt_num(trd)
+  plotselect trd
+  tune_usaxs_motor a2rp __range -1*__range 30 0.1
+      # we are now at the top of the A2Rp rocking curve
+  waitmove; get_angles;
+  counters cnt_num(I0) cnt_num(upd2)
+  plotselect upd2
+}'
+###################################################################################
+###################################################################################
+###################################################################################
+ 
+
+def useModeImaging '{
+  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to Imaging/WAXS mode" ))
+  closeCCDshutter
+  closeTiFilterShutter
+  ## comment to myself: Use mode 5 for USAXS Imaging and 6 for USAXS Imaging tuning.  
+  if(USAXSSAXSMODE!= 5){
+	  if (USAXSSAXSMODE!= 6){
+  	   __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+	   set_USAXSSAXSMODE -1
+  	  print __tmpstr__
+  	  print "Moving to proper Imaging/WAXS mode"
+ 	  set_lim(ax,get_lim(ax,1),dial(ax,-45))
+  	  set_lim(dx,get_lim(dx,1),dial(dx,DIODE_DX + DX_LimOffset))
+  	  getangles
+ 	   move_em;waitmove
+ 	   A[waxsx]  = WAXS_Xout
+ 	   A[ax] = UImg_AxPosition
+   	   #A[ay] = UImg_AyImagingCenter		# USAXS Imaging, Ay when using Imaging
+	   #A[ar] = UImg_ArImagingCenter                   
+ 	   #A[dx] = UImg_dxImagingCenter
+ 	   #A[dy] = UImg_dyImagingCenter
+ 	   move_em;waitmove
+ 	   set_lim(ax,get_lim(ax,1),dial(ax,UImg_AxPosition - 1))
+	    if(fabs(A[ax]- UImg_AxPosition)>0.1){
+ 	     printf("\nABORTED moving to USAXS Imaging, Ax stage found in wrong position :\n")
+ 	     exit
+ 	     }
+	    set_USAXSSAXSMODE 6 
+	   }
+ 	   getangles
+ 	   move_em;waitmove
+ 	   A[waxsx]  = WAXS_Xout
+ 	   A[ax] = UImg_AxPosition
+ 	  
+          #in tune position, do tune 
+	  #tuneImaging
+	  #done tuning, go imaging
+   	  #move_ImagingIn
+
+ 	  # move SAXS slits in, used for USAXS Imaging mode also
+          local __vertGSlitDiff, __horGSlitDiff
+ 	   __vertGSlitDiff = fabs(epics_get("9idcLAX:GSlit1V:size.VAL") - UImg_ImgGuardVertApperture )
+ 	   __horGSlitDiff = fabs(epics_get("9idcLAX:GSlit1H:size.VAL") - UImg_ImgGuardHorApperture )
+
+ 	   if(__vertGSlitDiff>0.03 || __horGSlitDiff > 0.03){
+ 	      print "changing G slits"
+	      epics_put("9idcLAX:GSlit1V:size.VAL",UImg_ImgGuardVertApperture)          # change slits
+ 	      epics_put("9idcLAX:GSlit1H:size.VAL",UImg_ImgGuardHorApperture)          # change slits
+ 	      sleep(0.5)  
+ 	      while(__vertGSlitDiff>0.02 || __horGSlitDiff > 0.02){
+ 		    sleep(0.5)
+  	        __vertGSlitDiff = fabs((epics_get("9idcLAX:mxv:c0:m5.RBV")-epics_get("9idcLAX:mxv:c0:m6.RBV")) - UImg_ImgGuardVertApperture )
+ 	         __horGSlitDiff = fabs((epics_get("9idcLAX:mxv:c0:m3.RBV")-epics_get("9idcLAX:mxv:c0:m4.RBV")) - UImg_ImgGuardHorApperture )
+  	     }
+	    }
+	    getangles
+	    if(fabs(A[uslvap]- UImg_ImgVertApperture)>0.02 || fabs( A[uslhap]-UImg_ImgHorApperture)>0.02){
+	       print "Moving Beam defining slits"
+	       A[uslvap] = UImg_ImgVertApperture
+	       A[uslhap] = UImg_ImgHorApperture
+ 	      move_em; waitmove; getangles
+ 	      sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
+ 	   }
+ 	}
+    print "Prepared for USAXS Imaging mode"
+    comment "Ready for USAXS Imaging mode"
+    epics_put ("9idcLAX:USAXS:state",       "USAXS Imaging Mode")
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put ("9idcLAX:USAXS:scanning",    0)
+}'
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tuneImaging '
+   DCMfeedbackON
+   closeCCDshutter                         # close CCD shutter in case we are in Radiography mode
+   IfRequestedStopBeforeNextScan           # stop if user chose to do so. 
+   #  useModeUSAXS                            # should be done only in USAXS mode. 
+   epics_put ("9idcLAX:USAXS:timeStamp",   date())
+   epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tune")
+   # check that you are in imaging mode
+   # set slits
+   # move camera out...
+   # move diode in
+   # set_USAXS_Slits                        # make sure USAXS slits are set correctly...
+   # move AR to ArImagingCenter
+   set_USAXSSAXSMODE  -1          			# semi empty path state...
+   print "Moving Beam defining slits to small beam and Alta out"
+   getangles
+   A[waxsx]  = UImg_TuneWaxsXPosition
+   move_em; waitmove; getangles
+   A[uslvap] = 0.3
+   A[uslhap] = 0.3
+   #A[ax] = UImg_AxPosition
+   #A[ar] = UImg_ArImagingCenter                   
+   #A[ay] = UImg_AyImagingCenter		# USAXS Imaging, Ay when using Imaging
+   #A[dx] = UImg_dxImagingCenter
+   #A[dy] = UImg_dyImagingCenter
+   #move_em; waitmove; getangles
+   set_USAXSSAXSMODE  6          			# tune imaging mode...
+   openMonoShutter
+   usaxs_CheckBeamStandard
+   chk_beam_on
+   openTiFilterShutter
+   autorange_I0I00amps                    # set correctly the gains for I0 and I00, TR diode
+   tune_mr;                               # tune M stage to monochromator
+   tune_m2rp;                             # tune M stage paralelity
+   autorange_I0I00amps                     # set correctly the ranges for all amplifiers
+   tune_arImaging 	                   # tune up the analyzer crystal pair, need to set the right range here.  			
+   autorange_UPDI0I00                     # set correctly the ranges for all amplifiers
+   tune_a2rpImaging    			 # set correctly the ranges for all amplifiers
+   epics_put ("9idcLAX:USAXS:timeStamp",   date())
+   epics_put ("9idcLAX:USAXS:state",       "Imaging pre-USAXS optics tuning done")
+   set_NumScansFromLastTune 0
+   set_EPOCHTimeOfLastTune EPOCH
+   set_RunPreUSAXStuneNext 0
+   #use move_ImagingIn to move Imaging in.  
+   		#A[waxsx] = UImg_WaxsXPosition
+   		#move_em; waitmove; getangles
+   		#set_USAXSSAXSMODE  5          			# imaging mode...
+    move_ImagingIn
+'
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+def move_ImagingIn'{
+  closeCCDshutter
+  closeTiFilterShutter
+  print "Moving to USAXS Imaging mode"
+  if (USAXSSAXSMODE!= 6){
+   set_USAXSSAXSMODE  -1          			# semi empty path state...
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Found different than tune Imaging mode, moving to tune mode first, tehn to imaging."
+    
+   # check that you are in imaging mode
+   # set slits
+   # move camera out...
+   # move diode in
+   # set_USAXS_Slits                        # make sure USAXS slits are set correctly...
+   # move AR to ArImagingCenter
+   print "Moving Beam defining slits to small beam and Alta out"
+   #A[waxsx]  = UImg_WaxsXPosition
+   #A[ax] = UImg_AxPosition
+   #A[ar] = UImg_ArImagingCenter                   
+   #A[ay] = UImg_AyImagingCenter		# USAXS Imaging, Ay when using Imaging
+   #A[dx] = UImg_dxImagingCenter
+   #A[dy] = UImg_dyImagingCenter
+   move_em; waitmove; getangles
+   set_USAXSSAXSMODE  6          			# Tune imaging mode path state...
+  }
+
+  set_USAXSSAXSMODE  -1 # in case there is an error in moving, it is NOT SAFE to start a scan
+  set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,UImg_WaxsXPosition + WAXS_XLimOffset))
+  epics_put("9idcLAX:GSlit1V:size.VAL",UImg_ImgGuardVertApperture)   # change slits
+  epics_put("9idcLAX:GSlit1H:size.VAL",UImg_ImgGuardHorApperture)   # change slits
+  A[waxsx] = UImg_WaxsXPosition
+  A[uslvap] = UImg_ImgVertApperture
+  A[uslhap] = UImg_ImgHorApperture
+  move_em; waitmove
+  print "USAXS Imaging is in position"
+  set_USAXSSAXSMODE 5             # 5 = Imaging
+}'
+############################################################################################################
+def move_ImagingOut'{
+
+  closeCCDshutter
+  closeTiFilterShutter
+  get_angles   #syncs spec to epics motor positions
+  print "Moving Imaging out of beam"  
+  set_USAXSSAXSMODE  -1        # in case there is an error in moving, it is NOT SAFE to start a scan
+  # move the pin_z away from sample
+  A[waxsx] = WAXS_Xout
+  #A[ar] = AR_VAL_CENTER    
+  #A[ay] = AY0               
+  move_em; waitmove; getangles
+  move_em; waitmove
+  set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_Xout + WAXS_XLimOffset))
+  # move WAXS out of beam position
+  print "Removed Imaging from beam position"
+  set_USAXSSAXSMODE  -1         # 1 = SAXS, WAXS, and USAXS out of beam
+}'
+############################################################################################################
+############################################################################################################
+
+def USAXSImagingExp  '{
+  if( $# != 2) {
+    printf ("usage: USAXSImagingExp ImageKey \"Sample name\"\n")
+    exit;
+    }
+  local pos_X pos_Y scan_title q_value __tmpMsgString __tmpStrMsg3
+  local ImageKeyLoc
+  global UImg_PathToData
+  ImageKeyLoc=$1
+  scan_title = __returnSampleName("$2")  
+         # read the header into parameters
+        # this is also USAXS name used by spec. 
+        # we should setup some kind of Imaging mode here           # setup for Imaging mode
+  ##################################################### 
+   IfRequestedStopBeforeNextScan  
+  #####################################################
+  ##################################################### 
+  epics_put ("9idcLAX:USAXS:scanning",    0)
+  epics_put ("9idcLAX:USAXS:state",      "Preparing for Imaging" )
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+  getangles
+  #####################################################
+  DCMfeedbackOFF 
+  #####################################################
+  set_UImg_ImageKey ImageKeyLoc
+  if(ImageKeyLoc == 1){scan_title = scan_title "_FlatField"}  
+  if(ImageKeyLoc == 2){scan_title = scan_title "_DarkField"}
+  #####################################################
+  epics_put("9idcLAX:USAXS:sampleTitle",scan_title)     # store original user name, before cleaning up as sample name. 
+  scan_title  = __get_clean_user_string(scan_title)     # remove bad characters for user, if he/she screws up. 
+  epics_put ("9idcLAX:SpecMacroFileName",DATAFILE )     # put Data file name for Nexus file
+  SPEC_STD_TITLE = TITLE		# what is TITLE here???
+  epics_put ("9idcLAX:USAXS:userName",    USER)
+  epics_put ("9idcLAX:USAXS:userDir",     CWD)
+  epics_put ("9idcLAX:USAXS:specFile",    DATAFILE)
+  epics_put ("9idcLAX:USAXS:specScan",    SCAN_N+1)
+  epics_put ("9idcLAX:USAXS:scanMacro",   "USAXS Imaging")
+  epics_put ("9idcLAX:USAXS:scanning",    0)
+  #####################################################
+  epics_put("9idalta:HDF1:EnableCallbacks",1)
+  #####################################################
+  #  create path to imaging data, for now that resides in the Alta ioc values for HDF1  
+  start_file_num = epics_get("9idalta:HDF1:FileNumber")
+  epics_put("9idalta:HDF1:FileName",scan_title)  
+  epics_put("9idalta:HDF1:FilePath",UImg_PathToData)
+  __tmpStrMsg3 = epics_get("9idalta:HDF1:FilePath_RBV", "string")
+  __tmpMsgString=sprintf("%s%s_%04d.hdf", __tmpStrMsg3, scan_title, start_file_num)
+  local scan_Title_num
+  scan_Title_num = sprintf("%s_%04d.hdf", scan_title, start_file_num)
+  if(ImageKeyLoc == 1){epics_put("9idcLAX:USAXS_Img:FlatFieldImage", scan_Title_num)}
+  if(ImageKeyLoc == 2){epics_put("9idcLAX:USAXS_Img:DarkFieldImage", scan_Title_num) }
+   #####################################################
+   # create spec scan record...
+   # set heading for scans to show if we are running USAXS or SBUSAXS
+     pos_X = A[sx]
+     pos_Y = A[sy]
+     HEADING = "USAXSImaging "
+     HEADING=sprintf("%s%s",HEADING,sprintf("%s  %g    %g    %g ",\
+	__tmpMsgString, pos_X, pos_Y, UImg_ExposureTime))
+     FPRNT=PPRNT=VPRNT=""
+     scan_head
+     PFMT=sprintf("%%s%%8.%df ",UP)
+     VFMT=sprintf("%%s%%9.%df ",UP)
+    # UP is user precision, defined in standard.mac as 4
+    # done with spec scan record...
+    epics_put("9idalta:cam1:AcquireTime", UImg_ExposureTime) 
+    if (ImageKeyLoc == 2){closeTiFilterShutter; sleep(2)}
+    #if (ImageKeyLoc < 2){IMG_openTiFilterShutter}    
+    epics_put("9idcLAX:vsc:c1.TP", UImg_ExposureTime +0.1)                  # set scalars to long enough time...
+    epics_put("9idcLAX:vsc:c0.TP", 1.2*UImg_ExposureTime ) 
+    epics_put("9idcLAX:vsc:c0.CONT",0)                                      # set scalar to manual counting only
+    epics_put("9idcLAX:vsc:c1.CONT",0)
+    old_ScalerDelay = epics_get("9idcLAX:vsc:c0.DLY")
+    epics_put("9idcLAX:vsc:c0.DLY",0)    
+    epics_put("9idcLAX:vsc:c1.DLY",0)
+    set_UImg_Img_I0_gain (I0Range)
+    epics_put ("9idcLAX:USAXS:state",       sprintf("%s for %g sec", "USAXS Imaging exposure", ApogExpTime ))
+    epics_put ("9idcLAX:USAXS:sampleTitle", scan_title)
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put ("9idcLAX:USAXS:scanning",    1)
+    # fire detector and wait for it to be done
+    epics_put("9idcLAX:USAXS_Img:StartExposureTime",date())                #Save start time for exposure
+    epics_put("9idcLAX:vsc:c0.CNT",1)                                      # count scalers
+    epics_put("9idcLAX:vsc:c1.CNT",1)
+
+    AltaDetectorAcquire("9idalta:cam1:Acquire")   # this seems very slow camera, has about 2 seconds overhead...
+ 
+    epics_put("9idcLAX:vsc:c0.CNT",0)                                      # stop counting
+    epics_put("9idcLAX:vsc:c1.CNT",0)
+    set_UImg_Img_I0_value (epics_get("9idcLAX:vsc:c1.S2"))	           #store the I0 value for users to review, HDF writes read it directly already
+    epics_put("9idcLAX:USAXS_Img:EndExposureTime",date())                  #Save end time for exposure
+    epics_put ("9idcLAX:USAXS:scanning",    0)
+ 
+    sleep(0.05) 
+    epics_put ("9idcLAX:USAXS:state",       "USAXS Imaging done")
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put("9idcLAX:vsc:c0.CONT",old_ScalerDelay)                                      # set scalar to manual counting only
+    closeTiFilterShutter
+   #####################################################
+   epics_put("9idalta:HDF1:EnableCallbacks",0)
+   #####################################################
+
+   #DCMfeedbackON 
+   #####################################################
+}'
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+def AltaDetectorAcquire(acqPV) '{
+   local   _DataCollectionTimer
+   _DataCollectionTimer = 0
+   epics_par(acqPV, "monitor_set")
+   epics_put(acqPV, "Acquire")
+   sleep (0.2)
+   while ((epics_get(acqPV) != "Done")){
+     _DataCollectionTimer++
+     set_FS_ElapsedTime (_DataCollectionTimer*0.2)
+     printf("Waiting for Imaging data collection to finish %g sec\r", (0.2*_DataCollectionTimer))
+     epics_put ("9idcLAX:USAXS:state", sprintf("Running Imaging collection for %gs",(0.2*_DataCollectionTimer)))
+     sleep(0.2)
+     #wait(0x28)
+   }
+   epics_par(acqPV, "monitor_clear")
+}'
+
+#-------------------------------------------------------------------------------
+#############################################################################
+###################################################################################
+###################################################################################
+###################################################################################

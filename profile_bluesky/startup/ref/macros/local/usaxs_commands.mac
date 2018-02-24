@@ -1,0 +1,1243 @@
+#
+# usaxscontrol:/data/spec/macros/usaxs/usaxs_commands.mac
+#
+# this file contains auxiliary usaxs commands....
+#
+########### SVN repository information ###################
+# $Date: 2018-02-12 14:17:10 -0600 (Mon, 12 Feb 2018) $
+# $Author: ilavsky $
+# $Revision: 1472 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac $
+# $Id: usaxs_commands.mac 1472 2018-02-12 20:17:10Z ilavsky $
+########### SVN repository information ###################
+#
+#  USAXS-specific macros 
+#  maintained by Jan Ilavsky
+#  edit:  2006-Oct-6, X.Jiao: corrected PVs and path etc. for run at 32ID-B
+#  edit:  2006-Oct-18, PRJ:   repaired spec qdo macro file copy command
+#  edit:  2007-June-15, PRJ:  DCMfeedbackON andf DCMfeedbackOFF
+#  edit:  2007-09-10,PRJ:     replaced all "lax:" with "9idcLAX:"
+#  edit:  2007-09-27, JIL:    replaced all "brq:" with "9idcUSX:" since the PVV names changed.
+#  edit:  2008-10-15, JIL:    moved parameters into EPICS, needed to change macros.
+#  edit:  2010-06-29, XJ:     corrected PVs for run at 15idd
+#  edit:  2010-10-26, JIL:    corrected last few 9ID PVs
+#  edit:  2010-11-15, PAB:    added email notification macro
+#  edit:  2011-04-12, PAB:    added USAXS-Pinhole PVs
+#  edit:  2011-06-21, JIL:    added USAXS guard slits PVs
+#  edit:  2012-04-19, JIL:    added slits change functions 
+#  edit:  2013-02-09, JIL:    waxs support updates 
+#  edit:  2013-02-19, JIL:    added __returnSampleName to support input of sample name as string or string variable
+#  edit:  2013-03-05, JIL:    added __get_clean_user_string(s) to clean up the user names of garbage characters and make them file name compatible. 
+#  edit:  2014-08-12, JIL:    modified to enable use of names with "." in them. HOpefully this will work on all platforms by now. 
+#  edit:  2014-08-26, JIL:    added functions to control UseFlyscan PV
+#  edit:  2014-09-23, JIL:    added asrp link for 2D USAXS
+#  edit:  2015--1-19, JIL:    9id modifications
+#  edit:  2015-01-20, JIL:    removed use of diode_dy and use only DY0, not sure why we had two epics PVs. leave spec commands same, though. 
+#  edit:  2015-02-07, JIL:    fixed for 9id operations
+#  edit:  2015-03-16, JIL:    added epics PVs handling for preUSAXStune
+#  edit:  2015-03-26, JIL:    added __append_info_to_name 
+#  edit:  2016-01-18, JIL:    modified for TR_diode amplifier
+#  edit:  2016-05-23, JIL:    Added FlyScanOrderNumber
+#  edit:  2017-03-23, JIL:    added USAXS Imaging with Alta usaxscontrol ioc, modified preUSAXS tune handling
+#  edit:  2017-08-12, JIL:    changed all pinSAXS to SAXS and added check for PLC:Y0 protection engaged. Put this function where needed: StopIfPLCEmergencyProtectionOn
+#  edit:  2017-09-07, JIL:    added autoranging better support
+#  edit:  2018-01-08, JIL:    addec CollectData here... 
+
+#  
+#-------------------------------------------------------------------------------
+
+### These functions make original global spec variables - now in EPICS
+### accessible by name. 
+def CCD_DX 'epics_get("9idcLAX:USAXS:CCD_dx")'
+def CCD_DY 'epics_get("9idcLAX:USAXS:CCD_dy")'
+def DIODE_DY 'epics_get("9idcLAX:USAXS:DY0")'
+def DIODE_DX 'epics_get("9idcLAX:USAXS:Diode_dx")'
+def USAXS_TIME 'epics_get("9idcLAX:USAXS:CountTime")'
+def NUMPNTS 'epics_get("9idcLAX:USAXS:NumPoints")'
+def UATERM 'epics_get("9idcLAX:USAXS:UATerm")'
+def SAMPLE_Y_STEP 'epics_get("9idcLAX:USAXS:Sample_Y_Step")'
+def AY0 'epics_get("9idcLAX:USAXS:AY0")'
+def DY0 'epics_get("9idcLAX:USAXS:DY0")'
+def SAD 'epics_get("9idcLAX:USAXS:SAD")'
+def SDD 'epics_get("9idcLAX:USAXS:SDD")'
+def USAXS_MINSTEP 'epics_get("9idcLAX:USAXS:MinStep")'
+def AR_VAL_CENTER 'epics_get("9idcLAX:USAXS:ARcenter")'
+def ASR_VAL_CENTER 'epics_get("9idcLAX:USAXS:ASRcenter")'
+def MR_VAL_CENTER 'epics_get("9idcLAX:USAXS:MRcenter")'
+def MSR_VAL_CENTER 'epics_get("9idcLAX:USAXS:MSRcenter")'
+def IMG_AL_FILTER 'epics_get("9idcLAX:USAXS:Img_Al_Filter")'
+def IMG_TI_FILTER 'epics_get("9idcLAX:USAXS:Img_Ti_Filter")'
+def SCAN_AL_FILTER 'epics_get("9idcLAX:USAXS:Scan_Al_Filter")'
+def SCAN_TI_FILTER 'epics_get("9idcLAX:USAXS:Scan_Ti_Filter")'
+def ASRP0 'epics_get("9idcLAX:USAXS:ASRcenter")'
+def START_OFFSET 'epics_get("9idcLAX:USAXS:StartOffset")'
+def FINISH 'epics_get("9idcLAX:USAXS:Finish")'
+def MOTOR_PRESCALER_WAIT 'epics_get("9idcLAX:USAXS:Prescaler_Wait")'
+def UPDRange 'epics_get(sprintf("%s:lurange",UPD_PV),"short")'
+
+## this needs to be more complicated to avoid getting stale value…
+def I0Range 'epics_get(sprintf("%s:gain",I0_PV))'
+def I00Range 'epics_get(sprintf("%s:gain",I00_PV))'
+def TRDRange 'epics_get(sprintf("%s:gain",TRD_PV))'
+def DIODERange 'epics_get(sprintf("%s:lurange",UPD_PV), "short")+1'
+
+def I0_Range_ ' (epics_get("9idcUSX:pd02:seq01:mode", "short")==1) ? exp10(5+ epics_get("9idcUSX:pd02:seq01:lurange", "short")) : I0Range '
+def I00_Range_ ' (epics_get("9idcUSX:pd03:seq01:mode", "short")==1) ? exp10(5+ epics_get("9idcUSX:pd03:seq01:lurange", "short")) : I00Range '
+def TRD_Range_ ' (epics_get("9idcUSX:pd05:seq01:mode", "short")==1) ? exp10(5+ epics_get("9idcUSX:pd05:seq01:lurange", "short")) : TRDRange '
+
+
+#And these functions make the pinhole globals work...
+
+def PIN_ZIn 'epics_get("9idcLAX:USAXS_Pin:Pin_z_in")'
+def PIN_ZOut 'epics_get("9idcLAX:USAXS_Pin:Pin_z_out")'
+def PIN_ZLimOffset 'epics_get("9idcLAX:USAXS_Pin:Pin_z_limit_offset")'
+def PIN_YIn 'epics_get("9idcLAX:USAXS_Pin:Pin_y_in")'
+def PIN_YOut 'epics_get("9idcLAX:USAXS_Pin:Pin_y_out")'
+def PIN_YLimOffset 'epics_get("9idcLAX:USAXS_Pin:Pin_y_limit_offset")'
+def AX_In 'epics_get("9idcLAX:USAXS_Pin:ax_in")'
+def AX_Out 'epics_get("9idcLAX:USAXS_Pin:ax_out")'
+def AX_LimOffset 'epics_get("9idcLAX:USAXS_Pin:ax_limit_offset")'
+def DX_In 'epics_get("9idcLAX:USAXS:Diode_dx")'
+def DX_Out 'epics_get("9idcLAX:USAXS_Pin:dx_out")'
+def DX_LimOffset 'epics_get("9idcLAX:USAXS_Pin:dx_limit_offset")'
+def USAXS_HSlit 'epics_get("9idcLAX:USAXS_Pin:USAXS_hslit_ap")'
+def USAXS_VSlit 'epics_get("9idcLAX:USAXS_Pin:USAXS_vslit_ap")'
+def SAXS_VSlit  'epics_get("9idcLAX:USAXS_Pin:Pin_vslit_ap")'
+def SAXS_HSlit 'epics_get("9idcLAX:USAXS_Pin:Pin_hslit_ap")'
+
+def USAXS_HGSlit 'epics_get("9idcLAX:USAXS_Pin:USAXS_hgslit_ap")'
+def USAXS_VGSlit 'epics_get("9idcLAX:USAXS_Pin:USAXS_vgslit_ap")'
+def SAXS_VGSlit  'epics_get("9idcLAX:USAXS_Pin:Pin_vgslit_ap")'
+def SAXS_HGSlit 'epics_get("9idcLAX:USAXS_Pin:Pin_hgslit_ap")'
+
+
+def PIN_AL_FILTER 'epics_get("9idcLAX:USAXS_Pin:Exp_Al_Filter")'
+def PIN_TI_FILTER 'epics_get("9idcLAX:USAXS_Pin:Exp_Ti_Filter")'
+
+def PIN_TRPD 'epics_get("9idcLAX:USAXS_Pin:Pin_TrPD")'
+def PIN_TRI0 'epics_get("9idcLAX:USAXS_Pin:Pin_TrI0")'
+def PIN_TRPDGain 'epics_get("9idcLAX:USAXS_Pin:Pin_TrPDgain")'
+def PIN_TRI0Gain 'epics_get("9idcLAX:USAXS_Pin:Pin_TrI0gain")'
+def set_PIN_I0 'epics_put("9idcLAX:USAXS_Pin:I0", $1)'
+
+def PIN_IMAGE_BASEDIR 'epics_get("9idcLAX:USAXS_Pin:directory")'
+
+def USAXSSAXSMODE 'epics_get("9idcLAX:USAXS_Pin:USAXSSAXSMode")'
+def PIN_NumImages 'epics_get("9idcLAX:USAXS_Pin:NumImages")'
+def PIN_AcquireTime 'epics_get("9idcLAX:USAXS_Pin:AcquireTime")'
+def PIN_EXP_TIME 'epics_get("9idcLAX:USAXS_Pin:AcquireTime")'
+
+def USAXS_MEASURE_PIN_TRANS 'epics_get("9idcLAX:USAXS:TR_MeasurePinTrans")'             # measure transmission in USAXS using pin diode
+def USAXSPinT_AyPosition 'epics_get("9idcLAX:USAXS:TR_AyPosition")'      		# Ay to hit pin diode
+def USAXSPinT_MeasurementTime 'epics_get("9idcLAX:USAXS:TR_MeasurementTime")'	        # How long to count
+def USAXSPinT_pinCounts 'epics_get("9idcLAX:USAXS:TR_pinCounts")'		        # How many counts were on pin diode
+def USAXSPinT_pinGain 'epics_get("9idcLAX:USAXS:TR_pinGain")'				# gain of pin diode (note, we are using I00 amplifier here)
+def USAXSPinT_I0Counts 'epics_get("9idcLAX:USAXS:TR_I0Counts")'				# How many counts were on I0 
+def USAXSPinT_I0Gain 'epics_get("9idcLAX:USAXS:TR_I0Gain")'				# gain of I0
+
+def IfRequestedStopBeforeNextScan'{
+      local _Time_Counter
+      local _OpenTheShutter
+      _OpenTheShutter = 0
+      _Time_Counter = 0
+      while(epics_get("9idcLAX:USAXS:PauseBeforeNextScan")>0.5){
+        printf("User requested pause, sleeping and waiting for change in Pause PV for %g sec\r",_Time_Counter)
+        epics_put ("9idcLAX:USAXS:state", sprintf("Pausing for user for %gs",_Time_Counter))
+        sleep(1)
+        _Time_Counter++
+        _OpenTheShutter = 1
+      }
+      if(epics_get("9idcLAX:USAXS:StopBeforeNextScan")){
+          #printf("User requested stop before next scan, stopping data collection\n")
+	  comment "User requested stop before next scan, stopping data collection"
+	  closeTiFilterShutter
+	  epics_put("9idcLAX:USAXS:StopBeforeNextScan",0)
+          # un set dataCollectionInProgress so GUI (and other tools) know, user is collecting data... (1-not running, 0 running)
+          epics_put("9idcLAX:dataColInProgress", 1) 
+          exit;
+      }
+      if(_OpenTheShutter>0.5){openMonoShutter; sleep(2)}
+   }'
+
+def StopIfPLCEmergencyProtectionOn'{
+   local __IsEmegencyProtectionOn
+     __IsEmegencyProtectionOn = epics_get("9idcLAX:plc:Y0","short")                           ### this should be 1 when we tripped power on PLC  
+   if(__IsEmegencyProtectionOn<1){
+      comment "Equipment protection is engaged, no power on motors. Fix PLC protection before any move. Stopping now."
+      comment "Call bealine scientists if you do not understand. DO NOT TRY TO FIX YOURSELF  !!!!!!"
+      closeTiFilterShutter
+      # un set dataCollectionInProgress so GUI (and other tools) know, user is collecting data... (1-not running, 0 running)
+      epics_put("9idcLAX:dataColInProgress", 1) 
+      exit;
+      }
+   }'
+
+# this is Io value from gates scalar in LAX for Nexus file
+def PIN_I0 'epics_get("9idcLAX:USAXS_Pin:I0")'
+# WAXS
+def WAXS_XIn 'epics_get("9idcLAX:USAXS_Pin:waxs_x_in")'
+def WAXS_Xout 'epics_get("9idcLAX:USAXS_Pin:waxs_x_out")'
+def WAXS_XLimOffset 'epics_get("9idcLAX:USAXS_Pin:waxs_x_limit_offset")'
+def WEXP_AL_FILTER 'epics_get("9idcLAX:USAXS_WAXS:Exp_Al_Filter")'
+def WEXP_TI_FILTER 'epics_get("9idcLAX:USAXS_WAXS:Exp_Ti_Filter")'
+def WAXS_IMAGE_BASEDIR 'epics_get("9idcLAX:USAXS_WAXS:directory")'
+def WAXS_NumImages 'epics_get("9idcLAX:USAXS_WAXS:NumImages")'
+def WAXS_AcquireTime 'epics_get("9idcLAX:USAXS_WAXS:AcquireTime")'
+def WAXS_EXP_TIME 'epics_get("9idcLAX:USAXS_WAXS:AcquireTime")'
+
+# FlyScan values
+def FS_NumberOfPoints 'epics_get("9idcLAX:USAXS:FS_NumberOfPoints")'
+def FS_ScanTime 'epics_get("9idcLAX:USAXS:FS_ScanTime")'
+def useFlyscan 'epics_get("9idcLAX:USAXS:UseFlyscan")'
+def FS_enableASRP 'if(epics_get("9idcLAX:USAXS:is2DUSAXSscan")){epics_put("9idcLAX:userStringCalc2.SCAN",9)}'
+def FS_disableASRP 'epics_put("9idcLAX:userStringCalc2.SCAN",0)'
+def FS_orderNumber 'epics_get("9idcLAX:USAXS:FS_OrderNumber")'
+def FS_increaseOrderNumber 'epics_put("9idcLAX:USAXS:FS_OrderNumber", (epics_get("9idcLAX:USAXS:FS_OrderNumber")+1))'
+
+# USAXS Imaging
+def UImg_ImageKey 'epics_get("9idcLAX:USAXS_Img:ImageKey")' 
+##  "0-image, 1-flat field, 2-dark field")
+def UImg_ExposureTime 'epics_get("9idcLAX:USAXS_Img:ExposureTime")'
+
+def UImg_Tomo_Rot_Angle 'epics_get("9idcLAX:USAXS_Img:Tomo_Rot_Angle")'
+def UImg_Img_I0_value 'epics_get("9idcLAX:USAXS_Img:Img_I0_value")'
+def UImg_Img_I0_gain 'epics_get("9idcLAX:USAXS_Img:Img_I0_gain")'
+
+def UImg_AxPosition 'epics_get("9idcLAX:USAXS_Img:ax_in")'
+def UImg_WaxsXPosition 'epics_get("9idcLAX:USAXS_Img:waxs_x_in")'
+
+def UImg_FlatFieldImage 'epics_get("9idcLAX:USAXS_Img:FlatFieldImage")'
+def UImg_DarkFieldImage 'epics_get("9idcLAX:USAXS_Img:DarkFieldImage")'
+def UImg_ExperimentTitle 'epics_get("9idcLAX:USAXS_Img:ExperimentTitle")'
+
+def UImg_ImgHorApperture 'epics_get("9idcLAX:USAXS_Img:ImgHorApperture")' 
+def UImg_ImgVertApperture 'epics_get("9idcLAX:USAXS_Img:ImgVertApperture")' 
+def UImg_ImgGuardHorApperture 'epics_get("9idcLAX:USAXS_Img:ImgGuardHorApperture")' 
+def UImg_ImgGuardVertApperture 'epics_get("9idcLAX:USAXS_Img:ImgGuardVertApperture")' 
+def UImg_Img_Al_Filters 'epics_get("9idcLAX:USAXS_Img:Img_Al_Filters")'
+def UImg_Img_Ti_Filters 'epics_get("9idcLAX:USAXS_Img:Img_Ti_Filters")'
+def UImg_FilterTransmision 'epics_get(9idcLAX:USAXS_Img:Img_FilterTransmission")'
+
+# preUSAXStune handling
+def NumScansFromLastTune 'epics_get("9idcLAX:USAXS:NumScansFromLastTune")'
+def EPOCHTimeOfLastTune 'epics_get("9idcLAX:USAXS:EPOCHTimeOfLastTune")'
+def ReqNumScansBetweenTune 'epics_get("9idcLAX:USAXS:ReqNumScansBetweenTune")'
+def ReqTimeBetweenTune 'epics_get("9idcLAX:USAXS:ReqTimeBetweenTune")'
+def RunPreUSAXStuneOnQdo 'epics_get("9idcLAX:USAXS:RunPreUSAXStuneOnQdo")'
+def RunPreUSAXStuneNext 'epics_get("9idcLAX:USAXS:RunPreUSAXStuneNext")'
+
+def set_NumScansFromLastTune 'epics_put("9idcLAX:USAXS:NumScansFromLastTune", $1)'
+def set_EPOCHTimeOfLastTune 'epics_put("9idcLAX:USAXS:EPOCHTimeOfLastTune", $1)'
+def set_ReqNumScansBetweenTune 'epics_put("9idcLAX:USAXS:ReqNumScansBetweenTune", $1)'
+def set_ReqTimeBetweenTune 'epics_put("9idcLAX:USAXS:ReqTimeBetweenTune", $1)'
+def set_RunPreUSAXStuneOnQdo 'epics_put("9idcLAX:USAXS:RunPreUSAXStuneOnQdo", $1)'
+def set_RunPreUSAXStuneNext 'epics_put("9idcLAX:USAXS:RunPreUSAXStuneNext", $1)'
+
+# set commands 
+
+## USAXS Imaging set commands:
+def set_UImg_ImageKey 'epics_put("9idcLAX:USAXS_Img:ImageKey", $1)' 
+##  "0-image, 1-flat field, 2-dark field")
+def set_UImg_ExposureTime 'epics_put("9idcLAX:USAXS_Img:ExposureTime", $1)'
+
+def set_UImg_Tomo_Rot_Angle 'epics_put("9idcLAX:USAXS_Img:Tomo_Rot_Angle", $1)'
+def set_UImg_Img_I0_value 'epics_put("9idcLAX:USAXS_Img:Img_I0_value", $1)'
+def set_UImg_Img_I0_gain 'epics_put("9idcLAX:USAXS_Img:Img_I0_gain", $1)'
+
+def set_UImg_AxPosition 'epics_put("9idcLAX:USAXS_Img:ax_in"v)'
+def set_UImg_WaxsXPosition 'epics_put("9idcLAX:USAXS_Img:waxs_x_in", $1)'
+
+def set_UImg_FlatFieldImage 'epics_put("9idcLAX:USAXS_Img:FlatFieldImage", __returnSampleName("$1"))'
+def set_UImg_DarkFieldImage 'epics_put("9idcLAX:USAXS_Img:DarkFieldImage", __returnSampleName("$1"))'
+def set_UImg_ExperimentTitle 'epics_put("9idcLAX:USAXS_Img:ExperimentTitle", __returnSampleName("$1"))'
+
+def set_UImg_ImgHorApperture 'epics_put("9idcLAX:USAXS_Img:ImgHorApperture", $1)' 
+def set_UImg_ImgVertApperture 'epics_put("9idcLAX:USAXS_Img:ImgVertApperture", $1)' 
+def set_UImg_ImgVertApperture 'epics_put("9idcLAX:USAXS_Img:ImgVertApperture", $1)' 
+def set_UImg_ImgGuardVertApperture 'epics_put("9idcLAX:USAXS_Img:ImgGuardVertApperture", $1)' 
+def set_UImg_Img_Al_Filters 'epics_put("9idcLAX:USAXS_Img:Img_Al_Filters", $1)'
+def set_UImg_Img_Ti_Filters 'epics_put("9idcLAX:USAXS_Img:Img_Ti_Filters", $1)'
+def set_UImg_FilterTransmision 'epics_put("9idcLAX:USAXS_Img:Img_FilterTransmission", $1)'
+
+
+## standard set commands... 
+
+def set_CCD_DX 'epics_put("9idcLAX:USAXS:CCD_dx", $1)'
+def set_CCD_DY 'epics_put("9idcLAX:USAXS:CCD_dy", $1)'
+def set_DIODE_DY 'epics_put("9idcLAX:USAXS:DY0", $1)'
+def set_DIODE_DX 'epics_put("9idcLAX:USAXS:Diode_dx", $1)'
+def set_USAXS_TIME 'epics_put("9idcLAX:USAXS:CountTime", $1)'
+def set_NUMPNTS 'epics_put("9idcLAX:USAXS:NumPoints", $1)'
+def set_UATERM 'epics_put("9idcLAX:USAXS:UATerm", $1)'
+def set_SAMPLE_Y_STEP 'epics_put("9idcLAX:USAXS:Sample_Y_Step", $1)'
+def set_AY0 'epics_put("9idcLAX:USAXS:AY0", $1)'
+def set_DY0 'epics_put("9idcLAX:USAXS:DY0", $1)'
+def set_SAD 'epics_put("9idcLAX:USAXS:SAD", $1)'
+def set_SDD 'epics_put("9idcLAX:USAXS:SDD", $1)'
+def set_USAXS_MINSTEP 'epics_put("9idcLAX:USAXS:MinStep", $1)'
+def set_AR_VAL_CENTER 'epics_put("9idcLAX:USAXS:ARcenter", $1)'
+def set_ASR_VAL_CENTER 'epics_put("9idcLAX:USAXS:ASRcenter", $1)'
+def set_MR_VAL_CENTER 'epics_put("9idcLAX:USAXS:MRcenter", $1)'
+def set_MSR_VAL_CENTER 'epics_put("9idcLAX:USAXS:MSRcenter", $1)'
+def set_IMG_AL_FILTER 'epics_put("9idcLAX:USAXS:Img_Al_Filter", $1)'
+def set_IMG_TI_FILTER 'epics_put("9idcLAX:USAXS:Img_Ti_Filter", $1)'
+def set_SCAN_AL_FILTER 'epics_put("9idcLAX:USAXS:Scan_Al_Filter", $1)'
+def set_SCAN_TI_FILTER 'epics_put("9idcLAX:USAXS:Scan_Ti_Filter", $1)'
+def set_ASRP0 'epics_put("9idcLAX:USAXS:ASRcenter", $1)'
+def set_START_OFFSET 'epics_put("9idcLAX:USAXS:StartOffset", $1)'
+def set_FINISH 'epics_put("9idcLAX:USAXS:Finish", $1)'
+def set_MOTOR_PRESCALER_WAIT 'epics_put("9idcLAX:USAXS:Prescaler_Wait", $1)'
+
+def set_PIN_ZIn 'epics_put("9idcLAX:USAXS_Pin:Pin_z_in", $1)'
+def set_PIN_ZOut 'epics_put("9idcLAX:USAXS_Pin:Pin_z_out", $1)'
+def set_PIN_ZLimOffset 'epics_put("9idcLAX:USAXS_Pin:Pin_z_limit_offset", $1)'
+def set_PIN_YIn 'epics_put("9idcLAX:USAXS_Pin:Pin_y_in", $1)'
+def set_PIN_YOut 'epics_put("9idcLAX:USAXS_Pin:Pin_y_out", $1)'
+def set_PIN_YLimOffset 'epics_put("9idcLAX:USAXS_Pin:Pin_y_limit_offset", $1)'
+def set_AX_In 'epics_put("9idcLAX:USAXS_Pin:ax_in", $1)'
+def set_AX_Out 'epics_put("9idcLAX:USAXS_Pin:ax_out", $1)'
+def set_AX_LimOffset 'epics_put("9idcLAX:USAXS_Pin:ax_limit_offset", $1)'
+def set_DX_In 'epics_put("9idcLAX:USAXS:Diode_dx", $1)'
+def set_DX_Out 'epics_put("9idcLAX:USAXS_Pin:dx_out", $1)'
+def set_DX_LimOffset 'epics_put("9idcLAX:USAXS_Pin:dx_limit_offset", $1)'
+def set_USAXS_HSlit 'epics_put("9idcLAX:USAXS_Pin:USAXS_hslit_ap", $1)'
+def set_USAXS_VSlit 'epics_put("9idcLAX:USAXS_Pin:USAXS_vslit_ap", $1)'
+def set_SAXS_VSlit  'epics_put("9idcLAX:USAXS_Pin:Pin_vslit_ap", $1)'
+def set_SAXS_HSlit 'epics_put("9idcLAX:USAXS_Pin:Pin_hslit_ap", $1)'
+
+def set_USAXS_HGSlit 'epics_put("9idcLAX:USAXS_Pin:USAXS_hgslit_ap", $1)'
+def set_USAXS_VGSlit 'epics_put("9idcLAX:USAXS_Pin:USAXS_vgslit_ap", $1)'
+def set_SAXS_VGSlit  'epics_put("9idcLAX:USAXS_Pin:Pin_vgslit_ap", $1)'
+def set_SAXS_HGSlit 'epics_put("9idcLAX:USAXS_Pin:Pin_hgslit_ap", $1)'
+
+def set_PIN_AL_FILTER 'epics_put("9idcLAX:USAXS_Pin:Exp_Al_Filter", $1)'
+def set_PIN_TI_FILTER 'epics_put("9idcLAX:USAXS_Pin:Exp_Ti_Filter", $1)'
+def set_PIN_NumImages 'epics_put("9idcLAX:USAXS_Pin:NumImages", $1)'
+
+def set_PIN_AcquireTime 'epics_put("9idcLAX:USAXS_Pin:AcquireTime", $1)'
+def set_PIN_EXP_TIME 'epics_put("9idcLAX:USAXS_Pin:AcquireTime", $1)'
+def set_PIN_TRPD 'epics_put("9idcLAX:USAXS_Pin:Pin_TrPD", $1)'
+def set_PIN_TRI0 'epics_put("9idcLAX:USAXS_Pin:Pin_TrI0", $1)'
+def set_PIN_TRPDGain 'epics_put("9idcLAX:USAXS_Pin:Pin_TrPDgain", $1)'
+def set_PIN_TRI0Gain 'epics_put("9idcLAX:USAXS_Pin:Pin_TrI0gain", $1)'
+
+def set_PIN_IMAGE_BASEDIR 'epics_put("9idcLAX:USAXS_Pin:directory", $1)'
+
+
+# WAXS
+def set_WAXS_IMAGE_BASEDIR 'epics_put("9idcLAX:USAXS_WAXS:directory", $1)'
+
+def set_WAXS_XIn 'epics_put("9idcLAX:USAXS_Pin:waxs_x_in", $1)'
+def set_WAXS_Xout 'epics_put("9idcLAX:USAXS_Pin:waxs_x_out", $1)'
+def set_WAXS_XLimOffset 'epics_put("9idcLAX:USAXS_Pin:waxs_x_limit_offset", $1)'
+def set_WEXP_AL_FILTER 'epics_put("9idcLAX:USAXS_WAXS:Exp_Al_Filter", $1)'
+def set_WEXP_TI_FILTER 'epics_put("9idcLAX:USAXS_WAXS:Exp_Ti_Filter", $1)'
+def set_WAXS_AcquireTime 'epics_put("9idcLAX:USAXS_WAXS:AcquireTime", $1)'
+def set_WAXS_EXP_TIME 'epics_put("9idcLAX:USAXS_WAXS:AcquireTime", $1)'
+def set_WAXS_NumImages 'epics_put("9idcLAX:USAXS_WAXS:NumImages", $1)'
+
+# FlyScan values
+def set_FS_NumberOfPoints 'epics_put("9idcLAX:USAXS:FS_NumberOfPoints", $1)'
+def set_FS_ScanTime 'epics_put("9idcLAX:USAXS:FS_ScanTime", $1)'
+def set_FS_ElapsedTime 'epics_put("9idcLAX:USAXS:FS_ElapsedTime", $1)'
+def set_useFlyscan 'epics_put("9idcLAX:USAXS:UseFlyscan", $1)'
+def set_FS_orderNumber 'epics_put("9idcLAX:USAXS:FS_OrderNumber", $1)'
+
+#transmission
+ def set_USAXS_MEASURE_PIN_TRANS 'epics_put("9idcLAX:USAXS:TR_MeasurePinTrans", $1)'      # measure transmission in USAXS using pin diode
+ def set_USAXSPinT_AyPosition 'epics_put("9idcLAX:USAXS:TR_AyPosition", $1)'      		 # Ay to hit pin diode
+ def set_USAXSPinT_MeasurementTime 'epics_put("9idcLAX:USAXS:TR_MeasurementTime", $1)'	# How long to count
+ def set_USAXSPinT_pinCounts 'epics_put("9idcLAX:USAXS:TR_pinCounts", $1)'			# How many counts were on pin diode
+ def set_USAXSPinT_pinGain 'epics_put("9idcLAX:USAXS:TR_pinGain", $1)'				# gain of pin diode (note, we are using I00 amplifier here)
+ def set_USAXSPinT_I0Counts 'epics_put("9idcLAX:USAXS:TR_I0Counts", $1)'			# How many counts were on I0
+ def set_USAXSPinT_I0Gain 'epics_put("9idcLAX:USAXS:TR_I0Gain", $1)'				# gain of I0
+
+
+
+
+
+set_USAXS_MEASURE_PIN_TRANS    0           # default is no
+set_USAXSPinT_AyPosition      10           # guess in mm move up the ay
+set_USAXSPinT_MeasurementTime  2           # seconds, default time
+
+
+
+# the acquire period is used only when collecting multiple images and is basically offset of the subsequent images. 
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+def set_USAXSSAXSMODE 'epics_put("9idcLAX:USAXS_Pin:USAXSSAXSMode", $1)'
+# values for USAXSSAXSMode:
+# -1  dirty, prior move did not finish correctly
+#  1  SAXS and USAXS out of beam
+#  2  USAXS in beam
+#  3  SAXS in beam
+#  4  WAXS in the beam
+#  5  Imaging in
+#  6  Imaging tuning mode. 
+
+############################################################################################################
+############################################################################################################
+############################################################################################################
+def __get_clean_user_string(s)'{
+    """ 
+        Obtain string from user and remove any chars that are not alphanum or '_'
+    """
+    local userstring,i,cn,slength, userStringL
+    userstring=""
+    if (s=="") {
+        while ((s=input("Input string: "))== "") {}
+     }
+    slength = length(s)
+
+   # loop through each character
+   for (i=1; i<slength+1 ; i++) {
+       cn = substr(s, i, 1)
+       # check if char is alphanumeric or underscore
+       if( !( (cn >= "a")&&(cn<= "z")  || \
+              (cn >= "A")&&(cn<= "Z")  || \
+              (cn >= "0")&&(cn<= "9")  || \
+              (cn == ".")  || \
+              (cn == "_") ) ) {
+                 cn = "_"
+            }
+            userstring = userstring cn
+       }
+              #(cn == " ")  || \
+     userStringL = __append_info_to_name(userstring)
+   return(userStringL)
+}'
+
+############################################################################################################
+def __append_info_to_name(s)'{
+    """ 
+       Modify sample name with some more info
+    """
+    local userstring,i,cn,slength
+    userstring=""
+   userstring = s
+   return(userstring)
+}'
+
+#############################
+### cleanup spec file name for use with SAXS and WAXS
+def USAXS_CleanupFileName (oldName, NewExtension) '{
+
+  num_spaces = split(oldName ,temp," ")     ## remove spaces first
+  new_name = temp[0]
+  for(i=1; i<num_spaces; i++) {new_name = new_name "_" temp[i] }
+
+  num_dots = split(new_name ,temp,".")     ## remove dots second
+  new_name = temp[0]
+  for(i=1; i<(num_dots-1); i++) {new_name = new_name "_" temp[i] }
+
+  if(length(NewExtension)>0){
+     new_name  = new_name "_" NewExtension     #append extension
+  }
+  return new_name
+}'
+############################################################################################################
+def __returnSampleName(s) '{
+   if(whatis(s) ==0) {
+     return s
+   } else {
+     return @s
+   }
+}'
+############################################################################################################
+############################################################################################################
+############################################################################################################
+
+def set_USAXS_Slits '{
+  local __tmpGSV, __tmpGSH
+  __tmpGSV =  epics_get("9idcLAX:GSlit1V:size.VAL")
+  __tmpGSH =  epics_get("9idcLAX:GSlit1H:size.VAL")
+  getangles
+ # if(fabs(A[uslvap]-USAXS_VSlit)>0.01 || fabs(A[uslhap]-USAXS_HSlit)>0.01) || fabs(__tmpGSV-USAXS_VGSlit)>0.01 || fabs(__tmpGSH-USAXS_HGSlit)>0.01)
+ # {
+     comment "Moving USAXS slits and guard slits to correct place"
+     # move USAXS slits and guard slits in place
+     A[uslvap] = USAXS_VSlit
+     A[uslhap] = USAXS_HSlit
+     epics_put("9idcLAX:GSlit1V:size.VAL",USAXS_VGSlit)   # change slits
+     epics_put("9idcLAX:GSlit1H:size.VAL",USAXS_HGSlit)   # change slits
+     move_em; waitmove
+  # }
+}'
+############################################################################################################
+def set_WAXS_Slits 'set_SAXS_Slits'
+############################################################################################################
+
+def set_SAXS_Slits '{
+  local __tmpGSV, __tmpGSH
+  __tmpGSV =  epics_get("9idcLAX:GSlit1V:size.VAL")
+  __tmpGSH =  epics_get("9idcLAX:GSlit1H:size.VAL")
+  getangles
+ # if(fabs(A[uslvap]-USAXS_VSlit)>0.01 || fabs(A[uslhap]-USAXS_HSlit)>0.01) || fabs(__tmpGSV-USAXS_VGSlit)>0.01 || fabs(__tmpGSH-USAXS_HGSlit)>0.01)
+ # {
+     comment "Moving USAXS slits and guard slits to correct place"
+     # move USAXS slits and guard slits in place
+     A[uslvap] = SAXS_VSlit  
+     A[uslhap] = SAXS_HSlit 
+     epics_put("9idcLAX:GSlit1V:size.VAL",SAXS_VGSlit  )   # change slits
+     epics_put("9idcLAX:GSlit1H:size.VAL",SAXS_HGSlit )   # change slits
+     move_em; waitmove
+  # }
+}'
+############################################################################################################
+############################################################################################################
+
+def moveSample '{
+  # move the USAXS sample
+  local __my_SX   __my_SY
+  if( $# != 2) {
+    printf ("usage: moveSample SX SY\n")
+    exit;
+  }
+  __my_SX = $1
+  __my_SY = $2
+  waitmove; get_angles
+  A[sx] = __my_SX
+  A[sy] = __my_SY
+  move_em; waitmove
+}'
+############################################################################################################
+def addSBUSAXSColumn'
+    global useSBUSAXS
+    # add or remove the asrp column, if needed...
+    if(useSBUSAXS){
+      u_column_add("asrp"      ,"%.3f",   "A[asrp]",   "USAXS")
+     } else {
+      u_column_remove("asrp"   ,"%.3f",   "A[asrp]",   "USAXS")
+    }
+'
+############################################################################################################
+def moveDetector '{
+  # move the USAXS detector
+  local __my_DX  __my_DY
+  if( $# != 2) {
+    printf ("usage: moveDetector DX DY\n")
+    exit;
+  }
+  __my_DX = $1
+  __my_DY = $2
+  waitmove; get_angles
+  A[dx] = __my_DX
+  A[dy] = __my_DY
+  move_em; waitmove
+}'
+############################################################################################################
+def DCMfeedbackON   '{
+      epics_put("9idcLAX:fbe:omega:on",1)
+      if((epics_get("9idcLAX:fbe:omega.DRVH")-epics_get("9idcLAX:fbe:omega.OVAL"))<0.2 || (epics_get("9idcLAX:fbe:omega.OVAL")-epics_get("9idcLAX:fbe:omega.DRVL"))<0.2){
+     	 if(NOTIFY_ON_FEEDBACK) {sendNotifications("USAXS Feedback problem","Feedback is very close to its limits.");}
+      }
+}'
+############################################################################################################
+def DCMfeedbackOFF  '{
+      epics_put("9idcLAX:fbe:omega:on",0)
+      if((epics_get("9idcLAX:fbe:omega.DRVH")-epics_get("9idcLAX:fbe:omega.OVAL"))<0.2 || (epics_get("9idcLAX:fbe:omega.OVAL")-epics_get("9idcLAX:fbe:omega.DRVL"))<0.2){
+     	 if(NOTIFY_ON_FEEDBACK) {sendNotifications("USAXS Feedback problem","Feedback is very close to its limits.");}
+      }
+}'
+############################################################################################################
+def openCCDshutter  'epics_put("9idcRIO:Galil2Bo0_CMD", 1)'
+############################################################################################################
+def closeCCDshutter 'epics_put("9idcRIO:Galil2Bo0_CMD", 0)'
+############################################################################################################
+# changed openMonoShutter to try opening only if closed and sleep after that
+def openMonoShutter  '{
+  if(!epics_get("PA:09ID:STA_B_SBS_OPEN_PL.VAL", "short")){
+       print "B shutter found closed, trying to open"
+       epics_put("9ida:rShtrB:Open", 1)
+       sleep (3)
+       DCMfeedbackON
+       comment "Feedback started, you may need to wait for it to tune the beamline"
+  } 
+}'
+############################################################################################################
+def openWhiteShutter  '{
+  if(!epics_get("PA:09ID:STA_A_FES_OPEN_PL.VAL", "short")){
+       print "A shutter found closed, trying to open"
+       epics_put("9ida:rShtrA:Open", 1)
+       sleep (5)
+  } 
+}'
+############################################################################################################
+def closeMonoShutter 'epics_put("9ida:rShtrB:Close", 1)'
+############################################################################################################
+#use new Shutter in the box on 9id in minihutch
+def closeTiFilterShutter '{
+      epics_put("9idb:BioEnc2B3.VAL","Down")
+       }'
+############################################################################################################
+def openTiFilterShutter  '{
+	epics_put("9idb:BioEnc2B3.VAL","Up")
+	epics_put("9idb:BioEnc2B2.VAL","Up")
+	epics_put("9idb:BioEnc2B1.VAL","Up")
+	epics_put("9idb:BioEnc2B0.VAL","Up")
+	epics_put("9idb:BioEnc1B3.VAL","Up")
+	epics_put("9idb:BioEnc1B2.VAL","Up")
+	epics_put("9idb:BioEnc1B1.VAL","Up")	
+	epics_put("9idb:BioEnc1B0.VAL","Up")
+	mv_Al_filter  SCAN_AL_FILTER; mv_Ti_filter  SCAN_TI_FILTER
+        sleep(0.4)
+}'
+############################################################################################################
+def insertCCDfilters  '{
+        mv_Al_filter IMG_AL_FILTER; mv_Ti_filter  IMG_TI_FILTER
+        sleep(0.05)
+	epics_put("9idb:BioEnc2B3.VAL","Up")
+	epics_put("9idb:BioEnc2B2.VAL","Up")
+	epics_put("9idb:BioEnc2B1.VAL","Up")
+	epics_put("9idb:BioEnc2B0.VAL","Up")
+	epics_put("9idb:BioEnc1B3.VAL","Up")
+	epics_put("9idb:BioEnc1B2.VAL","Up")
+	epics_put("9idb:BioEnc1B1.VAL","Up")	
+	epics_put("9idb:BioEnc1B0.VAL","Up")
+ }'
+############################################################################################################
+def insertScanFilters '{
+	mv_Al_filter SCAN_AL_FILTER; mv_Ti_filter SCAN_TI_FILTER
+}'
+############################################################################################################
+def mv_Al_filter '{
+  #
+  # Set the number of Al (bank A) foil thicknesses in the PF4 filter in 9ID-D.
+  #
+  local fPos fNow
+  local blade0 blade1 blade2 blade3
+  if( $# != 1) {
+    printf ("usage: mv_Al_filter fPosA\n")
+    exit;
+  }
+  fPos = $1
+  mv_pf4_filter_bank(0, fPos)
+  sleep (0.1)
+}'
+############################################################################################################
+def mv_Ti_filter '
+  #
+  # Set the number of Ti (bank B) foil thicknesses in the PF4 filter in 9ID_D.
+  #
+  local fPos fNow
+  local blade0 blade1 blade2 blade3
+  if( $# != 1) {
+    printf ("usage: mv_Ti_filter fPosB\n")
+    exit;
+  }
+  fPos = $1
+  mv_pf4_filter_bank(1, fPos)
+  sleep (0.1)
+'
+############################################################################################################
+def insertPF4filters '
+  local filterNum_Al     filterNum_Ti
+  local thisFilterNum_Al thisFilterNum_Ti
+  #
+  if( $# != 2) {
+    printf ("usage: insertPF4filters filterNum_Al filterNum_Ti\n")
+    exit;
+  }
+  filterNum_Al = $1
+  filterNum_Ti = $2
+  mv_Al_filter  filterNum_Al
+  mv_Ti_filter  filterNum_Ti
+  sleep(0.1)
+
+  thisFilterNum_Al = epics_get("9idcUSX:pf4:fPosA", "short")
+  thisFilterNum_Ti = epics_get("9idcUSX:pf4:fPosB", "short")
+  if ((filterNum_Al != thisFilterNum_Al) || (filterNum_Ti != thisFilterNum_Ti)) {
+    # try to fail safe, may not work
+    closeTiFilterShutter
+    comment "!!!Did not insert selected filters!!!"
+  }
+'
+############################################################################################################
+############################################################################################################
+############################################################################################################
+############   Mode changing
+# values for USAXSSAXSMode:
+# -1  dirty, prior move did not finish correctly
+#  1  SAXS, WAXS and USAXS out of beam
+#  2  USAXS in beam
+#  3  SAXS in beam
+#  4  WAXS or Imaging in beam
+
+############################################################################################################
+def useModeOpenBeamPath '
+    StopIfPLCEmergencyProtectionOn
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to OpenBeamPath mode" ))
+    closeCCDshutter
+    closeTiFilterShutter
+    if (USAXSSAXSMODE!= 1){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Opening the beam path, moving all components out"
+    move_SAXSOut
+    move_WAXSOut
+    move_USAXSOut
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "USAXS moved to OpenBeamPath mode" ))
+ }
+'
+############################################################################################################
+#######   USAXS ###############
+def useModeRadiography '{
+  StopIfPLCEmergencyProtectionOn
+  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to Radiography mode" ))
+  closeCCDshutter
+  closeTiFilterShutter
+  openMonoShutter  
+  if (USAXSSAXSMODE!= 2){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Moving to proper USAXS mode"
+    move_SAXSOut
+    move_WAXSOut
+    move_USAXSIn
+  }
+ 
+  print "Preparing for Radiography mode ... please wait ..."
+  moveDetector   CCD_DX   CCD_DY
+  openTiFilterShutter
+  insertCCDfilters
+  openCCDshutter
+  comment "Ready for Radiography mode"
+  print "TV should now show Radiography CCD image. If not, check: TV on? Right TV input? Camera on (Blue button)?"
+  print "Beam on? Shutters opened? Sample/holder out of beam? - if all is OK, try running preUSAXStune."
+  print "preUSAXStune worked? Run useModeRadiography. Still not working? Call Jan or Ross."
+  print "But before calling - are you REALLY sure the sample is not blocking the beam? Move it out and try preUSAXStune again."
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "Radiography Mode")
+  epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+  epics_put ("9idcLAX:USAXS:scanning",    0)
+}'
+############################################################################################################
+def useModeUSAXS '{
+  local ccdShutterState
+    StopIfPLCEmergencyProtectionOn
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
+
+  closeCCDshutter
+  closeTiFilterShutter
+  DCMfeedbackON
+  #local __NeedRetune
+  #__NeedRetune = 0
+  if (USAXSSAXSMODE!= 2){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Moving to proper USAXS mode"
+    move_WAXSOut
+    move_SAXSOut
+    move_USAXSIn
+	#__NeedRetune = 1
+  }
+  print "Preparing for USAXS mode ... please wait ..."
+  # set scalar to autocount mode for USAXS
+  epics_put("9idcLAX:vsc:c0.CONT",1)
+  moveDetector  DIODE_DX  DIODE_DY
+  sleep(0.1)
+  ccdShutterState = epics_get("9idcRIO:Galil2Bo0_CMD", "short")
+  if (ccdShutterState == 1) {
+    comment "!!!CCD shutter failed to close!!!"
+  } else {
+ #   openMonoShutter
+    comment "Ready for USAXS mode"
+    #print "Change TV input selector to show image in hutch"
+    #print "Turn off BLUE switch on CCD controller"
+    insertScanFilters
+    closeTiFilterShutter
+    epics_put ("9idcLAX:USAXS:state",       "USAXS Mode")
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put ("9idcLAX:USAXS:scanning",    0)
+  }
+  #if(__NeedRetune) {
+  #__TuneAfterImaging
+  #}
+}'
+
+############################################################################################################
+def __TuneAfterImaging '{
+    tune_ar 0.005  
+    tune_ar;tune_a2rp
+}'
+
+
+############################################################################################################
+########### SAXS  ###################
+
+def useModeSAXS '{
+  StopIfPLCEmergencyProtectionOn
+  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to SAXS mode" ))
+  closeCCDshutter
+  closeTiFilterShutter
+  if (USAXSSAXSMODE!= 3){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Moving to proper SAXS mode"
+    move_WAXSOut
+    move_USAXSOut
+    move_SAXSIn
+  }
+  print "Prepared for SAXS mode"
+    comment "Ready for SAXS mode"
+    #insertScanFilters
+    epics_put ("9idcLAX:USAXS:state",       "SAXS Mode")
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put ("9idcLAX:USAXS:scanning",    0)
+
+}'
+############################################################################################################
+########### WAXS   ####################
+
+def useModeWAXS '{
+    StopIfPLCEmergencyProtectionOn
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to WAXS mode" ))
+  closeCCDshutter
+  closeTiFilterShutter
+  if (USAXSSAXSMODE!= 4){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Moving to proper WAXS mode"
+    move_SAXSOut
+    move_USAXSOut
+    move_WAXSIn
+  }
+  # move SAXS slits in, used for WAXS mode also
+    local __vertGSlitDiff, __horGSlitDiff
+    __vertGSlitDiff = fabs(epics_get("9idcLAX:GSlit1V:size.VAL") - SAXS_VGSlit )
+    __horGSlitDiff = fabs(epics_get("9idcLAX:GSlit1H:size.VAL") - SAXS_HGSlit )
+
+    if(__vertGSlitDiff>0.03 || __horGSlitDiff > 0.03){
+       print "changing G slits"
+       epics_put("9idcLAX:GSlit1V:size.VAL",SAXS_VGSlit)          # change slits
+       epics_put("9idcLAX:GSlit1H:size.VAL",SAXS_HGSlit)          # change slits
+       sleep(0.5)  
+       while(__vertGSlitDiff>0.02 || __horGSlitDiff > 0.02){
+ 	    sleep(0.5)
+          __vertGSlitDiff = fabs((epics_get("9idcLAX:mxv:c0:m5.RBV")-epics_get("9idcLAX:mxv:c0:m6.RBV")) - SAXS_VGSlit )
+          __horGSlitDiff = fabs((epics_get("9idcLAX:mxv:c0:m3.RBV")-epics_get("9idcLAX:mxv:c0:m4.RBV")) - SAXS_HGSlit )
+       }
+    }
+    getangles
+    if(fabs(A[uslvap]- SAXS_VSlit)>0.02 || fabs( A[uslhap]-SAXS_HSlit)>0.02){
+       print "Moving Beam defining slits"
+       A[uslvap] = SAXS_VSlit
+       A[uslhap] = SAXS_HSlit
+       move_em; waitmove; getangles
+       sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
+    }
+    print "Prepared for WAXS mode"
+    comment "Ready for WAXS mode"
+    #insertScanFilters
+    epics_put ("9idcLAX:USAXS:state",       "WAXS Mode")
+    epics_put ("9idcLAX:USAXS:timeStamp",   date())
+    epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+    epics_put ("9idcLAX:USAXS:scanning",    0)
+}'
+
+
+############################################################################################################
+###########   Common routines #################
+
+def move_WAXSOut'{
+
+  StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  get_angles   #syncs spec to epics motor positions
+  print "Moving WAXS out of beam"  
+  set_USAXSSAXSMODE  -1        # in case there is an error in moving, it is NOT SAFE to start a scan
+  # move the pin_z away from sample
+  A[waxsx] = WAXS_Xout
+  move_em; waitmove
+  set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_Xout + WAXS_XLimOffset))
+  # move WAXS out of beam position
+  print "Removed WAXS from beam position"
+  set_USAXSSAXSMODE  1         # 1 = SAXS, WAXS, and USAXS out of beam
+}'
+
+############################################################################################################
+def move_WAXSIn'{
+    StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  print "Moving to WAXS mode"
+  if (USAXSSAXSMODE!= 1){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Incorrect USAXSSAXSMODE mode found. If empthy path is in the beam, set_USAXSSAXSMODE to 1"
+    exit
+  }
+  __usaxs_wait_for_Interlock
+  set_USAXSSAXSMODE  -1 # in case there is an error in moving, it is NOT SAFE to start a scan
+  # first move USAXS out of way
+  set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_XIn + WAXS_XLimOffset))
+  epics_put("9idcLAX:GSlit1V:size.VAL",SAXS_VGSlit)   # change slits
+  epics_put("9idcLAX:GSlit1H:size.VAL",SAXS_HGSlit)   # change slits
+  A[waxsx] = WAXS_XIn
+  A[uslvap] = SAXS_VSlit
+  A[uslhap] = SAXS_HSlit
+  move_em; waitmove
+  print "WAXS is in position"
+  set_USAXSSAXSMODE 4             # 4 = WAXS
+}'
+############################################################################################################
+def move_SAXSOut '{
+    StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  get_angles   #syncs spec to epics motor positions
+  print "Moving SAXS out of beam"  
+  set_USAXSSAXSMODE  -1        # in case there is an error in moving, it is NOT SAFE to start a scan
+  # move the pin_z away from sample
+  A[pin_z] = PIN_ZOut
+  move_em; waitmove
+  set_lim(pin_z,get_lim(pin_z,1),dial(pin_z,PIN_ZOut - PIN_ZLimOffset))
+  # move pinhole up to out of beam position
+  A[pin_y] = PIN_YOut
+  move_em; waitmove
+  set_lim(pin_y,dial(pin_y,(PIN_YOut-PIN_YLimOffset)),get_lim(pin_y,-1))
+  print "Removed SAXS from beam position"
+  ###sleep(1)    #waxs seems to be getting ahead of saxs limit switch - should nto be needed, we have __usaxs_wait_for_Interlock now. 
+  set_USAXSSAXSMODE  1         # 1 = SAXS, WAXS, and USAXS out of beam
+}'
+############################################################################################################
+
+def move_SAXSIn '{
+    StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  print "Moving to Pinhole SAXS mode"
+  if (USAXSSAXSMODE!= 1){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Incorrect USAXSSAXSMODE mode found. If USAXS is out of beam, set_USAXSSAXSMODE to 1"
+    exit
+  }
+  __usaxs_wait_for_Interlock
+  set_USAXSSAXSMODE  -1 # in case there is an error in moving, it is NOT SAFE to start a scan
+  # first move USAXS out of way
+  set_lim(pin_y,dial(pin_y,PIN_YIn - PIN_YLimOffset),get_lim(pin_y,-1))
+  epics_put("9idcLAX:GSlit1V:size.VAL",SAXS_VGSlit)   # change slits
+  epics_put("9idcLAX:GSlit1H:size.VAL",SAXS_HGSlit)   # change slits
+  A[pin_y]=PIN_YIn
+  A[uslvap] = SAXS_VSlit
+  A[uslhap] = SAXS_HSlit
+  move_em; waitmove
+  set_lim(pin_z,get_lim(pin_z,1), dial(pin_z,PIN_ZIn - PIN_ZLimOffset))
+  A[pin_z] = PIN_ZIn
+  move_em; waitmove
+  print "Pinhole SAXS is in position"
+  set_USAXSSAXSMODE 3             # 3 = Pinhole SAXS
+}'
+############################################################################################################
+def move_USAXSOut'{
+    StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  get_angles   #syncs spec to epics motor positions
+  print "Moving USAXS out of beam"  
+  set_USAXSSAXSMODE  -1           # in case there is an error in moving, it is NOT SAFE to start a scan
+  A[ax] = AX_Out
+  A[dx] = DX_Out
+  move_em; waitmove
+  # now Main stages are out of place, so we can now set the limits and then move pinhole in place.
+  set_lim(ax,dial(ax,AX_Out - AX_LimOffset),get_lim(ax,1))
+  set_lim(dx,get_lim(dx,1),dial(dx,(DX_Out + DX_LimOffset)))
+  print "Removed USAXS from beam position"
+  set_USAXSSAXSMODE  1             # 1 = SAXS, WAXS, and USAXS out of beam
+}'
+############################################################################################################
+def move_USAXSIn'{
+    StopIfPLCEmergencyProtectionOn
+  closeCCDshutter
+  closeTiFilterShutter
+  print "Moving to USAXS mode"
+  if (USAXSSAXSMODE!= 1){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Incorrect USAXSSAXSMODE mode found. If SAXS is out of beam, set_USAXSSAXSMODE to 1"
+    exit
+  }
+  __usaxs_wait_for_Interlock
+  set_USAXSSAXSMODE  -1 # in case there is an error in moving, it is NOT SAFE to start a scan
+  # move USAXS in the beam
+  # set the limits so we can move pinhole in place.
+  set_lim(ax,dial(ax,AX_In - AX_LimOffset),get_lim(ax,1))
+  set_lim(dx,get_lim(dx,1),dial(dx,DIODE_DX + DX_LimOffset))
+  epics_put("9idcLAX:GSlit1V:size.VAL",USAXS_VGSlit)   # change slits
+  epics_put("9idcLAX:GSlit1H:size.VAL",USAXS_HGSlit)   # change slits
+  A[uslvap] = USAXS_VSlit
+  A[uslhap] = USAXS_HSlit
+  A[ay] = AY0
+  A[ax] = AX_In
+  A[dx] = DX_In
+  A[dy] = DY0
+  move_em; waitmove
+  print "USAXS is in position"
+  set_USAXSSAXSMODE  2 # 2 = USAXS in place
+}'
+############################################################################################################
+def __usaxs_wait_for_Interlock'{
+   # this function waits for the three 
+   local Waiting_1234, Waiting_1235, Waiting_1236, __timer9876
+   Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
+   Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
+   Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
+   __timer9876 = 1
+    while (Waiting_1234==0 || Waiting_1235==0 || Waiting_1236==0) {
+        sleep(0.1)
+        Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
+        Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
+        Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
+        printf("Waiting for Interlock  %g sec, check limit switches\r", (__timer9876/10))
+      __timer9876++
+   }
+}'
+
+#############################################################
+# the standard chk_beam macro breaks out of the count loops
+def standard_chk_beam 'break'
+
+def USAXS_chk_beam '{
+  #
+  #  chk_thresh is a global
+  #
+  local _delayScan_   _warmUpNow_
+  local _time0_  __hr  __min __sec
+  local  delay_sec  elapsed
+  if (_time0_ == 0) _time0_ = time()
+  if (set_sim(-1) || S[MON] >= chk_thresh) {
+    # beam is ON
+    p "beam is on"
+    if (_delayScan_) {
+      if (!_warmUpNow_) {
+        printf ("Beam detected, %s, beginning warmup\n", date())
+        _time0_ = time()
+        _warmUpNow_ = 1
+      } else {
+        # warm-up time
+        elapsed = time() - _time0_
+        if (elapsed >= delay_sec) {
+          printf ("Warmup done, %s, resuming operations\n", date())
+          _delayScan_ = _warmUpNow_ = _time0_ = 0
+          tty_cntl("ce")
+          break
+        } else {
+          # show an update report
+          #  note:  not "elapsed time" here but "time remaining"
+          elapsed = _time0_ + delay_sec - time()
+          __sec = elapsed % 60
+          __min = (elapsed / 60) % 60
+          __hr  = elapsed / 60 / 60
+          printf ("%3d:%02d:%02d left in warmup period\r", __hr, __min, __sec)
+        }
+      }
+    } else {
+      p "normal condition with beam on"
+    }
+  } else {
+    # beam is OFF
+    p "beam is off"
+    set_RunPreUSAXStuneNext 1
+    if (!_delayScan_) {
+      printf ("Beam dump detected, %s\n", date())
+      _delayScan_ = 1
+      _warmUpNow_ = 0
+      _time0_ = time()
+      delay_sec = 15
+    } else {
+      # show an update report
+      elapsed = time() - _time0_
+      __sec = elapsed % 60
+      __min = (elapsed / 60) % 60
+      __hr  = elapsed / 60 / 60
+      if (elapsed >    60) delay_sec =  5*60
+      if (elapsed >  5*60) delay_sec = 10*60
+      if (elapsed > 15*60) delay_sec = 30*60
+      printf ("No beam for  %3d:%02d:%02d\r", __hr, __min, __sec)
+    }
+  }
+}'
+
+############################################################################################################
+def postMessageUSAXS_done '{
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "USAXS macro file done")
+  epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+  epics_put ("9idcLAX:USAXS:scanning",    0)
+  if(NOTIFY_ON_SCAN_DONE) { sendNotifications("USAXS macro complete","USAXS has finished running the macro and is waiting for further commands.");}
+  comment "End of USAXS scans"
+#  savedebug
+}'
+############################################################################################################
+
+def stripFilePath(full_name) '{
+  # strip away any file path from full_name
+  local path_arr[]  fileName
+  num = split(full_name, path_arr, "/")
+  fileName = path_arr[num-1]
+  return(fileName)
+}'
+############################################################################################################
+
+def postUsaxsDofile2WWW '{
+  local cmd macFile theTarget date_str  num
+  if ($# != 0) {
+    print "usage: postUsaxsDofile2WWW"
+    exit
+  }
+
+  # strip away any file path from DOFILE
+  macFile = stripFilePath(DOFILE)
+  epics_put ("9idcLAX:USAXS:macroFile",      macFile)
+  epics_put ("9idcLAX:USAXS:macroFileTime",  date())
+  theTarget = "/tmp/specmacro.txt"
+  cmd = sprintf("/bin/cp -f %s %s ", DOFILE, theTarget )
+  print cmd
+  unix(cmd)
+
+  # Archive each usaxs.mac (or sbusaxs.mac) file.
+  #
+  # Since the users execute a batch of scans using the
+  # usaxs.mac (or sbusaxs.mac) file, they overwrite any
+  # previous batch file they used.  This bit of code
+  # makes an archive copy of each batch file.
+  #
+  # make the date _readable_ instead of epoch
+  date_str = "date_str is now a string variable"
+  unix("/bin/date \"+%Y%m%d-%H%M%S\"", date_str)
+  split(date_str, date_arr, "\n")
+  fmt = "/bin/cp -f %s /share1/log/macros/%s-%s"
+  cmd = sprintf(fmt, DOFILE, date_arr[0], macFile )
+  print cmd
+  unix(cmd)
+}'
+############################################################################################################
+def validateUsaxsDofile '{
+  local cmd 
+
+  cmd = sprintf("~/bin/find_unprintable_chars.py %s", DOFILE)
+  print cmd
+  result = unix(cmd)
+  if (result != 0) {
+    printf("\nABORTED qdo due to :\n")
+    if (result == 1) printf("Spec found unprintable chars in %s, fix the file and restart\n",DOFILE)
+    else if (result == 2) printf("Usage: find_unprintable_chars.py %s\n",DOFILE)
+    else if (result == 3) printf("%s does not exist\n", DOFILE)
+    else if (result == 4) printf("%s is not a regular file\n",DOFILE)
+    else printf ( "Error code %d reported\n", result)
+    #printf ("Please correct this and reload SPEC.\n)
+    exit
+  }
+}'
+############################################################################################################
+############################################################################################################
+
+# this is new definition,assume the sequence program in brq working properly
+def mv_pf4_filter_bank_seq(bank, fPos) '{
+     if (bank==0) {
+        epics_put("9idcUSX:pf4:fPosA", fPos)
+     }   
+     if( bank ==1) {
+        epics_put("9idcUSX:pf4:fPosB", fPos)
+     }
+        
+}'   
+############################################################################################################
+
+# this is a generic definition, choose the one you want
+def mv_pf4_filter_bank(bank, fPos) '{
+  mv_pf4_filter_bank_seq(bank, fPos)
+#  if (bank==1) {
+#  	#mv_pf4_filter_bank_spec(bank, fPos)
+#  	mv_pf4_filter_bank_seq(bank, fPos)
+#  } else {
+# 	mv_pf4_filter_bank_seq(bank, fPos)
+#  }
+}'
+
+def sendNotifications(subject,message) '{
+global NOTIFICATION_ADDRESSES
+global NOTIFICATION_ADDRESSES_COUNT
+for(i=0;i<NOTIFICATION_ADDRESSES_COUNT;i++) {
+USER_EMAIL=NOTIFICATION_ADDRESSES[i]
+command = "echo \""message"\" | mail -s \""subject"\" "USER_EMAIL
+unix(command);  
+}
+}'
+############################################################################################################
+###################################################################################
+
+
+
+def CURRENT_EXPERIMENT_NAME  '{
+	tempDummyString = "$1"
+	comment "%s"  tempDummyString
+}'
+
+
+def CollectData '{
+	if( $# !=  1) {
+    	  printf ("Typical usage: CollectData usaxs\.mac \n")
+        exit;
+		}	
+	# Change the DOFILE name to the argument so these two functions operate on the file name passed in
+	DOFILE = "$1"
+	
+	# These were in old preable of usaxs.mac; for the other two, see below	
+	validateUsaxsDofile;   # check do file for non printable characters
+	postUsaxsDofile2WWW;   # copy this macro to the WWW page area	
+	# set dataCollectionInProgress so GUI (and other tools) know, user is collecting data... (1-running, 0 not running)
+	epics_put("9idcLAX:dataColInProgress", 1)
+	
+	### !!!!!!!!!!! spec executes the following qdo statements in reverse order !!!!!!!!!!! ###
+	# This runs postMessageUSAXS_done
+	qdo usaxs_postScan.mac
+	qdo  $*                   
+                              # Run the mac file passed in as argument	
+	qdo usaxs_startscan.mac;  # opens the B shutter and possibly do other things   
+	qdo USAXS_conf.mac;       # load current instrument configuration
+
+}'
+
+ 
+###################################################################################
+###################################################################################
+
+global CTRL_C_PV
+global CTRL_C_VAR
+CTRL_C_PV = "9idcLAX:dataColInProgress"
+CTRL_C_VAR = 1
+
+def ctrlc_setpv_on '
+  """
+  Enable writing a value to a PV if Ctrl-C is pressed.
+  """
+   ####cdef("_cleanup3", "\n {epics_put(CTRL_C_PV, CTRL_C_VAR)}; ", "ctrlc_setpv")
+   cdef("cleanup1", "\n {epics_put(CTRL_C_PV, CTRL_C_VAR)}; ", "ctrlc_setpv")
+'
+
+def ctrlc_setpv_off '
+  """
+  Disable writing to a PV if Ctrl-C is pressed.
+  """
+   ###cdef("_cleanup3", "", "ctrlc_setpv","delete")
+   cdef("cleanup1", "", "ctrlc_setpv","delete")
+'
+
+##################################################################################
+###################################################################################
+
+ 
+ def ___round(x) '{
+	    return int(x > 0.0 ? x + 0.5 : x - 0.5);
+	  }'
+
+###################################################################################
+

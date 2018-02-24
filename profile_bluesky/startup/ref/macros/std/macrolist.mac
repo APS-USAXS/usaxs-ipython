@@ -1,0 +1,347 @@
+"""
+Utility macros for determining macros in use and related information
+ 
+
+DESCRIPTION
+===========
+This file contains macros which will list and helpd describe macros being used. 
+It can determine the macros currently loaded and list where they were loaded and 
+which macros are loaded at startup. 
+
+The following are macros provided:
+
+    * :spec:def:`macro_list`          -> List macros loaded in spec with 
+                                         source file loc
+    * :spec:def:`mls`                 -> Alias for macro_list
+    * :spec:def:`macro_specstartlist` -> List macros loaded at startup 
+    * :spec:def:`ssls`                -> Alias for macro_specstartlist
+
+
+
+LIMITATIONS
+===========
+This has only been tested on RHEL5 and RHEL6 hosts. Since Solaris and other 
+Linux flavors may not implement the same application switches for grep, it is 
+unknown whether the macros here will function the same. The user's experience 
+may vary.  
+
+Installation
+============
+
+Setup
+-----
+No special configuration is needed to run these macros. Simply load the macro
+file::
+
+  > qdo macrolist.mac
+
+Dependencies
+------------
+There are no dependencies on other macros.
+
+
+Impact
+------
+
+No chained macro definitions are affected by this macro.
+
+File information
+================
+
+AUTHORS:
+
+  * J Kirchman (JAK, jkirchman), 
+    Argonne National Laboratory
+
+CREATION DATE:
+
+  2013-10-10
+
+COPYRIGHT:
+
+  .. automatically retrieve the current year:
+  .. |current_year| date:: %Y
+
+  Copyright (c) 2014-|current_year|, UChicago Argonne, LLC
+
+  All Rights Reserved
+
+  APS SPEC macros
+
+  APS SPEC development team,
+  X-ray Science Division and APS Engineering Support Division,
+  Argonne National Laboratory
+
+LICENSE::
+
+  OPEN SOURCE LICENSE
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+  1. Redistributions of source code must retain the above copyright notice,
+     this list of conditions and the following disclaimer.  Software changes,
+     modifications, or derivative works, should be noted with comments and
+     the author and organization's name.
+
+  2. Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+  3. Neither the names of UChicago Argonne, LLC or the Department of Energy
+     nor the names of its contributors may be used to endorse or promote
+     products derived from this software without specific prior written
+     permission.
+
+  4. The software and the end-user documentation included with the
+     redistribution, if any, must include the following acknowledgment:
+
+     "This product includes software produced by UChicago Argonne, LLC
+     under Contract No. DE-AC02-06CH11357 with the Department of Energy."
+
+  *****************************************************************************
+  *****************************************************************************
+
+  DISCLAIMER
+
+  THE SOFTWARE IS SUPPLIED "AS IS" WITHOUT WARRANTY OF ANY KIND.
+
+  Neither the United States GOVERNMENT, nor the United States Department
+  of Energy, NOR uchicago argonne, LLC, nor any of their employees, makes
+  any warranty, express or implied, or assumes any legal liability or
+  responsibility for the accuracy, completeness, or usefulness of any
+  information, data, apparatus, product, or process disclosed, or
+  represents that its use would not infringe privately owned rights.
+
+  *****************************************************************************
+
+VERSION::
+
+  $Revision: 1290 $
+  $Date: 2016-04-29 15:12:23 -0500 (Fri, 29 Apr 2016) $
+  $Author: usaxs $
+  $URL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/std/macrolist.mac $
+
+CHANGE LOG:
+
+  2014-05-06 (JAK):
+
+  - Original
+
+  2014-08-29 (JAK):
+
+  - Misc changes to "where_used": 
+  - Remove match if in commented lines
+  - Warns if no matches found
+  - Cleanup line consolidated  
+
+  2015-05-13 (JAK):
+
+  - Added geoms surf and new sevc
+  - Changed print statement for geometry 
+
+TO DO:
+
+  - Where used doesn't handle def wrappers very well  
+
+"""
+
+#==============================================================================
+# Global variable definitions
+#==============================================================================
+
+#==============================================================================
+# Macro command definitions
+#==============================================================================
+
+
+#------------------------------------------------------------------------------
+def mls 'macro_list'
+
+#------------------------------------------------------------------------------
+def macro_list '{
+  """
+  Spec macro which lists all non-standard macros loaded and from where (file).
+  This can be useful if one needs to know if any non-standard macros have 
+  been utilized ot would be lost if planning to restart fresh. 
+
+  USAGE::
+
+    > macro_list
+
+  ARGUMENTS:
+    :none: 
+
+  NOTE:
+    This macro uses temporary files which it creates in the /tmp directory
+    after which it cleans up after itself and deletes the files.
+
+   
+  """
+  local random logfile deflist cmd
+
+  random = rand()
+  logfile = "/tmp/" random ".log"
+  deflist = "/tmp/" random ".list"
+
+  # Cannot use fon/foff due to parsing of single quotes 
+  if (on(logfile)!=0) eprint "Could not open logfile"
+  offt
+  prdef
+  close(logfile)
+  ont
+
+
+  # Create command to: 1) grep out standard macros, 
+  #                    2&3) parse together filename and def name 
+  #                    4) remove -- lines
+  #                    5) sort by filename
+  #                    6) space out and remove hash
+  #                    7) use sed to remove if any parenthesis
+  #                    8) put into columns
+  if ($# == 1) {
+      macfilter = "\'\'"
+      printf("***%s ***",$1)
+  }
+  else
+    macfilter = "-v -i standard"
+
+  cmd = sprintf("grep %s %s \
+                 | egrep -A 1 \'^#.*mac\' \
+                 | perl -p -e \'s/mac\n/mac\t/\' \
+                 | grep def \
+                 | sort \
+                 | awk \'{print \$2 \" \" \$3 \" \" \$4}\' \
+                 | sed -e \'s/\(\.\*\$//\' \
+                 | column -t > %s" \
+                 , macfilter, logfile, deflist)
+  unix (cmd)
+
+  # Print def list
+  unix (sprintf("cat %s", deflist))
+
+  # Cleanup
+  unix (sprintf("rm %s %s", logfile, deflist)) 
+
+}'
+
+
+
+
+
+#------------------------------------------------------------------------------
+def where_used(macro) '{
+  """
+  Spec macro which lists all of the macros using a specified macro. 
+
+  USAGE::
+
+    > where_used (macro)
+
+  ARGUMENTS:
+    :macro:   specified macro whose use is to be shown
+
+  NOTE:
+    This macro uses temporary files which it creates in the /tmp directory
+    after which it cleans up after itself and deletes the files.
+
+   
+  """
+  local random logfile deflist cmd usesize
+
+  if (macro == "") {
+      eprintf("No macro provided! Please provide a macro name.\n")
+      return(-1)
+  }
+  else {
+      #printf("All occurrences of \'%s\' will be displayed.\n",macro)
+  }
+
+  random = rand()
+  logfile = "/tmp/" random ".log"
+  uselist = "/tmp/" random ".use"
+
+  # Cannot use fon/foff due to parsing of single quotes 
+  if (on(logfile)!=0) eprint "Could not open logfile"
+  offt
+  prdef
+  close(logfile)
+  ont
+
+
+  # Create command to: 1) grep the macro everywhere used, including all defs 
+  #                    2) remove its own def and usage lines
+  #                    3) remove any print lines 
+  #                    4) remove comment lines containing matches 
+  #                    5) grep the exact match with the line preceding (where used)
+  
+  cmd = sprintf("egrep -w --color=auto \'%s|^def|^#\ \*mac\|^#\ \*MAC\' %s \
+                 | egrep -v \'^def %s|Usage\' \
+                 | egrep -w -v \'printf\' \
+                 | egrep -v -E \'^\ \*#\' \
+                 | grep -w -B 1 %s > %s" \
+                 , macro, logfile, macro, macro, uselist)
+  unix (cmd)
+
+  # Print which/use list
+  unix (sprintf("stat -c %s %s", "%s", uselist), usesize)
+  if ( usesize == "0" ) {
+    printf("No macros found which use \'%s\'.", macro)
+  } else { 
+    unix (sprintf("cat %s", uselist))
+  }
+
+  # Cleanup
+  unix (sprintf("rm -f %s %s", logfile, uselist)) 
+
+}'
+
+
+#------------------------------------------------------------------------------
+def ssls 'macro_specstartlist'
+
+
+#------------------------------------------------------------------------------
+def macro_specstartlist '{
+  """
+  Spec macro which lists which of the usual macros loaded at startup are present. 
+
+  USAGE::
+
+    > macro_specfilelist
+
+  ARGUMENTS:
+    :none: 
+
+   
+  """
+  local geom geomfile macfile
+ 
+  # Determine geometry from spec name
+  if (index(SPEC,"four") != 0)        geom = "fourc"
+  else if (index(SPEC,"sixc") != 0)   geom = "sixc"
+  else if (index(SPEC,"psic") != 0)   geom = "psic"
+  else if (index(SPEC,"kapp") != 0)   geom = "kappa"
+  else if (index(SPEC,"surf") != 0)   geom = "surf"
+  else if (index(SPEC,"sevc") != 0)   geom = "sevc"
+  else                                geom = "spec"
+  printf("Based on the spec name \'%s\', it is assumed this is a %s geometry.\n", SPEC, geom)
+
+
+  geomfile = sprintf("%s%s", substr(geom,1,4), ".mac")
+  
+  macfile["0"] = SPECD "/standard.mac"
+  macfile["1"] = SPECD "/" geomfile
+  macfile["2"] = SPECD "/" SPEC "/" geomfile
+  macfile["3"] = SPECD "/site_f.mac"
+  macfile["4"] = SPECD "/site.mac"
+  macfile["5"] = SPECD "/" SPEC "/conf.mac"
+  macfile["6"] = CWD "/spec.mac"
+
+  for (i=0 ; macfile[i] != 0; i++) {
+    presence = (file_info(macfile[i])) ? "EXISTS" : "DOES NOT EXIST"
+    printf("%-64s %-15s\n", macfile[i], presence)
+  }
+
+}'
+

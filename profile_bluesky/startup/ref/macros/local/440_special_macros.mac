@@ -1,0 +1,48 @@
+
+def tune_a2rp '
+	epics_put("9idcLAX:vsc:c0.DLY", 0.2)
+	tune_usaxs_motor a2rp -0.2 0.2 40 0.2
+	epics_put("9idcLAX:vsc:c0.DLY", 0.1)
+	# try to approach from the original position since the piezzos seem to have some hysteresis
+	umvr a2rp -0.1
+	sleep(0.2)
+	umv a2rp pl_COM
+	# JIL 6 29 2009 
+'
+
+def tune_m2rp '
+     global useSBUSAXS
+     global useMSstage
+     global tune_ok
+     if(useSBUSAXS==1||useMSstage==1){counters cnt_num(I00) cnt_num(I00)} else {counters cnt_num(I0) cnt_num(I0)}
+     if(useSBUSAXS==1||useMSstage==1){plotselect I00} else {plotselect I0}
+     #autorange_I0
+     tune_usaxs_motor m2rp -0.12 0.12 30 0.2    ## for highe energy operations change range to 0.2 V
+     # fix for tuning problems of m2rp on 10 30 2006 JIL, why???
+     #####if(tune_ok){umv m2rp pl_COM-0.05}
+     # is this still neded, change to move... October 08, JIL
+     if(tune_ok){umv m2rp pl_COM}
+     #autorange_I0
+     plotselect upd2
+     counters cnt_num(I0) cnt_num(upd2)
+    '
+
+def tune_ar   '{
+  global AR_VAL_CENTER_OFFSET  
+  local __range
+  __range = 0.0003
+  if( $# == 1 ) { __range = $1 }
+  tune_usaxs_motor ar __range -1*__range 40 0.3
+      # we are now at the top of the AR rocking curve
+      # let us define the beam center as such
+  waitmove; get_angles;
+      # fix for missing the beam center by use of AR_VAL_CENTER_OFFSET, JIL 12/12/2007
+  umvr ar AR_VAL_CENTER_OFFSET
+  waitmove; get_angles;
+  # store AR center
+  set_AR_VAL_CENTER A[ar]
+      # remember the Q calculation needs a new 2theta0
+      # use the current AR encoder position
+  epics_put("9idcLAX:USAXS:Q.B", epics_get("9idcLAX:USAXS:Q.A"))
+}'
+

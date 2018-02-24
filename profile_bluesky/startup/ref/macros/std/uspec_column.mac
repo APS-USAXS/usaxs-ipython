@@ -1,0 +1,148 @@
+#===============================================================================
+# file ucolumn.mac
+# Written by X. Jiao 07/12/2005 Version 1.0
+#
+# Generic SPEC macros
+#
+# Decription: to add user defined columns to spec file, based on P. Jemian's 
+#             macros:uni_specdatacolumn.mac
+#
+# User Macros: 
+#    u_column_show: display user defined data columns
+#    u_column_add:  add one new entry of user defined column
+#    u_column_remove: delete one or( a set related to one key identifier)
+#                     column/columns
+#    u_column_clear: clear all user defined columns
+# Internal Macros:
+#    u_column_rebuild
+#
+# Modification History:
+# 7/20/2005 X. Jiao -> created based on uni_specdatacolumn.mac, modified so that
+#                     user columns grouped as key identifier, one can delete
+#                     as pieces while keep others. 
+#
+#=============================================================================== 
+#
+#$Log: uspec_column.mac,v $
+#Revision 1.3  2006/05/17 16:44:35  jiaox
+#*** empty log message ***
+#
+#Revision 1.2  2006/05/11 17:46:31  jiaox
+#Added CVS Log entry.
+#
+#
+###############################################################################
+
+
+#===============================================================================
+# global variables 
+#===============================================================================
+global _ADDCOL_ID[]   ;# associative array with definition key identifier
+
+
+#===============================================================================
+# User macros defined here
+#===============================================================================
+def u_column_show '{
+    local A_name B_name
+    for( i in _ADDCOL_ID) {
+       A_name = _ADDCOL_ID[i]
+       B_name = sprintf("_ADDCOL_%s_FMT",i)
+       printf("\nColumns defined as pieces of identifier:%s\n",i)
+       for( j in @A_name) {
+          printf("%s :  %s  :  %s \n", j,@A_name[j],@B_name[j])
+       }    
+    }      
+ 
+}'
+
+def u_column_add(tag,fmt,cmd,key)'{
+    local A_name B_name
+    A_name = sprintf("_ADDCOL_%s_CMD",key)
+    B_name = sprintf("_ADDCOL_%s_FMT",key)
+    if(!_ADDCOL_ID[key]) {
+        _ADDCOL_ID[key] = A_name
+        global @A_name[] @B_name[]
+    }
+    
+    @A_name[tag] = cmd
+    @B_name[tag] = fmt
+    u_column_rebuild
+ 
+}'
+
+def u_column_remove(tag,key) '{
+    local A_name B_name
+    if(_ADDCOL_ID[key]) {
+          A_name = _ADDCOL_ID[key]
+          B_name = sprintf("_ADDCOL_%s_FMT",key)
+          delete @A_name[tag]
+          delete @B_name[tag]
+    }
+    u_column_rebuild
+}'
+
+def u_column_clear(key) '{
+    local A_name B_name i
+    if(_ADDCOL_ID[key]) {
+       A_name = _ADDCOL_ID[key]
+       B_name = sprintf("_ADDCOL_%s_FMT",key)
+       unglobal @A_name
+       unglobal @B_name
+       delete _ADDCOL_ID[key]
+    }
+    else {
+       if (key =="all") {
+         for(i in _ADDCOL_ID) {
+           A_name=_ADDCOL_ID[i]
+           B_name=sprintf("_ADDCOL_%s_FMT",i)
+           unglobal @A_name
+           unglobal @B_name
+           delete _ADDCOL_ID[i]
+         }
+       }
+       
+    }
+    u_column_rebuild
+           
+}'
+
+
+#===============================================================================
+# Internal macros defined here
+#===============================================================================
+def u_column_rebuild '{
+    local fout_cmd fout_fmt flabel fheader ncols i j
+    local A_name B_name
+    ncols=0
+    flabel=fout_cmd=fout_fmt=""    
+    for( i in _ADDCOL_ID) {
+       A_name = _ADDCOL_ID[i]
+       B_name = sprintf("_ADDCOL_%s_FMT",i)
+       for(j in @A_name) {
+          ncols++
+          flabel = sprintf("%s  %s",j,flabel)
+          fout_fmt = sprintf("%s %s",@B_name[j],fout_fmt)
+          if(ncols==1) fout_cmd=sprintf("%s%s",@A_name[j],fout_cmd)
+          else fout_cmd=sprintf("%s,%s",@A_name[j],fout_cmd)
+       }
+    }
+    if(ncols) {
+        flabel  = sprintf("\"%s\"", flabel)
+        fheader = sprintf("\n _cols+=%d", ncols)
+        fout    = sprintf("sprintf(\"%s\",%s)", fout_fmt, fout_cmd)
+        cdef("Fheader", fheader,  "UCOL", 0x20)
+        cdef("Flabel",  flabel,   "UCOL", 0x20)
+        cdef("Fout",    fout,     "UCOL", 0x20)
+    }
+    else {
+        cdef("Fheader", "",  "UCOL", "delete")
+        cdef("Flabel",  "",  "UCOL", "delete")
+        cdef("Fout",    "",  "UCOL", "delete")
+        rdef Flabel \'""\'
+        rdef Fout   \'""\'
+   }
+}'    
+    
+
+

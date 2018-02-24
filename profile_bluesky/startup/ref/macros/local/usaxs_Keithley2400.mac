@@ -1,0 +1,142 @@
+# usaxscontrol:/data/spec/macros/usaxs/usaxs_Keithley2400.mac
+#
+# this file contains support for Keithley 2400 on 9idcLAX
+#
+#
+########### SVN repository information ###################
+# $Date: 2015-01-16 11:38:12 -0600 (Fri, 16 Jan 2015) $
+# $Author: usaxs $
+# $Revision: 1047 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_Keithley2400.mac $
+# $Id: usaxs_Keithley2400.mac 1047 2015-01-16 17:38:12Z usaxs $
+########### SVN repository information ###################
+#
+#
+#  USAXS-Keithley 2400 Sourcemeter macros 
+#  maintained by Jan Ilavsky
+#-------------------------------------------------------------------------------
+#############################################################################
+#
+######################################################################################
+# define Keithley2400 epics macros 
+# Voltage read and range read/write
+def K2400_Vget  'epics_get("9idcLAX:k24k:setVoltRdAI.VAL")'
+def K2400_VRget 'epics_get("9idcLAX:k24k:vRangeMO.VAL")'
+def K2400_VRset '{
+	if( ($# != 1) || ($1 > 4) || ($1 < 0)) {
+        print "Allowed V range states by Keithley 2400: 0-4"
+	    print " 0: 200mV\n 1: 2V\n 2: 20V\n 3: 200V\n 4: AUTO\n"
+	}
+	else  epics_put("9idcLAX:k24k:vRangeMO.VAL",$1)
+	printf ("Keithley 2400 voltage range set to %s.\n", K2400_VRget)
+}'
+
+# Current read and range read/write
+def K2400_Iget  'epics_get("9idcLAX:k24k:measCurrAI.VAL")'
+def K2400_IRget 'epics_get("9idcLAX:k24k:iRangeMO.VAL")'
+def K2400_IRset '{
+	if( ($# != 1) || ($1 > 7) || ($1 < 0)) {
+        print "Allowed I range states by Keithley 2400: 0-7"
+	    print " 0: 1uA\n 1: 10uA\n 2: 100uA\n 3: 1mA "
+	    print " 4: 10mA\n 5: 100mA\n 6: 1A\n 7: AUTO\n"
+	}
+	else  epics_put("9idcLAX:k24k:iRangeMO.VAL",$1)
+	printf ("Keithley 2400 voltage range set to %s.\n", K2400_IRget)
+}'
+######################################################################################
+
+def RecordKeithleyCurrent '{
+     """write temperatures to file"""
+	TEMPLINK = sprintf ("Current on Keithely2400 is %g A\n", epics_get("9idcLAX:k24k:measCurrAI.VAL"))     
+     comment "%s" TEMPLINK 
+     ###
+}'
+######################################################################################
+
+def RecordKeithleyIV '{
+    local K_limit, npoints, K_interval, i
+    local K_readV, K_readI
+    K_limit = ($1)
+    npoints = ($2)
+    K_interval = (2*K_limit)/(npoints-1)
+
+    epics_put("9idcLAX:k24k:enableBO", 1); sleep(1)
+    
+    for (i=-K_limit; i<=K_limit; i=i+K_interval) {
+        epics_put("9idcLAX:k24k:setVoltAO", i); sleep(1)
+        K_readV = epics_get("9idcLAX:k24k:measVoltAI.VAL")
+        K_readI = epics_get("9idcLAX:k24k:measCurrAI.VAL")
+        TEMPLINK = sprintf ("IV on Keithely2400: %g V %g A\n", K_readV, K_readI)
+        comment "%s" TEMPLINK
+    }
+    
+    TEMPLINK = sprintf("R at final point: %g", K_readV/K_readI)
+    comment "%s" TEMPLINK
+
+    epics_put("9idcLAX:k24k:enableBO", 0)
+}'
+######################################################################################
+
+# Current read and range read/write
+def RecordK2400 '{
+    """write voltage to file"""
+	VOLT_K2400 = sprintf ("Voltage of Keithley2400 is %g\n",K2400_Vget)     
+    comment "%s" VOLT_K2400
+	I_K2400 = sprintf ("Current of Keithley2400 is %g\n", K2400_Iget)     
+    comment "%s" I_K2400
+    ###
+}'
+######################################################################################
+
+def RecordKeithleyCurrent '{
+     """write temperatures to file"""
+	TEMPLINK = sprintf ("Current on Keithely2400 is %g A\n", epics_get("9idcLAX:k24k:measCurrAI.VAL"))     
+     comment "%s" TEMPLINK 
+     ###
+}'
+######################################################################################
+
+def RecordKeithleyIV '{
+    local K_limit, npoints, K_interval, i
+    local K_readV, K_readI, K_setV
+    local m[]
+
+    K_limit = ($1)
+    npoints = ($2)
+    m[0] = 0
+
+    local array K_V[npoints], K_I[npoints]
+
+    K_interval = (2*K_limit)/(npoints-1)
+
+    epics_put("9idcLAX:k24k:enableBO", 1); sleep(1)
+    
+    for (i=0; i< npoints; i++) { 
+        K_setV = -K_limit + K_interval*i
+        epics_put("9idcLAX:k24k:setVoltAO", K_setV); sleep(3)
+        K_readV = epics_get("9idcLAX:k24k:measVoltAI.VAL")
+        K_readI = epics_get("9idcLAX:k24k:measCurrAI.VAL")
+        K_V[i] = K_readV
+        K_I[i] = K_readI
+
+        TEMPLINK = sprintf ("IV on Keithely2400: %g V %g A\n", K_readV, K_readI)
+        comment "%s" TEMPLINK
+    }
+
+    plot_cntl("filter1,open")
+    plot_cntl("erase")
+    plot_cntl("dots")
+    plot_cntl("-ebars")
+    plot_range("auto","auto","auto","auto")
+    array_plot(K_V, K_I)
+    
+    TEMPLINK = sprintf("R at final point: %g", K_readV/K_readI)
+    comment "%s" TEMPLINK
+    print array_fit(m, K_V, K_I-K_I[int(npoints/2)+1])
+    TEMPLINK = sprintf("R fit value: %g", m[0])
+    comment "%s" TEMPLINK
+
+    epics_put("9idcLAX:k24k:enableBO", 0)
+}'
+######################################################################################
+

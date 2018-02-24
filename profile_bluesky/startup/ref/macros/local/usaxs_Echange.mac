@@ -1,0 +1,176 @@
+#
+#  usaxs_Echange.mac
+#
+#  USAXS-specific macros
+#  maintained by Jan Ilavsky
+#  last edit:  2009-March-21
+#
+#
+# this file contains macros which change energy for usaxs instrument.... 
+# set for Si 220 crystals, change _Local_D for Si111
+# fixed bug which caused error when run before any scan
+# March 21, 2009 - changed so the code will tune MR, MSRP, and AR for slit smeared case... 
+# change is geometry changes. Last time worked perfect...
+# June 25, 2009 - changed back. We'll see how should we run in the future. 
+
+
+def mv_USAXS_E '{
+  local _E step _OLD_E _OLD_Wavelength _NEW_Wavelength _Local_D_220 _OLD_Bragg_Th _NEW_Bragg_Th
+  local _OLD_mr _New_mr _OLD_ar _New_ar _Local_D _Local_D_111 _start_echange_time
+  local _OLD_msr, _NEW_msr, _OLD_asr, _NEW_asr
+  global useSBUSAXS
+  global useMSstage                 
+  if( $# != 1) {
+    printf("usage: mv_USAXS_E energy_keV");
+    exit;
+  }
+  _E = $1;
+  if ( _E > 1000 ) {
+    printf("Requested Energy > 1000, assuming input was eV, ... converting to keV.\n");
+    _E = _E * 0.001
+  }
+  # when did we start:
+  _start_echange_time = date()
+  useModeUSAXS
+  set_USAXS_Slits 
+
+  # first remember where you were
+  get_angles
+  _OLD_E = A[en]
+  _OLD_Wavelength = 12.398424437/_OLD_E
+  _NEW_Wavelength = 12.398424437/ _E
+  _Local_D_220 = 2 * 1.920155404
+  _Local_D_440 = 2 * 5.43102088 / sqrt(32)
+  _Local_D_333 = 2 * 5.43102088 / sqrt(3*9)
+  _Local_D_111 = 2 * 5.43102088 / sqrt(3)
+  _Local_D = _Local_D_220
+  _OLD_Bragg_Th = (180/PI)* asin(_OLD_Wavelength/_Local_D)
+  _NEW_Bragg_Th = (180/PI)* asin(_NEW_Wavelength/_Local_D)
+
+      # tune the monochromator and the undulator
+  step = 1
+  printf("\nStep %d: Changing DCM and undulator energies to %.5f keV.\n", step, _E);
+  und_tracking_on
+  umv en _E;
+
+  DCMfeedbackON
+  print "If needed, move mx, ax, and ay to the correct positons for 4 reflections."
+  print "Also, if needed modify the USAXS_conf.mac for the new energy."
+  print "Done changing beamline energy, next is 30s sleep, use ctrl-S to pause and check steering and ctrl-Q to resume"
+  sleep(30)
+  print "resuming energy change, tuning M stage"
+     # tune the MR stage
+  step = step + 1
+  # need to calculate for Si220 where to go and go there....
+  _OLD_mr = A[mr]  
+  _New_mr = _NEW_Bragg_Th +(_OLD_mr-_OLD_Bragg_Th)
+  printf("\nStep %d: Rotating mr from %.5f to %.5f degrees.\n", step, _OLD_mr, _New_mr );
+  umv mr _New_mr;
+
+  step = step + 1
+  printf("\nStep %d: Coarse mr scan to find peak.\n", step);
+  if(useSBUSAXS==1){counters cnt_num(I00) cnt_num(I00)} else {counters cnt_num(I0) cnt_num(I0)}
+  if(useSBUSAXS==1){plotselect I00} else {plotselect I0}
+  openTiFilterShutter
+  set_I0_gain 8
+  lup mr 0.02 -0.02 30 1
+
+  step = step + 1
+  printf("\nStep %d: Moving mr to %.5f degrees (centroid).\n", step, CEN);
+  umv mr CEN
+
+  step = step + 1
+  printf("\nStep %d: Fine mr scan to find peak and optimize m2rp.\n", step);
+  tune_mr
+  tune_m2rp
+
+  step = step + 1
+  printf("\nStep %d: Done optmizing M stage to %.5f degrees.\n", step, A[mr]);
+
+  ###################################
+  if(useSBUSAXS==1 || useMSstage==1){
+     step = step + 1
+ 
+      _OLD_msr = A[msr]  
+      _New_msr = _NEW_Bragg_Th +(_OLD_msr-_OLD_Bragg_Th)
+      printf("\nStep %d: Rotating msr from %.5f to %.5f degrees.\n", step, _OLD_msr, _New_msr );
+      umv msr _New_msr;
+     counters cnt_num(I0) cnt_num(I0) 
+     plotselect I0
+     openTiFilterShutter
+     lup msr 0.02 -0.02 30 1
+ 
+     step = step + 1
+     printf("\nStep %d: Moving msr to %.5f degrees (centroid).\n", step, CEN);
+     umv msr CEN
+
+     step = step + 1
+     printf("\nStep %d: Tuning msrp.\n", step);
+     tune_msrp
+
+#     step = step + 1
+#     _OLD_asr = A[asr]  
+#     _New_asr = _NEW_Bragg_Th +(_OLD_asr-_OLD_Bragg_Th)
+#     printf("\nStep %d: Rotating asr from %.5f to %.5f degrees.\n", step, _OLD_asr, _New_asr );
+#     umv asr _New_asr;
+
+     step = step + 1
+ #    printf("\nStep %d: Asrp not tuned, not possible!!!\n", step);
+  }
+   ###################################
+ 
+
+### Change for A stage with 111 crystals
+#  _Local_D = _Local_D_111
+#  _OLD_Bragg_Th = (180/PI)* asin(_OLD_Wavelength/_Local_D)
+#  _NEW_Bragg_Th = (180/PI)* asin(_NEW_Wavelength/_Local_D)
+### remove above lines for 220 crystals on A stage... 
+
+
+   # tune the AR stage
+  step = step + 1
+  _OLD_ar = A[ar]  
+  _New_ar = _NEW_Bragg_Th +(_OLD_ar-_OLD_Bragg_Th)
+  printf("\nStep %d: Rotating ar from %.5f to %.5f degrees.\n", step, _OLD_ar, _New_ar );
+  umv ar _New_ar;
+
+  step = step + 1
+  printf("\nStep %d: Coarse ar scan to find peak.\n", step);
+  tune_ar 0.025  
+  
+  step = step + 1
+  printf("\nStep %d: Moving ar to %.5f degrees (centroid).\n", step, CEN);
+
+  step = step + 1
+  printf("\nStep %d: Fine ar and a2rp optimization.\n", step);
+  tune_ar
+  tune_a2rp
+
+  step = step + 1
+  printf("\nStep %d: Finished optmizing A stage to %.5f degrees.\n", step, A[ar]);
+
+  # optimize the instrument
+  step = step + 1
+  printf("\nStep %d: Finetune the USAXS instrument and tune the guard slits for SAXS\n", step);
+  preUSAXStune
+
+  ### update the calculation of flyscan trajectory
+  __OldFinish = FINISH
+  set_FINISH 0.1
+  set_FINISH __OldFinish 
+  ## this should have updated all flyscan parameters since the FINISH has changed (twice) 
+  
+  tune_diode
+  tune_GslitsCenter  
+  #printf("\nDiode position and Guard slits tuned, however the pinY may be off now. ");
+
+  printf("\nTune Guard slits, not done Guard slits tuned, however the pinY may be off now. ");
+  # reload USAXS_conf.mac so our tune ranges are correctly set. 
+  qdo ./USAXS_conf.mac
+  
+  printf("\nStarted at %s, done at %s .\n", _start_echange_time, date());
+  print "If needed, move mx, ax, and ay to the correct positons for 4 reflections."
+  print "Also, if needed modify the USAXS_conf.mac for the new energy."
+}'
+
+###################################################################################

@@ -1,0 +1,4 @@
+# un set dataCollectionInProgress so GUI (and other tools) know, user is collecting data... (1-not running, 0 running)
+epics_put("9idcLAX:dataColInProgress", 0)
+
+postMessageUSAXS_done

@@ -1,0 +1,53 @@
+#    usaxs_startscan.mac
+#
+#  USAXS-specific macros 
+#  maintained by Jan Ilavsky
+#  last edit:  2011-06-27
+#
+#   This file contains stuff to do before starting usaxs scans...
+#
+# 
+
+
+####
+#useModeUSAXS;          # make sure we use USAXS configuration
+openMonoShutter;       # open Mono shutter, sleeps as needed
+epics_put ("9idcLAX:USAXS:state", sprintf("Starting data collection"))
+epics_put ("9idcLAX:collectingSAXS", 0)
+epics_put ("9idcLAX:collectingWAXS", 0)
+
+### this is what spec.mac does at this time...
+#######################################################
+# measure dark currents for the detectors
+global USAXS_MEASURE_DARK_CURRENTS
+ if(USAXS_MEASURE_DARK_CURRENTS){
+    measure_USAXS_DETS_dark_currents 
+    measure_USAXS_PD_dark_currents
+ }
+ if( RunPreUSAXStuneOnQdo){
+         comment "Runing preUSAXStune since it was requested on start of the measurements. " 
+         set_USAXS_Slits   # make sure USAXS slits are set correctly...
+         preUSAXStune
+ }
+
+# sync different order numbers for all three images
+def __SyncOrderNumbers '{
+  if(syncOrderNumbers) {
+	__TmpOrderNum=epics_get("9idcLAX:USAXS:FS_OrderNumber")
+	if(epics_get("usaxs_pilatus1:cam1:FileNumber")> __TmpOrderNum){
+   		 __TmpOrderNum = epics_get("usaxs_pilatus1:cam1:FileNumber")
+	}
+	if(epics_get("usaxs_pilatus2:cam1:FileNumber")> __TmpOrderNum){
+		    __TmpOrderNum = epics_get("usaxs_pilatus2:cam1:FileNumber")
+	}
+	epics_put("usaxs_pilatus2:cam1:FileNumber",__TmpOrderNum)
+	epics_put("usaxs_pilatus1:cam1:FileNumber",__TmpOrderNum)
+	epics_put("usaxs_pilatus2:HDF1:FileNumber",__TmpOrderNum)
+	epics_put("usaxs_pilatus1:HDF1:FileNumber",__TmpOrderNum)
+	epics_put("usaxs_pilatus2:Nexus1:FileNumber",__TmpOrderNum)
+	epics_put("usaxs_pilatus1:Nexus1:FileNumber",__TmpOrderNum)
+	epics_put("9idcLAX:USAXS:FS_OrderNumber",__TmpOrderNum)
+  }
+}'
+
+__SyncOrderNumbers

@@ -1,0 +1,256 @@
+#
+#  usaxs_globals.mac 
+#
+#  USAXS-specific macros 
+#  maintained by Jan Ilavsky
+#  last edit:  2014 - January 20 - JIL
+# 
+#
+########### SVN repository information ###################
+# $Date: 2018-02-12 14:17:10 -0600 (Mon, 12 Feb 2018) $
+# $Author: ilavsky $
+# $Revision: 1472 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_globals.mac $
+# $Id: usaxs_globals.mac 1472 2018-02-12 20:17:10Z ilavsky $
+########### SVN repository information ###################
+#  
+# set spec plot here
+# September 27, 2007 replaced all brq: with 32idbUSX: since the PVV names changed. JIL
+# October 2008, changes related to moving all sorts of stuff to EPICS, JIL
+# June 2009, added useMSstage parameter
+# November 2009, JIL, changed AR eand MR encoder parts
+# June,2010, changed pv prefix from 32idbUSX to 9idcUSX
+# October 2010, JIL, added Use_DLPCA300 to control which UPD is used
+# June 2012, JIL, added some more parameters to scan up and use feedback for piezo tunings. Added I0gain and I00gain to columns in spec file
+# April 2013, JIL, modified to use last update value for gain on I0 and I00
+# June 2013, JIL, modified to add waiting for sequence programs to be finished before each counting
+# January 2014, JIL, added FlyScan support
+# March 2014, JIL, small changes, moved __WaitForSequencePrograms to usaxs_diode.mac
+# August 2014,JIL, modifications for USAXS Imaging
+# 2016-01-18, JIL:    modified for TR_diode amplifier
+# 2016-07-08, JIL: Changes for tuning Guard slits with rectangular beam
+# 2017-03-27, JIL: Modified presUSAXStune handling
+# 2017-09-07, JIL: added autoranging better support
+
+
+setplot 131
+plotselect upd2
+plot_cntl("font=courb12")
+plot_cntl("font=courb12")
+plot_cntl("colors=0:0:::")
+#############################################################################
+#
+#############################################################################
+no_hkl   # do not care about hkl for this data so forget about it
+#############################################################################
+#
+#   names of Heidenhain angle encoders
+#
+def mr_encoder 'epics_get("9idcLAX:aero:c3:m1")'
+def ar_encoder 'epics_get("9idcLAX:aero:c0:m1")'
+
+global _SCALER_PV
+
+_SCALER_PV = "9idcLAX:vsc:c0"
+#_SCALER_PV = "9idcUSX:scaler1"
+
+
+global     A2RP_DEGREES_PER_VDC          # calibration constant for ASRP piezo
+global     useSBUSAXS                    # set to 1 if running SBUSAXS geometry, else 0
+global     useMSstage                    #set to 1 if using MS stage even in Slit smeared USAXS
+global     USAXSScanUp                   # sety to 1 to scan to higher angles (up)     
+global     ARenc_CENTER                  # center of rocking curve for AR motor encoder, degrees Probably not needed anymore
+global     SPEC_STD_TITLE                # scan title
+global     USAXS_SAMPLE_THICKNESS        # sample thickness. units:mm
+global     USAXS_MEASURE_DARK_CURENTS    # set to 1 to measure dark curents every scan, 0 for not
+global     SAXS_AutorangeI0              # set to 1 to measure dark curents every scan, 0 for not
+global     AR_VAL_CENTER_OFFSET          # this is fudge factor between AR_tune result and proper AR_Val_Center
+
+global     Use_DLPCA300	                 # this is switch so we can change between DLPCA200 (=0) or DLPCA300 (=1)
+
+global     PDstring                     # PV for photodiode, of the form 9idcUSX:[PDstring]
+global     I0string                     # PV for I0, of the form 9idcUSX:[PDstring]
+global     I00string                    # PV for I00, of the form 9idcUSX:[PDstring]
+global     NOTIFICATION_ADDRESSES       # zero-indexed array of email addresses to be notified when USAXS state changes (beam loss, macro done)
+global     NOTIFICATION_ADDRESSES_COUNT # size of above array
+global     UPD_Change_delay             # delay in seconds afte rPD range change within usaxs macro, set in Conf file, typically 0.5s
+global     UPD_PV                       # define global prefix for UPD
+global     TRD_PV                       # define global prefix for TRD
+global     I00_PV                       # define global prefix for I00
+global     I0_PV                        # define global prefix for UPD
+global     M2rpA2rpTuneTime             # define time needed to run m2rp and a2rp feedback based tunes
+
+global     SAXS_GSlitsScaleFct       # scaling factor by which GuardSlits are opened more than beam size for SAXS, used by Guard slits tune prgm
+global     SAXS_GSlitVStepIn         # how much to step vertically in the beam from current position
+global     SAXS_GSlitVStepOut        # how much to step vertically out the beam from current position
+global     SAXS_GSlitHStepIn         # how much to step horizontally in the beam from current position
+global     SAXS_GSlitHStepOut        # how much to step horizontally out the beam from current position
+global     SAXS_Tr_Time              # how long to measure tranmsission for SAXS
+global     SAXS_PD_Yoffset           # how much to move in pinY from beam position to get to SAXS PD
+
+global     USAXS_tune_mr_range          # range for tune mr 
+global     USAXS_tune_m2rp_range        # range for tune m2rp 
+global     USAXS_tune_ar_range          # range for tune ar 
+global     USAXS_tune_a2rp_range        # range for tune a2rp
+global     USAXS_tune_msr_range         # range for tune msr 
+global     USAXS_tune_asr_range         # range for tune asr 
+
+global     WAXSPVprefix                 # prefix for WAXS camera
+###global     WAXSPathPrefix               # prefix for WAXS camera to get to /data/ mount point  -- 2017-11-21 not needed any more for Pilatus2. 
+global     WAXSexposureTime             # exposure time for WAXS camera
+
+global     AltaPVprefix					# PV of Alta soft ioc
+global     UImg_AcquireTime             # USAXS imaging (ALta) acquire time
+global     UImg_NumImages				# USAXS Imaging number of images collected, more or less always 1
+global     UImg_PathToData				# USAXS Imaging path (Windows!) where Apogee stores data. 
+global     UImg_PathToDataRel			# remove, not needed for future, but fix code also. 
+global 	   UImg_ArImagingCenter		# USAXS Imaging, Ar when using Imaging
+global 	   UImg_dyImagingCenter		# USAXS Imaging, dy when tuning in 2 reflections
+global 	   UImg_dxImagingCenter		# USAXS Imaging, dx when tuning in 2 reflections 
+global     UImg_TuneWaxsXPosition       # USAXS Imaging, waxsX when diode is in the beam, tuen with TR diode chain
+
+global    USAXS_tune_USAXSMutliplier    # in counting for preUSAXStune, how much more a USAXS scan counts than SAXS/WAXS
+         
+global    AutorangeOldUPDRange          # last value of autoranging which we can start with
+global    AutorangeOldI0Range           # last value of autoranging which we can start with
+global    AutorangeOldI00Range          # last value of autoranging which we can start with
+global    AutorangeOldTRDRange          # last value of autoranging which we can start with
+
+global array   FlyScan_ArPosArray[400]	# Fly scan calculated Ar waypoints
+global FSToleratePoints					# number of extra points to tolerate in FLy scan before repeating
+
+
+AutorangeOldUPDRange = 4
+AutorangeOldI0Range = 5
+AutorangeOldI00Range = 5
+AutorangeOldTRDRange = 4
+
+
+FSToleratePoints = 5
+WAXSexposureTime  = 1
+SAXS_PD_Yoffset  = 10
+SAXS_Tr_Time   = 3
+USAXS_SAMPLE_THICKNESS = 1.0              # standard liquid cell thickness: mm
+A2RP_DEGREES_PER_VDC = 0.00059721         # measured by JI 10 2006, was 0.0059721 for e-brick controlled piezo
+					# for PI controllr volatges changed 10*, therefore this numbe ris 0.00059721
+useSBUSAXS = 0                   # set to slit smeared geometry by default
+useMSstage = 0                   # do not use MS stage in slit smeared case by default 
+USAXSScanUp = 0                  # old method, scanning down to lower angles
+USAXS_MEASURE_DARK_CURENTS = 1   # default is to measure dark currents every scan... Can save time by skipping  
+AR_VAL_CENTER_OFFSET = 0         # default value - ideal 
+SAXS_AutorangeI0  = 1         # deafult value, autoraneg I0 gain before each SAXS image          
+NOTIFICATION_ADDRESSES_COUNT=0
+M2rpA2rpTuneTime = 10            # select 10 seconds to run piezzo tunes as default
+SAXS_GSlitsScaleFct = 1.2     # 1.2x the size of the beam should be good guess for guard slits. 
+SAXS_GSlitVStepIn = 0.1       # 0.1mm step out the beam
+SAXS_GSlitVStepOut = 0.4      # 0.4mm step over of beam
+SAXS_GSlitHStepIn = 0.2       # 0.2mm step out the beam
+SAXS_GSlitHStepOut = 1.1      # 1.1mm step over of beam
+
+USAXS_tune_mr_range =  0.0025    # range for tune mr for about 12-17kev
+USAXS_tune_m2rp_range = 3        # range for tune m2rp for about 12keV
+USAXS_tune_ar_range =  0.002     # range for tune ar for about 12keV 
+USAXS_tune_a2rp_range = 3        # range for tune a2rp for about 12keV
+USAXS_tune_msr_range = 3         # range for tune msr for about 12keV
+USAXS_tune_asr_range = 3         # range for tune asr for about 12keV 
+
+
+USAXS_tune_USAXSMutliplier = 3	 # default how much more one USAXS scan counts than SAXS or WAXS scan
+
+Use_DLPCA300 = 1                 # lets use DDPCA300, 0 if DLPC200
+
+
+#            Define local PD address:
+ if(Use_DLPCA300){
+     PDstring = "pd01:seq02"
+     UPD_PV    =    "9idcUSX:pd01:seq02"    
+  }else{
+     PDstring = "pd01:seq01"
+     UPD_PV    =    "9idcUSX:pd01:seq01"  
+  }
+# end of PD local address change
+I0_PV        =    "9idcUSX:fem02:seq01"
+I00_PV       =    "9idcUSX:fem03:seq01"
+TRD_PV       =    "9idcUSX:fem05:seq01"
+I0string     =    "pd02:seq01"
+I00string    =    "pd03:seq01"
+TRDstring    =    "pd05:seq01"
+
+
+#############################################################################
+#############################################################################
+# prepare to record the additional USAXS info in the data file
+def getUSAXSencoders '
+  MR_ENC=mr_encoder;
+  AR_ENC=ar_encoder;
+'
+# get the USAXS info after every data point
+# measure0 is called before counting, measure1 and measure2 after the counting. We use measure0 to wait for sequence programs to update, measure 2 to grab the right numbers. 
+#  def measure0 '__waitForSequencePrograms;'  I think this causes hanging...
+def measure0 ''
+def measure1 ''
+def measure2 'getUSAXSdiode;getUSAXSencoders;'
+
+#def Pheader ''
+def Plabel '"ay  dy  ar_enc   pd_range  pd_curent  I0_gain  I00_gain"'
+def Pout   'sprintf("%.3f %.3f %.6f %d %g %.2e %.2e", A[ay], A[dy], A[ar], DIODE_range, DIODE_current, I0_Range_, I00_Range_)'
+
+u_column_clear("all")
+u_column_add("ay",        "%.3f", "A[ay]",	   "USAXS")
+u_column_add("dy",        "%.3f", "A[dy]",	   "USAXS")
+u_column_add("ar_enc",    "%.6f", "A[ar]",	   "USAXS")
+u_column_add("pd_range",  "%d",   "DIODE_range",   "USAXS")
+u_column_add("pd_counts", "%d",   "DIODE_counts",  "USAXS")
+u_column_add("pd_rate",   "%g",   "DIODE_rate",    "USAXS")
+u_column_add("pd_curent", "%g",   "DIODE_current", "USAXS")
+u_column_add("I0_gain",   "%g",   "I0_Range_",       "USAXS")
+u_column_add("I00_gain",  "%g",   "I00_Range_",      "USAXS")
+
+
+
+#############################################################
+# clear the user bit to indicate USAXS scan is not running
+#epics_put ("9idcLAX:USAXS:scanning",  0)
+# guarantee that we tell Igor (through EPICS) which photodiode we are using
+#epics_put("32idbLAX:upd2:selected", 1)
+###################################################################################
+####
+###################################################################################
+# def openDoors 'printf("%s\n", "spec cannot open the hutch doors")'
+##############################################################################
+# Now in EPICS (OCT 08)
+#global     SAMPLE_Y_STEP                 # sample Y movement, mm, to make after each step in the scan
+#global     SAMPLE_DETECTOR_DISTANCE_MM   # need to set configuration in USAXS.conf
+#global     SAMPLE_ANALYZER_DISTANCE_MM   # need to set configuration in USAXS.conf
+#global     USAXS_TIME                    # time to measure each point in USAX sscan
+#global     AR_VAL_CENTER                 # center of rocking curve for AR motor.VAL, degrees
+#global     NUMPTS                        # number of points
+#global     DY0                           # start position of detector stage
+#global     SDD                           # sample to detector disatnce
+#global     AY0                           # start analyzer height 
+#global     SAD                           # sample to analyzer distacne
+#global     MOTOR_PRESCALER_WAIT          # seconds wait after moving before counting scaler
+#global     USAXS_MINSTEP                 # min step of uascan    
+#global     UATERM                        # weighing value... Changes spread of the log stepping
+# note the following is now called ASR_Val_Center, but can be called also ASRP0 for backward compatibility
+#global     ASRP0                         # start asrp value for SBUSAXS
+# global     START_OFFSET                  # angle offset to start above AR_VAL_CENTER
+# global     FINISH                        # end angle for USAXS scans
+
+#USAXS_MINSTEP    = 0.00002       #default value - reasonable smallest number
+#SAMPLE_Y_STEP = 0                # do not move sample while measuring USAXS by default
+#USAXS_TIME = 1                   # default to 1 second count time...
+#UATERM = 1                       # default term... 
+#MOTOR_PRESCALER_WAIT = 0.1       
+#START_OFFSET = 0.002             # some default offset...
+#FINISH = 5                       # some default end
+
+#global     USAXS_MEASURE_PIN_TRANS      # measure transmission in USAXS using pin diode
+#global     USAXSPinT_AyPosition         # Ay to hit pin diode
+#global     USAXSPinT_MeasurementTime    # How long to count
+#global     USAXSPinT_pinCounts          # How many counts were on pin diode
+#global     USAXSPinT_pinGain            # gain of pin diode (note, we are using I00 amplifier here)
+#global     USAXSPinT_I0Counts           # How many counts were on I0 
+#global     USAXSPinT_I0Gain             # gain of I0 
+
+

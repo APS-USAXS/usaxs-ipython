@@ -1,0 +1,897 @@
+
+# $Id: AreaDetector.mac 1047 2015-01-16 17:38:12Z usaxs $
+
+#########################################################ccdscan conceptual macros, not expected to change for each type. but all embedded macros need to be implemented ##############
+#   conceptual macros: ccdset_filetmeplate ccdset_filename ccdset_seqnum   ccdsave {on/off}
+#                      ccdabort ccdwait ccdtrig [nimages]  ccdset_time  ccdwait_trig
+#                      ccdget_seqn ccdget_ccdc ccdget_ROIdim 
+#                      ccd_blockbeam ccd_showbeam 
+#                      
+#
+#
+#
+global CCD_SCAN_SAVE CCD_DARK_NUM CCD_REPEATS CCD_NUMEXPOSURES OFF_SEQN
+global CCD_FLAG CCD_EXT CCD_THROW  CCD_DATA_DIR
+global CCD_SLEEP OFF_SEQN DIR_SLASH
+
+DIR_SLASH="/"
+CCD_REPEATS=1
+CCD_NUMEXPOSURES=1
+
+#-----------------------------------------------------------------------------
+# ccdscan_setup sets the ccdscan features: 
+# 1) save/not save images during scan
+# 2) how many images to throw away at the begining(For some cameras, it ensures 
+#    that the background is stable. )
+# 3) how many darks to take and save.
+# 4) how many images to take at each scan point.
+#-----------------------------------------------------------------------------   
+
+if(unset("SCAN_N") ) {
+
+    SCAN_N=0
+}
+
+def ccdscan_setup'
+    if($# != 0 && $# <3) {
+       p "Usage: ccdscan_setup or ccdscan_setup save_flag  #darks #frames_per_point [NumExp_per_frame]"
+       p "       if num darks is negatic, will take dark at the end of the scan."
+       exit
+    }   
+    if( $#  == 0) {   
+       CCD_SCAN_SAVE =  yesno("Save images during scan?",CCD_SCAN_SAVE);
+       CCD_DARK_NUM = getval("Number of darks to take(negative number to take dark at the end):", CCD_DARK_NUM);
+       CCD_REPEATS = getval("Number of frames per scan point:", CCD_REPEATS);
+       CCD_NUMEXPOSURES =  getval("Number of exposures per frame:", CCD_NUMEXPOSURES);
+    }
+    if($# >=3 ) {
+       CCD_SCAN_SAVE = $1
+       CCD_DARK_NUM = $2
+       CCD_REPEATS = $3
+       if($#4) CCD_NUMEXPOSURES =$4
+       else CCD_NUMEXPOSURES=1
+    }
+'
+
+#------------------------------------------------------------------------------
+#  Example: ccdscan ascan th 1 2 10 1
+#------------------------------------------------------------------------------
+def ccdscan '{
+    if($# ==0) {
+        p "Usage: ccdscan any_spec_scan_macro"
+	p "example: ccdscan ascan th  1 2 20 1"
+	exit
+    }	
+    OFF_SEQN = ccdget_seqn();
+    CCD_FLAG =1;
+    ond;offt;
+    printf("\n#C %s ccdscan is turned on\n",date())
+    ont;offd
+    cdef("cleanup_once","ccdscan_cleanup;","ccdscan","0x20")
+    
+    $*
+    
+    CCD_FLAG=0;
+    ond;offt;
+    printf("\n#C %s ccdscan is turned off\n",date())
+    ont;offd
+    offd;ont;
+    ccdset_filepath(sprintf("%s%s%s",CCD_DATA_DIR,get_datafilename(),DIR_SLASH ));
+    ccdset_filename(sprintf("%s_scanoff",get_datafilename()));
+    ccdset_filetemplate( sprintf("%s%s","%s%s_%3.3d.",CCD_EXT))
+    ccdset_seqnum OFF_SEQN
+    ccdsave on
+  
+}'
+
+def ccdscan_cleanup_scanabort 'ccdscan_cleanup'
+
+def ccdscan_cleanup  '
+    ccdabort
+    ccdset_filepath(sprintf("%s%s%s",CCD_DATA_DIR,get_datafilename(),DIR_SLASH));
+    ccdset_filetemplate( sprintf("%s%s","%s%s_%3.3d.",CCD_EXT))
+    ccdset_filename(sprintf("%s_scanoff",get_datafilename()));
+    ccdset_seqnum OFF_SEQN
+    ccdsave on
+   
+    ont;offd
+    CCD_FLAG = 0;
+    printf("\n%s. ccdscan aborted;cleaned ccdscan stuff.",date())
+'    
+    
+
+#------------------------------------------------------------------------------
+# turn on/off the user defined macros inside the stardard scan macros for ccdscan
+#------------------------------------------------------------------------------
+def ccduse_on '
+    global CCD_FLAG
+    cdef("measure0","
+         if(CCD_FLAG) {_measure0_ccd}
+         ","ccd","0x10")
+    cdef("measure2","
+         if(CCD_FLAG){ _measure2_ccd}
+         ","ccd","0x10")
+    cdef("user_prescan_head","
+         if(CCD_FLAG){ _user_prescan_head_ccd}
+	 ","ccd","0x10")
+    cdef("user_scan_tail","
+         if(CCD_FLAG) { _user_scan_tail_ccd}
+	 ","ccd","0x10")
+'   
+
+
+def ccduse_off '
+    cdef("measure0","","ccd","delete")
+    cdef("measure2","","ccd","delete")
+    cdef("user_prescan_head","","ccd","delete")
+    cdef("user_scan_tail","","ccd","delete")
+'     
+
+
+
+#------------------------------------------------------------------------------
+# Some real internal macros that are embedded deeply inside the ccdscan
+#------------------------------------------------------------------------------
+
+def _user_scan_tail_ccd '
+    if(CCD_DARK_NUM<0) { ccdscan_dark;}
+    
+'
+
+def _user_prescan_head_ccd ' 
+     ccdset_time _ctime
+     ccdset_expNum CCD_NUMEXPOSURES  #uncomment for roper 
+     ccdscan_throw
+     ccdscan_header
+     if(CCD_DARK_NUM>0) {ccdscan_dark;}
+'   
+def ccdscan_throw '
+   if ( CCD_THROW > 0) {
+       ccd_blockbeam;
+       printf("\nTaking %i images and throwing them away\n",CCD_THROW);
+       ccdtrig CCD_THROW;
+       ccdwait;
+   }
+'
+
+def ccdscan_header '
+    local  foo
+    local array rd[4]
+    
+    if(CCD_SCAN_SAVE) {
+         ccdsave on
+         foo = sprintf("%s%s%sS%s%s",CCD_DATA_DIR, get_datafilename(),DIR_SLASH,SCAN_N+1,DIR_SLASH);
+         ccdset_filepath(foo);
+         ccdsave on
+                 
+    }
+    p "\nWriting CCD infomation to spec data file"
+    ond;offt
+    printf("\n#CCD ccdscan %i",SCAN_N+1);
+    printf("\n#CCD save_flag %i",CCD_SCAN_SAVE);
+    if(CCD_SCAN_SAVE) {
+       printf("\n#CCD image_base %s",sprintf("%s%s_s%d_",ccdget_filepath(),get_datafilename(),SCAN_N+1) );
+    } else {
+       printf("\n#CCD image_base N/A")
+    }   
+    printf("\n#CCD repeats_per_point %i",CCD_REPEATS);
+    printf("\n#CCD expoures_per_images %i",ccdget_expNum());
+    printf("\n#CCD dark %i",fabs(CCD_DARK_NUM));
+    if(chk_ccdc()) {
+      rd=ccdget_ROIdim(CCD_MONITOR_ROI)
+      printf("\n#CCD counter_roi %i %i %i %i",rd[0],rd[1],rd[2],rd[3]);
+    } else {
+      printf("\n#CCD counter_roi N/A");
+    }   
+    ont;offd
+    						      
+    
+'
+
+
+def ccdscan_dark '
+    if(fabs(CCD_DARK_NUM) >0 ) {
+      local foo
+      if(fabs(CCD_DARK_NUM)==1) {
+         ccdset_filetemplate( sprintf("%s%s","%s%s.",CCD_EXT))
+      }else{
+         ccdset_filetemplate( sprintf("%s%s","%s%s_%3.3d.",CCD_EXT))
+
+      }
+      if(CCD_DARK_NUM>0) {    
+         foo = sprintf("%s_s%d_dark",get_datafilename(),SCAN_N+1);
+      }else {
+         foo = sprintf("%s_s%d_dark",get_datafilename(),SCAN_N);
+      }
+      ccdset_filename(foo);
+      ccdset_seqnum 1;
+      ccd_blockbeam;
+      printf("\nTaking %i darks\n",fabs(CCD_DARK_NUM));
+      ccdtrig_wait fabs(CCD_DARK_NUM)
+      ccd_showbeam	
+    }	 
+'
+
+def _measure0_ccd '
+      if(CCD_SCAN_SAVE) {
+         # Using callback blocks, these should go away. Need test for all detectors
+         #if(NPTS>0) {
+         #   while( (ccdget_seqn()-1) != CCD_REPEATS) {
+         #     sleep(0.01);
+         #   }
+         #} else {
+         #   if(CCD_DARK_NUM >0) {
+         #      while( (ccdget_seqn()-1) != CCD_DARK_NUM){
+         #          sleep(0.01);
+         #      }
+         #   }
+         #}   
+         local foo2
+	 if(CCD_REPEATS==1) {
+              ccdset_filetemplate( sprintf("%s%s","%s%s.",CCD_EXT))
+         }else{
+              ccdset_filetemplate( sprintf("%s%s","%s%s_%3.3d.",CCD_EXT))
+
+	 }
+	 foo2 = sprintf("%s_s%d_%d",get_datafilename(),SCAN_N,NPTS)
+         ccdset_filename(foo2);
+      }
+      ccdset_seqnum 1
+      if(CCD_SLEEP) {
+         local ii
+         for(ii=0;ii<CCD_REPEATS;ii++) {
+            ccdtrig 1
+            ccdwait
+            do_sleep(CCD_SLEEP)
+         }   
+      }else {
+         ccdtrig CCD_REPEATS;
+      }
+      
+'
+def _measure2_ccd '
+      ccdwait
+      if(chk_ccdc()) {
+          
+          S[@CCD_CNTR] = ccdget_ccdc()
+      }
+'                 
+
+
+def get_datafilename() ' {
+    local  foo1 [];
+    local foo2;
+    foo2 = split(DATAFILE,foo1,"/")-1
+    return foo1[foo2];
+}'
+
+
+
+def exists(varname,field) '{
+  # checks if varname[field] exists
+  # note: both arguments must be in quotes (or string variables)
+  return( whatis(sprintf("%s[%s]",varname,field)) ? 1:0 )
+  }'
+
+global MNT_MAP[]
+
+def makedir '{
+  # takes a string or a variable of type string
+  if (unix(sprintf("test -d %s",$1))) {
+    if (unix(sprintf("mkdir -p %s",$1))) exit
+    else printf("Created directory %s.\n",$1)
+    unix(sprintf("chmod -R a+w %s",$1))
+    }
+  else if (unix(sprintf("test -w %s",$1))) {
+    printf("Cannot write to directory %s: Permission denied.\n",$1)
+    exit
+    }
+  }'
+
+
+def is_winpath(s) '{
+    if(index(s,":") || index(s,"\\") ){
+         return 1
+    } else {
+         return 0
+    }
+
+}'
+
+def to_client_dir(s) '{
+      local n str1,str_array,field, client_path,i
+      if(!exists("MNT_MAP","client") ){
+         print "Error:  the map of the ccd data directory %s on this computer is missing."
+         print "        check MNT_MAP global array"
+         exit
+     
+      }
+      if(substr(MNT_MAP["server"],length(MNT_MAP["server"])) != DIR_SLASH ) {
+         MNT_MAP["server"] = MNT_MAP["server"] DIR_SLASH
+      }
+
+      if(substr(MNT_MAP["client"],length(MNT_MAP["client"])) != "/" ) {
+          MNT_MAP["client"]  = MNT_MAP["client"] "/"
+      }
+      if(substr(s,length(s)) != DIR_SLASH) {
+           s = s DIR_SLASH
+      }	   
+
+      n=length(MNT_MAP["server"])
+      str1=substr(s,n+1);
+      n=split(str1,str_array,DIR_SLASH) ;
+      client_path=MNT_MAP["client"]
+      for(i=0;i<n-1;i++)  client_path=client_path str_array[i] "/"
+      return client_path
+ }'
+
+
+
+
+def ccdget_filepath() '{
+   local s
+   s=""
+   local byte array fp[256]
+   fp=epics_get(sprintf("%sFilePath",ADFILEPV))
+   for(i=0;i<256;i++) {
+        s= sprintf("%s%c",s,fp[i])
+   }
+   return s
+
+}'
+
+def ccdget_filename() '{
+   local s
+   s=""
+   local byte array fp[256]
+   fp=epics_get(sprintf("%sFileName",ADFILEPV))
+   for(i=0;i<256;i++) {
+        s= sprintf("%s%c",s,fp[i])
+   }
+   return s
+
+}'
+
+ccduse_on
+
+
+
+####################For ccd roi pseudo counter#############################
+global CCD_MONITOR_ROI  CCD_CNTR  CCDROI_OVERHEAD
+CCDROI_OVERHEAD=0
+def setccdc_v1_5 '
+   if($# !=1) {
+      p "Usage: setccdc 0"
+      exit
+   }
+   if(chk_ccdc()) {
+      #Enable ROI asyn port 
+      epics_put(sprintf("%sEnableCallbacks",ADROIPV),"Enable")
+      epics_put(sprintf("%sBlockingCallbacks",ADROIPV),"Yes")
+      #Enbalbe this ROI 
+      CCD_MONITOR_ROI = ADROIPV  "$1"  ":"   
+      epics_put(sprintf("%sUse",CCD_MONITOR_ROI),1)
+      epics_put(sprintf("%sComputeStatistics",CCD_MONITOR_ROI),"Yes")
+   } else {
+      CCD_MONITOR_ROI = "none"
+      printf(" No pseudo counter %s created. Use config to create is first.",CCD_CNTR)
+   }   
+'
+
+
+def setccdc_v1_6 '
+  
+   if(chk_ccdc()) {
+      #Enable statistics asyn port 
+      epics_put(sprintf("%sEnableCallbacks",ADROIPV),"Enable")
+      epics_put(sprintf("%sBlockingCallbacks",ADROIPV),"Yes")
+      epics_put(sprintf("%sEnableCallbacks",ADSTATPV),"Enable")
+      epics_put(sprintf("%sBlockingCallbacks",ADSTATPV),"Yes")
+      #Enbalbe this statistics 
+      epics_put(sprintf("%sComputeStatistics",ADSTATPV),"Yes")
+      CCD_MONITOR_ROI = ADROIPV
+      
+   } else {
+      CCD_MONITOR_ROI = "none"
+      printf(" No pseudo counter %s created. Use config to create is first.",CCD_CNTR)
+   }   
+
+'
+
+
+
+
+if(unset("CCD_CNTR")) {
+   CCD_CNTR="ccdc"
+}
+def chk_ccdc() '{
+
+   local foo
+   foo = 0;
+   for(i=0;i<COUNTERS;i++) {
+        if(cnt_mne(i) == CCD_CNTR)  {
+           foo++;
+           break;
+        } 
+     }
+     return foo;
+
+}'
+
+def ccdget_ccdc_v1_5() '{
+    sleep(CCDROI_OVERHEAD)    # This should be 0 now if callback block is used 
+    return(epics_get(sprintf("%sTotal_RBV",CCD_MONITOR_ROI)))
+}'
+def ccdget_ccdc_v1_6() '{
+    sleep(CCDROI_OVERHEAD)    # This should be 0 now if callback block is used 
+    return(epics_get(sprintf("%sTotal_RBV",ADSTATPV)))
+}'
+###########################################End of conceptual ccdscan macros definition################################
+#####################################################################################################################
+
+
+
+
+
+
+#############################Global variables for areaDetector controls################
+global DETPV  ADFILEPV ADROIPV CCDROI_OVERHEAD ADSTATPV
+###############################################################################
+
+##### Common commands for all detector interfaces#############
+
+#------------------------------------------------------------------------------
+# ccd_addcolumn adds an ROI (its average) as a data column in the spec file.
+# ccd_rmcolumn removes an ROI data column from the spec file
+#------------------------------------------------------------------------------
+def ccd_addcolumn_roi_v1_5 '
+    if($# !=1) {
+       print "Usage: ccd_addcolum_roi 0"
+       exit
+    }
+    local name cmd _pv
+    _pv = sprintf("%s%i:Use",ADROIPV,$1)
+    epics_put(_pv,1);
+    _pv= sprintf("%s%i:ComputeStatistics",ADROIPV,$1)
+    epics_put(_pv,"Yes");
+    
+    name=sprintf("ROI%i",$1)
+    _pv = sprintf("%s%i:Total_RBV",ADROIPV,$1);
+    cmd = sprintf("epics_get(\"%s\")",_pv);
+    u_column_add(name,"%.8g",cmd,"ccdroi");
+    printf("%s will be saved to the data file\n",name);
+    u_column_show;
+'
+
+
+def ccd_addcolumn_roi_v1_6 '
+    if($# !=1) {
+       print "Usage: ccd_addcolum_roi statistic_pv"
+       exit
+    }
+    local name cmd _pv
+    epics_put(sprintf("%sEnableCallbacks","$1"),"Enable")
+    epics_put(sprintf("%sBlockingCallbacks","$1"),"Yes")
+    _pv= sprintf("%sComputeStatistics","$1")
+    epics_put(_pv,"Yes");
+    name = epics_get(sprintf("%sNDArrayPort_RBV","$1"))
+    _pv = sprintf("%sTotal_RBV","$1");
+    cmd = sprintf("epics_get(\"%s\")",_pv);
+    u_column_add(name,"%.8g",cmd,"ccdroi");
+    printf("%s will be saved to the data file\n",name);
+    u_column_show;
+'
+def ccd_rmcolumn_roi '
+    if($# !=1) {
+       print "Usage: ccd_rmcolumn_roi pv/all "
+       exit
+    }
+    local name cmd _pv
+    name = 
+    if(name == "all") {
+       u_column_clear("ccdroi")
+       print "all ccd rois columns are not saved to the data file"
+    } else {
+       name = "$1"
+       u_column_remove(name,"ccdroi");
+       printf("%s is  not saved to the data file anymore\n",name);
+    }   
+'
+
+
+
+def ccdset_expNum '
+    epics_put(sprintf("%sNumExposures",DETPV),$1)
+'
+def ccdget_expNum() '{
+    return(epics_get(sprintf("%sNumExposures",DETPV)))
+}'
+
+
+def ccdset_seqnum '
+   epics_put(sprintf("%sFileNumber",ADFILEPV),$1);
+'
+
+def ccdget_seqn() '{
+    return(epics_get(sprintf("%sFileNumber",ADFILEPV)))
+
+}'
+
+def ccdset_filename(s) '{
+    local byte array fp[256]
+    local n i
+    fp=s
+    epics_put(sprintf("%sFileName",ADFILEPV),fp);
+}'    
+
+def ccdset_filetemplate(s) '{
+    local byte array fp[256]
+    local n i
+    fp=s
+    epics_put(sprintf("%sFileTemplate",ADFILEPV),fp);
+}'    
+
+def ccdtrig_wait '{
+   ccdtrig $1
+   ccdwait
+
+}'
+
+def ccdabort '
+    epics_put(sprintf("%sAcquire",DETPV),"Done")
+'
+
+def ccdget_ROIdim(ROIPV) '{
+   local array d[4]
+   d[0]=epics_get(sprintf("%sMinX",ROIPV))
+   d[1]=epics_get(sprintf("%sSizeX",ROIPV))
+   d[2]=epics_get(sprintf("%sMinY",ROIPV))
+   d[3]=epics_get(sprintf("%sSizeY",ROIPV))
+   return d
+}'
+
+def ccdwait '{
+    while(epics_get(sprintf("%sAcquire",DETPV))!="Done") {
+       printf("\r Images Completed: %6i",epics_get(sprintf("%sNumImagesCounter_RBV",DETPV)) )
+       sleep(0.02)
+    }
+    printf("\r                              \r") 
+}'
+
+
+def _ccdtrig '{
+    local n
+    if($#==0) n=1 
+     else n=$1
+    while(epics_get(sprintf("%sAcquire",DETPV))!="Done") {
+        sleep(0.01)
+    }
+    epics_put(sprintf("%sNumImages",DETPV),n)
+    epics_put(sprintf("%sAcquire",DETPV),"Acquire")
+    
+}'
+
+########################The following macros will change based on detector type################
+# ccdset_filepath
+# ccdsave
+# ccdset_time
+# ccdtrig
+
+###############implements for diffrent detectors ############################
+
+##dummy set_filepath, areaDetector app. can not create one automatically
+
+def ccdset_filepath_dummy(s) '{
+    
+}'
+
+
+## pilatus can created dir automatically, or if the IOC running on the same machine spec is running
+def ccdset_filepath_raw(s) '{
+    local byte array fp[256]
+    local n i
+    fp=s
+    epics_put(sprintf("%sFilePath",ADFILEPV),fp);
+}'  
+
+# if running on different machine but have samba/nfs mount on them 
+
+def ccdset_filepath_mkdir(s) '{
+    local local_path
+    local_path=to_client_dir(s)     
+    makedir local_path
+    chmod_dir local_path
+    ccdset_filepath_raw(s)
+}'
+
+
+def chmod_dir '{
+   if (unix(sprintf("chmod -R a+wr %s",$1))) exit
+        else printf("Making directory %s writable to all\n",$1)
+}'
+
+
+
+
+#####ccdsave for ndarray plugin type and nataive vendor saving 
+def ccdsave_ndplugin '{
+   if($# !=1 ) {
+       eprint "Usage: ccdsave on/off"
+       exit
+    }
+    
+    if( "$1" == "on")  {
+       epics_put(sprintf("%sEnableCallbacks",ADFILEPV),"Yes")
+       epics_put(sprintf("%sBlockingCallbacks",ADFILEPV),"Yes")
+       epics_put(sprintf("%sAutoIncrement",ADFILEPV),"Yes")
+       epics_put(sprintf("%sAutoSave",ADFILEPV),"Yes");
+       
+    }
+    if( "$1" == "off") {
+       epics_put(sprintf("%sAutoSave",ADFILEPV),"No");
+    }
+}'
+
+
+
+#vendor file saving , no plugin added  for mar and roper
+def ccdsave_native '{
+
+    if($# !=1 ) {
+       eprint "Usage: ccdsave on/off"
+       exit
+    }
+    
+    if( "$1" == "on")  {
+       epics_put(sprintf("%sAutoIncrement",ADFILEPV),"Yes")
+       epics_put(sprintf("%sAutoSave",ADFILEPV),"Yes");
+       
+    }
+    if( "$1" == "off") {
+       epics_put(sprintf("%sAutoSave",ADFILEPV),"No");
+    }
+
+}'
+
+#pilatus always save data for
+
+def ccdsave_pilatus '{
+       if($# !=1 ) {
+       eprint "Usage: ccdsave on/off"
+       exit
+    }
+    if( "$1" == "on")  {
+       epics_put(sprintf("%sAutoSave",ADFILEPV),"Yes");
+       epics_put(sprintf("%sAutoIncrement",ADFILEPV),"Yes")
+    }
+    if( "$1" == "off") {
+       ccdset_filename("dummy")
+       ccdset_filetemplate(sprintf("%s%s","%s%s%3.3d.",CCD_EXT))
+       epics_put(sprintf("%sAutoIncrement",ADFILEPV),"No")
+    }
+ 
+    
+}'
+
+#########ccdtrig####################################
+
+#simulated detector and other applicable
+def adtrig '{
+    if(epics_get(sprintf("%sImageMode",DETPV)) != "Multiple") {
+             epics_put(sprintf("%sImageMode",DETPV),"Multiple")
+    }
+    _ccdtrig $*
+}'
+
+#roper
+
+def ropertrig '{
+    if(epics_get(sprintf("%sImageMode",DETPV)) != "Normal") {
+             epics_put(sprintf("%sImageMode",DETPV),"Normal")
+    }
+    _ccdtrig $*
+}'
+
+#pilatus uses adtrig
+#mar uses adtrig
+
+########ccdset_time#############################
+
+
+#Simulated detector  and mar
+def adset_time ' {
+   if($#!=1) {
+      p "Usage:adset_time xtime"
+      exit
+   }
+   local  xtime
+   xtime=$1
+   epics_put(sprintf("%sAcquireTime",DETPV),$1)
+   #epics_put(sprintf("%sAcquirePeriod",DETPV),0)
+   if($# ==2 && $2 >xtime ) {
+      epics_get(sprintf("%sAcquirePeriod",DETPV))
+      epics_put(sprintf("%sAcquirePeriod",DETPV),$2)
+   }      
+}'
+
+#roper
+def roperset_time '{
+   if($#!=1) {
+      p "Usage:roperset_time xtime"
+      exit
+   }
+   local  xtime
+   xtime=$1
+   epics_put(sprintf("%sAcquireTime",DETPV),$1)
+}'
+
+
+#pilatus
+
+def pilatusset_time'{
+    if($#!=1) {
+      p "Usage:pilatusset_time xtime"
+      exit
+    }
+    local mode
+    mode=epics_get(sprintf("%sTriggerMode",DETPV),"short") #internal 
+    if(mode =="0") epics_put(sprintf("%sAcquirePeriod",DETPV),($1)+0.004);
+    epics_put(sprintf("%sAcquireTime",DETPV),$1)
+
+}'
+
+##to handle AD version between 1.5 and 1.6 statistics plugins and ROI plugins separated
+
+def new_adplugin '{
+   rdef setccdc \'setccdc_v1_6\'
+   rdef ccd_addcolumn_roi \'ccd_addcolumn_roi_v1_6\'
+   rdef ccdget_ccdc \'ccdget_ccdc_v1_6\'
+   
+}'
+
+
+def old_adplugin '{
+   rdef setccdc \'setccdc_v1_5\'
+   rdef ccd_addcolumn_roi \'ccd_addcolumn_roi_v1_5\'
+   rdef ccdget_ccdc \'ccdget_ccdc_v1_5\'
+   
+}'
+ 
+
+
+
+
+
+##########################
+def use_sim '{
+    rdef ccdtrig \' adtrig \'
+    rdef ccdsave \'ccdsave_ndplugin\'
+    rdef ccdset_time \' adset_time\'
+    rdef ccdset_filepath \'ccdset_filepath_mkdir\'
+    CCD_EXT="cdf"
+}'
+
+def use_roper '{
+    rdef ccdtrig \' ropertrig \'
+    rdef ccdsave \'ccdsave_native\'
+    rdef ccdset_time \' roperset_time\'
+    rdef ccdset_filepath \'ccdset_filepath_dummy\'
+    if(epics_get(sprintf("%sFileFormat",ADFILEPV)) =="SPE" ) {
+       CCD_EXT= "SPE"
+    } else {
+       CCD_EXT="tif"
+    }
+}' 
+
+def use_mar '{
+    rdef ccdtrig \' adtrig \'
+    rdef ccdsave \'ccdsave_native\'
+    rdef ccdset_time \' adset_time\'
+    CCD_EXT="tif"
+    if(exists("MNT_MAP","client")) {
+       rdef ccdset_filepath \' ccdset_filepath_mkdir\'
+    } else {
+       rdef ccdset_filepath \'ccdset_filepath_dummy\'
+    }
+}'
+
+
+def use_pilatus '{
+    rdef ccdtrig \' adtrig \'
+    rdef ccdsave \'ccdsave_native\'
+    rdef ccdset_time \' pilatusset_time\'
+    rdef ccdset_filepath \'ccdset_filepath_raw\'
+    CCD_EXT="tif"
+}'
+
+
+def ccdinfo '{
+    printf("\nAreaDetector with PV prefix %s :\n",DETPV)
+    printf("Type: %s\n",epics_get(sprintf("%sManufacturer_RBV",DETPV)) )
+    printf("File IO prefix: %s\n", ADFILEPV)
+    printf("Image data extension type: %s\n",CCD_EXT)
+    printf("Image data directory at server: %s\n",CCD_DATA_DIR)
+    if(exists("MNT_MAP","client") ){
+    printf("Image data directory at client(spec): %s\n",MNT_MAP["client"])
+    }
+    printf("ROI plugin prefix: %s\n",ADROIPV)
+      
+   
+
+}'
+def ccdsetup '{
+   local type foo
+   delete MNT_MAP["server"]
+   delete MNT_MAP["client"]
+   DETPV=getval("The EPICS prefix of the detector:",DETPV);
+   ADFILEPV=getval("The EPICS prefix of the detector file I/O :",ADFILEPV);
+   ADROIPV=getval("The EPICS prefix of the ROI plugin:",ADROIPV);
+   ADSTATPV=getval("The EPICS prefix of the statistic plugin(V1.6 or later):",ADSTATPV);
+   CCD_DATA_DIR = getval("The directory where the Image Server saves the data:",CCD_DATA_DIR)
+   if(is_winpath(CCD_DATA_DIR) ) DIR_SLASH ="\\"
+   else DIR_SLASH = "/"
+  
+   if(substr(CCD_DATA_DIR,length(CCD_DATA_DIR)) != DIR_SLASH  ) {
+        CCD_DATA_DIR = CCD_DATA_DIR DIR_SLASH
+      
+   } 
+   if(yesno("Do yo have the ccd data directory mounted on the local computer?",1) ){
+
+       MNT_MAP["server"] = CCD_DATA_DIR;
+       MNT_MAP["client"] = getval("The directory where spec sees the data:",MNT_MAP["client"]);
+   
+     if(substr(MNT_MAP["client"],length(MNT_MAP["client"])) != "/" ) {
+        MNT_MAP["client"]  = MNT_MAP["client"] "/"
+     }
+   }
+
+   if(yesno("\nSetup a pseudo counter to monitor some ROIs from spec?",1)) {
+      CCD_CNTR=getval("The pseudo counter name:",CCD_CNTR);
+      if(chk_ccdc()) {
+         printf("Found a counter named %s.",CCD_CNTR)
+         if(ADSTATPV) {
+           setccdc ;
+         } else { setccdc 0 ;}
+      } else {
+         printf("%c%sPlease configure a pseudo counter \"%s\"(None type) with config%c%s.\n",27,"[31m",CCD_CNTR,27,"[0m")
+      }
+     printf("\nUse setccdc {ROI#} (i.e. setccdc 0 (V1.5 or earlier) )  to change monitored ROI\n")
+   }
+   
+   type=epics_get(sprintf("%sManufacturer_RBV",DETPV))
+   if(type=="Simulated detector") {  
+        use_sim
+   }
+   if(type=="Roper Scientific") {
+        use_roper
+   }
+    
+   if(type=="MAR") {
+        use_mar
+   }
+      
+   if(type=="Dectris") {
+        use_pilatus
+   }
+   ccdinfo
+
+}'
+
+
+#use_sim
+
+
+new_adplugin
+#or switch to old AD version
+#old_adplugin 
+
+def ccd_blockbeam ''
+def ccd_showbeam ''
+#setup : DETPV ADFILEPV ADROIPV CCD_DATA_DIR MNT ccdc
+
+
+
+DETPV="9idcPIL:cam1:"
+ADFILEPV="9idcPIL:cam1:"
+CCD_DATA_DIR="/data/SAXS/"
+use_pilatus

@@ -1,0 +1,12 @@
+########### SVN repository information ###################
+# $Date: 2015-01-16 11:38:12 -0600 (Fri, 16 Jan 2015) $
+# $Author: usaxs $
+# $Revision: 1047 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/config/site_f.mac $
+# $Id: site_f.mac 1047 2015-01-16 17:38:12Z usaxs $
+########### SVN repository information ###################
+
+# This file is executed by SPEC _only_ on a "fresh" (-f) start
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# LAST LINE - Do not move or remove this line
