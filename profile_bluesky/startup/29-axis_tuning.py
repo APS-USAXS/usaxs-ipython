@@ -34,13 +34,13 @@ def mr_pretune_hook():
     m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     m_stage.r.tuner.num = 31
     m_stage.r.tuner.width = 2*USAXS_tune_mr_range
-    # TODO: set count time: 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
      
  
 def mr_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    # TODO: set_MR_VAL_CENTER A[mr]
+    yield from bps.mv(mr_val_center, m_stage.r.position)
  
  
 m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=TUNING_DET_SIGNAL.name)
@@ -56,9 +56,8 @@ def m2rp_pretune_hook():
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     m_stage.r2p.tuner.num = 21
-    yield from bps.mv(scaler0.delay, 0.02)  # TODO: confirm
+    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)  # TODO: confirm
     m_stage.r2p.tuner.width = 2*USAXS_tune_m2rp_range
-    # TODO: set count time: 0.1
     
 
 def m2rp_posttune_hook():
@@ -86,12 +85,13 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 #     ms_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 #     ms_stage.r.tuner.num = 31
 #     ms_stage.r.tuner.width = 2*USAXS_tune_msr_range
-#     # TODO: set count time: 0.1
+#     yield from bps.mv(scaler0.preset_time, 0.1)
 #     
 # 
 # def msr_posttune_hook():
 #     msg = "Tuning axis {}, final position is {}"
 #     print(msg.format(ms_stage.r.name, ms_stage.r.position))
+#     yield from bps.mv(msr_val_center, ms_stage.r.position)
 # 
 # 
 # # use I00 (if MS stage is used, use I0)
@@ -109,15 +109,15 @@ def ar_pretune_hook():
     a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     a_stage.r.tuner.num = 35
     a_stage.r.tuner.width = 2*USAXS_tune_ar_range
-    # TODO: set count time: 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
 
 
 def ar_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(a_stage.r.name, a_stage.r.position))
-    # TODO: set_AR_VAL_CENTER A[ar]
 
     if a_stage.r.tuner.tune_ok:
+        yield from bps.mv(ar_val_center, a_stage.r.position)
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
@@ -145,8 +145,7 @@ def a2rp_pretune_hook():
     a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     a_stage.r2p.tuner.num = 31
     a_stage.r2p.tuner.width = 2*USAXS_tune_a2rp_range
-    # TODO: set count time: 0.1
-    yield from bps.mv(scaler0.delay, 0.02)  # TODO: confirm
+    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)  # TODO: confirm
 
 
 def a2rp_posttune_hook():
@@ -155,7 +154,6 @@ def a2rp_posttune_hook():
     #
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
-    # TODO: set_AR_VAL_CENTER A[ar]
 
     if a_stage.r2p.tuner.tune_ok:
         # remember the Q calculation needs a new 2theta0
