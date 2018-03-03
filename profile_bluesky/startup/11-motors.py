@@ -111,16 +111,21 @@ append_wa_motor_list(
 
 class UsaxsCollimatorStageDevice(Device):
     """USAXS Collimator (Monochromator) stage"""
-    r = Component(EpicsMotor, '9idcLAX:aero:c3:m1')
+    r = Component(TunableEpicsMotor, '9idcLAX:aero:c3:m1')
     x = Component(EpicsMotor, '9idcLAX:m58:c0:m2')
     y = Component(EpicsMotor, '9idcLAX:m58:c0:m3')
-    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m2')
+    r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m2')
 
 m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
 append_wa_motor_list(
     m_stage.r, m_stage.x, m_stage.y,
     m_stage.r2p, 
 )
+
+if False:       # TODO: need the detector first!
+    m_stage.r.tuner = TuneAxis([mydet], m_stage.r)
+    m_stage.r.tuner.width = 2
+    m_stage.r.tuner.num = 81
 
 
 # #msr = EpicsMotor('9idcLAX:xps:c0:m5', name='msr')  # msr
@@ -135,7 +140,7 @@ class UsaxsCollimatorSideReflectionStageDevice(Device):
     #t = Component(EpicsMotor, '9idcLAX:xps:c0:m3')
     x = Component(EpicsMotor, '9idcLAX:m58:c1:m1')
     y = Component(EpicsMotor, '9idcLAX:m58:c1:m2')
-    rp = Component(EpicsMotor, '9idcLAX:pi:c0:m3')
+    rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m3')
 
 ms_stage = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 append_wa_motor_list(m_stage.x, m_stage.y, m_stage.rp)
@@ -153,11 +158,11 @@ append_wa_motor_list(m_stage.x, m_stage.y, m_stage.rp)
 
 class UsaxsAnalyzerStageDevice(Device):
     """USAXS Analyzer stage"""
-    r = Component(EpicsMotor, '9idcLAX:aero:c0:m1')
+    r = Component(TunableEpicsMotor, '9idcLAX:aero:c0:m1')
     x = Component(EpicsMotor, '9idcLAX:m58:c0:m5')
     y = Component(EpicsMotor, '9idcLAX:aero:c1:m1')
     z = Component(EpicsMotor, '9idcLAX:m58:c0:m7')
-    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m1')
+    r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m1')
     rt = Component(EpicsMotor, '9idcLAX:m58:c1:m3')
 
 a_stage = UsaxsAnalyzerStageDevice('', name='a_stage')
@@ -178,7 +183,7 @@ class UsaxsAnalyzerSideReflectionStageDevice(Device):
     #r = Component(EpicsMotor, '9idcLAX:xps:c0:m6')
     #t = Component(EpicsMotor, '9idcLAX:xps:c0:m4')
     y = Component(EpicsMotor, '9idcLAX:m58:c1:m4')
-    rp = Component(EpicsMotor, '9idcLAX:pi:c0:m4')
+    rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m4')
 
 as_stage = UsaxsAnalyzerStageDevice('', name='aw_stage')
 append_wa_motor_list(as_stage.sy, as_stage.srp)
