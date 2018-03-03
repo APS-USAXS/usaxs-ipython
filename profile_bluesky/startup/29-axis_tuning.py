@@ -18,6 +18,14 @@ else:
     TUNING_DET_SIGNAL = I00_SIGNAL
 
 
+USAXS_tune_mr_range =  0.0025    # range for tune mr for about 12-17kev
+USAXS_tune_m2rp_range = 3        # range for tune m2rp for about 12keV
+USAXS_tune_ar_range =  0.002     # range for tune ar for about 12keV 
+USAXS_tune_a2rp_range = 3        # range for tune a2rp for about 12keV
+USAXS_tune_msr_range = 3         # range for tune msr for about 12keV
+USAXS_tune_asr_range = 3         # range for tune asr for about 12keV 
+
+
 # -------------------------------------------
 
 def mr_pretune_hook():
@@ -25,7 +33,7 @@ def mr_pretune_hook():
     print(msg.format(m_stage.r.name, m_stage.r.position))
     m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     m_stage.r.tuner.num = 31
-    # TODO: m_stage.r.tuner.width = 2*USAXS_tune_mr_range
+    m_stage.r.tuner.width = 2*USAXS_tune_mr_range
     # TODO: set count time: 0.1
      
  
@@ -49,7 +57,7 @@ def m2rp_pretune_hook():
     m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     m_stage.r2p.tuner.num = 21
     yield from bps.mv(scaler0.delay, 0.02)  # TODO: confirm
-    # TODO: m_stage.r2p.tuner.width = 2*USAXS_tune_m2rp_range
+    m_stage.r2p.tuner.width = 2*USAXS_tune_m2rp_range
     # TODO: set count time: 0.1
     
 
@@ -77,7 +85,7 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 #     print(msg.format(ms_stage.r.name, ms_stage.r.position))
 #     ms_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 #     ms_stage.r.tuner.num = 31
-#     # TODO: ms_stage.r.tuner.width = 2*USAXS_tune_msr_range
+#     ms_stage.r.tuner.width = 2*USAXS_tune_msr_range
 #     # TODO: set count time: 0.1
 #     
 # 
@@ -100,7 +108,7 @@ def ar_pretune_hook():
     print(msg.format(a_stage.r.name, a_stage.r.position))
     a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     a_stage.r.tuner.num = 35
-    # TODO: a_stage.r.tuner.width = 2*USAXS_tune_ar_range
+    a_stage.r.tuner.width = 2*USAXS_tune_ar_range
     # TODO: set count time: 0.1
 
 
@@ -136,7 +144,7 @@ def a2rp_pretune_hook():
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
     a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     a_stage.r2p.tuner.num = 31
-    # TODO: a_stage.r2p.tuner.width = 2*USAXS_tune_a2rp_range
+    a_stage.r2p.tuner.width = 2*USAXS_tune_a2rp_range
     # TODO: set count time: 0.1
     yield from bps.mv(scaler0.delay, 0.02)  # TODO: confirm
 
