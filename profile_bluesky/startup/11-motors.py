@@ -122,11 +122,6 @@ append_wa_motor_list(
     m_stage.r2p, 
 )
 
-if False:       # TODO: need the detector first!
-    m_stage.r.tuner = TuneAxis([mydet], m_stage.r)
-    m_stage.r.tuner.width = 2
-    m_stage.r.tuner.num = 81
-
 
 # #msr = EpicsMotor('9idcLAX:xps:c0:m5', name='msr')  # msr
 # #mst = EpicsMotor('9idcLAX:xps:c0:m3', name='mst')  # mst

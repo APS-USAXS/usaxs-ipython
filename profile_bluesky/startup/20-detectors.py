@@ -6,6 +6,8 @@ aps_current = EpicsSignalRO("S:SRcurrentAI", name="aps_current")
 
 userCalcs_lax = userCalcsDevice("9idcLAX:", name="userCalcs_lax")
 
+usaxs_q_calc = swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
+
 """
 usaxs@usaxscontrol ~/.../startup/spec $ caget 9idcLAX:vsc:c{0,1,2}.NM{1,2,3,4,5,6,7,8}
 9idcLAX:vsc:c0.NM1             seconds
