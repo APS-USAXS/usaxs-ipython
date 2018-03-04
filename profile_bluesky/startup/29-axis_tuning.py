@@ -56,7 +56,7 @@ def m2rp_pretune_hook():
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     m_stage.r2p.tuner.num = 21
-    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)  # TODO: confirm
+    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)
     m_stage.r2p.tuner.width = 2*USAXS_tune_m2rp_range
     
 
@@ -66,7 +66,7 @@ def m2rp_posttune_hook():
     #
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
-    yield from bps.mv(scaler0.delay, 0.05)  # TODO: confirm
+    yield from bps.mv(scaler0.delay, 0.05)
 
 
 # use I00 (if MS stage is used, use I0)
@@ -145,7 +145,7 @@ def a2rp_pretune_hook():
     a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
     a_stage.r2p.tuner.num = 31
     a_stage.r2p.tuner.width = 2*USAXS_tune_a2rp_range
-    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)  # TODO: confirm
+    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)
 
 
 def a2rp_posttune_hook():
@@ -159,7 +159,7 @@ def a2rp_posttune_hook():
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
-    yield from bps.mv(scaler0.delay, 0.05)  # TODO: confirm
+    yield from bps.mv(scaler0.delay, 0.05)
 
 
 a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=I0_SIGNAL.name)
