@@ -23,10 +23,6 @@ else:
     TUNING_DET_SIGNAL = I00_SIGNAL
 
 
-USAXS_tune_mr_range =  0.0025    # range for tune mr for about 12-17kev
-USAXS_tune_m2rp_range = 3        # range for tune m2rp for about 12keV
-USAXS_tune_ar_range =  0.002     # range for tune ar for about 12keV 
-USAXS_tune_a2rp_range = 3        # range for tune a2rp for about 12keV
 USAXS_tune_msr_range = 3         # range for tune msr for about 12keV
 USAXS_tune_asr_range = 3         # range for tune asr for about 12keV 
 
@@ -36,10 +32,7 @@ USAXS_tune_asr_range = 3         # range for tune asr for about 12keV
 def mr_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-    m_stage.r.tuner.num = 31
-    m_stage.r.tuner.width = 2*USAXS_tune_mr_range
-    yield from bps.mv(scaler0.preset_time, 0.1)
+    scaler0.stage_sigs["preset_time"] = 0.1
      
  
 def mr_posttune_hook():
@@ -49,6 +42,10 @@ def mr_posttune_hook():
  
  
 m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=TUNING_DET_SIGNAL.name)
+m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+m_stage.r.tuner.num = 31
+m_stage.r.tuner.width = 0.005
+
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
 
@@ -59,10 +56,8 @@ m_stage.r.post_tune_method = mr_posttune_hook
 def m2rp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
-    m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-    m_stage.r2p.tuner.num = 21
-    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)
-    m_stage.r2p.tuner.width = 2*USAXS_tune_m2rp_range
+    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.delay, 0.02)
     
 
 def m2rp_posttune_hook():
@@ -76,6 +71,10 @@ def m2rp_posttune_hook():
 
 # use I00 (if MS stage is used, use I0)
 m_stage.r2p.tuner = TuneAxis([scaler0], m_stage.r2p, signal_name=TUNING_DET_SIGNAL.name)
+m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+m_stage.r2p.tuner.num = 21
+m_stage.r2p.tuner.width = 6
+
 m_stage.r2p.pre_tune_method = m2rp_pretune_hook
 m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
@@ -111,10 +110,7 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 def ar_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(a_stage.r.name, a_stage.r.position))
-    a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-    a_stage.r.tuner.num = 35
-    a_stage.r.tuner.width = 2*USAXS_tune_ar_range
-    yield from bps.mv(scaler0.preset_time, 0.1)
+    scaler0.stage_sigs["preset_time"] = 0.1
 
 
 def ar_posttune_hook():
@@ -129,6 +125,10 @@ def ar_posttune_hook():
 
 
 a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=I0_SIGNAL.name)
+a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+a_stage.r.tuner.num = 35
+a_stage.r.tuner.width = 0.004
+
 a_stage.r.pre_tune_method = ar_pretune_hook
 a_stage.r.post_tune_method = ar_posttune_hook
 
@@ -147,10 +147,8 @@ a_stage.r.post_tune_method = ar_posttune_hook
 def a2rp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
-    a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-    a_stage.r2p.tuner.num = 31
-    a_stage.r2p.tuner.width = 2*USAXS_tune_a2rp_range
-    yield from bps.mv(scaler0.preset_time, 0.1, scaler0.delay, 0.02)
+    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.delay, 0.02)
 
 
 def a2rp_posttune_hook():
@@ -168,5 +166,8 @@ def a2rp_posttune_hook():
 
 
 a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=I0_SIGNAL.name)
+a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+a_stage.r2p.tuner.num = 31
+a_stage.r2p.tuner.width = 6
 a_stage.r.pre_tune_method = ar_pretune_hook
 a_stage.r.post_tune_method = ar_posttune_hook
