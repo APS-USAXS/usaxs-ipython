@@ -7,9 +7,14 @@ TUNE_METHOD_PEAK_CHOICE = "com"
 
 USING_MS_STAGE = False
 
-# TODO: Can this be smarter via introspection of scaler0?
-I0_SIGNAL = scaler0.channels.chan02         # chan02 : I0 (I0)
-I00_SIGNAL = scaler0.channels.chan03        # chan03 : I00 (I00)
+# use introspection to identify channel names
+for ch_attr in scaler0.channels.read_attrs:
+    if hasattr(scaler0.channels, ch_attr):
+        ch = scaler0.channels.__getattribute__(ch_attr)
+        if ch.chname.value == "I0":
+            I0_SIGNAL = ch
+        if ch.chname.value == "I00":
+            I00_SIGNAL = ch
 
 # use I00 (if MS stage is used, use I0)
 if USING_MS_STAGE:
