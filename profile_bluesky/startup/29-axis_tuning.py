@@ -11,10 +11,12 @@ USING_MS_STAGE = False
 for ch_attr in scaler0.channels.read_attrs:
     if hasattr(scaler0.channels, ch_attr):
         ch = scaler0.channels.__getattribute__(ch_attr)
-        if ch.chname.value == "I0":
+        if ch.chname.value == "I0_USAXS":
             I0_SIGNAL = ch
-        if ch.chname.value == "I00":
+        elif ch.chname.value == "I00_USAXS":
             I00_SIGNAL = ch
+        elif ch.chname.value == "PD_USAXS":
+            UPD_SIGNAL = ch
 
 # use I00 (if MS stage is used, use I0)
 if USING_MS_STAGE:
@@ -23,7 +25,6 @@ else:
     TUNING_DET_SIGNAL = I00_SIGNAL
 
 
-USAXS_tune_msr_range = 3         # range for tune msr for about 12keV
 USAXS_tune_asr_range = 3         # range for tune asr for about 12keV 
 
 
@@ -81,27 +82,27 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
 # -------------------------------------------
 
-# TODO: confirm
 
-# def msr_pretune_hook():
-#     msg = "Tuning axis {}, current position is {}"
-#     print(msg.format(ms_stage.r.name, ms_stage.r.position))
-#     ms_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-#     ms_stage.r.tuner.num = 31
-#     ms_stage.r.tuner.width = 2*USAXS_tune_msr_range
-#     yield from bps.mv(scaler0.preset_time, 0.1)
-#     
-# 
-# def msr_posttune_hook():
-#     msg = "Tuning axis {}, final position is {}"
-#     print(msg.format(ms_stage.r.name, ms_stage.r.position))
-#     yield from bps.mv(msr_val_center, ms_stage.r.position)
-# 
-# 
-# # use I00 (if MS stage is used, use I0)
-# ms_stage.rp.tuner = TuneAxis([scaler0], ms_stage.rp, signal_name=TUNING_DET_SIGNAL.name)
-# ms_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
-# ms_stage.r.tuner.num = 21
+def msrp_pretune_hook():
+    msg = "Tuning axis {}, current position is {}"
+    print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
+    scaler0.stage_sigs["preset_time"] = 0.1
+     
+ 
+def msrp_posttune_hook():
+    msg = "Tuning axis {}, final position is {}"
+    print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
+    yield from bps.mv(msr_val_center, ms_stage.rp.position)
+ 
+ 
+# use I00 (if MS stage is used, use I0)
+ms_stage.rp.tuner = TuneAxis([scaler0], ms_stage.rp, signal_name=TUNING_DET_SIGNAL.name)
+ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+ms_stage.rp.tuner.num = 21
+ms_stage.rp.tuner.width = 6
+
+ms_stage.rp.pre_tune_method = msrp_pretune_hook
+ms_stage.rp.post_tune_method = msrp_posttune_hook
 
 
 # -------------------------------------------
@@ -124,7 +125,7 @@ def ar_posttune_hook():
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=I0_SIGNAL.name)
+a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=UPD_SIGNAL.name)
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
 a_stage.r.tuner.width = 0.004
@@ -135,11 +136,27 @@ a_stage.r.post_tune_method = ar_posttune_hook
 
 # -------------------------------------------
 
-# TODO: confirm
 
-# as_stage.rp.tuner = TuneAxis([scaler0], as_stage.rp, signal_name=I0_SIGNAL.name)
-# as_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+def asrp_pretune_hook():
+    msg = "Tuning axis {}, current position is {}"
+    print(msg.format(as_stage.rp.name, as_stage.rp.position))
+    scaler0.stage_sigs["preset_time"] = 0.1
+     
+ 
+def asrp_posttune_hook():
+    msg = "Tuning axis {}, final position is {}"
+    print(msg.format(as_stage.rp.name, as_stage.rp.position))
+    yield from bps.mv(msr_val_center, as_stage.rp.position)
+ 
+ 
+# use I00 (if MS stage is used, use I0)
+as_stage.rp.tuner = TuneAxis([scaler0], as_stage.rp, signal_name=UPD_SIGNAL.name)
+as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+as_stage.rp.tuner.num = 21
+as_stage.rp.tuner.width = 6
 
+as_stage.rp.pre_tune_method = asrp_pretune_hook
+as_stage.rp.post_tune_method = asrp_posttune_hook
 
 # -------------------------------------------
 
@@ -165,7 +182,7 @@ def a2rp_posttune_hook():
     yield from bps.mv(scaler0.delay, 0.05)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=I0_SIGNAL.name)
+a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=UPD_SIGNAL.name)
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = 6
