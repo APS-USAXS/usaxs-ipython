@@ -3,12 +3,6 @@ print(__file__)
 """motors, stages, positioners, ..."""
 
 
-# TODO: monochromator and undulator energies should be a motor
-#mono_energy = EpicsMotor('9ida:BraggEAO', name='mono_energy')	        # TODO: 9ida:BraggERdbkAO
-#und_us_energy = EpicsMotor('ID09us:EnergySet', name='und_us_energy')	# TODO: ID09us:Energy
-#und_ds_energy = EpicsMotor('ID09ds:EnergySet', name='und_ds_energy')	# TODO: ID09ds:Energy
-
-
 # sx = EpicsMotor('9idcLAX:m58:c2:m1', name='sx')  # sx
 # sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')  # sy
 
