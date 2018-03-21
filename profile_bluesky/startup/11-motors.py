@@ -3,7 +3,6 @@ print(__file__)
 """motors, stages, positioners, ..."""
 
 
-
 # sx = EpicsMotor('9idcLAX:m58:c2:m1', name='sx')  # sx
 # sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')  # sy
 
@@ -138,7 +137,7 @@ class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m3')
 
 ms_stage = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
-append_wa_motor_list(m_stage.x, m_stage.y, m_stage.rp)
+append_wa_motor_list(ms_stage.x, ms_stage.y, ms_stage.rp)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -180,8 +179,8 @@ class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:m58:c1:m4')
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m4')
 
-as_stage = UsaxsAnalyzerStageDevice('', name='aw_stage')
-append_wa_motor_list(as_stage.sy, as_stage.srp)
+as_stage = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
+append_wa_motor_list(as_stage.y, as_stage.rp)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .

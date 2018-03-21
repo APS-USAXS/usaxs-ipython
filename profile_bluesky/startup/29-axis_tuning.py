@@ -224,9 +224,9 @@ def a2rp_posttune_hook():
     yield from bps.mv(scaler0.delay, 0.05)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=UPD_SIGNAL.name)
+a_stage.r2p.tuner = TuneAxis([scaler0], a_stage.r2p, signal_name=UPD_SIGNAL.name)
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = 6
-a_stage.r.pre_tune_method = ar_pretune_hook
-a_stage.r.post_tune_method = ar_posttune_hook
+a_stage.r2p.pre_tune_method = a2rp_pretune_hook
+a_stage.r2p.post_tune_method = a2rp_posttune_hook
