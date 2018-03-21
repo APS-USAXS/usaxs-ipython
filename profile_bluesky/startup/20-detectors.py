@@ -2,6 +2,19 @@ print(__file__)
 
 """various detectors"""
 
+# will become part of APS_BlueSky_tools.devices
+def use_EPICS_scaler_channels(scaler):
+    """
+    configure scaler for only the channels with names assigned in EPICS 
+    """
+    read_attrs = []
+    for ch in scaler.channels.component_names:
+        _nam = epics.caget("{}.NM{}".format(scaler.prefix, int(ch[4:])))
+        if len(_nam.strip()) > 0:
+            read_attrs.append(ch)
+    scaler.channels.read_attrs = read_attrs
+
+
 # the old way
 # scaler0 = EpicsScaler('9idcLAX:vsc:c0', name='scaler0')
 # scaler1 = EpicsScaler('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
@@ -14,11 +27,23 @@ scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
 # chan04 : upd2 (USAXS_PD)
 # chan05 : trd (TR_diode)
 # chan06 : I000 (I000)
-scaler0.channels.read_attrs = ['chan01', 'chan02', 'chan03', 'chan04', 'chan05', 'chan06']
+use_EPICS_scaler_channels(scaler0)
+
+
+# use introspection to identify channel names
+for ch_attr in scaler0.channels.read_attrs:
+    if hasattr(scaler0.channels, ch_attr):
+        ch = scaler0.channels.__getattribute__(ch_attr)
+        if ch.chname.value == "I0_USAXS":
+            I0_SIGNAL = ch
+        elif ch.chname.value == "I00_USAXS":
+            I00_SIGNAL = ch
+        elif ch.chname.value == "PD_USAXS":
+            UPD_SIGNAL = ch
+
 # ignore scaler 1 for now
 scaler2_I000_counts = EpicsSignalRO("9idcLAX:vsc:c2.S2", name="scaler2_I000_counts")
 scaler2_I000_cps = EpicsSignalRO("9idcLAX:vsc:c2_cts1.B", name="scaler2_I000_counts")
-
 
 
 """
