@@ -1,6 +1,61 @@
 print(__file__)
 
-"""configure per-axis tuning"""
+"""
+configure per-axis tuning
+
+A tunable axis has these attributes::
+
+    tuner : obj (function reference)
+        reference to tuning method, such as `APS_BlueSky_tools.plans.TuneAxis()`,
+        Default value is `None` -- this *must* be set before axis can be tuned.
+
+    pre_tune_method : obj (function reference)
+        function to be called before tuning starts, 
+        the default prints status.  
+        Use this to stage various components for the tune.
+
+    pre_tune_method : obj (function reference)
+        function to be called after tuning ends, 
+        the default prints status.  
+        Use this to unstage various components after the tune.
+
+For reference, `APS_BlueSky_tools.plans.TuneAxis().tune()` uses these default attributes::
+
+    width : float
+        full range that axis will be scanned, default = 1
+
+    num : int 
+        full range that axis will be scanned, default = 10
+
+    peak_choice : str
+        either "cen" (default: peak value) or "com" (center of mass)
+
+These attributes, set internally, are available for reference::
+
+    axis : instance of `EpicsMotor` (or other positioner with `AxisTunerMixin`)
+        positioner to be used
+
+    signals : list of instances of `ScalerCH`, `EpicsScaler`, or similar
+        list of detectors to be used
+
+    signal_name : str 
+        name of specific detector signal (must be in `signals`) to use for tuning
+
+These attributes, set internally, are results of the tune scan::
+
+    tune_ok : bool 
+        status of most recent tune
+
+    peaks : instance of `bluesky.callbacks.fitting.PeakStats`
+        with results from most recent tune scan
+
+    stats : [peaks]
+        list of peak summary statistics from all previous tune scans
+
+    center : float
+        value of tune result: `if tune_ok: axis.move(center)` 
+
+"""
 
 # use center-of-mass, and not peak value: "com"
 TUNE_METHOD_PEAK_CHOICE = "com"
@@ -13,9 +68,6 @@ if USING_MS_STAGE:
     TUNING_DET_SIGNAL = I0_SIGNAL
 else:
     TUNING_DET_SIGNAL = I00_SIGNAL
-
-
-USAXS_tune_asr_range = 3         # range for tune asr for about 12keV 
 
 
 # -------------------------------------------
