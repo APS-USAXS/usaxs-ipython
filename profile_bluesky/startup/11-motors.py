@@ -7,7 +7,7 @@ print(__file__)
 # sx = EpicsMotor('9idcLAX:m58:c2:m1', name='sx')  # sx
 # sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')  # sy
 
-class UsaxsSampleStageDevice(Device):
+class UsaxsSampleStageDevice(MotorBundle):
     """USAXS sample stage"""
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m1')
     y = Component(EpicsMotor, '9idcLAX:m58:c2:m2')
@@ -22,7 +22,7 @@ append_wa_motor_list(sample_stage.x, sample_stage.y)
 # dx = EpicsMotor('9idcLAX:m58:c2:m3', name='dx')  # dx
 # dy = EpicsMotor('9idcLAX:aero:c2:m1', name='dy')  # dy
 
-class UsaxsDetectorStageDevice(Device):
+class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m3')
     y = Component(EpicsMotor, '9idcLAX:aero:c2:m1')
@@ -39,7 +39,7 @@ append_wa_motor_list(detector_stage.x, detector_stage.y)
 # uslvap = EpicsMotor('9idcLAX:m58:c2:m7', name='uslvap')  # uslitverap
 # uslvcen = EpicsMotor('9idcLAX:m58:c2:m5', name='uslvcen')  # uslitvercen
 
-class UsaxsSlitDevice(Device):
+class UsaxsSlitDevice(MotorBundle):
     """USAXS slit just before the sample"""
     hap  = Component(EpicsMotor, '9idcLAX:m58:c2:m8')
     hcen = Component(EpicsMotor, '9idcLAX:m58:c2:m6')
@@ -61,7 +61,7 @@ append_wa_motor_list(
 # OutMS = EpicsMotor('9ida:m44', name='OutMS')  # MonoSl_out
 # TopMS = EpicsMotor('9ida:m45', name='TopMS')  # MonoSl_top
 
-class MonoSlitDevice(Device):
+class MonoSlitDevice(MotorBundle):
     """mono beam slit"""
     bot = Component(EpicsMotor, '9ida:m46')
     inb = Component(EpicsMotor, '9ida:m43')
@@ -85,7 +85,7 @@ append_wa_motor_list(
 # gslout = EpicsMotor('9idcLAX:mxv:c0:m3', name='gslout')  # GSlit_outb
 # gsltop = EpicsMotor('9idcLAX:mxv:c0:m5', name='gsltop')  # GSlit_top
 
-class GSlitDevice(Device):
+class GSlitDevice(MotorBundle):
     """guard slit"""
     bot = Component(EpicsMotor, '9idcLAX:mxv:c0:m6')
     inb = Component(EpicsMotor, '9idcLAX:mxv:c0:m4')
@@ -109,7 +109,7 @@ append_wa_motor_list(
 # my = EpicsMotor('9idcLAX:m58:c0:m3', name='my')  # my
 # m2rp = EpicsMotor('9idcLAX:pi:c0:m2', name='m2rp')  # USAXS.m2rp
 
-class UsaxsCollimatorStageDevice(Device):
+class UsaxsCollimatorStageDevice(MotorBundle):
     """USAXS Collimator (Monochromator) stage"""
     r = Component(TunableEpicsMotor, '9idcLAX:aero:c3:m1')
     x = Component(EpicsMotor, '9idcLAX:m58:c0:m2')
@@ -129,7 +129,7 @@ append_wa_motor_list(
 # msx = EpicsMotor('9idcLAX:m58:c1:m1', name='msx')  # msx
 # msy = EpicsMotor('9idcLAX:m58:c1:m2', name='msy')  # msy
 
-class UsaxsCollimatorSideReflectionStageDevice(Device):
+class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
     """USAXS Collimator (Monochromator) side-reflection stage"""
     #r = Component(EpicsMotor, '9idcLAX:xps:c0:m5')
     #t = Component(EpicsMotor, '9idcLAX:xps:c0:m3')
@@ -151,7 +151,7 @@ append_wa_motor_list(m_stage.x, m_stage.y, m_stage.rp)
 # a2rp = EpicsMotor('9idcLAX:pi:c0:m1', name='a2rp')  # USAXS.a2rp
 # art = EpicsMotor('9idcLAX:m58:c1:m3', name='art')  # ART50-100
 
-class UsaxsAnalyzerStageDevice(Device):
+class UsaxsAnalyzerStageDevice(MotorBundle):
     """USAXS Analyzer stage"""
     r = Component(TunableEpicsMotor, '9idcLAX:aero:c0:m1')
     x = Component(EpicsMotor, '9idcLAX:m58:c0:m5')
@@ -173,7 +173,7 @@ append_wa_motor_list(
 # asrp = EpicsMotor('9idcLAX:pi:c0:m4', name='asrp')  # USAXS.asrp
 # asy = EpicsMotor('9idcLAX:m58:c1:m4', name='asy')  # asy
 
-class UsaxsAnalyzerSideReflectionStageDevice(Device):
+class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     """USAXS Analyzer side-reflection stage"""
     #r = Component(EpicsMotor, '9idcLAX:xps:c0:m6')
     #t = Component(EpicsMotor, '9idcLAX:xps:c0:m4')
@@ -190,7 +190,7 @@ append_wa_motor_list(as_stage.sy, as_stage.srp)
 # saxs_y = EpicsMotor('9idcLAX:mxv:c0:m8', name='saxs_y')  # saxs_y
 # saxs_z = EpicsMotor('9idcLAX:mxv:c0:m2', name='saxs_z')  # saxs_z
 
-class SaxsDetectorStageDevice(Device):
+class SaxsDetectorStageDevice(MotorBundle):
     """SAXS detector stage"""
     x = Component(EpicsMotor, '9idcLAX:mxv:c0:m1')
     y = Component(EpicsMotor, '9idcLAX:mxv:c0:m8')
