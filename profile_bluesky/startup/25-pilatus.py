@@ -8,6 +8,7 @@ from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
 
 area_detector_EPICS_PV_prefix = {
     'Pilatus 100k' : 'usaxs_pilatus1:',
+    'Pilatus 200kw' : 'usaxs_pilatus2:',
     'PointGrey BlackFly' : '9idFLY1:',
     'Alta' : '9idalta:',
 }
@@ -76,4 +77,5 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
 
 
 # saxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 100k"], name="saxs_det")
-# waxs_det = MyPointGreyDetector(area_detector_EPICS_PV_prefix["PointGrey BlackFly"], name="waxs_det")
+# waxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 200kw"], name="waxs_det")
+# pg_det = MyPointGreyDetector(area_detector_EPICS_PV_prefix["PointGrey BlackFly"], name="pg_det")
