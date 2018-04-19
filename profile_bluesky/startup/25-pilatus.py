@@ -2,8 +2,10 @@ print(__file__)
 
 """Pilatus detector"""
 
-from ophyd import AreaDetector, PilatusDetectorCam, PointGreyCam
+from ophyd import AreaDetector, PilatusDetectorCam, PointGreyDetectorCam
 from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
+from ophyd.areadetector import ADComponent
+from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 
 
 area_detector_EPICS_PV_prefix = {
@@ -39,6 +41,7 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
         root="/",                   # TODO: root path for HDF5 files (for databroker filestore)
         write_path_template="/tmp", # TODO: path for HDF5 files (for EPICS area detector)
         reg=db.reg,
+        )
 
 
 class MyPointGreyDetector(SingleTrigger, AreaDetector):
