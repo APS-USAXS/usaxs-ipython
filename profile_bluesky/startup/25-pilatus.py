@@ -23,23 +23,6 @@ class MyPilatusCam(PilatusDetectorCam):
     # frame_type = ADComponent(EpicsSignal, "FrameType")
     
 
-class MyHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
-#class MyHDF5Plugin(HDF5Plugin):
-    """custom support for detector HDF5 plugin (AD 2.5+)"""
-    
-    file_number_sync = None
-    # FIXME:  .put() works OK but .value returns numpy object metadata
-    # In [48]: pco_edge.hdf1.xml_layout_file.get()
-    # Out[48]: '<array size=21, type=time_char>'
-    # FIXME: xml_layout_file = Component(EpicsSignalWithRBV, "XMLFileName", string=True)
-    xml_layout_file = ADComponent(EpicsSignal, "XMLFileName", string=True)    # use as WRITE-ONLY for now due to error above
-    xml_layout_valid = ADComponent(EpicsSignalRO, "XMLValid_RBV")
-    xml_layout_error_message = ADComponent(EpicsSignalRO, "XMLErrorMsg_RBV", string=True)
-    
-    def get_frames_per_point(self):
-        return self.parent.cam.num_images.get()
-
-
 class MyPilatusDetector(SingleTrigger, AreaDetector):
     """Pilatus detector(s) as used by 9-ID-C USAXS"""
     # TODO: configure the "root" and "write_path_template" attributes
