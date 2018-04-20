@@ -22,6 +22,7 @@ install_qt_kicker()
 from bluesky.callbacks import *
 from bluesky.plan_tools import print_summary
 import bluesky.plans as bp
+import bluesky.plan_stubs as bps
 import numpy as np
 import bluesky.magics
 
@@ -35,10 +36,10 @@ def append_wa_motor_list(*motorlist):
 # verbose messages for debugging.
 import logging
 # ophyd.logger.setLevel(logging.DEBUG)
-#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 
 # diagnostics
 from bluesky.utils import ts_msg_hook
-#RE.msg_hook = ts_msg_hook
+RE.msg_hook = ts_msg_hook
 from bluesky.simulators import summarize_plan
