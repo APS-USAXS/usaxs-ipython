@@ -2,10 +2,6 @@ print(__file__)
 
 """Pilatus detector"""
 
-from ophyd import AreaDetector, PilatusDetectorCam, PointGreyDetectorCam
-from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
-from ophyd.areadetector import ADComponent
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 
 
 area_detector_EPICS_PV_prefix = {
@@ -49,7 +45,7 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
     # TODO: configure the "root" and "write_path_template" attributes
     # TODO: consider each detector separately?
     
-    cam = ADComponent(PointGreyCam, "cam1:")
+    cam = ADComponent(PointGreyDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
     # root : the path BlueSky can see
     # write_path_template : the path the detector can see (starts with root)
