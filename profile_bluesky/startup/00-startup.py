@@ -36,7 +36,7 @@ def append_wa_motor_list(*motorlist):
 # verbose messages for debugging.
 import logging
 # ophyd.logger.setLevel(logging.DEBUG)
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 # diagnostics
