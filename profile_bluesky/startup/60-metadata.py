@@ -10,16 +10,6 @@ RE.md['pid'] = os.getpid()
 
 # Add a callback that prints scan IDs at the start of each scan.
 
-def print_scan_ids(name, start_doc):
-    msg = "Transient Scan ID: "
-    msg += str(start_doc['scan_id'])
-    msg += " at "
-    msg += str(datetime.isoformat(datetime.now()))
-    print(msg)
-    print("Persistent Unique Scan ID: '{0}'".format(start_doc['uid']))
-
-callback_db['print_scan_ids'] = RE.subscribe(print_scan_ids, 'start')
-
 import socket 
 import getpass 
 HOSTNAME = socket.gethostname() or 'localhost' 
