@@ -11,8 +11,8 @@ class UsaxsSampleStageDevice(MotorBundle):
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m1')
     y = Component(EpicsMotor, '9idcLAX:m58:c2:m2')
 
-sample_stage = UsaxsSampleStageDevice('', name='sample_stage')
-append_wa_motor_list(sample_stage.x, sample_stage.y)
+s_stage = UsaxsSampleStageDevice('', name='s_stage')
+append_wa_motor_list(s_stage.x, s_stage.y)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -26,8 +26,8 @@ class UsaxsDetectorStageDevice(MotorBundle):
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m3')
     y = Component(EpicsMotor, '9idcLAX:aero:c2:m1')
 
-detector_stage = UsaxsDetectorStageDevice('', name='detector_stage')
-append_wa_motor_list(detector_stage.x, detector_stage.y)
+d_stage = UsaxsDetectorStageDevice('', name='d_stage')
+append_wa_motor_list(d_stage.x, d_stage.y)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
