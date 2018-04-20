@@ -16,7 +16,6 @@ import os
 import subprocess
 from ophyd.utils import OrderedDefaultDict
 from enum import Enum
-from bluesky import preprocessors as bpp
 import threading
 import time
 
@@ -62,11 +61,11 @@ class ApsBusyFlyScanDeviceMixin(object):
     
     .. autosummary:
        ~flyscan_plan
-       ~hook_flyscan
-       ~hook_pre_flyscan
-       ~hook_post_flyscan
+       ~hook_flyscan_plan
+       ~hook_pre_flyscan_plan
        ~hook_flyscan_wait_not_scanning
        ~hook_flyscan_wait_scanning
+       ~hook_post_flyscan_plan
        ~flyscan_wait
        ~_flyscan
     
@@ -95,30 +94,30 @@ class ApsBusyFlyScanDeviceMixin(object):
         self._flyscan_status = None
         self.poll_sleep_interval_s = 0.05
     
-    def hook_flyscan(self):
+    def hook_flyscan_plan(self):
         """
         Customize: called during fly scan
         
         called from RunEngine thread in ``flyscan_plan()``, 
         blocking calls are not permitted
         """
-        logger.debug("hook_flyscan_not_scanning() : no-op default")
+        logger.debug("hook_flyscan_plan() : no-op default")
     
-    def hook_pre_flyscan(self):
+    def hook_pre_flyscan_plan(self):
         """
         Customize: called before the fly scan
         
         NOTE: As part of a BlueSky plan thread, no blocking calls are permitted
         """
-        logger.debug("hook_pre_flyscan() : no-op default")
+        logger.debug("hook_pre_flyscan_plan() : no-op default")
     
-    def hook_post_flyscan(self):
+    def hook_post_flyscan_plan(self):
         """
         Customize: called after the fly scan
         
         NOTE: As part of a BlueSky plan thread, no blocking calls are permitted
         """
-        logger.debug("hook_post_flyscan() : no-op default")
+        logger.debug("hook_post_flyscan_plan() : no-op default")
     
     def hook_flyscan_wait_not_scanning(self):
         """
@@ -171,36 +170,39 @@ class ApsBusyFlyScanDeviceMixin(object):
             logger.debug("leaving fly_scan() - not complete")
             return
 
-        logger.debug("flyscan() - clearing Busy")
+        logger.debug("_flyscan() - clearing Busy")
         self.busy.state.put(BusyStatus.done) # make sure it's Done first
         self.flyscan_wait(False)
         time.sleep(1.0)
 
-        logger.debug("flyscan() - setting Busy")
+        logger.debug("_flyscan() - setting Busy")
         self.busy.state.put(BusyStatus.busy)
         self.flyscan_wait(True)
 
         self._flyscan_status._finished(success=True)
-        logger.debug("flyscan() complete")
+        logger.debug("_flyscan() complete")
     
     def flyscan_plan(self, *args, **kwargs):
         """
         This is the BlueSky plan to submit to the RunEgine
         """
         logger.debug("flyscan_plan()")
-        yield from bpp.open_run()
+        yield from bps.open_run()
 
-        self.hook_pre_flyscan()
+        self.hook_pre_flyscan_plan()
         self._flyscan_status = DeviceStatus(self.busy.state)
         
         thread = threading.Thread(target=self._flyscan, daemon=True)
         thread.start()
         
         while not self._flyscan_status.done:
-            self.hook_flyscan()
+            self.hook_flyscan_plan()
             bps.sleep(self.poll_sleep_interval_s)
-        logger.debug("plan() status=" + str(self._flyscan_status))
-        self.hook_post_flyscan()
+        logger.debug("flyscan_plan() status=" + str(self._flyscan_status))
 
-        yield from bpp.close_run()
-        logger.debug("plan() complete")
+        print("BEFORE<<<<<<<<<<<<<<<<<<<<<<<<<<")
+        self.hook_post_flyscan_plan()
+        print("AFTER<<<<<<<<<<<<<<<<<<<<<<<<<<")
+
+        yield from bps.close_run()
+        logger.debug("flyscan_plan() complete")
