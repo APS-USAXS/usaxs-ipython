@@ -65,9 +65,9 @@ USING_MS_STAGE = False
 
 # use I00 (if MS stage is used, use I0)
 if USING_MS_STAGE:
-    TUNING_DET_SIGNAL = I0_SIGNAL
-else:
     TUNING_DET_SIGNAL = I00_SIGNAL
+else:
+    TUNING_DET_SIGNAL = I0_SIGNAL
 
 
 # -------------------------------------------
@@ -83,7 +83,11 @@ def mr_posttune_hook():
     print(msg.format(m_stage.r.name, m_stage.r.position))
     yield from bps.mv(mr_val_center, m_stage.r.position)
  
- 
+
+# FIXME:  TuneAxis is not configured or (setup properly) for ScalerCH
+# TODO: EpicsScaler and ScalerCH both, by default, show too many channels
+# TODO: EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
+# TODO: need report of tuning OK/not OK on console
 m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=TUNING_DET_SIGNAL.name)
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
@@ -230,3 +234,11 @@ a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = 6
 a_stage.r2p.pre_tune_method = a2rp_pretune_hook
 a_stage.r2p.post_tune_method = a2rp_posttune_hook
+
+
+
+def tune_usaxs_optics():
+	yield from m_stage.r.tuner.tune()
+	yield from m_stage.r2p.tuner.tune()
+	yield from a_stage.r.tuner.tune()
+	yield from a_stage.r2p.tuner.tune()
