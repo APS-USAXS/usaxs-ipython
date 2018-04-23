@@ -6,6 +6,7 @@ USAXS Fly Scan setup
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
+# from usaxs_support.saveFlyData import SaveFlyScan
 
 
 class UsaxsFlyScanDevice(Device, ApsBusyFlyScanDeviceMixin):
