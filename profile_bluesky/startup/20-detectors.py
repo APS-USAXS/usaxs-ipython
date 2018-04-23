@@ -15,7 +15,8 @@ def use_EPICS_scaler_channels(scaler):
     scaler.channels.read_attrs = read_attrs
 
 
-# the old way
+# the old way ... because ...
+# FIXME:  TuneAxis is not configured or (setup properly) for ScalerCH
 scaler0 = EpicsScaler('9idcLAX:vsc:c0', name='scaler0')
 # scaler1 = EpicsScaler('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
 # scaler2 = EpicsScaler('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback

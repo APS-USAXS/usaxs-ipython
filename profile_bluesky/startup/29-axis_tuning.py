@@ -84,7 +84,6 @@ def mr_posttune_hook():
     yield from bps.mv(mr_val_center, m_stage.r.position)
  
 
-# FIXME:  TuneAxis is not configured or (setup properly) for ScalerCH
 # TODO: EpicsScaler and ScalerCH both, by default, show too many channels
 # TODO: EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
 # TODO: need report of tuning OK/not OK on console
