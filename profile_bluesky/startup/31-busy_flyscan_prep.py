@@ -8,42 +8,7 @@ this example does not inject the data into BlueSky.
 Coded here to meet an imposing deadline.
 """
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
-
-from collections import deque, OrderedDict
-import os
-import subprocess
-from ophyd.utils import OrderedDefaultDict
-from enum import Enum
-import threading
-import time
-
-
-class BusyStatus(str, Enum):
-    busy = "Busy"
-    done = "Done"
-
-
-class BusyRecord(Device):
-    """a busy record sets the fly scan into action"""
-    state = Component(EpicsSignal, "")
-    output_link = Component(EpicsSignal, ".OUT")
-    forward_link = Component(EpicsSignal, ".FLNK")
-
-
-class MyCalc(Device):
-    """swait record simulates a signal"""
-    result = Component(EpicsSignal, "")
-    calc = Component(EpicsSignal, ".CALC")
-    proc = Component(EpicsSignal, ".PROC")
-
-
-class MyWaveform(Device):
-    """waveform records store fly scan data"""
-    wave = Component(EpicsSignalRO, "")
-    number_elements = Component(EpicsSignalRO, ".NELM")
-    number_read = Component(EpicsSignalRO, ".NORD")
+# logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
 # FIXME: this Device does not work correctly.  DO NOT USE.
