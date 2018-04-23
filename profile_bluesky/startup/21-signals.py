@@ -4,6 +4,11 @@ print(__file__)
 
 aps_current = EpicsSignalRO("S:SRcurrentAI", name="aps_current")
 
+FE_shutter = MyApsPssShutter("9ida:rShtrA", name="FE_shutter")
+mono_shutter = MyApsPssShutter("9ida:rShtrB", name="mono_shutter")
+usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
+ccd_shutter = InOutShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
+
 mono_energy = EpicsSignal('9ida:BraggERdbkAO', name='mono_energy', write_pv="9ida:BraggEAO")
 und_us_energy = EpicsSignal('ID09us:Energy', name='und_us_energy', write_pv="ID09us:EnergySet")
 und_ds_energy = EpicsSignal('ID09ds:Energy', name='und_ds_energy', write_pv="ID09ds:EnergySet")
