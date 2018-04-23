@@ -51,13 +51,9 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
 
 class MyPointGreyDetector(SingleTrigger, AreaDetector):
     """PointGrey Black Fly detector(s) as used by 9-ID-C USAXS"""
-    # TODO: configure the "root" and "write_path_template" attributes
-    # TODO: consider each detector separately?
     
     cam = ADComponent(PointGreyDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
-    # root : the path BlueSky can see
-    # write_path_template : the path the detector can see (starts with root)
 
 
 saxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 100k"], name="saxs_det")
