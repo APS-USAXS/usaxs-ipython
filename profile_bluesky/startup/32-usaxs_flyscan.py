@@ -6,7 +6,7 @@ USAXS Fly Scan setup
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
-# from usaxs_support.saveFlyData import SaveFlyScan
+from usaxs_support.saveFlyData import SaveFlyScan
 
 
 class UsaxsFlyScanDevice(Device, ApsBusyFlyScanDeviceMixin):
@@ -21,9 +21,20 @@ class UsaxsFlyScanDevice(Device, ApsBusyFlyScanDeviceMixin):
         self.ar0 = None
         self.ay0 = None
         self.dy0 = None
+        self.saveFlyData = None
 
-    def hook_flyscan_plan(self):
-        pass
+    def hook_flyscan_started(self):
+        """this is run after _flyscan(), after fly scan starts"""
+        def save_data():
+            # TODO: instead, get this from EPICS
+            filename = '/tmp/the_fly_scan.h5'
+            self.saveFlyData = SaveFlyScan(filename)
+            self.saveFlyData.waitForData()
+            self.saveFlyData = None
+
+        print("this is where saveFlyData will be kicked off")
+        # thread = threading.Thread(target=save_data, daemon=True)
+        # thread.start()
 
     def hook_pre_flyscan_plan(self):
         """
@@ -71,8 +82,6 @@ class UsaxsFlyScanDevice(Device, ApsBusyFlyScanDeviceMixin):
         #     a_stage.y.user_setpoint, self.ay0, 
         #     d_stage.y.user_setpoint, self.dy0)
 
-        print("Fly scan complete, normally, would save data at this time")
-
         t = time.time()
         msg = "fly scan finished in {} s".format(t - self.t0)
         print(msg)
@@ -86,9 +95,9 @@ def fix_faulty():
     # a_stage.y.move(0)
     # d_stage.y.move(13.35)
     
-    a_stage.r.user_setpoint.set(8.761986)
+    a_stage.r.user_setpoint.set(8.761272)
     a_stage.y.user_setpoint.set(0)
-    d_stage.y.user_setpoint.set(13.35)
+    d_stage.y.user_setpoint.set(13.2833635)
 
 
 # RE(usaxs_flyscan.flyscan_plan())
