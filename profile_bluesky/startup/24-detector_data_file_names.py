@@ -19,6 +19,26 @@ from pathlib import PurePath
 logger = logging.getLogger(__name__)
 
 
+"""
+file systems on Pilatus detectors need more work
+
+saxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_saxs/
+waxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_waxs/
+
+PointGrey BlackFly does not write out to file typically.  No use of HDF5 plugin.
+
+Alta: ?
+"""
+
+
+area_detector_EPICS_PV_prefix = {
+    'Pilatus 100k' : 'usaxs_pilatus1:',
+    'Pilatus 200kw' : 'usaxs_pilatus2:',
+    'PointGrey BlackFly' : '9idFLY1:',
+    'Alta' : '9idalta:',
+}
+
+
 class MyFileStorePluginBase(FileStoreBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

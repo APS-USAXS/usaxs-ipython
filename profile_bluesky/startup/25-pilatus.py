@@ -3,24 +3,6 @@ print(__file__)
 """Pilatus detector"""
 
 
-"""
-file systems on Pilatus detectors need more work
-
-saxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_saxs/
-waxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_waxs/
-
-PointGrey does not write out to file typically.  Do not care about HDF5 plugin
-"""
-
-
-area_detector_EPICS_PV_prefix = {
-    'Pilatus 100k' : 'usaxs_pilatus1:',
-    'Pilatus 200kw' : 'usaxs_pilatus2:',
-    'PointGrey BlackFly' : '9idFLY1:',
-    'Alta' : '9idalta:',
-}
-
-
 class MyPilatusCam(PilatusDetectorCam):
     """custom support for detector cam plugin"""
     # # FIXME: ophyd has problem with trying to unstage the RBV value inside RE()
@@ -49,13 +31,5 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
         )
 
 
-class MyPointGreyDetector(SingleTrigger, AreaDetector):
-    """PointGrey Black Fly detector(s) as used by 9-ID-C USAXS"""
-    
-    cam = ADComponent(PointGreyDetectorCam, "cam1:")
-    image = ADComponent(ImagePlugin, "image1:")
-
-
 saxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 100k"], name="saxs_det")
 waxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 200kw"], name="waxs_det")
-blackfly_det = MyPointGreyDetector(area_detector_EPICS_PV_prefix["PointGrey BlackFly"], name="blackfly_det")
