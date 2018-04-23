@@ -23,7 +23,7 @@ from lxml import etree as lxml_etree
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
 
-import epics		        # PyEpics support
+import epics                # PyEpics support
 from spec2nexus import eznx     # NeXus r/w support using h5py
 
 
@@ -266,10 +266,10 @@ class SaveFlyScan(object):
                 self._attachEpicsAttributes(ds, pv_spec.pv)
                 eznx.addAttributes(ds, **pv_spec.attrib)
             except Exception as e:
-                print("ERROR: ", pv_spec.label, value)
+                print("ERROR: pv_spec.label={}, value={}".format(pv_spec.label, value))
                 print("MESSAGE: ", e)
                 print("RESOLUTION: writing as error message string")
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e)])
+                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
     def saveFile(self):
@@ -304,7 +304,7 @@ class SaveFlyScan(object):
                 print("ERROR: ", pv_spec.label, value)
                 print("MESSAGE: ", e)
                 print("RESOLUTION: writing as error message string")
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e)])
+                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
         # as the final step, make all the links as directed
@@ -393,7 +393,15 @@ class SaveFlyScan(object):
             eznx.addAttributes(xture.hdf5_group, **xture.attrib)
 
         for field in field_registry.values():
-            ds = eznx.makeDataset(field.group_parent.hdf5_group, field.name, [field.text])
+            if isinstance(field.text, type(u"unicode")):
+                field.text = field.text.encode('utf8')
+            try:
+                ds = eznx.makeDataset(field.group_parent.hdf5_group, field.name, [field.text])
+            except Exception as _exc:
+                msg = "problem with field={}, text={}, exception={}".format(
+                    field.name, field.text, _exc
+                )
+                raise Exception(msg)
             eznx.addAttributes(ds, **field.attrib)
 
     def _attachEpicsAttributes(self, node, pv):
@@ -401,10 +409,10 @@ class SaveFlyScan(object):
         pvname = os.path.splitext(pv.pvname)[0]
         desc = epics.caget(pvname+'.DESC') or ''
         eznx.addAttributes(node,
-          epics_pv = pv.pvname,
-          units = pv.units or '',
+          epics_pv = pv.pvname.encode('utf8'),
+          units = (pv.units or '').encode('utf8'),
           epics_type = pv.type,
-          epics_description = desc,
+          epics_description = desc.encode('utf8'),
         )
 
 
@@ -454,7 +462,7 @@ def developer():
     sfs.waitForData()
 
 if __name__ == '__main__':
-    main()	# production system
+    main()  # production system
     # developer()
 
 
