@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 """
 file systems on Pilatus detectors need more work
 
-saxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_saxs/
+saxs:  /mnt/share1/USAXS_data/yyyy-mm/user_working_folder_saxs/
 waxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_waxs/
 
 PointGrey BlackFly does not write out to file typically.  No use of HDF5 plugin.
@@ -64,10 +64,33 @@ class MyFileStorePluginBase(FileStoreBase):
         write_path : str
             Path that the IOC can write to
         '''
-        filename = new_short_uid()
-        formatter = datetime.now().strftime
-        write_path = formatter(self.write_path_template)
-        read_path = formatter(self.read_path_template)
+        # These are the instructions as-supplied
+        #filename = new_short_uid()
+        #formatter = datetime.now().strftime
+        #write_path = formatter(self.write_path_template)	# for HDF5 plugin
+        #read_path = formatter(self.read_path_template)		# for DataBroker
+        
+        # trust EPICS to have these right (per #15)
+        logger.info("File path: " + self.file_path.value)
+        logger.info("File name: " + self.file_name.value)
+        logger.info("File template: " + self.file_template.value)
+        
+        # start of the file name, file number will be appended per template
+        filename = self.file_name.value
+        
+        # this is where the HDF5 plugin will write the image, 
+        # relative to the IOC's filesystem
+        write_path = self.file_path.value
+        
+        # this is where the DataBroker will find the image, 
+        #on a filesystem accessible to BlueSky
+        read_path = write_path.replace("/mnt/", "/").replace("/usaxscontrol/", "/share1/")
+        
+        msg = "make_filename() filename={}, read_path={}, write_path={}".format(
+            filename, read_path, write_path
+        )
+        logger.info(msg)
+        
         return filename, read_path, write_path
 
     def stage(self):
@@ -96,14 +119,19 @@ class MyFileStorePluginBase(FileStoreBase):
                           "" % self.file_path.get())
 
 
+my_hdf5_file_template = "%s%s_%4.4d.hdf"    # what we normally use
+my_hdf5_file_template = "%s%s_%6.6d.h5" # re-define so we can see this setup happen
+
+
 class MyFileStoreHDF5(MyFileStorePluginBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.filestore_spec = 'AD_HDF5'  # spec name stored in resource doc
-        self.stage_sigs.update([('file_template', '%s%s_%6.6d.h5'),
-                                ('file_write_mode', 'Stream'),
-                                ('capture', 1)
-                                ])
+        self.filestore_spec = 'AD_HDF5'  # SPEC name stored in resource doc
+        self.stage_sigs.update([
+            ('file_template', my_hdf5_file_template),
+            ('file_write_mode', 'Stream'),
+            ('capture', 1)
+        ])
 
     def get_frames_per_point(self):
         return self.num_capture.get()
