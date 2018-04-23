@@ -27,7 +27,7 @@ waxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_waxs/
 
 PointGrey BlackFly does not write out to file typically.  No use of HDF5 plugin.
 
-Alta: ?
+Alta: /mnt/share1/USAXS_data/...
 """
 
 
