@@ -19,55 +19,6 @@ from pathlib import PurePath
 logger = logging.getLogger(__name__)
 
 
-# FIXME: RE(bp.count([saxs_det], num=5)) raises an exception
-"""
-In [33]: RE(bp.count([saxs_det], num=5))
-Transient Scan ID: 32     Time: 2018/04/20 12:05:01
-Persistent Unique Scan ID: 'a96897a0-4ddd-4f57-ac99-fcc312e92e25'
-Transient Scan ID: 32 at 2018-04-20T12:05:01.166467
-Persistent Unique Scan ID: 'a96897a0-4ddd-4f57-ac99-fcc312e92e25'
-New stream: 'primary'                                                                                                                                                                                                                                               
-+-----------+------------+
-|   seq_num |       time |
-+-----------+------------+
-+-----------+------------+
-generator count ['a96897a0'] (scan num: 32)
-
-
-
-exit status: fail
-# descriptor(s): 1
----------------------------------------------------------------------------
-IndexError                                Traceback (most recent call last)
-<ipython-input-33-fccab7a10f08> in <module>()
-----> 1 RE(bp.count([saxs_det], num=5))
-
-...
-/APSshare/anaconda3/BlueSky/lib/python3.6/site-packages/bluesky/utils.py in __call__(self, *args, **kwargs)
-    367             mtd = self.func
-    368         # invoke the callable and return the result
---> 369         return mtd(*args, **kwargs)
-    370 
-    371     def __eq__(self, other):
-
-/APSshare/anaconda3/BlueSky/lib/python3.6/site-packages/APS_BlueSky_tools/filewriters.py in receiver(self, key, document)
-    207         if key in xref:
-    208             self._datetime = datetime.datetime.fromtimestamp(document["time"])
---> 209             xref[key](document)
-    210         else:
-    211             msg = "custom_callback encountered: {} : {}".format(key, document)
-
-/APSshare/anaconda3/BlueSky/lib/python3.6/site-packages/APS_BlueSky_tools/filewriters.py in descriptor(self, doc)
-    293                 det_name = list(self.detectors.keys())[0]
-    294                 if det_name not in self.data:
---> 295                     det_name = list(doc["data_keys"].keys())[0]
-    296                 if det_name in self.data:
-    297                     self.data.move_to_end(det_name)
-
-IndexError: list index out of range
-
-"""
-
 class MyFileStorePluginBase(FileStoreBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
