@@ -19,7 +19,6 @@ from pathlib import PurePath
 logger = logging.getLogger(__name__)
 
 
-# TODO: RuntimeError: there is no version sentinel for the resource collection
 # FIXME: RE(bp.count([saxs_det], num=5)) raises an exception
 """
 In [33]: RE(bp.count([saxs_det], num=5))
