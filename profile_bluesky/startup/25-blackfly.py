@@ -13,6 +13,10 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
     image = ADComponent(ImagePlugin, "image1:")
 
 
-blackfly_det = MyPointGreyDetector(
-    area_detector_EPICS_PV_prefix["PointGrey BlackFly"], 
-    name="blackfly_det")
+try:
+    nm = "PointGrey BlackFly"
+    prefix = area_detector_EPICS_PV_prefix[nm]
+    blackfly_det = MyPointGreyDetector(prefix, name="blackfly_det")
+except TimeoutError as exc_obj:
+    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    print(msg)

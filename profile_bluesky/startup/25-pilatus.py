@@ -40,5 +40,18 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
         )
 
 
-saxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 100k"], name="saxs_det")
-waxs_det = MyPilatusDetector(area_detector_EPICS_PV_prefix["Pilatus 200kw"], name="waxs_det")
+try:
+    nm = "Pilatus 100k"
+    prefix = area_detector_EPICS_PV_prefix[nm]
+    saxs_det = MyPilatusDetector(prefix, name="saxs_det")
+except TimeoutError as exc_obj:
+    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    print(msg)
+
+try:
+    nm = "Pilatus 200kw"
+    prefix = area_detector_EPICS_PV_prefix[nm]
+    waxs_det = MyPilatusDetector(prefix, name="waxs_det")
+except TimeoutError as exc_obj:
+    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    print(msg)
