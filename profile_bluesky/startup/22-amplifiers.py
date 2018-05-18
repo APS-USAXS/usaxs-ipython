@@ -16,7 +16,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
 
 
 class DiodeRangeDevice(Device):
-    _default_configuration_attrs = ('gain', 'background', 'background_error')
+    _default_configuration_attrs = ()
     _default_read_attrs = ('gain', 'background', 'background_error')
 
     gain = FormattedComponent(EpicsSignal, '{self.prefix}gain{self._ch_num}')
@@ -29,7 +29,7 @@ class DiodeRangeDevice(Device):
         super().__init__(prefix, **kwargs)
 
 
-class DiodeControlsDevice(Device):
+class DiodeControlsDevice(CurrentAmplifierDevice):
     reqrange = Component(EpicsSignal, "reqrange")
     mode = Component(EpicsSignal, "mode")
     selected = Component(EpicsSignal, "selected")
@@ -41,7 +41,6 @@ class DiodeControlsDevice(Device):
     range3 = Component(DiodeRangeDevice, '', ch_num=3)
     range4 = Component(DiodeRangeDevice, '', ch_num=4)
     counts_per_volt = Component(EpicsSignal, "vfc")
-    gain = Component(EpicsSignal, "gain")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
     lucounts = Component(EpicsSignalRO, "lucounts")
