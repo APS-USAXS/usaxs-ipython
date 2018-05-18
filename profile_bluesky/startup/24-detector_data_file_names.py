@@ -4,7 +4,10 @@ print(__file__)
 replace BlueSky file name scheme when used with area detector
 """
 
-from ophyd import AreaDetector, PilatusDetectorCam, PointGreyDetectorCam
+from ophyd import AreaDetector
+from ophyd import PilatusDetectorCam
+from ophyd import PointGreyDetectorCam
+from ophyd import SimDetectorCam
 from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
 from ophyd.utils import set_and_wait
 from ophyd.areadetector import ADComponent
@@ -36,6 +39,7 @@ area_detector_EPICS_PV_prefix = {
     'Pilatus 200kw' : 'usaxs_pilatus2:',
     'PointGrey BlackFly' : '9idFLY1:',
     'Alta' : '9idalta:',
+    'SimDetector' : '9idcSIM1:',
 }
 
 
