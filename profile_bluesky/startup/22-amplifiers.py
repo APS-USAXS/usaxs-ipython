@@ -30,7 +30,7 @@ class DiodeRangeDevice(Device):
 
 
 class DiodeControlsDevice(Device):
-    reqrange = Component(EpicsSignalRO, "reqrange")
+    reqrange = Component(EpicsSignal, "reqrange")
     mode = Component(EpicsSignal, "mode")
     selected = Component(EpicsSignal, "selected")
     gainU = Component(EpicsSignal, "gainU")
@@ -41,6 +41,7 @@ class DiodeControlsDevice(Device):
     range3 = Component(DiodeRangeDevice, '', ch_num=3)
     range4 = Component(DiodeRangeDevice, '', ch_num=4)
     counts_per_volt = Component(EpicsSignal, "vfc")
+    gain = Component(EpicsSignal, "gain")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
     lucounts = Component(EpicsSignalRO, "lucounts")
@@ -54,5 +55,5 @@ I0_femto = FemtoAmplifierDevice('9idcUSX:fem02:seq01:', name='I0_femto')
 I00_femto = FemtoAmplifierDevice('9idcUSX:fem03:seq01:', name='I00_femto')
 I000_femto = FemtoAmplifierDevice('9idcUSX:fem04:seq01:', name='I000_femto')
 
-diode1_controls = DiodeControlsDevice("9idcUSX:pd01:seq01:", name="diode1_controls")
-diode2_controls = DiodeControlsDevice("9idcUSX:pd01:seq02:", name="diode2_controls")
+femto200_controls = DiodeControlsDevice("9idcUSX:pd01:seq01:", name="femto200_controls")
+femto300_controls = DiodeControlsDevice("9idcUSX:pd01:seq02:", name="femto300_controls")
