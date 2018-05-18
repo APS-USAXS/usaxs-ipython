@@ -237,7 +237,7 @@ a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 
 def tune_usaxs_optics():
-	yield from m_stage.r.tuner.tune()
-	yield from m_stage.r2p.tuner.tune()
-	yield from a_stage.r.tuner.tune()
-	yield from a_stage.r2p.tuner.tune()
+    yield from m_stage.r.tuner.tune()
+    yield from m_stage.r2p.tuner.tune()
+    yield from a_stage.r.tuner.tune()
+    yield from a_stage.r2p.tuner.tune()
