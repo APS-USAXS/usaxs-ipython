@@ -23,9 +23,9 @@ class DiodeRangeDevice(Device):
     background = FormattedComponent(EpicsSignal, '{self.prefix}bkg{self._ch_num}')
     background_error = FormattedComponent(EpicsSignal, '{self.prefix}bkgErr{self._ch_num}')
 
-    def __init__(self, prefix, ch_num, **kwargs):
+    def __init__(self, prefix, ch_num=None, **kwargs):
+        assert(ch_num is not None, "Must provide `ch_num=` keyword argument.")
         self._ch_num = ch_num
-
         super().__init__(prefix, **kwargs)
 
 
@@ -46,7 +46,22 @@ class DiodeControlsDevice(CurrentAmplifierDevice):
     lucounts = Component(EpicsSignalRO, "lucounts")
     lurate = Component(EpicsSignalRO, "lurate")
     lucurrent = Component(EpicsSignalRO, "lucurrent")
+
+    def __init__(self, prefix, **kwargs):
+        self.scaler = None
+        super().__init__(prefix, **kwargs)
     
+    def measure_dark_currents(self, numReadings=8):     # TODO:
+        """
+        """
+        assert(self.scaler is not None, "Must define the `scaler`.")
+        pass
+    
+    def autoscale(self):                                # TODO:
+        """
+        """
+        assert(self.scaler is not None, "Must define the `scaler`.")
+        pass
 
 
 I_femto = FemtoAmplifierDevice('9idcUSX:fem01:seq01:', name='I_femto')
