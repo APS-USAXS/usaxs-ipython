@@ -29,7 +29,7 @@ class DiodeRangeDevice(Device):
         super().__init__(prefix, **kwargs)
 
 
-class AutorangeSettings(class):
+class AutorangeSettings(object):
     """values allowed for ``DiodeControlsDevice.reqrange``"""
     automatic = "automatic"
     auto_background = "auto+background"
@@ -53,6 +53,7 @@ class DiodeControlsDevice(CurrentAmplifierDevice):
     lucounts = Component(EpicsSignalRO, "lucounts")
     lurate = Component(EpicsSignalRO, "lurate")
     lucurrent = Component(EpicsSignalRO, "lucurrent")
+    updating = Component(EpicsSignalRO, "updating")
 
     def __init__(self, prefix, **kwargs):
         self.scaler = None
@@ -70,16 +71,17 @@ class DiodeControlsDevice(CurrentAmplifierDevice):
         assert self.scaler is not None, "Must define the `scaler`."
         pass
     
+    @property
     def isUpdating(self):
-        return self.mode.value in (1, "updating")
-
-
-class UPD_FemtoAmplifierDevice(FemtoAmplifierDevice):
+        v = self.mode.value in (1, AutorangeSettings.auto_background)
+        if v:
+            v = self.updating.value in (1, "Updating")
+        return v
     
     def _decode_gain_target(self, target):
         gain_list = (4, 6, 8, 10, 12)
         assert target in gain_list, "`target` must be one of these values: {}".format(gain_list)
-        return gain_list(target)
+        return gain_list.index(target)
 
     def set_gain_plan(self, target):
         """
@@ -93,6 +95,7 @@ class UPD_FemtoAmplifierDevice(FemtoAmplifierDevice):
         
         Only use low noise gains; those are the only ones which actually work
         """
+        yield from bps.abs_set(self.mode, AutorangeSettings.manual)
         yield from bps.abs_set(self.reqrange, self._decode_gain_target(target))
 
     def set_gain_cmd(self, target):
@@ -107,10 +110,11 @@ class UPD_FemtoAmplifierDevice(FemtoAmplifierDevice):
         
         Only use low noise gains; those are the only ones which actually work
         """
-        self.reqrange.set(self._decode_gain_target(target))
+        self.mode.put(AutorangeSettings.manual)
+        self.reqrange.put(self._decode_gain_target(target))
 
 
-I_femto = UPD_FemtoAmplifierDevice('9idcUSX:fem01:seq01:', name='I_femto')
+I_femto = FemtoAmplifierDevice('9idcUSX:fem01:seq01:', name='I_femto')
 I0_femto = FemtoAmplifierDevice('9idcUSX:fem02:seq01:', name='I0_femto')
 I00_femto = FemtoAmplifierDevice('9idcUSX:fem03:seq01:', name='I00_femto')
 I000_femto = FemtoAmplifierDevice('9idcUSX:fem04:seq01:', name='I000_femto')
