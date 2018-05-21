@@ -13,7 +13,7 @@ RE.md['pid'] = os.getpid()
 import socket 
 import getpass 
 HOSTNAME = socket.gethostname() or 'localhost' 
-USERNAME = getpass.getuser() or 'synApps_xxx_user' 
+USERNAME = getpass.getuser() or 'APS USAXS user' 
 RE.md['login_id'] = USERNAME + '@' + HOSTNAME
 RE.md['BLUESKY_VERSION'] = bluesky.__version__
 RE.md['OPHYD_VERSION'] = ophyd.__version__
