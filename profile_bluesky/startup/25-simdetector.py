@@ -13,16 +13,6 @@ databroker_simdetector_root_path = "/share1/USAXS_data/"
 # This is the path the detector can see
 # It must start with the path defined in `databroker_simdetector_root_path`
 simdetector_file_template_root = "/share1/USAXS_data/"
-
-
-
-# class MyPilatusCam(PilatusDetectorCam):
-#     """custom support for detector cam plugin"""
-#     # # FIXME: ophyd has problem with trying to unstage the RBV value inside RE()
-#     # image_mode = ADComponent(EpicsSignal, "ImageMode")
-#     # num_images = ADComponent(EpicsSignal, "NumImages")
-#     # acquire_time = ADComponent(EpicsSignal, "AcquireTime")
-#     # frame_type = ADComponent(EpicsSignal, "FrameType")
     
 
 class MySimDetector(SingleTrigger, AreaDetector):
@@ -43,7 +33,7 @@ class MySimDetector(SingleTrigger, AreaDetector):
 try:
     nm = "SimDetector"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    adsim = MySimDetector(prefix, name="adsim")
+    adsimdet = MySimDetector(prefix, name="adsimdet")
 except TimeoutError as exc_obj:
     msg = "Timeout connecting with {} ({})".format(nm, prefix)
     print(msg)
