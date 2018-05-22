@@ -166,22 +166,42 @@ class TRD_AmplifierSequenceControlsDevice(AmplifierSequenceControlsDevice):
         return fmt.format(target)
 
 
-# use one or the other of these:
-#UPD_AMPLIFIER_ID = "DLPC200"
-UPD_AMPLIFIER_ID = "DLPCA300"
+# this PV tells which UPD amplifier and sequence programs we're using now
+# read-only for us since it is set when IOC boots
+# these command line scripts change a soft link for the IOC's boot: 
+#    use200pd    or    use300pd
+# we only need this once, get it via PyEpics
+_amplifier_id_upd = epics.caget("9idcLAX:femto:model", as_string=True)
 
-UPD_femto  = FemtoAmplifierDevice('9idcUSX:fem01:seq01:', name='upd_femto')
-I0_femto   = FemtoAmplifierDevice('9idcUSX:fem02:seq01:', name='I0_femto')
-I00_femto  = FemtoAmplifierDevice('9idcUSX:fem03:seq01:', name='I00_femto')
-I000_femto = FemtoAmplifierDevice('9idcUSX:fem04:seq01:', name='I000_femto')
-trd_femto  = FemtoAmplifierDevice('9idcUSX:fem05:seq01:', name='trd_femto')
+"""
+detector  scaler             amplifier             sequence             Femto model
+========  =================  ====================  ===================  ===========
+UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem01:seq01:  9idcLAX:pd01:seq01:  DLPCA200
+UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem09:seq02:  9idcLAX:pd01:seq02:  DDPCA300
+I0        9idcLAX:vsc:c0.S2  9idcRIO:fem02:seq01:  9idcLAX:pd02:seq01:
+I00       9idcLAX:vsc:c0.S3  9idcRIO:fem03:seq01:  9idcLAX:pd03:seq01:
+I000      9idcLAX:vsc:c0.S6  9idcRIO:fem04:seq01:  None
+TRD       9idcLAX:vsc:c0.S5  9idcRIO:fem05:seq01:  9idcLAX:pd05:seq01:
+"""
+
+
+UPD_femto  = FemtoAmplifierDevice(
+    dict(
+        DLPCA200 = "9idcLAX:fem01:seq01:",
+        DDPCA300 = "9idcLAX:fem09:seq02:",
+    )[_amplifier_id_upd],
+	name='upd_femto')
+I0_femto   = FemtoAmplifierDevice('9idcRIO:fem02:seq01:', name='I0_femto')
+I00_femto  = FemtoAmplifierDevice('9idcRIO:fem03:seq01:', name='I00_femto')
+I000_femto = FemtoAmplifierDevice('9idcRIO:fem04:seq01:', name='I000_femto')
+trd_femto  = FemtoAmplifierDevice('9idcRIO:fem05:seq01:', name='trd_femto')
 
 UPD_seq = UPD_AmplifierSequenceControlsDevice(
     dict(
-        DLPC200  = "9idcUSX:pd01:seq01:",
-        DLPCA300 = "9idcUSX:pd01:seq02:",
-    )[UPD_AMPLIFIER_ID],
+        DLPCA200 = "9idcLAX:pd01:seq01:",
+        DDPCA300 = "9idcLAX:pd01:seq02:",
+    )[_amplifier_id_upd],
     name="UPD_seq")
-I0_seq  = AmplifierSequenceControlsDevice("9idcUSX:pd02:seq01:", name="I0_seq")
-I00_seq = AmplifierSequenceControlsDevice("9idcUSX:pd03:seq01:", name="I00_seq")
-TRD_seq = TRD_AmplifierSequenceControlsDevice("9idcUSX:pd05:seq01:", name="TRD_seq")
+I0_seq  = AmplifierSequenceControlsDevice("9idcLAX:pd02:seq01:", name="I0_seq")
+I00_seq = AmplifierSequenceControlsDevice("9idcLAX:pd03:seq01:", name="I00_seq")
+TRD_seq = TRD_AmplifierSequenceControlsDevice("9idcLAX:pd05:seq01:", name="TRD_seq")
