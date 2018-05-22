@@ -194,7 +194,7 @@ UPD_femto  = FemtoAmplifierDevice(
 I0_femto   = FemtoAmplifierDevice('9idcRIO:fem02:seq01:', name='I0_femto')
 I00_femto  = FemtoAmplifierDevice('9idcRIO:fem03:seq01:', name='I00_femto')
 I000_femto = FemtoAmplifierDevice('9idcRIO:fem04:seq01:', name='I000_femto')
-trd_femto  = FemtoAmplifierDevice('9idcRIO:fem05:seq01:', name='trd_femto')
+TRD_femto  = FemtoAmplifierDevice('9idcRIO:fem05:seq01:', name='trd_femto')
 
 UPD_seq = UPD_AmplifierSequenceControlsDevice(
     dict(
@@ -204,4 +204,5 @@ UPD_seq = UPD_AmplifierSequenceControlsDevice(
     name="UPD_seq")
 I0_seq  = AmplifierSequenceControlsDevice("9idcLAX:pd02:seq01:", name="I0_seq")
 I00_seq = AmplifierSequenceControlsDevice("9idcLAX:pd03:seq01:", name="I00_seq")
+# I000_seq = None
 TRD_seq = TRD_AmplifierSequenceControlsDevice("9idcLAX:pd05:seq01:", name="TRD_seq")
