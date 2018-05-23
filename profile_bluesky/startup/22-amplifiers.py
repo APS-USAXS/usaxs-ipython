@@ -35,6 +35,9 @@ class CurrentAmplifierDevice(Device):
 class FemtoAmplifierDevice(CurrentAmplifierDevice):
     gainindex = Component(EpicsSignal, "gainidx")
     description = Component(EpicsSignal, "femtodesc")
+    
+    def setGain(self):
+        pass    # TODO: set by value or by index
 
 
 class DiodeRangeDevice(Device):
@@ -83,17 +86,20 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
     def __init__(self, prefix, **kwargs):
         self.scaler = None
         super().__init__(prefix, **kwargs)
+        self.__init_ranges__()
 
-    def measure_dark_currents(self, numReadings=8):     # TODO: part of #16
-        """
-        """
-        assert self.scaler is not None, "Must define the `scaler`."
+    def __init_ranges__(self):
+        # TODO: learn about ranges from reqrange
         pass
 
-    def autoscale(self):                                # TODO: #16
+    def measure_dark_currents(self, scaler, numReadings=8):     # TODO: part of #16
         """
         """
-        assert self.scaler is not None, "Must define the `scaler`."
+        pass
+
+    def autoscale(self, scaler):                                # TODO: #16
+        """
+        """
         pass
 
     @property
@@ -103,48 +109,48 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
             v = self.updating.value in (1, "Updating")
         return v
 
-    def _decode_gain_target(self, target):
-        """
-        returns gain setting from requested ``target`` value
-
-        Should override in subclass to customize for different 
-        amplifiers.  These are for USAXS photodiode.
-
-        PARAMETERS
-
-        target : int
-            one of (4, 6, 8, 10, 12)
-            corresponding, respectively, to gains of (1e4, 1e6, 1e8, 1e10, 1e12)
-
-
-        EXAMPLE CONTENT::
-
-            gain_list = (4, 6, 8, 10, 12)
-            err_msg = "supplied value ({}) not one of these: {}".format(
-                target, gain_list)
-            assert target in gain_list, err_msg
-            return gain_list.index(target)
-
-        """
-        raise NotImplementedError("Must define in subclass")
-
-    def set_gain_plan(self, target):
-        """
-        set gain on amplifier during a BlueSky plan
-
-        Only use low noise gains; those are the only ones which actually work
-        """
-        yield from bps.abs_set(self.mode, AutorangeSettings.manual)
-        yield from bps.abs_set(self.reqrange, self._decode_gain_target(target))
-
-    def set_gain_cmd(self, target):
-        """
-        set gain on amplifier directly, do not use during a BlueSky plan
-
-        Only use low noise gains; those are the only ones which actually work
-        """
-        self.mode.put(AutorangeSettings.manual)
-        self.reqrange.put(self._decode_gain_target(target))
+    # def _decode_gain_target(self, target):
+    #     """
+    #     returns gain setting from requested ``target`` value
+    # 
+    #     Should override in subclass to customize for different 
+    #     amplifiers.  These are for USAXS photodiode.
+    # 
+    #     PARAMETERS
+    # 
+    #     target : int
+    #         one of (4, 6, 8, 10, 12)
+    #         corresponding, respectively, to gains of (1e4, 1e6, 1e8, 1e10, 1e12)
+    # 
+    # 
+    #     EXAMPLE CONTENT::
+    # 
+    #         gain_list = (4, 6, 8, 10, 12)
+    #         err_msg = "supplied value ({}) not one of these: {}".format(
+    #             target, gain_list)
+    #         assert target in gain_list, err_msg
+    #         return gain_list.index(target)
+    # 
+    #     """
+    #     raise NotImplementedError("Must define in subclass")
+    # 
+    # def set_gain_plan(self, target):
+    #     """
+    #     set gain on amplifier during a BlueSky plan
+    # 
+    #     Only use low noise gains; those are the only ones which actually work
+    #     """
+    #     yield from bps.abs_set(self.mode, AutorangeSettings.manual)
+    #     yield from bps.abs_set(self.reqrange, self._decode_gain_target(target))
+    # 
+    # def set_gain_cmd(self, target):
+    #     """
+    #     set gain on amplifier directly, do not use during a BlueSky plan
+    # 
+    #     Only use low noise gains; those are the only ones which actually work
+    #     """
+    #     self.mode.put(AutorangeSettings.manual)
+    #     self.reqrange.put(self._decode_gain_target(target))
 
 
 class DetectorAmplifierAutorangeDevice(Device):
@@ -152,11 +158,10 @@ class DetectorAmplifierAutorangeDevice(Device):
     femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
     controls = FormattedComponent(AmplifierSequenceControlsDevice, '{self.autorange_pv}')
     
-    def __init__(self, autorange_pv, scaler_channel_pv, amplifier_pv, range_dict, **kwargs):
+    def __init__(self, autorange_pv, scaler_channel_pv, amplifier_pv, **kwargs):
         self.autorange_pv = autorange_pv
         self.scaler_channel_pv = scaler_channel_pv
         self.amplifier_pv = amplifier_pv
-        self.range_dict = range_dict
         super().__init__("", **kwargs)
 
 
@@ -174,7 +179,6 @@ upd_struct = DetectorAmplifierAutorangeDevice(
             DLPCA200 = "9idcLAX:fem01:seq01:",
             DDPCA300 = "9idcLAX:fem09:seq02:",
         )[_amplifier_id_upd],
-    {"1e4":0, "1e6":1, "1e8":2, "1e10":3, "1e12":4},
     name="upd_struct",
 )
 
@@ -182,7 +186,6 @@ trd_struct = DetectorAmplifierAutorangeDevice(
     "9idcLAX:pd05:seq01:",
     "9idcLAX:vsc:c0.S5",
     "9idcRIO:fem05:seq01:",
-    {"1e4":4, "1e6":6, "1e8":8, "1e10":10, "1e12":12},
     name="trd_struct",
 )
 
@@ -190,7 +193,6 @@ I0_struct = DetectorAmplifierAutorangeDevice(
     "9idcLAX:pd02:seq01:",
     "9idcLAX:vsc:c0.S2",
     "9idcRIO:fem02:seq01:",
-    {"1e5":6, "1e6":6, "1e7":7, "1e8":8, "1e9":9},
     name="I0_struct",
 )
 
@@ -198,7 +200,6 @@ I00_struct = DetectorAmplifierAutorangeDevice(
     "9idcLAX:pd03:seq01:",
     "9idcLAX:vsc:c0.S3",
     "9idcRIO:fem03:seq01:",
-    {"1e5":6, "1e6":6, "1e7":7, "1e8":8, "1e9":9},
     name="I00_struct",
 )
 
