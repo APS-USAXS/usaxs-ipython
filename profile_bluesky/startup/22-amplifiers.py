@@ -1,6 +1,28 @@
 print(__file__)
 
-"""amplifiers"""
+"""
+detectors, amplifiers, and related support
+
+========  =================  ====================  ===================  ===========
+detector  scaler             amplifier             sequence             Femto model
+========  =================  ====================  ===================  ===========
+UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem01:seq01:  9idcLAX:pd01:seq01:  DLPCA200
+UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem09:seq02:  9idcLAX:pd01:seq02:  DDPCA300
+I0        9idcLAX:vsc:c0.S2  9idcRIO:fem02:seq01:  9idcLAX:pd02:seq01:
+I00       9idcLAX:vsc:c0.S3  9idcRIO:fem03:seq01:  9idcLAX:pd03:seq01:
+I000      9idcLAX:vsc:c0.S6  9idcRIO:fem04:seq01:  None
+TRD       9idcLAX:vsc:c0.S5  9idcRIO:fem05:seq01:  9idcLAX:pd05:seq01:
+========  =================  ====================  ===================  ===========
+
+A PV (``9idcLAX:femto:model``) tells which UPD amplifier and sequence 
+programs we're using now.  This PV is read-only since it is set when 
+IOC boots, based on a soft link that configures the IOC.  The soft 
+link may be changed using the ``use200pd``  or  ``use300pd`` script.
+
+We only need to get this once, get it via one-time call with PyEpics
+and then use it with inline dictionaries use_EPICS_scaler_channels(scaler0)to pick the right PVs.
+"""
+
 
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
@@ -29,36 +51,27 @@ class DiodeRangeDevice(Device):
         super().__init__(prefix, **kwargs)
 
 
-class AutorangeSettings(object):
-    """values allowed for ``AmplifierSequenceControlsDevice.reqrange``"""
-    automatic = "automatic"
-    auto_background = "auto+background"
-    manual = "manual"
+def _ranges_subgroup_(cls, nm, suffix, ranges, **kwargs):
+    defn = OrderedDict()
+    for i in ranges:
+        key = '{}{}'.format(nm, i)
+        defn[key] = (cls, '', dict(ch_num=i))
+
+    return defn
 
 
 class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
     """
     Ophyd support for amplifier sequence program
-    
-    TODO: resolve this question
-    Since the sequence program knows (from st.cmd) to which
-    amplifier and scaler it is using (and this configuration
-    is not available in any EPICS PVs), must we need 
-    coordinate that here as well?
     """
     reqrange = Component(EpicsSignal, "reqrange")
     mode = Component(EpicsSignal, "mode")
     selected = Component(EpicsSignal, "selected")
     gainU = Component(EpicsSignal, "gainU")
     gainD = Component(EpicsSignal, "gainD")
-    # number of ranges dependent on amplifier, must be easily defined
-    # TODO: use DynamicDeviceComponent and supply range dict in constructor
-    # ranges = DynamicDeviceComponent(...)
-    range0 = Component(DiodeRangeDevice, '', ch_num=0)
-    range1 = Component(DiodeRangeDevice, '', ch_num=1)
-    range2 = Component(DiodeRangeDevice, '', ch_num=2)
-    range3 = Component(DiodeRangeDevice, '', ch_num=3)
-    range4 = Component(DiodeRangeDevice, '', ch_num=4)
+    ranges = DynamicDeviceComponent(
+        _ranges_subgroup_(
+            DiodeRangeDevice, 'range', 'suffix', range(5)))
     counts_per_volt = Component(EpicsSignal, "vfc")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
@@ -70,40 +83,40 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
     def __init__(self, prefix, **kwargs):
         self.scaler = None
         super().__init__(prefix, **kwargs)
-    
+
     def measure_dark_currents(self, numReadings=8):     # TODO: part of #16
         """
         """
         assert self.scaler is not None, "Must define the `scaler`."
         pass
-    
+
     def autoscale(self):                                # TODO: #16
         """
         """
         assert self.scaler is not None, "Must define the `scaler`."
         pass
-    
+
     @property
     def isUpdating(self):
         v = self.mode.value in (1, AutorangeSettings.auto_background)
         if v:
             v = self.updating.value in (1, "Updating")
         return v
-    
+
     def _decode_gain_target(self, target):
         """
-        returns gain setting from requested converts ``target`` value
-        
+        returns gain setting from requested ``target`` value
+
         Should override in subclass to customize for different 
         amplifiers.  These are for USAXS photodiode.
-        
+
         PARAMETERS
-    
+
         target : int
             one of (4, 6, 8, 10, 12)
             corresponding, respectively, to gains of (1e4, 1e6, 1e8, 1e10, 1e12)
 
-        
+
         EXAMPLE CONTENT::
 
             gain_list = (4, 6, 8, 10, 12)
@@ -134,75 +147,60 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
         self.reqrange.put(self._decode_gain_target(target))
 
 
-class UPD_AmplifierSequenceControlsDevice(AmplifierSequenceControlsDevice):
-
-    def _decode_gain_target(self, target):
-        """
-        converts ``target`` value to gain (index) value for USAXS photodiode
-        
-        PARAMETERS
+class DetectorAmplifierAutorangeDevice(Device):
+    scaler = FormattedComponent(EpicsSignal, '{self.scaler_channel_pv}')
+    femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
+    controls = FormattedComponent(AmplifierSequenceControlsDevice, '{self.autorange_pv}')
     
-        target : int
-            one of (4, 6, 8, 10, 12)
-            corresponding, respectively, to gains of (1e4, 1e6, 1e8, 1e10, 1e12)
-
-        """
-        gain_list = (4, 6, 8, 10, 12)
-        err_msg = "`target` must be one of these values: {}".format(gain_list)
-        assert target in gain_list, err_msg
-        return gain_list.index(target)
+    def __init__(self, autorange_pv, scaler_channel_pv, amplifier_pv, range_dict, **kwargs):
+        self.autorange_pv = autorange_pv
+        self.scaler_channel_pv = scaler_channel_pv
+        self.amplifier_pv = amplifier_pv
+        self.range_dict = range_dict
+        super().__init__("", **kwargs)
 
 
-class TRD_AmplifierSequenceControlsDevice(AmplifierSequenceControlsDevice):
+# ------------
 
-    def _decode_gain_target(self, target):
-        gain_list = (5, 6, 7, 8, 9, 10)
-        err_msg = "`target` must be one of these values: {}".format(gain_list)
-        assert target in gain_list, err_msg
-        if target < 10:
-            fmt = "1e{} low noise"
-        else:
-            fmt = "1e{} high speed"
-        return fmt.format(target)
-
-
-# this PV tells which UPD amplifier and sequence programs we're using now
-# read-only for us since it is set when IOC boots
-# these command line scripts change a soft link for the IOC's boot: 
-#    use200pd    or    use300pd
-# we only need this once, get it via PyEpics
 _amplifier_id_upd = epics.caget("9idcLAX:femto:model", as_string=True)
 
-"""
-detector  scaler             amplifier             sequence             Femto model
-========  =================  ====================  ===================  ===========
-UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem01:seq01:  9idcLAX:pd01:seq01:  DLPCA200
-UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem09:seq02:  9idcLAX:pd01:seq02:  DDPCA300
-I0        9idcLAX:vsc:c0.S2  9idcRIO:fem02:seq01:  9idcLAX:pd02:seq01:
-I00       9idcLAX:vsc:c0.S3  9idcRIO:fem03:seq01:  9idcLAX:pd03:seq01:
-I000      9idcLAX:vsc:c0.S6  9idcRIO:fem04:seq01:  None
-TRD       9idcLAX:vsc:c0.S5  9idcRIO:fem05:seq01:  9idcLAX:pd05:seq01:
-"""
-
-
-UPD_femto  = FemtoAmplifierDevice(
+upd_struct = DetectorAmplifierAutorangeDevice(
     dict(
-        DLPCA200 = "9idcLAX:fem01:seq01:",
-        DDPCA300 = "9idcLAX:fem09:seq02:",
-    )[_amplifier_id_upd],
-	name='upd_femto')
-I0_femto   = FemtoAmplifierDevice('9idcRIO:fem02:seq01:', name='I0_femto')
-I00_femto  = FemtoAmplifierDevice('9idcRIO:fem03:seq01:', name='I00_femto')
-I000_femto = FemtoAmplifierDevice('9idcRIO:fem04:seq01:', name='I000_femto')
-TRD_femto  = FemtoAmplifierDevice('9idcRIO:fem05:seq01:', name='trd_femto')
-
-UPD_seq = UPD_AmplifierSequenceControlsDevice(
+            DLPCA200 = "9idcLAX:pd01:seq01:",
+            DDPCA300 = "9idcLAX:pd01:seq02:",
+        )[_amplifier_id_upd],
+    "9idcLAX:vsc:c0.S4",
     dict(
-        DLPCA200 = "9idcLAX:pd01:seq01:",
-        DDPCA300 = "9idcLAX:pd01:seq02:",
-    )[_amplifier_id_upd],
-    name="UPD_seq")
-I0_seq  = AmplifierSequenceControlsDevice("9idcLAX:pd02:seq01:", name="I0_seq")
-I00_seq = AmplifierSequenceControlsDevice("9idcLAX:pd03:seq01:", name="I00_seq")
-# I000_seq = None
-TRD_seq = TRD_AmplifierSequenceControlsDevice("9idcLAX:pd05:seq01:", name="TRD_seq")
+            DLPCA200 = "9idcLAX:fem01:seq01:",
+            DDPCA300 = "9idcLAX:fem09:seq02:",
+        )[_amplifier_id_upd],
+    {"1e4":0, "1e6":1, "1e8":2, "1e10":3, "1e12":4},
+    name="upd_struct",
+)
+
+trd_struct = DetectorAmplifierAutorangeDevice(
+    "9idcLAX:pd05:seq01:",
+    "9idcLAX:vsc:c0.S5",
+    "9idcRIO:fem05:seq01:",
+    {"1e4":4, "1e6":6, "1e8":8, "1e10":10, "1e12":12},
+    name="trd_struct",
+)
+
+I0_struct = DetectorAmplifierAutorangeDevice(
+    "9idcLAX:pd02:seq01:",
+    "9idcLAX:vsc:c0.S2",
+    "9idcRIO:fem02:seq01:",
+    {"1e5":6, "1e6":6, "1e7":7, "1e8":8, "1e9":9},
+    name="I0_struct",
+)
+
+I00_struct = DetectorAmplifierAutorangeDevice(
+    "9idcLAX:pd03:seq01:",
+    "9idcLAX:vsc:c0.S3",
+    "9idcRIO:fem03:seq01:",
+    {"1e5":6, "1e6":6, "1e7":7, "1e8":8, "1e9":9},
+    name="I00_struct",
+)
+
+# no autorange controls here
+I000_femto = FemtoAmplifierDevice("9idcRIO:fem04:seq01:", name="I000_femto")
