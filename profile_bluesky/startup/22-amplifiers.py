@@ -179,8 +179,8 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     lucurrent = Component(EpicsSignalRO, "lucurrent")
     updating = Component(EpicsSignalRO, "updating")
 
-    background_count_time = Component(
-        Signal, value=1.0, name="background_count_time")
+    autoscale_count_time = Component(Signal, value=0.5)
+    background_count_time = Component(Signal, value=1.0)
 
     def __init__(self, prefix, **kwargs):
         self.scaler = None
@@ -247,28 +247,46 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             msg += "must be one of these: {}".format(self.acceptable_gain_values)
             raise ValueError(msg)
 
-    def measure_dark_currents(self, scaler, detector, shutter, numReadings):
+    def measure_dark_currents(self, scaler, signal, numReadings=8, shutter=None):
         """
         measure the dark current background on each gain
         
-        TODO: need to close/restore shutter
-        TODO: should this be a plan?
+        note: Should this be a plan? No.  Can always launch in a thread.
         """
         starting = dict(
             gain = self.reqrange.value,
             mode = self.mode.value,
         )
+        if shutter is not None:
+            shutter.close()
         self.mode.put(AutorangeSettings.manual)
         for range_name in sorted(self.ranges.read_attrs):
+            # tell each gain to measure its own background
             gain = self.ranges.__getattr__(range_name)
-            gain.measure_background(self, scaler, detector, numReadings)
+            gain.measure_background(self, scaler, signal, numReadings)
         self.reqrange.put(starting["gain"])
         self.mode.put(starting["mode"])
 
-    def autoscale(self, scaler):                                # TODO: #16
+    def autoscale(self, scaler, shutter=None):
         """
+        set the amplifier to autoscale+background, settle to the best gain
         """
-        pass
+        stage_sigs = {}
+        stage_sigs["scaler"] = scaler.stage_sigs
+
+        scaler.stage_sigs["preset_time"] = self.autoscale_count_time.value
+        if shutter is not None:
+            shutter.open()
+
+        self.mode.put(AutorangeSettings.auto_background)
+        for _ignore_ in self.ranges.read_attrs:
+            counting = scaler.trigger()    # start counting
+            ophyd.status.wait(
+                counting, 
+                timeout=self.autoscale_count_time.value+1.0)
+            print("gain = {} V/A".format(_gain_to_str_(self.gain.value)))
+
+        scaler.stage_sigs = stage_sigs["scaler"]
 
     @property
     def isUpdating(self):
@@ -280,21 +298,28 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 
 class DetectorAmplifierAutorangeDevice(Device):
     scaler = FormattedComponent(EpicsScaler, '{self.scaler_pv}')
-    detector = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.S{self.detector_channel}')
-    detector_name = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.NM{self.detector_channel}')
+    signal = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.S{self.signal_channel_pv}')
+    signal_name = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.NM{self.signal_channel_pv}')
     femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
     auto = FormattedComponent(AmplifierAutoDevice, '{self.autorange_pv}')
     
-    def __init__(self, scaler_pv, detector_channel, amplifier_pv, autorange_pv, **kwargs):
-        self.autorange_pv = autorange_pv
+    def __init__(self, scaler_pv, signal_channel_pv, amplifier_pv, autorange_pv, **kwargs):
         self.scaler_pv = scaler_pv
-        self.detector_channel = detector_channel
+        self.signal_channel_pv = signal_channel_pv
         self.amplifier_pv = amplifier_pv
+        self.autorange_pv = autorange_pv
         super().__init__("", **kwargs)
 
-    def measure_dark_currents(self, shutter=None, numReadings=8):
-        print("Measure dark current backgrounds for: " + self.detector_name.value)
-        self.auto.measure_dark_currents(self.scaler, self.detector, shutter, numReadings)
+    def measure_dark_currents(self, numReadings=8, shutter=None):
+        print("Measure dark current backgrounds for: " + self.signal_name.value)
+        self.auto.measure_dark_currents(self.scaler, self.signal, numReadings, shutter)
+
+    def autoscale(self, shutter=None):
+        """
+        set the amplifier to autoscale+background, settle to the best gain
+        """
+        print("Autoscaling for: " + self.signal_name.value)
+        self.auto.autoscale(self.scaler, shutter)
 
 
 # ------------
