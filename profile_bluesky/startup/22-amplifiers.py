@@ -38,54 +38,58 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._range_info_known = False
+
+        self._gain_info_known = False
+        self.num_gains = 0
+        self.acceptable_gain_values = ()
         
-    def __init_range_info__(self, enum_strs):
-		"""
-		learn gain values from EPICS database
-		
-		provide a list of acceptable gain values for later use
-		"""
+    def __init_gains__(self, enum_strs):
+        """
+        learn range (gain) values from EPICS database
+        
+        provide a list of acceptable gain values for later use
+        """
         acceptable = [s for s in enum_strs if s != 'UNDEF']
         num_gains = len(acceptable)
         # assume labels are ALWAYS formatted: "{float} V/A"
         acceptable += [float(s.split()[0]) for s in acceptable]
         acceptable += range(num_gains)
-        self.num_ranges = num_gains
+        self.num_gains = num_gains
         self.acceptable_range_values = acceptable
+        self._gain_info_known = True
 
     def setGain(self, target):
-		"""
-		set the gain on the amplifier
-		
-		Since the gain values are available from EPICS, 
-		we use that to provide a method that can set the 
-		gain by any of these values:
-		
-		* gain text value (from EPICS)
-		* integer index number
-		* desired gain floating-point value
-		
-		Assumptions:
-		
-		* gain label (from EPICS) is ALWAYS: "{float} V/A"
-		* float mantissa is always one digit
-		"""
-        if not self._range_info_known:
-            self.__init_range_info__(self.gainindex.enum_strs)
-        if target in self.acceptable_range_values:
-            if isinstance(target, (int, float)) and target > self.num_ranges:
+        """
+        set the gain on the amplifier
+        
+        Since the gain values are available from EPICS, 
+        we use that to provide a method that can set the 
+        gain by any of these values:
+        
+        * gain text value (from EPICS)
+        * integer index number
+        * desired gain floating-point value
+        
+        Assumptions:
+        
+        * gain label (from EPICS) is ALWAYS: "{float} V/A"
+        * float mantissa is always one digit
+        """
+        if not self._gain_info_known:
+            self.__init_gains__(self.gainindex.enum_strs)
+        if target in self.acceptable_gain_values:
+            if isinstance(target, (int, float)) and target > self.num_gains:
                 # gain value specified, rewrite as str
                 # assume mantissa is only 1 digit
-                target = ("%.0e V/A" % target).replace("+", "")
+                target = ("%.0e V/A" % target).replace("+", "").replace("e0", "e")
             self.gainindex.put(target)
         else:
             msg = "could not set gain to {}, ".format(target)
-            msg += "must be one of these: {}".format(self.gainindex.enum_strs)
+            msg += "must be one of these: {}".format(self.acceptable_gain_values)
             raise ValueError(msg)
 
 
-class DiodeRangeDevice(Device):
+class DiodeGainDevice(Device):
     _default_configuration_attrs = ()
     _default_read_attrs = ('gain', 'background', 'background_error')
 
@@ -99,16 +103,16 @@ class DiodeRangeDevice(Device):
         super().__init__(prefix, **kwargs)
 
 
-def _ranges_subgroup_(cls, nm, suffix, ranges, **kwargs):
+def _gains_subgroup_(cls, nm, suffix, gains, **kwargs):
     defn = OrderedDict()
-    for i in ranges:
+    for i in gains:
         key = '{}{}'.format(nm, i)
         defn[key] = (cls, '', dict(ch_num=i))
 
     return defn
 
 
-class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
+class AmplifierAutoDevice(CurrentAmplifierDevice):
     """
     Ophyd support for amplifier sequence program
     """
@@ -118,8 +122,8 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
     gainU = Component(EpicsSignal, "gainU")
     gainD = Component(EpicsSignal, "gainD")
     ranges = DynamicDeviceComponent(
-        _ranges_subgroup_(
-            DiodeRangeDevice, 'range', 'suffix', range(5)))
+        _gains_subgroup_(
+            DiodeGainDevice, 'range', 'suffix', range(5)))
     counts_per_volt = Component(EpicsSignal, "vfc")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
@@ -131,11 +135,58 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
     def __init__(self, prefix, **kwargs):
         self.scaler = None
         super().__init__(prefix, **kwargs)
-        self.__init_ranges__()
 
-    def __init_ranges__(self):
-        # TODO: learn about ranges from reqrange
-        pass
+        self._gain_info_known = False
+        self.num_gains = 0
+        self.acceptable_gain_values = ()
+
+    def __init_gains__(self, enum_strs):
+        """
+        learn range (gain) values from EPICS database
+        
+        provide a list of acceptable gain values for later use
+        """
+        acceptable = list(enum_strs)
+        num_gains = len(acceptable)
+        # assume labels are ALWAYS formatted: "{float} V/A"
+        acceptable += [float(s.split()[0]) for s in acceptable]
+        acceptable += range(num_gains)
+        self.num_gains = num_gains
+        self.acceptable_gain_values = acceptable
+        self._gain_info_known = True
+
+    def setGain(self, target):
+        """
+        set the gain on the autorange controls
+        
+        Since the gain values are available from EPICS, 
+        we use that to provide a method that can set the 
+        gain by any of these values:
+        
+        * gain text value (from EPICS)
+        * integer index number
+        * desired gain floating-point value
+        
+        Assumptions:
+        
+        * gain label (from EPICS) is ALWAYS: "{float} V/A gain"
+        * float mantissa is always one digit
+        """
+        if not self._gain_info_known:
+            self.__init_gains__(self.reqrange.enum_strs)
+        if target in self.acceptable_gain_values:
+            if isinstance(target, (int, float)) and target > self.num_gains:
+                # gain value specified, rewrite as str
+                # assume mantissa is only 1 digit
+                target = ("%.0e V/A gain" % target).replace("+", "").replace("e0", "e")
+            if isinstance(target, str) and str(target) in self.reqrange.enum_strs:
+                # must set reqrange by index number, rewrite as int
+                target = self.reqrange.enum_strs.index(target)
+            self.reqrange.put(target)
+        else:
+            msg = "could not set gain to {}, ".format(target)
+            msg += "must be one of these: {}".format(self.acceptable_gain_values)
+            raise ValueError(msg)
 
     def measure_dark_currents(self, scaler, numReadings=8):     # TODO: part of #16
         """
@@ -154,54 +205,11 @@ class AmplifierSequenceControlsDevice(CurrentAmplifierDevice):
             v = self.updating.value in (1, "Updating")
         return v
 
-    # def _decode_gain_target(self, target):
-    #     """
-    #     returns gain setting from requested ``target`` value
-    # 
-    #     Should override in subclass to customize for different 
-    #     amplifiers.  These are for USAXS photodiode.
-    # 
-    #     PARAMETERS
-    # 
-    #     target : int
-    #         one of (4, 6, 8, 10, 12)
-    #         corresponding, respectively, to gains of (1e4, 1e6, 1e8, 1e10, 1e12)
-    # 
-    # 
-    #     EXAMPLE CONTENT::
-    # 
-    #         gain_list = (4, 6, 8, 10, 12)
-    #         err_msg = "supplied value ({}) not one of these: {}".format(
-    #             target, gain_list)
-    #         assert target in gain_list, err_msg
-    #         return gain_list.index(target)
-    # 
-    #     """
-    #     raise NotImplementedError("Must define in subclass")
-    # 
-    # def set_gain_plan(self, target):
-    #     """
-    #     set gain on amplifier during a BlueSky plan
-    # 
-    #     Only use low noise gains; those are the only ones which actually work
-    #     """
-    #     yield from bps.abs_set(self.mode, AutorangeSettings.manual)
-    #     yield from bps.abs_set(self.reqrange, self._decode_gain_target(target))
-    # 
-    # def set_gain_cmd(self, target):
-    #     """
-    #     set gain on amplifier directly, do not use during a BlueSky plan
-    # 
-    #     Only use low noise gains; those are the only ones which actually work
-    #     """
-    #     self.mode.put(AutorangeSettings.manual)
-    #     self.reqrange.put(self._decode_gain_target(target))
-
 
 class DetectorAmplifierAutorangeDevice(Device):
     scaler = FormattedComponent(EpicsSignal, '{self.scaler_channel_pv}')
     femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
-    controls = FormattedComponent(AmplifierSequenceControlsDevice, '{self.autorange_pv}')
+    auto = FormattedComponent(AmplifierAutoDevice, '{self.autorange_pv}')
     
     def __init__(self, autorange_pv, scaler_channel_pv, amplifier_pv, **kwargs):
         self.autorange_pv = autorange_pv
