@@ -36,8 +36,53 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
     gainindex = Component(EpicsSignal, "gainidx")
     description = Component(EpicsSignal, "femtodesc")
     
-    def setGain(self):
-        pass    # TODO: set by value or by index
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._range_info_known = False
+        
+    def __init_range_info__(self, enum_strs):
+		"""
+		learn gain values from EPICS database
+		
+		provide a list of acceptable gain values for later use
+		"""
+        acceptable = [s for s in enum_strs if s != 'UNDEF']
+        num_gains = len(acceptable)
+        # assume labels are ALWAYS formatted: "{float} V/A"
+        acceptable += [float(s.split()[0]) for s in acceptable]
+        acceptable += range(num_gains)
+        self.num_ranges = num_gains
+        self.acceptable_range_values = acceptable
+
+    def setGain(self, target):
+		"""
+		set the gain on the amplifier
+		
+		Since the gain values are available from EPICS, 
+		we use that to provide a method that can set the 
+		gain by any of these values:
+		
+		* gain text value (from EPICS)
+		* integer index number
+		* desired gain floating-point value
+		
+		Assumptions:
+		
+		* gain label (from EPICS) is ALWAYS: "{float} V/A"
+		* float mantissa is always one digit
+		"""
+        if not self._range_info_known:
+            self.__init_range_info__(self.gainindex.enum_strs)
+        if target in self.acceptable_range_values:
+            if isinstance(target, (int, float)) and target > self.num_ranges:
+                # gain value specified, rewrite as str
+                # assume mantissa is only 1 digit
+                target = ("%.0e V/A" % target).replace("+", "")
+            self.gainindex.put(target)
+        else:
+            msg = "could not set gain to {}, ".format(target)
+            msg += "must be one of these: {}".format(self.gainindex.enum_strs)
+            raise ValueError(msg)
 
 
 class DiodeRangeDevice(Device):
