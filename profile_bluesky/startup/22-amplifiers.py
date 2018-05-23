@@ -120,21 +120,27 @@ class AmplfierGainDevice(Device):
         assert isinstance(scaler, (EpicsScaler, ScalerCH))
         assert isinstance(channel, EpicsSignalRO)
         parent.setGain(self.gain.value) # use our own gain
-        scaler.preset_time.set(1.0)     # TODO: should be a parameter
+        stage_sigs = {}
+        stage_sigs["scaler"] = scaler.stage_sigs
+
+        scaler.stage_sigs["preset_time"] = parent.background_count_time.value
         readings = []
         for i in range(numReadings):
-            scaler.count.set(1)     # start counting
-            time.sleep(0.01)        # wait to start
-            while scaler.count.value != 0:  # wait to complete
-                time.sleep(0.02)
+            counting = scaler.trigger()    # start counting
+            ophyd.status.wait(
+                counting, 
+                timeout=parent.background_count_time.value+1.0)
             readings.append(channel.value)
         self.background.put(np.mean(readings))
         self.background_error.put(np.std(readings))
-        print("-"*20)
-        print(self.gain.value)
-        print(readings)
-        print(self.background.value)
-        print(self.background_error.value)
+
+        scaler.stage_sigs = stage_sigs["scaler"]
+        msg = "gain = {} V/A, ".format(_gain_to_str_(self.gain.value))
+        msg += "dark current = {} +/- {}".format(
+            self.background.value,
+            self.background_error.value,
+        )
+        print(msg)
 
 
 class AutorangeSettings(object):
@@ -172,6 +178,9 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     lurate = Component(EpicsSignalRO, "lurate")
     lucurrent = Component(EpicsSignalRO, "lucurrent")
     updating = Component(EpicsSignalRO, "updating")
+
+    background_count_time = Component(
+        Signal, value=1.0, name="background_count_time")
 
     def __init__(self, prefix, **kwargs):
         self.scaler = None
@@ -243,6 +252,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         measure the dark current background on each gain
         
         TODO: need to close/restore shutter
+        TODO: should this be a plan?
         """
         starting = dict(
             gain = self.reqrange.value,
@@ -270,18 +280,20 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 
 class DetectorAmplifierAutorangeDevice(Device):
     scaler = FormattedComponent(EpicsScaler, '{self.scaler_pv}')
-    detector = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}{self.detector_pv}')
+    detector = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.S{self.detector_channel}')
+    detector_name = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.NM{self.detector_channel}')
     femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
     auto = FormattedComponent(AmplifierAutoDevice, '{self.autorange_pv}')
     
-    def __init__(self, scaler_pv, detector_pv, amplifier_pv, autorange_pv, **kwargs):
+    def __init__(self, scaler_pv, detector_channel, amplifier_pv, autorange_pv, **kwargs):
         self.autorange_pv = autorange_pv
         self.scaler_pv = scaler_pv
-        self.detector_pv = detector_pv
+        self.detector_channel = detector_channel
         self.amplifier_pv = amplifier_pv
         super().__init__("", **kwargs)
 
     def measure_dark_currents(self, shutter=None, numReadings=8):
+        print("Measure dark current backgrounds for: " + self.detector_name.value)
         self.auto.measure_dark_currents(self.scaler, self.detector, shutter, numReadings)
 
 
@@ -289,9 +301,9 @@ class DetectorAmplifierAutorangeDevice(Device):
 
 _amplifier_id_upd = epics.caget("9idcLAX:femto:model", as_string=True)
 
-upd_struct = DetectorAmplifierAutorangeDevice(
+upd_controls = DetectorAmplifierAutorangeDevice(
     "9idcLAX:vsc:c0",
-    ".S4",
+    4,
     dict(
             DLPCA200 = "9idcLAX:fem01:seq01:",
             DDPCA300 = "9idcLAX:fem09:seq02:",
@@ -300,31 +312,31 @@ upd_struct = DetectorAmplifierAutorangeDevice(
             DLPCA200 = "9idcLAX:pd01:seq01:",
             DDPCA300 = "9idcLAX:pd01:seq02:",
         )[_amplifier_id_upd],
-    name="upd_struct",
+    name="upd_controls",
 )
 
-trd_struct = DetectorAmplifierAutorangeDevice(
+trd_controls = DetectorAmplifierAutorangeDevice(
     "9idcLAX:vsc:c0",
-    ".S5",
+    5,
     "9idcRIO:fem05:seq01:",
     "9idcLAX:pd05:seq01:",
-    name="trd_struct",
+    name="trd_controls",
 )
 
-I0_struct = DetectorAmplifierAutorangeDevice(
+I0_controls = DetectorAmplifierAutorangeDevice(
     "9idcLAX:vsc:c0",
-    ".S2",
+    2,
     "9idcRIO:fem02:seq01:",
     "9idcLAX:pd02:seq01:",
-    name="I0_struct",
+    name="I0_controls",
 )
 
-I00_struct = DetectorAmplifierAutorangeDevice(
+I00_controls = DetectorAmplifierAutorangeDevice(
     "9idcLAX:vsc:c0",
-    ".S3",
+    3,
     "9idcRIO:fem03:seq01:",
     "9idcLAX:pd03:seq01:",
-    name="I00_struct",
+    name="I00_controls",
 )
 
 # no autorange controls here
