@@ -28,6 +28,10 @@ from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 
 
+def _gain_to_str_(gain):    # convenience function
+    return ("%.0e" % gain).replace("+", "").replace("e0", "e")
+
+
 class CurrentAmplifierDevice(Device):
     gain = Component(EpicsSignalRO, "gain")
 
@@ -56,6 +60,16 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
         acceptable += range(num_gains)
         self.num_gains = num_gains
         self.acceptable_range_values = acceptable
+
+        # assume gain labels are formatted "{float} {other_text}"
+        # and that other_text is the same for all
+        # TODO: we could verify that here!
+        s = acceptable[0]
+        self.gain_suffix = s[s.find(" "):]
+        for i, s in enumerate(acceptable[:num_gains]):
+            msg = "acceptable[{}] = {}, expected to end with '{}'".format(i, s, self.gain_suffix)
+            assert s[s.find(" "):] == self.gain_suffix
+        
         self._gain_info_known = True
 
     def setGain(self, target):
@@ -81,7 +95,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
             if isinstance(target, (int, float)) and target > self.num_gains:
                 # gain value specified, rewrite as str
                 # assume mantissa is only 1 digit
-                target = ("%.0e V/A" % target).replace("+", "").replace("e0", "e")
+                target = _gain_to_str_(target) + self.gain_suffix
             self.gainindex.put(target)
         else:
             msg = "could not set gain to {}, ".format(target)
@@ -153,6 +167,16 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         acceptable += range(num_gains)
         self.num_gains = num_gains
         self.acceptable_gain_values = acceptable
+        
+        # assume gain labels are formatted "{float} {other_text}"
+        # and that other_text is the same for all
+        # TODO: we could verify that here!
+        s = acceptable[0]
+        self.gain_suffix = s[s.find(" "):]
+        for i, s in enumerate(acceptable[:num_gains]):
+            msg = "acceptable[{}] = {}, expected to end with '{}'".format(i, s, self.gain_suffix)
+            assert s[s.find(" "):] == self.gain_suffix
+        
         self._gain_info_known = True
 
     def setGain(self, target):
@@ -169,7 +193,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         
         Assumptions:
         
-        * gain label (from EPICS) is ALWAYS: "{float} V/A gain"
+        * gain label (from EPICS) is ALWAYS: "{float} {ignore this}"
         * float mantissa is always one digit
         """
         if not self._gain_info_known:
@@ -178,7 +202,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             if isinstance(target, (int, float)) and target > self.num_gains:
                 # gain value specified, rewrite as str
                 # assume mantissa is only 1 digit
-                target = ("%.0e V/A gain" % target).replace("+", "").replace("e0", "e")
+                target = _gain_to_str_(target) + self.gain_suffix
             if isinstance(target, str) and str(target) in self.reqrange.enum_strs:
                 # must set reqrange by index number, rewrite as int
                 target = self.reqrange.enum_strs.index(target)
