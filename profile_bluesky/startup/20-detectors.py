@@ -42,6 +42,8 @@ if isinstance(scaler0, ScalerCH):
                 I00_SIGNAL = ch
             elif ch.chname.value == "PD_USAXS":
                 UPD_SIGNAL = ch
+            elif ch.chname.value == "TR diode":
+                TRD_SIGNAL = ch
 elif isinstance(scaler0, EpicsScaler):
     for ch_attr in scaler0.channels.read_attrs:
         if hasattr(scaler0.channels, ch_attr):
@@ -55,6 +57,8 @@ elif isinstance(scaler0, EpicsScaler):
                 I00_SIGNAL = ch
             elif desc == "PD_USAXS":
                 UPD_SIGNAL = ch
+            elif desc == "TR diode":
+                TRD_SIGNAL = ch
 
 
 # ignore scaler 1 for now
