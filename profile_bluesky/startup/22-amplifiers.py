@@ -28,6 +28,8 @@ from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 
 
+NUM_AUTORANGE_GAINS = 5		# common to all autorange sequence programs
+
 def _gain_to_str_(gain):    # convenience function
     return ("%.0e" % gain).replace("+", "").replace("e0", "e")
 
@@ -170,7 +172,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     gainD = Component(EpicsSignal, "gainD")
     ranges = DynamicDeviceComponent(
         _gains_subgroup_(
-            AmplfierGainDevice, 'gain', 'suffix', range(5)))
+            AmplfierGainDevice, 'gain', 'suffix', range(NUM_AUTORANGE_GAINS)))
     counts_per_volt = Component(EpicsSignal, "vfc")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
@@ -261,8 +263,12 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             shutter.close()
         self.mode.put(AutorangeSettings.manual)
         for range_name in sorted(self.ranges.read_attrs):
+            if range_name.find(".") >= 0 or not range_name.startswith("gain"):
+                continue
             # tell each gain to measure its own background
+            print(range_name)
             gain = self.ranges.__getattr__(range_name)
+            print(gain)
             gain.measure_background(self, scaler, signal, numReadings)
         self.reqrange.put(starting["gain"])
         self.mode.put(starting["mode"])
@@ -279,7 +285,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             shutter.open()
 
         self.mode.put(AutorangeSettings.auto_background)
-        for _ignore_ in self.ranges.read_attrs:
+        for _ignore_number_ in range(NUM_AUTORANGE_GAINS):
             counting = scaler.trigger()    # start counting
             ophyd.status.wait(
                 counting, 
@@ -297,28 +303,35 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 
 
 class DetectorAmplifierAutorangeDevice(Device):
-    scaler = FormattedComponent(EpicsScaler, '{self.scaler_pv}')
-    signal = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.S{self.signal_channel_pv}')
-    signal_name = FormattedComponent(EpicsSignalRO, '{self.scaler_pv}.NM{self.signal_channel_pv}')
-    femto = FormattedComponent(FemtoAmplifierDevice, '{self.amplifier_pv}')
-    auto = FormattedComponent(AmplifierAutoDevice, '{self.autorange_pv}')
+    """
+    Coordinate the different objects that control a diode or ion chamber
     
-    def __init__(self, scaler_pv, signal_channel_pv, amplifier_pv, autorange_pv, **kwargs):
-        self.scaler_pv = scaler_pv
-        self.signal_channel_pv = signal_channel_pv
-        self.amplifier_pv = amplifier_pv
-        self.autorange_pv = autorange_pv
+    This is a convenience intended to simplify tasks such
+    as measuring simultaneously the backgrounds of all channels.
+    """
+
+    def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
+        assert isinstance(nickname, str)
+        assert isinstance(scaler, (EpicsScaler, ScalerCH))
+        assert isinstance(signal, EpicsSignalRO)
+        assert isinstance(amplifier, FemtoAmplifierDevice)
+        assert isinstance(auto, AmplifierAutoDevice)
+        self.nickname = nickname
+        self.scaler = scaler
+        self.signal = signal
+        self.femto = amplifier
+        self.auto = auto
         super().__init__("", **kwargs)
 
     def measure_dark_currents(self, numReadings=8, shutter=None):
-        print("Measure dark current backgrounds for: " + self.signal_name.value)
+        print("Measure dark current backgrounds for: " + self.nickname)
         self.auto.measure_dark_currents(self.scaler, self.signal, numReadings, shutter)
 
     def autoscale(self, shutter=None):
         """
         set the amplifier to autoscale+background, settle to the best gain
         """
-        print("Autoscaling for: " + self.signal_name.value)
+        print("Autoscaling for: " + self.nickname)
         self.auto.autoscale(self.scaler, shutter)
 
 
@@ -326,43 +339,57 @@ class DetectorAmplifierAutorangeDevice(Device):
 
 _amplifier_id_upd = epics.caget("9idcLAX:femto:model", as_string=True)
 
+if _amplifier_id_upd == "DLCPA200":
+    _upd_femto_prefix = "9idcLAX:fem01:seq01:"
+    _upd_auto_prefix  = "9idcLAX:pd01:seq01:"
+elif _amplifier_id_upd == "DDPCA300":
+    _upd_femto_prefix = "9idcLAX:fem09:seq02:"
+    _upd_auto_prefix  = "9idcLAX:pd01:seq02:"
+
+upd_femto_amplifier  = FemtoAmplifierDevice(_upd_femto_prefix, name="upd_femto_amplifier")
+trd_femto_amplifier  = FemtoAmplifierDevice("9idcRIO:fem05:seq01:", name="trd_femto_amplifier")
+I0_femto_amplifier   = FemtoAmplifierDevice("9idcRIO:fem02:seq01:", name="I0_femto_amplifier")
+I00_femto_amplifier  = FemtoAmplifierDevice("9idcRIO:fem03:seq01:", name="I00_femto_amplifier")
+I000_femto_amplifier = FemtoAmplifierDevice("9idcRIO:fem04:seq01:", name="I000_femto_amplifier")
+
+upd_autorange = AmplifierAutoDevice(_upd_auto_prefix, name="upd_autorange")
+trd_autorange = AmplifierAutoDevice("9idcLAX:pd05:seq01:", name="trd_autorange")
+I0_autorange = AmplifierAutoDevice("9idcLAX:pd02:seq01:", name="I0_autorange")
+I00_autorange = AmplifierAutoDevice("9idcLAX:pd03:seq01:", name="I00_autorange")
+
 upd_controls = DetectorAmplifierAutorangeDevice(
-    "9idcLAX:vsc:c0",
-    4,
-    dict(
-            DLPCA200 = "9idcLAX:fem01:seq01:",
-            DDPCA300 = "9idcLAX:fem09:seq02:",
-        )[_amplifier_id_upd],
-    dict(
-            DLPCA200 = "9idcLAX:pd01:seq01:",
-            DDPCA300 = "9idcLAX:pd01:seq02:",
-        )[_amplifier_id_upd],
+    "PD_USAXS",
+    scaler0,
+    UPD_SIGNAL,
+    upd_femto_amplifier,
+    upd_autorange,
     name="upd_controls",
 )
 
 trd_controls = DetectorAmplifierAutorangeDevice(
-    "9idcLAX:vsc:c0",
-    5,
-    "9idcRIO:fem05:seq01:",
-    "9idcLAX:pd05:seq01:",
+    "TR diode",
+    scaler0,
+    TRD_SIGNAL,
+    trd_femto_amplifier,
+    trd_autorange,
     name="trd_controls",
 )
 
 I0_controls = DetectorAmplifierAutorangeDevice(
-    "9idcLAX:vsc:c0",
-    2,
-    "9idcRIO:fem02:seq01:",
-    "9idcLAX:pd02:seq01:",
+    "I0_USAXS",
+    scaler0,
+    I0_SIGNAL,
+    I0_femto_amplifier,
+    I0_autorange,
     name="I0_controls",
 )
 
 I00_controls = DetectorAmplifierAutorangeDevice(
-    "9idcLAX:vsc:c0",
-    3,
-    "9idcRIO:fem03:seq01:",
-    "9idcLAX:pd03:seq01:",
+    "I0_USAXS",
+    scaler0,
+    I00_SIGNAL,
+    I00_femto_amplifier,
+    I00_autorange,
     name="I00_controls",
 )
 
-# no autorange controls here
-I000_femto = FemtoAmplifierDevice("9idcRIO:fem04:seq01:", name="I000_femto")
