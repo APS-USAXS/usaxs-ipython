@@ -12,7 +12,7 @@ class UsaxsSampleStageDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:m58:c2:m2')
 
 s_stage = UsaxsSampleStageDevice('', name='s_stage')
-append_wa_motor_list(s_stage.x, s_stage.y)
+#append_wa_motor_list(s_stage.x, s_stage.y)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -27,7 +27,7 @@ class UsaxsDetectorStageDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:aero:c2:m1')
 
 d_stage = UsaxsDetectorStageDevice('', name='d_stage')
-append_wa_motor_list(d_stage.x, d_stage.y)
+#append_wa_motor_list(d_stage.x, d_stage.y)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -46,10 +46,10 @@ class UsaxsSlitDevice(MotorBundle):
     vcen = Component(EpicsMotor, '9idcLAX:m58:c2:m5')
 
 usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
-append_wa_motor_list(
-    usaxs_slit.hcen, usaxs_slit.vcen,
-    usaxs_slit.hap,  usaxs_slit.vap
-)
+#append_wa_motor_list(
+#    usaxs_slit.hcen, usaxs_slit.vcen,
+#    usaxs_slit.hap,  usaxs_slit.vap
+#)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -68,10 +68,10 @@ class MonoSlitDevice(MotorBundle):
     top = Component(EpicsMotor, '9ida:m45')
 
 mono_slit = MonoSlitDevice('', name='mono_slit')
-append_wa_motor_list(
-    mono_slit.top, mono_slit.bot,
-    mono_slit.inb, mono_slit.out
-)
+#append_wa_motor_list(
+#    mono_slit.top, mono_slit.bot,
+#    mono_slit.inb, mono_slit.out
+#)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -94,11 +94,11 @@ class GSlitDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:m58:c0:m6')
 
 guard_slit = GSlitDevice('', name='guard_slit')
-append_wa_motor_list(
-    guard_slit.top, guard_slit.bot,
-    guard_slit.inb, guard_slit.out,
-    guard_slit.x,   guard_slit.y
-)
+#append_wa_motor_list(
+#    guard_slit.top, guard_slit.bot,
+#    guard_slit.inb, guard_slit.out,
+#    guard_slit.x,   guard_slit.y
+#)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -116,10 +116,10 @@ class UsaxsCollimatorStageDevice(MotorBundle):
     r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m2')
 
 m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
-append_wa_motor_list(
-    m_stage.r, m_stage.x, m_stage.y,
-    m_stage.r2p, 
-)
+#append_wa_motor_list(
+#    m_stage.r, m_stage.x, m_stage.y,
+#    m_stage.r2p, 
+#)
 
 
 # #msr = EpicsMotor('9idcLAX:xps:c0:m5', name='msr')  # msr
@@ -137,7 +137,7 @@ class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m3')
 
 ms_stage = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
-append_wa_motor_list(ms_stage.x, ms_stage.y, ms_stage.rp)
+#append_wa_motor_list(ms_stage.x, ms_stage.y, ms_stage.rp)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -160,11 +160,11 @@ class UsaxsAnalyzerStageDevice(MotorBundle):
     rt = Component(EpicsMotor, '9idcLAX:m58:c1:m3')
 
 a_stage = UsaxsAnalyzerStageDevice('', name='a_stage')
-append_wa_motor_list(
-    a_stage.r, 
-    a_stage.x, a_stage.y, a_stage.z,
-    a_stage.r2p, a_stage.rt,
-)
+#append_wa_motor_list(
+#    a_stage.r, 
+#    a_stage.x, a_stage.y, a_stage.z,
+#    a_stage.r2p, a_stage.rt,
+#)
 
 
 # #asr = EpicsMotor('9idcLAX:xps:c0:m6', name='asr')  # asr
@@ -180,7 +180,7 @@ class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m4')
 
 as_stage = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
-append_wa_motor_list(as_stage.y, as_stage.rp)
+#append_wa_motor_list(as_stage.y, as_stage.rp)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -196,9 +196,9 @@ class SaxsDetectorStageDevice(MotorBundle):
     z = Component(EpicsMotor, '9idcLAX:mxv:c0:m2')
     
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
-append_wa_motor_list(
-    saxs_stage.x, saxs_stage.y, saxs_stage.z,
-)
+#append_wa_motor_list(
+#    saxs_stage.x, saxs_stage.y, saxs_stage.z,
+#)
 
 
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -207,4 +207,4 @@ camy = EpicsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
 tcam = EpicsMotor('9idcLAX:m58:c1:m6', name='tcam')  # tcam
 tens = EpicsMotor('9idcLAX:m58:c1:m8', name='tens')  # Tension
 waxsx = EpicsMotor('9idcLAX:m58:c0:m4', name='waxsx')  # WAXS X
-append_wa_motor_list(camy, tcam, tens, waxsx)
+#append_wa_motor_list(camy, tcam, tens, waxsx)
