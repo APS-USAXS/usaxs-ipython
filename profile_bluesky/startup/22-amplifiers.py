@@ -34,6 +34,13 @@ def _gain_to_str_(gain):    # convenience function
     return ("%.0e" % gain).replace("+", "").replace("e0", "e")
 
 
+class AutorangeSettings(object):
+    """values allowed for sequence program's ``reqrange`` PV"""
+    automatic = "automatic"
+    auto_background = "auto+background"
+    manual = "manual"
+
+
 class CurrentAmplifierDevice(Device):
     gain = Component(EpicsSignalRO, "gain")
 
@@ -116,43 +123,10 @@ class AmplfierGainDevice(Device):
         assert ch_num is not None, "Must provide `ch_num=` keyword argument."
         self._ch_num = ch_num
         super().__init__(prefix, **kwargs)
-    
-    def measure_background(self, parent, scaler, channel, numReadings):
-        assert numReadings > 0, "numReadings ({}) must be >0".format(numReadings)
-        assert isinstance(scaler, (EpicsScaler, ScalerCH))
-        assert isinstance(channel, EpicsSignalRO)
-        parent.setGain(self.gain.value) # use our own gain
-        stage_sigs = {}
-        stage_sigs["scaler"] = scaler.stage_sigs
-
-        scaler.stage_sigs["preset_time"] = parent.background_count_time.value
-        readings = []
-        for i in range(numReadings):
-            counting = scaler.trigger()    # start counting
-            ophyd.status.wait(
-                counting, 
-                timeout=parent.background_count_time.value+1.0)
-            readings.append(channel.value)
-        self.background.put(np.mean(readings))
-        self.background_error.put(np.std(readings))
-
-        scaler.stage_sigs = stage_sigs["scaler"]
-        msg = "gain = {} V/A, ".format(_gain_to_str_(self.gain.value))
-        msg += "dark current = {} +/- {}".format(
-            self.background.value,
-            self.background_error.value,
-        )
-        print(msg)
 
 
-class AutorangeSettings(object):
-    """values allowed for sequence program's ``reqrange`` PV"""
-    automatic = "automatic"
-    auto_background = "auto+background"
-    manual = "manual"
-
-
-def _gains_subgroup_(cls, nm, suffix, gains, **kwargs):
+def _gains_subgroup_(cls, nm, gains, **kwargs):
+    """internal: used in AmplifierAutoDevice"""
     defn = OrderedDict()
     for i in gains:
         key = '{}{}'.format(nm, i)
@@ -172,7 +146,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     gainD = Component(EpicsSignal, "gainD")
     ranges = DynamicDeviceComponent(
         _gains_subgroup_(
-            AmplfierGainDevice, 'gain', 'suffix', range(NUM_AUTORANGE_GAINS)))
+            AmplfierGainDevice, 'gain', range(NUM_AUTORANGE_GAINS)))
     counts_per_volt = Component(EpicsSignal, "vfc")
     status = Component(EpicsSignalRO, "updating")
     lurange = Component(EpicsSignalRO, "lurange")
@@ -182,7 +156,6 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     updating = Component(EpicsSignalRO, "updating")
 
     autoscale_count_time = Component(Signal, value=0.5)
-    background_count_time = Component(Signal, value=1.0)
 
     def __init__(self, prefix, **kwargs):
         self.scaler = None
@@ -249,30 +222,6 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             msg += "must be one of these: {}".format(self.acceptable_gain_values)
             raise ValueError(msg)
 
-    def measure_dark_currents(self, scaler, signal, numReadings=8, shutter=None):
-        """
-        measure the dark current background on each gain
-        
-        note: Should this be a plan? No.  Can always launch in a thread.
-        """
-        starting = dict(
-            gain = self.reqrange.value,
-            mode = self.mode.value,
-        )
-        if shutter is not None:
-            shutter.close()
-        self.mode.put(AutorangeSettings.manual)
-        for range_name in sorted(self.ranges.read_attrs):
-            if range_name.find(".") >= 0 or not range_name.startswith("gain"):
-                continue
-            # tell each gain to measure its own background
-            print(range_name)
-            gain = self.ranges.__getattr__(range_name)
-            print(gain)
-            gain.measure_background(self, scaler, signal, numReadings)
-        self.reqrange.put(starting["gain"])
-        self.mode.put(starting["mode"])
-
     def autoscale(self, scaler, shutter=None):
         """
         set the amplifier to autoscale+background, settle to the best gain
@@ -323,16 +272,66 @@ class DetectorAmplifierAutorangeDevice(Device):
         self.auto = auto
         super().__init__("", **kwargs)
 
-    def measure_dark_currents(self, numReadings=8, shutter=None):
-        print("Measure dark current backgrounds for: " + self.nickname)
-        self.auto.measure_dark_currents(self.scaler, self.signal, numReadings, shutter)
-
     def autoscale(self, shutter=None):
         """
         set the amplifier to autoscale+background, settle to the best gain
         """
         print("Autoscaling for: " + self.nickname)
         self.auto.autoscale(self.scaler, shutter)
+
+
+def measure_background(controls, shutter=None, count_time=1.0, numReadings=8):
+    """
+    interactive function to measure detector simultaneously
+    
+    controls [obj]
+        list (or tuple) of ``DetectorAmplifierAutorangeDevice`` instances for
+        the detectors to have backgrounds measured
+    """
+    assert isinstance(controls, (tuple, list)), "controls must be a list"
+    scaler_dict = {}    # sort the list of controls by scaler
+    for i, control in enumerate(controls):
+        msg = "controls[{}] must be".format(i)
+        msg += " instance of 'DetectorAmplifierAutorangeDevice'"
+        msg += ", provided: {}".format(control)
+        assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
+        k = control.scaler.prefix
+        if k not in scaler_dict:
+            scaler_dict[k] = []
+        scaler_dict[k].append(control)
+    
+    if shutter is not None:
+        shutter.close()
+
+    for control_list in scaler_dict.values():
+        scaler = control_list[0].scaler
+        signals = [c.signal for c in control_list]
+        
+        stage_sigs = {}
+        stage_sigs["scaler"] = scaler.stage_sigs
+        scaler.stage_sigs["preset_time"] = count_time
+
+        for n in range(NUM_AUTORANGE_GAINS):
+            # set gains
+            for control in control_list:
+                control.auto.setGain(n)
+            readings = {s.pvname: [] for s in signals}
+            
+            for m in range(numReadings):
+                # count and wait to complete
+                counting = scaler.trigger()
+                ophyd.status.wait(counting, timeout=count_time+1.0)
+                
+                for s in signals:
+                    readings[s.pvname].append(s.value)
+        
+            s_range_name = "gain{}".format(n)
+            for c in control_list:
+                g = c.auto.ranges.__getattr__(s_range_name)
+                g.background.put(np.mean(readings[c.signal.pvname]))
+                g.background_error.put(np.std(readings[c.signal.pvname]))
+
+        scaler.stage_sigs = stage_sigs["scaler"]
 
 
 # ------------
