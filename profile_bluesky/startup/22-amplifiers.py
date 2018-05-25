@@ -155,8 +155,6 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     lucurrent = Component(EpicsSignalRO, "lucurrent")
     updating = Component(EpicsSignalRO, "updating")
 
-    autoscale_count_time = Component(Signal, value=0.5)
-
     def __init__(self, prefix, **kwargs):
         self.scaler = None
         super().__init__(prefix, **kwargs)
@@ -222,27 +220,6 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             msg += "must be one of these: {}".format(self.acceptable_gain_values)
             raise ValueError(msg)
 
-    def autoscale(self, scaler, shutter=None):
-        """
-        set the amplifier to autoscale+background, settle to the best gain
-        """
-        stage_sigs = {}
-        stage_sigs["scaler"] = scaler.stage_sigs
-
-        scaler.stage_sigs["preset_time"] = self.autoscale_count_time.value
-        if shutter is not None:
-            shutter.open()
-
-        self.mode.put(AutorangeSettings.auto_background)
-        for _ignore_number_ in range(NUM_AUTORANGE_GAINS):
-            counting = scaler.trigger()    # start counting
-            ophyd.status.wait(
-                counting, 
-                timeout=self.autoscale_count_time.value+1.0)
-            print("gain = {} V/A".format(_gain_to_str_(self.gain.value)))
-
-        scaler.stage_sigs = stage_sigs["scaler"]
-
     @property
     def isUpdating(self):
         v = self.mode.value in (1, AutorangeSettings.auto_background)
@@ -272,16 +249,32 @@ class DetectorAmplifierAutorangeDevice(Device):
         self.auto = auto
         super().__init__("", **kwargs)
 
-    def autoscale(self, shutter=None):
-        """
-        set the amplifier to autoscale+background, settle to the best gain
-        """
-        print("Autoscaling for: " + self.nickname)
-        self.auto.autoscale(self.scaler, shutter)
+
+def get_by_scaler(controls):
+    """
+    return dictionary of [controls] keyed by common scaler support
+    
+    controls [obj]
+        list (or tuple) of ``DetectorAmplifierAutorangeDevice``
+    """
+    assert isinstance(controls, (tuple, list)), "controls must be a list"
+    scaler_dict = {}    # sort the list of controls by scaler
+    for i, control in enumerate(controls):
+        # each item in list MUST be instance of DetectorAmplifierAutorangeDevice
+        msg = "controls[{}] must be".format(i)
+        msg += " instance of 'DetectorAmplifierAutorangeDevice'"
+        msg += ", provided: {}".format(control)
+        assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
+
+        k = control.scaler.prefix       # key by scaler's PV prefix
+        if k not in scaler_dict:
+            scaler_dict[k] = []         # new scaler
+        scaler_dict[k].append(control)  # group controls by scaler
+    return scaler_dict
 
 
-def _common_scaler_measurement_(control_list, count_time=1.0, num_readings=8):
-    """internal: measure backgrounds from signals sharing a common scaler"""
+def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8):
+    """internal, blocking: measure amplifier backgrounds for signals sharing a common scaler"""
     scaler = control_list[0].scaler
     signals = [c.signal for c in control_list]
     
@@ -304,10 +297,10 @@ def _common_scaler_measurement_(control_list, count_time=1.0, num_readings=8):
                 readings[s.pvname].append(s.value)
     
         s_range_name = "gain{}".format(n)
-        for c in control_list:
-            g = c.auto.ranges.__getattr__(s_range_name)
-            g.background.put(np.mean(readings[c.signal.pvname]))
-            g.background_error.put(np.std(readings[c.signal.pvname]))
+        for control in control_list:
+            g = control.auto.ranges.__getattr__(s_range_name)
+            g.background.put(np.mean(readings[control.signal.pvname]))
+            g.background_error.put(np.std(readings[control.signal.pvname]))
 
     scaler.stage_sigs = stage_sigs["scaler"]
 
@@ -320,24 +313,52 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
     assert isinstance(controls, (tuple, list)), "controls must be a list"
-    scaler_dict = {}    # sort the list of controls by scaler
-    for i, control in enumerate(controls):
-        msg = "controls[{}] must be".format(i)
-        msg += " instance of 'DetectorAmplifierAutorangeDevice'"
-        msg += ", provided: {}".format(control)
-        assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
-        k = control.scaler.prefix
-        if k not in scaler_dict:
-            scaler_dict[k] = []
-        scaler_dict[k].append(control)
+    scaler_dict = get_by_scaler(controls)
     
     if shutter is not None:
         shutter.close()
 
     for control_list in scaler_dict.values():
-        # TODO: could do each of these in parallel threads
+        # TODO: could do each of these in parallel threads, use status and wait for it
         # for now, in sequence
-        _common_scaler_measurement_(control_list, count_time, num_readings)
+        _scaler_background_measurement_(control_list, count_time, num_readings)
+
+
+def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
+    """internal, blocking: autoscale amplifiers for signals sharing a common scaler"""
+    scaler = controls[0].scaler
+    stage_sigs = {}
+    stage_sigs["scaler"] = scaler.stage_sigs
+
+    scaler.stage_sigs["preset_time"] = count_time
+    for control in controls:
+        control.auto.mode.put(AutorangeSettings.auto_background)
+        # amplifier sequence program (in IOC) will set the gain
+
+    # How many times to let autoscale work?
+    # Number of possible gains is one choice - use that
+    for _ignore_number_ in range(NUM_AUTORANGE_GAINS):
+        counting = scaler.trigger()    # start counting
+        ophyd.status.wait(counting, timeout=count_time+1.0)
+
+    scaler.stage_sigs = stage_sigs["scaler"]
+
+
+def autoscale_amplifiers(controls, shutter=None, count_time=1.0):
+    """
+    interactive function to autoscale detector amplifiers simultaneously
+    
+    controls [obj]
+        list (or tuple) of ``DetectorAmplifierAutorangeDevice``
+    """
+    assert isinstance(controls, (tuple, list)), "controls must be a list"
+    scaler_dict = get_by_scaler(controls)
+    
+    if shutter is not None:
+        shutter.open()
+
+    for control_list in scaler_dict.values():
+        _scaler_autoscale_(control_list, count_time)
 
 
 # ------------
