@@ -264,7 +264,7 @@ def get_by_scaler(controls):
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
     assert isinstance(controls, (tuple, list)), "controls must be a list"
-    scaler_dict = {}    # sort the list of controls by scaler
+    scaler_dict = OrderedDefaultDict(list)    # sort the list of controls by scaler
     for i, control in enumerate(controls):
         # each item in list MUST be instance of DetectorAmplifierAutorangeDevice
         msg = "controls[{}] must be".format(i)
@@ -273,8 +273,6 @@ def get_by_scaler(controls):
         assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
 
         k = control.scaler.name       # key by scaler's ophyd device name
-        if k not in scaler_dict:
-            scaler_dict[k] = []         # new scaler
         scaler_dict[k].append(control)  # group controls by scaler
     return scaler_dict
 
@@ -329,7 +327,7 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
         _scaler_background_measurement_(control_list, count_time, num_readings)
 
 
-_last_autorange_gain_ = {}
+_last_autorange_gain_ = OrderedDefaultDict(dict)
 
 def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
     """internal, blocking: autoscale amplifiers for signals sharing a common scaler"""
@@ -343,8 +341,6 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
     scaler.stage_sigs["delay"] = 0.02
     scaler.stage_sigs["count_mode"] = "OneShot"
 
-    if scaler.name not in _last_autorange_gain_:
-        _last_autorange_gain_[scaler.name] = {}
     last_gain_dict = _last_autorange_gain_[scaler.name]
 
     for control in controls:
