@@ -29,6 +29,8 @@ from ophyd.device import FormattedComponent
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
+AMPLIFIER_MINIMUM_SETTLING_TIME = 0.01    # reasonable?
+
 
 def _gain_to_str_(gain):    # convenience function
     return ("%.0e" % gain).replace("+", "").replace("e0", "e")
@@ -50,8 +52,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
     description = Component(EpicsSignal, "femtodesc")
     
     # gain settling time for the device is <150ms
-    # TODO: make a signal for this?
-    # settling_time = Component(Signal, value=0.08)
+    settling_time = Component(Signal, value=0.08)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -291,8 +292,12 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
 
     for n in range(NUM_AUTORANGE_GAINS):
         # set gains
+        settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
         for control in control_list:
             control.auto.setGain(n)
+            settling_time = max(settling_time, control.femto.settling_time.value)
+        time.sleep(settling_time)
+
         readings = {s.pvname: [] for s in signals}
         
         for m in range(num_readings):
@@ -356,6 +361,7 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
 
     last_gain_dict = _last_autorange_gain_[scaler.name]
 
+    settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
     for control in controls:
         control.auto.mode.put(AutorangeSettings.auto_background)
         # faster if we start from last known autoscale gain
@@ -363,8 +369,9 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
         if gain is not None:    # be cautious, might be unknown
             control.auto.reqrange.put(gain)
         last_gain_dict[control.auto.gain.name] = control.auto.gain.value
+        settling_time = max(settling_time, control.femto.settling_time.value)
     
-    time.sleep(0.05)    # let amplifiers settle
+    time.sleep(settling_time)
 
     # How many times to let autoscale work?
     # Number of possible gains is one choice - NUM_AUTORANGE_GAINS
