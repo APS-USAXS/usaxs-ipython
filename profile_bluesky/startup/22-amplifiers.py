@@ -28,7 +28,7 @@ from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 
 
-NUM_AUTORANGE_GAINS = 5		# common to all autorange sequence programs
+NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
 
 def _gain_to_str_(gain):    # convenience function
     return ("%.0e" % gain).replace("+", "").replace("e0", "e")
@@ -280,13 +280,44 @@ class DetectorAmplifierAutorangeDevice(Device):
         self.auto.autoscale(self.scaler, shutter)
 
 
-def measure_background(controls, shutter=None, count_time=1.0, numReadings=8):
+def _common_scaler_measurement_(control_list, count_time=1.0, num_readings=8):
+    """internal: measure backgrounds from signals sharing a common scaler"""
+    scaler = control_list[0].scaler
+    signals = [c.signal for c in control_list]
+    
+    stage_sigs = {}
+    stage_sigs["scaler"] = scaler.stage_sigs
+    scaler.stage_sigs["preset_time"] = count_time
+
+    for n in range(NUM_AUTORANGE_GAINS):
+        # set gains
+        for control in control_list:
+            control.auto.setGain(n)
+        readings = {s.pvname: [] for s in signals}
+        
+        for m in range(num_readings):
+            # count and wait to complete
+            counting = scaler.trigger()
+            ophyd.status.wait(counting, timeout=count_time+1.0)
+            
+            for s in signals:
+                readings[s.pvname].append(s.value)
+    
+        s_range_name = "gain{}".format(n)
+        for c in control_list:
+            g = c.auto.ranges.__getattr__(s_range_name)
+            g.background.put(np.mean(readings[c.signal.pvname]))
+            g.background_error.put(np.std(readings[c.signal.pvname]))
+
+    scaler.stage_sigs = stage_sigs["scaler"]
+
+
+def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
     """
-    interactive function to measure detector simultaneously
+    interactive function to measure detector backgrounds simultaneously
     
     controls [obj]
-        list (or tuple) of ``DetectorAmplifierAutorangeDevice`` instances for
-        the detectors to have backgrounds measured
+        list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
     assert isinstance(controls, (tuple, list)), "controls must be a list"
     scaler_dict = {}    # sort the list of controls by scaler
@@ -304,34 +335,9 @@ def measure_background(controls, shutter=None, count_time=1.0, numReadings=8):
         shutter.close()
 
     for control_list in scaler_dict.values():
-        scaler = control_list[0].scaler
-        signals = [c.signal for c in control_list]
-        
-        stage_sigs = {}
-        stage_sigs["scaler"] = scaler.stage_sigs
-        scaler.stage_sigs["preset_time"] = count_time
-
-        for n in range(NUM_AUTORANGE_GAINS):
-            # set gains
-            for control in control_list:
-                control.auto.setGain(n)
-            readings = {s.pvname: [] for s in signals}
-            
-            for m in range(numReadings):
-                # count and wait to complete
-                counting = scaler.trigger()
-                ophyd.status.wait(counting, timeout=count_time+1.0)
-                
-                for s in signals:
-                    readings[s.pvname].append(s.value)
-        
-            s_range_name = "gain{}".format(n)
-            for c in control_list:
-                g = c.auto.ranges.__getattr__(s_range_name)
-                g.background.put(np.mean(readings[c.signal.pvname]))
-                g.background_error.put(np.std(readings[c.signal.pvname]))
-
-        scaler.stage_sigs = stage_sigs["scaler"]
+        # TODO: could do each of these in parallel threads
+        # for now, in sequence
+        _common_scaler_measurement_(control_list, count_time, num_readings)
 
 
 # ------------
@@ -392,3 +398,5 @@ I00_controls = DetectorAmplifierAutorangeDevice(
     name="I00_controls",
 )
 
+controls_list_I0_I00_TRD = [I0_controls, I00_controls, trd_controls]
+controls_list_UPD_I0_I00_TRD = [upd_controls] + controls_list_I0_I00_TRD
