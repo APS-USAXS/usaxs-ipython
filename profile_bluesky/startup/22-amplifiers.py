@@ -49,6 +49,10 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
     gainindex = Component(EpicsSignal, "gainidx")
     description = Component(EpicsSignal, "femtodesc")
     
+    # gain settling time for the device is <150ms
+    # TODO: make a signal for this?
+    # settling_time = Component(Signal, value=0.08)
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -154,6 +158,8 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     lurate = Component(EpicsSignalRO, "lurate")
     lucurrent = Component(EpicsSignalRO, "lucurrent")
     updating = Component(EpicsSignalRO, "updating")
+    
+    max_count_rate = Component(Signal, value=950000)
 
     def __init__(self, prefix, **kwargs):
         self.scaler = None
@@ -319,14 +325,13 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
         shutter.close()
 
     for control_list in scaler_dict.values():
-        # TODO: could do each of these in parallel threads, use status and wait for it
-        # for now, in sequence
+        # do these in sequence, just in case same hardware used multiple times
         _scaler_background_measurement_(control_list, count_time, num_readings)
 
 
 _last_autorange_gain_ = {}
 
-def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
+def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
     """internal, blocking: autoscale amplifiers for signals sharing a common scaler"""
     global _last_autorange_gain_
 
@@ -338,32 +343,59 @@ def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
     scaler.stage_sigs["delay"] = 0.02
     scaler.stage_sigs["count_mode"] = "OneShot"
 
-    last_gain_dict = _last_autorange_gain_.get(scaler.name)
+    if scaler.name not in _last_autorange_gain_:
+        _last_autorange_gain_[scaler.name] = {}
+    last_gain_dict = _last_autorange_gain_[scaler.name]
+
     for control in controls:
         control.auto.mode.put(AutorangeSettings.auto_background)
-        if last_gain_dict is not None:
-            # faster if we start from last known autoscale gain
-            gain = last_gain_dict.get(control.auto.gain.name)
-            if gain is not None:    # be cautious, might be unknown
-                control.auto.gain.put(gain)
+        # faster if we start from last known autoscale gain
+        gain = last_gain_dict.get(control.auto.gain.name)
+        if gain is not None:    # be cautious, might be unknown
+            control.auto.reqrange.put(gain)
+        last_gain_dict[control.auto.gain.name] = control.auto.gain.value
+    
+    time.sleep(0.05)    # let amplifiers settle
 
     # How many times to let autoscale work?
-    # Number of possible gains is one choice - use that
-    for _ignore_number_ in range(NUM_AUTORANGE_GAINS):
+    # Number of possible gains is one choice - NUM_AUTORANGE_GAINS
+    # consider: could start on one extreme, end on the other
+    max_iterations = min(max_iterations, NUM_AUTORANGE_GAINS)
+
+    # Better to let caller set a higher possible number
+    # Converge if no gains change
+    # Also, make sure no detector count rates are stuck at max
+    
+    for iteration in range(max_iterations):
+        converged = []      # append True is convergence criteria is satisfied
         counting = scaler.trigger()    # start counting
         ophyd.status.wait(counting, timeout=count_time+1.0)
         # amplifier sequence program (in IOC) will adjust the gain now
+        
+        for control in controls:
+            # any gains changed?
+            gain_now = control.auto.gain.value
+            gain_previous = last_gain_dict[control.auto.gain.name]
+            converged.append(gain_now == gain_previous)
+            last_gain_dict[control.auto.gain.name] = gain_now
+        
+            # are we topped up on any detector?
+            max_rate = control.auto.max_count_rate.value
+            actual_rate = control.signal.value
+            converged.append(actual_rate <= max_rate)
+        
+        if False not in converged:      # all True?
+            complete = True
+            break   # no changes
 
     scaler.stage_sigs = stage_sigs["scaler"]
-    
-    if last_gain_dict is None:
-        _last_autorange_gain_[scaler.name] = {}
-    last_gain_dict = _last_autorange_gain_[scaler.name]
-    for control in controls:
-        last_gain_dict[control.auto.gain.name] = control.auto.gain.value
+
+    if not complete:        # bailed out early from loop
+        fmt = "FAILED TO FIND CORRECT GAIN IN {} AUTOSCALE ITERATIONS"
+        raise RuntimeError(fmt.format(max_iterations))
 
 
-def autoscale_amplifiers(controls, shutter=None, count_time=1.0):
+def autoscale_amplifiers(controls, shutter=None, count_time=1.0, max_iterations=9):
     """
     interactive function to autoscale detector amplifiers simultaneously
     
@@ -377,7 +409,11 @@ def autoscale_amplifiers(controls, shutter=None, count_time=1.0):
         shutter.open()
 
     for control_list in scaler_dict.values():
-        _scaler_autoscale_(control_list, count_time)
+        # do these in sequence, just in case same hardware used multiple times
+        _scaler_autoscale_(
+            control_list, 
+            count_time=count_time, 
+            max_iterations=max_iterations)
 
 
 # ------------
