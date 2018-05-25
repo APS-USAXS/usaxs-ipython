@@ -33,20 +33,25 @@ class UsaxsFlyScanDevice(Device):
     
     def plan(self):
 
+        def report(t):
+            msg = "%.02fs - flying " % t
+            msg += "  ar = %.5f" % a_stage.r.position
+            msg += "  ay = %.5f" % a_stage.y.position
+            msg += "  dy = %.5f" % d_stage.y.position
+            # msg += "  flying = {}".format(self.flying.value)
+            return msg
+
         def waiter():
             logger.debug("waiter has arrived")
             t = time.time()
             timeout = t + self.scan_time.value + 20 # extra padded time
-            time.sleep(self.update_interval_s/2)    # wait for flyscan to start
-            #self.flying.get()
+            startup = t + self.update_interval_s/2
+            while t < startup and not  self.flying.value:    # wait for flyscan to start
+                time.sleep(0.01)
             while t < timeout and self.flying.value:
                 if t > self.update_time:
                     self.update_time = t + self.update_interval_s
-                    msg = "%.02fs - flying "% (t - self.t0)
-                    msg += "  ar = %.5f" % a_stage.r.position
-                    msg += "  ay = %.5f" % a_stage.y.position
-                    msg += "  dy = %.5f" % d_stage.y.position
-                    # msg += "  flying = {}".format(self.flying.value)
+                    msg = report(t - self.t0)
                     print(msg)
                     logger.debug(msg)
                 time.sleep(0.01)
@@ -55,6 +60,9 @@ class UsaxsFlyScanDevice(Device):
                 logger.error("{}s - waiter timeout!!".format(time.time()-self.t0))
             else:
                 logger.debug("{}s - waiter is done".format(time.time()-self.t0))
+            msg = report(time.time() - self.t0)
+            print(msg)
+            logger.debug(msg)
 
         def callback(value, old_value, **kwargs):
             logger.debug("{}s - callback value={}".format(time.time()-self.t0, value))
@@ -69,7 +77,7 @@ class UsaxsFlyScanDevice(Device):
         self.flying.put(False)
 
         self.busy.subscribe(callback)
-        yield from bps.abs_set(self.busy, 1, group=g) # waits until done
+        yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
         thread = threading.Thread(target=waiter, daemon=True)
         thread.start()
         self.flying.put(True)
