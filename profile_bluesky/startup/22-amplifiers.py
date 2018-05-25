@@ -194,6 +194,18 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         
         self._gain_info_known = True
 
+    def setAutoMode(self):
+        """use "automatic" operations mode"""
+        self.mode.put(AutorangeSettings.automatic)
+
+    def setBAutoMode(self):
+        """use "auto+background" operations mode"""
+        self.mode.put(AutorangeSettings.auto_background)
+
+    def setManualMode(self):
+        """use "manual" operations mode"""
+        self.mode.put(AutorangeSettings.manual)
+
     def setGain(self, target):
         """
         request the gain on the autorange controls
@@ -288,7 +300,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
     scaler.stage_sigs["preset_time"] = count_time
 
     for control in control_list:
-        control.auto.mode.put(AutorangeSettings.manual)
+        control.auto.setManualMode()
 
     for n in range(NUM_AUTORANGE_GAINS):
         # set gains
@@ -363,7 +375,7 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
 
     settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
     for control in controls:
-        control.auto.mode.put(AutorangeSettings.auto_background)
+        control.auto.setBAutoMode()
         # faster if we start from last known autoscale gain
         gain = last_gain_dict.get(control.auto.gain.name)
         if gain is not None:    # be cautious, might be unknown
