@@ -266,7 +266,7 @@ def get_by_scaler(controls):
         msg += ", provided: {}".format(control)
         assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
 
-        k = control.scaler.prefix       # key by scaler's PV prefix
+        k = control.scaler.name       # key by scaler's ophyd device name
         if k not in scaler_dict:
             scaler_dict[k] = []         # new scaler
         scaler_dict[k].append(control)  # group controls by scaler
@@ -338,12 +338,12 @@ def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
     scaler.stage_sigs["delay"] = 0.02
     scaler.stage_sigs["count_mode"] = "OneShot"
 
-    last_gain_dict = _last_autorange_gain_.get(scaler.prefix)
+    last_gain_dict = _last_autorange_gain_.get(scaler.name)
     for control in controls:
         control.auto.mode.put(AutorangeSettings.auto_background)
         if last_gain_dict is not None:
             # faster if we start from last known autoscale gain
-            gain = last_gain_dict.get(control.auto.prefix)
+            gain = last_gain_dict.get(control.auto.gain.name)
             if gain is not None:    # be cautious, might be unknown
                 control.auto.gain.put(gain)
 
@@ -357,10 +357,10 @@ def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
     scaler.stage_sigs = stage_sigs["scaler"]
     
     if last_gain_dict is None:
-        _last_autorange_gain_[scaler.prefix] = {}
-    last_gain_dict = _last_autorange_gain_[scaler.prefix]
+        _last_autorange_gain_[scaler.name] = {}
+    last_gain_dict = _last_autorange_gain_[scaler.name]
     for control in controls:
-        last_gain_dict[control.auto.prefix] = control.auto.gain.value
+        last_gain_dict[control.auto.gain.name] = control.auto.gain.value
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=1.0):
