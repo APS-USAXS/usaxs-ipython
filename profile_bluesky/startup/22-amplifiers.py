@@ -453,17 +453,17 @@ I0_femto_amplifier   = FemtoAmplifierDevice("9idcRIO:fem02:seq01:", name="I0_fem
 I00_femto_amplifier  = FemtoAmplifierDevice("9idcRIO:fem03:seq01:", name="I00_femto_amplifier")
 I000_femto_amplifier = FemtoAmplifierDevice("9idcRIO:fem04:seq01:", name="I000_femto_amplifier")
 
-upd_autorange = AmplifierAutoDevice(_upd_auto_prefix, name="upd_autorange")
-trd_autorange = AmplifierAutoDevice("9idcLAX:pd05:seq01:", name="trd_autorange")
-I0_autorange = AmplifierAutoDevice("9idcLAX:pd02:seq01:", name="I0_autorange")
-I00_autorange = AmplifierAutoDevice("9idcLAX:pd03:seq01:", name="I00_autorange")
+upd_autorange_controls = AmplifierAutoDevice(_upd_auto_prefix, name="upd_autorange_controls")
+trd_autorange_controls = AmplifierAutoDevice("9idcLAX:pd05:seq01:", name="trd_autorange_controls")
+I0_autorange_controls = AmplifierAutoDevice("9idcLAX:pd02:seq01:", name="I0_autorange_controls")
+I00_autorange_controls = AmplifierAutoDevice("9idcLAX:pd03:seq01:", name="I00_autorange_controls")
 
 upd_controls = DetectorAmplifierAutorangeDevice(
     "PD_USAXS",
     scaler0,
     UPD_SIGNAL,
     upd_femto_amplifier,
-    upd_autorange,
+    upd_autorange_controls,
     name="upd_controls",
 )
 
@@ -472,7 +472,7 @@ trd_controls = DetectorAmplifierAutorangeDevice(
     scaler0,
     TRD_SIGNAL,
     trd_femto_amplifier,
-    trd_autorange,
+    trd_autorange_controls,
     name="trd_controls",
 )
 
@@ -481,7 +481,7 @@ I0_controls = DetectorAmplifierAutorangeDevice(
     scaler0,
     I0_SIGNAL,
     I0_femto_amplifier,
-    I0_autorange,
+    I0_autorange_controls,
     name="I0_controls",
 )
 
@@ -490,7 +490,7 @@ I00_controls = DetectorAmplifierAutorangeDevice(
     scaler0,
     I00_SIGNAL,
     I00_femto_amplifier,
-    I00_autorange,
+    I00_autorange_controls,
     name="I00_controls",
 )
 
