@@ -286,6 +286,9 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
     stage_sigs["scaler"] = scaler.stage_sigs
     scaler.stage_sigs["preset_time"] = count_time
 
+    for control in control_list:
+        control.auto.mode.put(AutorangeSettings.manual)
+
     for n in range(NUM_AUTORANGE_GAINS):
         # set gains
         for control in control_list:
