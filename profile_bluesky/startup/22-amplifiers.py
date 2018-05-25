@@ -324,24 +324,43 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
         _scaler_background_measurement_(control_list, count_time, num_readings)
 
 
+_last_autorange_gain_ = {}
+
 def _scaler_autoscale_(controls, shutter=None, count_time=1.0):
     """internal, blocking: autoscale amplifiers for signals sharing a common scaler"""
+    global _last_autorange_gain_
+
     scaler = controls[0].scaler
     stage_sigs = {}
     stage_sigs["scaler"] = scaler.stage_sigs
 
     scaler.stage_sigs["preset_time"] = count_time
+    scaler.stage_sigs["delay"] = 0.02
+    scaler.stage_sigs["count_mode"] = "OneShot"
+
+    last_gain_dict = _last_autorange_gain_.get(scaler.prefix)
     for control in controls:
         control.auto.mode.put(AutorangeSettings.auto_background)
-        # amplifier sequence program (in IOC) will set the gain
+        if last_gain_dict is not None:
+            # faster if we start from last known autoscale gain
+            gain = last_gain_dict.get(control.auto.prefix)
+            if gain is not None:    # be cautious, might be unknown
+                control.auto.gain.put(gain)
 
     # How many times to let autoscale work?
     # Number of possible gains is one choice - use that
     for _ignore_number_ in range(NUM_AUTORANGE_GAINS):
         counting = scaler.trigger()    # start counting
         ophyd.status.wait(counting, timeout=count_time+1.0)
+        # amplifier sequence program (in IOC) will adjust the gain now
 
     scaler.stage_sigs = stage_sigs["scaler"]
+    
+    if last_gain_dict is None:
+        _last_autorange_gain_[scaler.prefix] = {}
+    last_gain_dict = _last_autorange_gain_[scaler.prefix]
+    for control in controls:
+        last_gain_dict[control.auto.prefix] = control.auto.gain.value
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=1.0):
