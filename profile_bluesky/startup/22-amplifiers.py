@@ -26,6 +26,7 @@ and then use it with inline dictionaries use_EPICS_scaler_channels(scaler0)to pi
 
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
+logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
@@ -302,7 +303,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
     for control in control_list:
         control.auto.setManualMode()
 
-    for n in range(NUM_AUTORANGE_GAINS):
+    for n in range(NUM_AUTORANGE_GAINS-1, 0, -1):  # reverse order
         # set gains
         settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
         for control in control_list:
@@ -331,7 +332,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
                 _gain_to_str_(control.auto.gain.value), 
                 g.background.value, 
                 g.background_error.value)
-            logging.info(msg)
+            logger.info(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
 
@@ -353,7 +354,7 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
         # do these in sequence, just in case same hardware used multiple times
         if len(control_list) > 0:
             msg = "Measuring background for: " + control_list[0].nickname
-            logging.info(msg)
+            logger.info(msg)
             _scaler_background_measurement_(control_list, count_time, num_readings)
 
 
@@ -415,7 +416,7 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
         if False not in converged:      # all True?
             complete = True
             break   # no changes
-        logging.debug("converged: {}".format(converged))
+        logger.debug("converged: {}".format(converged))
 
     scaler.stage_sigs = stage_sigs["scaler"]
 
@@ -441,7 +442,7 @@ def autoscale_amplifiers(controls, shutter=None, count_time=1.0, max_iterations=
         # do these in sequence, just in case same hardware used multiple times
         if len(control_list) > 0:
             msg = "Autoscaling amplifier for: " + control_list[0].nickname
-            logging.info(msg)
+            logger.info(msg)
             _scaler_autoscale_(
                 control_list, 
                 count_time=count_time, 
