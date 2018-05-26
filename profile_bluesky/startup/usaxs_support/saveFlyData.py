@@ -7,24 +7,25 @@ save EPICS data from USAXS Fly Scan to a NeXus file
 
 
 import datetime
+import logging
+from lxml import etree as lxml_etree
+import numpy
 import os
+import six
 import sys
+import time
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
 
 # do not warn if the HDF5 library version has changed
 # headers are 1.8.15, library is 1.8.16
 # THIS SETTING MIGHT BITE US IN THE FUTURE!
 os.environ['HDF5_DISABLE_VERSION_CHECK'] = '2'
-
 import h5py
-import numpy
-import time
-from lxml import etree as lxml_etree
 
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
-
 import epics                # PyEpics support
-from spec2nexus import eznx     # NeXus r/w support using h5py
 
 
 path = os.path.dirname(__file__)
@@ -137,13 +138,19 @@ class Link_Specification(object):
         link_registry[self.hdf5_path] = self
 
     def make_link(self, hdf_file_object):
-        '''make this link in the HDF5 file'''
+        '''make this NeXus link within the HDF5 file'''
         source = self.source_hdf5_path      # source: existing HDF5 object
         parent = '/'.join(source.split('/')[0:-1])     # parent: parent HDF5 path of source
         target = self.hdf5_path             # target: HDF5 node path to be created
         parent_obj = hdf_file_object[parent]
         source_obj = hdf_file_object[source]
-        eznx.makeLink(parent_obj, source_obj, target)
+
+        str_source = str(source_obj.name).encode("utf-8")
+        str_target = target.encode("utf-8")
+        if 'target' not in source_obj.attrs:
+            # NeXus link, NOT an HDF5 link!
+            source_obj.attrs["target"] = str_source
+        parent_obj[str_target] = parent_obj[str_source]
 
     def __str__(self):
         try:
@@ -262,23 +269,25 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, value)
+                logger.debug("{} = {}".format(pv_spec.label, value))
+                ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 self._attachEpicsAttributes(ds, pv_spec.pv)
-                eznx.addAttributes(ds, **pv_spec.attrib)
-            except Exception as e:
+                addAttributes(ds, **pv_spec.attrib)
+            #except Exception as e:
+            except IOError as e:
+                print("preliminaryWriteFile():")
                 print("ERROR: pv_spec.label={}, value={}".format(pv_spec.label, value))
                 print("MESSAGE: ", e)
                 print("RESOLUTION: writing as error message string")
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
+                ds = makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
     def saveFile(self):
         '''write all desired data to the file and exit this code'''
         t = datetime.datetime.now()
-        #timestamp = ' '.join((t.strftime("%Y-%m-%d"), t.strftime("%H:%M:%S")))
-        timestamp = str(t).split('.')[0]
+        timestamp = datetime.datetime.isoformat(t, sep=" ")
         f = group_registry['/'].hdf5_group
-        eznx.addAttributes(f, timestamp = timestamp)
+        f.attrs["timestamp"] = timestamp
 
         # TODO: will len(caget(array)) = NORD or NELM? (useful data or full array)
         for pv_spec in pv_registry.values():
@@ -297,14 +306,15 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, value)
+                ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 self._attachEpicsAttributes(ds, pv_spec.pv)
-                eznx.addAttributes(ds, **pv_spec.attrib)
+                addAttributes(ds, **pv_spec.attrib)
             except Exception as e:
+                print("saveFile():")
                 print("ERROR: ", pv_spec.label, value)
                 print("MESSAGE: ", e)
                 print("RESOLUTION: writing as error message string")
-                ds = eznx.makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
+                ds = makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
         # as the final step, make all the links as directed
@@ -377,43 +387,94 @@ class SaveFlyScan(object):
         for key, xture in sorted(group_registry.items()):
             if key == '/':
                 # create the file and internal structure
-                f = eznx.makeFile(self.hdf5_file_name,
-                  # the following are attributes to the root element of the HDF5 file
-                  file_name = self.hdf5_file_name,
-                  creator = __file__,
-                  creator_version = self.creator_version,
-                  creator_config_file=self.config_file,
-                  HDF5_Version = h5py.version.hdf5_version,
-                  h5py_version = h5py.version.version,
+                f = h5py.File(self.hdf5_file_name, "w")
+                # the following are attributes to the root element of the HDF5 file
+                addAttributes(f, 
+                    **dict(
+                        file_name = self.hdf5_file_name,
+                        creator = __file__,
+                        creator_version = self.creator_version,
+                        creator_config_file = self.config_file,
+                        HDF5_Version = h5py.version.hdf5_version,
+                        h5py_version = h5py.version.version,
+                        # NX_class = "NXroot",    # not illegal, *never* used
+                    )
                 )
                 xture.hdf5_group = f
             else:
                 hdf5_parent = xture.group_parent.hdf5_group
-                xture.hdf5_group = eznx.makeGroup(hdf5_parent, xture.name, xture.nx_class)
-            eznx.addAttributes(xture.hdf5_group, **xture.attrib)
+                xture.hdf5_group = hdf5_parent.create_group(xture.name)
+                xture.hdf5_group.attrs["NX_class"] = xture.nx_class
+            addAttributes(xture.hdf5_group, **xture.attrib)
 
         for field in field_registry.values():
             if isinstance(field.text, type(u"unicode")):
                 field.text = field.text.encode('utf8')
             try:
-                ds = eznx.makeDataset(field.group_parent.hdf5_group, field.name, [field.text])
+                ds = makeDataset(field.group_parent.hdf5_group, field.name, [field.text])
+                ds = field.group_parent.hdf5_group
             except Exception as _exc:
                 msg = "problem with field={}, text={}, exception={}".format(
                     field.name, field.text, _exc
                 )
                 raise Exception(msg)
-            eznx.addAttributes(ds, **field.attrib)
+            addAttributes(ds, **field.attrib)
 
     def _attachEpicsAttributes(self, node, pv):
         '''attach common attributes from EPICS to the HDF5 tree node'''
         pvname = os.path.splitext(pv.pvname)[0]
         desc = epics.caget(pvname+'.DESC') or ''
-        eznx.addAttributes(node,
-          epics_pv = pv.pvname.encode('utf8'),
-          units = (pv.units or '').encode('utf8'),
-          epics_type = pv.type,
-          epics_description = desc.encode('utf8'),
-        )
+        addAttributes(node, **dict(
+            epics_pv = pv.pvname.encode('utf8'),
+            units = (pv.units or '').encode('utf8'),
+            epics_type = pv.type,
+            epics_description = desc.encode('utf8')
+        ))
+
+
+def makeDataset(parent, name, data = None, **attr):
+    '''
+    create and write data to a dataset in the HDF5 file hierarchy
+    
+    Any named parameters in the call to this method 
+    will be saved as attributes of the dataset.
+
+    :param obj parent: parent group
+    :param str name: valid NeXus dataset name
+    :param obj data: the information to be written
+    :param dict attr: optional dictionary of attributes
+    :return: h5py dataset object
+    '''
+    if data is None:
+        obj = parent.create_dataset(name)
+    else:
+        # https://stackoverflow.com/questions/23220513/storing-a-list-of-strings-to-a-hdf5-dataset-from-python
+        # [n.encode("ascii", "ignore") for n in data]
+        def encoder(value):
+            if isinstance(value, six.string_types):
+                return value.encode("ascii", "ignore")
+            return value
+
+        if not isinstance(data, (tuple, list)):
+            data = [data, ]
+        if isinstance(data, (tuple, list)):
+            data = list(map(encoder, data))
+        obj = parent.create_dataset(name, data=data)
+    addAttributes(obj, **attr)
+    return obj
+
+
+def addAttributes(parent, **attr):
+    """
+    add attributes to an h5py data item
+
+    :param obj parent: h5py parent object
+    :param dict attr: optional dictionary of attributes
+    """
+    if isinstance(attr, dict):
+        # attr is a dictionary of attributes
+        for k, v in attr.items():
+            parent.attrs[k] = v
 
 
 def get_CLI_options():
