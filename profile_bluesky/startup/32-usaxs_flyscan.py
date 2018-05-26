@@ -16,6 +16,14 @@ sfs.preliminaryWriteFile()
 sfs.saveFile()
 """
 
+
+def run_in_thread(func):
+    def wrapper(*args, **kwargs):
+        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
+    return wrapper
+
+
 class BusyStatus(str, enum.Enum):
     busy = "Busy"
     done = "Done"
@@ -36,6 +44,8 @@ class UsaxsFlyScanDevice(Device):
         self.ay0 = None
         self.dy0 = None
         self.saveFlyData = None
+        self.saveFlyData_config = "usaxs_support/saveFlyData.xml"
+        self.saveFlyData_HDF5_file ="/tmp/sfs.h5"
     
     def plan(self):
 
@@ -47,6 +57,7 @@ class UsaxsFlyScanDevice(Device):
             # msg += "  flying = {}".format(self.flying.value)
             return msg
 
+        @run_in_thread
         def waiter():
             logger.debug("waiter has arrived")
             t = time.time()
@@ -70,30 +81,38 @@ class UsaxsFlyScanDevice(Device):
             print(msg)
             logger.debug(msg)
 
+        @run_in_thread
+        def saveDataPrep():
+            self.saveFlyData = SaveFlyScan(
+                self.saveFlyData_HDF5_file,
+                config_file=self.saveFlyData_config)
+            self.saveFlyData.preliminaryWriteFile()
+
+        @run_in_thread
+        def saveDataFinish():
+            if self.saveFlyData is None:
+                raise RuntimeError("Must first call saveDataPrep()")
+            self.saveFlyData.saveFile()
+
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
 
         self.t0 = time.time()
-        g = uuid.uuid4()
         self.update_time = self.t0 + self.update_interval_s
         self.flying.put(False)
         
-        # TODO: launch this in a thread
-        # TODO: sfs = SaveFlyScan(?filename?, config_file="usaxs_support/saveFlyData.xml")
-        # TODO: sfs.preliminaryWriteFile()
+        saveDataPrep()      # prepare HDF5 file to save fly scan data (background thread)
 
-
+        g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
-        thread = threading.Thread(target=waiter, daemon=True)
-        thread.start()
+        waiter()
         self.flying.put(True)
 
         yield from bps.wait(group=g)
         self.flying.put(False)
         
-        # TODO: launch this in a thread
-        # TODO: sfs.saveFile()
+        saveDataFinish()    # finish saving data to HDF5 file (background thread)
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0, 
