@@ -49,7 +49,7 @@ class UsaxsFlyScanDevice(Device):
     
     def plan(self):
 
-        def report(t):
+        def _report_(t):
             msg = "%.02fs - flying " % t
             msg += "  ar = %.5f" % a_stage.r.position
             msg += "  ay = %.5f" % a_stage.y.position
@@ -58,7 +58,7 @@ class UsaxsFlyScanDevice(Device):
             return msg
 
         @run_in_thread
-        def waiter():
+        def progress_reporting():
             logger.debug("waiter has arrived")
             t = time.time()
             timeout = t + self.scan_time.value + 20 # extra padded time
@@ -68,7 +68,7 @@ class UsaxsFlyScanDevice(Device):
             while t < timeout and self.flying.value:
                 if t > self.update_time:
                     self.update_time = t + self.update_interval_s
-                    msg = report(t - self.t0)
+                    msg = _report_(t - self.t0)
                     print(msg)
                     logger.debug(msg)
                 time.sleep(0.01)
@@ -77,22 +77,26 @@ class UsaxsFlyScanDevice(Device):
                 logger.error("{}s - waiter timeout!!".format(time.time()-self.t0))
             else:
                 logger.debug("{}s - waiter is done".format(time.time()-self.t0))
-            msg = report(time.time() - self.t0)
+            msg = _report_(time.time() - self.t0)
             print(msg)
             logger.debug(msg)
 
         @run_in_thread
-        def saveDataPrep():
+        def prepare_HDF5_file():
+            print("HDF5 config: {}".format(self.saveFlyData_config))
+            print("HDF5 output: {}".format(self.saveFlyData_HDF5_file))
             self.saveFlyData = SaveFlyScan(
                 self.saveFlyData_HDF5_file,
                 config_file=self.saveFlyData_config)
             self.saveFlyData.preliminaryWriteFile()
 
         @run_in_thread
-        def saveDataFinish():
+        def finish_HDF5_file():
             if self.saveFlyData is None:
                 raise RuntimeError("Must first call saveDataPrep()")
             self.saveFlyData.saveFile()
+            print("HDF5 output complete: {}".format(self.saveFlyData_config))
+            self.saveFlyData = None
 
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
@@ -102,17 +106,17 @@ class UsaxsFlyScanDevice(Device):
         self.update_time = self.t0 + self.update_interval_s
         self.flying.put(False)
         
-        saveDataPrep()      # prepare HDF5 file to save fly scan data (background thread)
+        prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
 
         g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
-        waiter()
+        progress_reporting()
         self.flying.put(True)
 
         yield from bps.wait(group=g)
         self.flying.put(False)
         
-        saveDataFinish()    # finish saving data to HDF5 file (background thread)
+        finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0, 
@@ -123,6 +127,9 @@ class UsaxsFlyScanDevice(Device):
 
 # #21 : w-i-p
 usaxs_flyscan = UsaxsFlyScanDevice(name="usaxs_flyscan")
+# development locations
+usaxs_flyscan.saveFlyData_config = "usaxs_support/saveFlyData.xml"
+usaxs_flyscan.saveFlyData_HDF5_file ="/tmp/sfs.h5"
 
 
 def fix_faulty():
