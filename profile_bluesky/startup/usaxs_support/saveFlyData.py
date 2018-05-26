@@ -459,7 +459,19 @@ def makeDataset(parent, name, data = None, **attr):
             data = [data, ]
         if isinstance(data, (tuple, list)):
             data = list(map(encoder, data))
+        # note: Does dataset compression make smaller files?
+        #
+        # ===========  =================
+        # compression  file size (bytes)
+        # ===========  =================
+        # None         362756
+        # gzip         815366
+        # lzf          861396
+        # ===========  =================
+        #
         obj = parent.create_dataset(name, data=data)
+        #obj = parent.create_dataset(name, data=data, compression="gzip")
+        #obj = parent.create_dataset(name, data=data, compression="lzf")
     addAttributes(obj, **attr)
     return obj
 
