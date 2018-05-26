@@ -70,9 +70,6 @@ class UsaxsFlyScanDevice(Device):
             print(msg)
             logger.debug(msg)
 
-        def callback(value, old_value, **kwargs):
-            logger.debug("{}s - callback value={}".format(time.time()-self.t0, value))
-
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
@@ -81,15 +78,22 @@ class UsaxsFlyScanDevice(Device):
         g = uuid.uuid4()
         self.update_time = self.t0 + self.update_interval_s
         self.flying.put(False)
+        
+        # TODO: launch this in a thread
+        # TODO: sfs = SaveFlyScan(?filename?, config_file="usaxs_support/saveFlyData.xml")
+        # TODO: sfs.preliminaryWriteFile()
 
-        self.busy.subscribe(callback)
+
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
         thread = threading.Thread(target=waiter, daemon=True)
         thread.start()
         self.flying.put(True)
+
         yield from bps.wait(group=g)
         self.flying.put(False)
-        self.busy.clear_sub(callback)
+        
+        # TODO: launch this in a thread
+        # TODO: sfs.saveFile()
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0, 
