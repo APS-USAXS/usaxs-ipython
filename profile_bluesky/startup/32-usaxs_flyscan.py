@@ -55,7 +55,7 @@ class UsaxsFlyScanDevice(Device):
 
         @run_in_thread
         def progress_reporting():
-            logger.debug("waiter has arrived")
+            logger.debug("progress_reporting has arrived")
             t = time.time()
             timeout = t + self.scan_time.value + 20 # extra padded time
             startup = t + self.update_interval_s/2
@@ -69,13 +69,13 @@ class UsaxsFlyScanDevice(Device):
                     logger.debug(msg)
                 time.sleep(0.01)
                 t = time.time()
-            if t > timeout:
-                logger.error("{}s - waiter timeout!!".format(time.time()-self.t0))
-            else:
-                logger.debug("{}s - waiter is done".format(time.time()-self.t0))
             msg = _report_(time.time() - self.t0)
             print(msg)
             logger.debug(msg)
+            if t > timeout:
+                logger.error("{}s - progress_reporting timeout!!".format(time.time()-self.t0))
+            else:
+                logger.debug("{}s - progress_reporting is done".format(time.time()-self.t0))
 
         @run_in_thread
         def prepare_HDF5_file():
