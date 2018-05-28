@@ -20,7 +20,7 @@ class MyApsPssShutter(ApsPssShutter):
     # our shutters use upper case for Open & Close
     open_bit = Component(EpicsSignal, ":Open")
     close_bit = Component(EpicsSignal, ":Close")
-    state = FormattedComponent(EpicsSignalRO, "{self.state_pv}", string=True)
+    state = FormattedComponent(EpicsSignalRO, "{self.state_pv}")
 
     def __init__(self, prefix, state_pv, *args, **kwargs):
         self.state_pv = state_pv
