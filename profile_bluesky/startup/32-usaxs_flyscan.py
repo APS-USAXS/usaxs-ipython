@@ -14,6 +14,8 @@ sfs.preliminaryWriteFile()
 sfs.saveFile()
 """
 
+FALLBACK_DIR = "/share1/USAXS_data"
+
 
 class BusyStatus(str, Enum):
     busy = "Busy"
@@ -37,7 +39,9 @@ class UsaxsFlyScanDevice(Device):
         self.saveFlyData = None
         self.saveFlyData_config = "usaxs_support/saveFlyData.xml"
         self.saveFlyData_HDF5_dir ="/tmp"
+        self.fallback_dir = FALLBACK_DIR
         self.saveFlyData_HDF5_file ="sfs.h5"
+        self._output_HDF5_file_ = None
     
     def plan(self):
 
@@ -76,16 +80,29 @@ class UsaxsFlyScanDevice(Device):
         @run_in_thread
         def prepare_HDF5_file():
             fname = os.path.abspath(self.saveFlyData_HDF5_dir)
-            msg = "Must save fly scan data to an existing directory."
-            msg += "  Gave {}".format(fname)
-            assert os.path.exists(fname), msg
+            if not os.path.exists(fname):
+                msg = "Must save fly scan data to an existing directory."
+                msg += "  Gave {}".format(fname)
+                fname = os.path.abspath(self.fallback_dir)
+                msg += "  Using fallback directory {}".format(self.fallback_dir)
+                logger.error(msg)
 
-            msg = "File {} exists.  Will not overwrite.".format(fname)
-            fname = os.path.join(fname, self.saveFlyData_HDF5_file)
-            assert not os.path.exists(fname), msg
+            s = self.saveFlyData_HDF5_file
+            _s_ = os.path.join(fname, s)      # for testing here
+            if os.path.exists(_s_):
+                msg = "File {} exists.  Will not overwrite.".format(_s_)
+                s = datetime.isoformat(datetime.now(), sep="_").split(".")[0]
+                s = s.replace(":", "").replace("-", "")
+                s = "flyscan_" + s + ".h5"
+                _s_ = os.path.join(fname, s)
+                msg += "  Using fallback file name {}".format(_s_)
+                logger.error(msg)
+            fname = os.path.join(fname, s)
 
             print("HDF5 config: {}".format(self.saveFlyData_config))
             print("HDF5 output: {}".format(fname))
+            self._output_HDF5_file_ = fname
+
             self.saveFlyData = SaveFlyScan(
                 fname,
                 config_file=self.saveFlyData_config)
@@ -97,9 +114,7 @@ class UsaxsFlyScanDevice(Device):
                 raise RuntimeError("Must first call saveDataPrep()")
             self.saveFlyData.saveFile()
 
-            fname = os.path.abspath(self.saveFlyData_HDF5_dir)
-            fname = os.path.join(fname, self.saveFlyData_HDF5_file)
-            print("HDF5 output complete: {}".format(fname))
+            print("HDF5 output complete: {}".format(self._output_HDF5_file_))
             self.saveFlyData = None
 
         self.ar0 = a_stage.r.position
