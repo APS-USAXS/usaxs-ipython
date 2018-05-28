@@ -8,7 +8,7 @@ def run_in_thread(func):
     def wrapper(*args, **kwargs):
         thread = threading.Thread(target=func, args=args, kwargs=kwargs)
         thread.start()
-		return thread
+        return thread
     return wrapper
 
 
@@ -20,6 +20,11 @@ class MyApsPssShutter(ApsPssShutter):
     # our shutters use upper case for Open & Close
     open_bit = Component(EpicsSignal, ":Open")
     close_bit = Component(EpicsSignal, ":Close")
+    state = FormattedComponent(EpicsSignalRO, "{self.state_pv}", string=True)
+
+    def __init__(self, prefix, state_pv, *args, **kwargs):
+        self.state_pv = state_pv
+        super().__init__(prefix, *args, **kwargs)
 
 
 class BusyStatus(str, Enum):

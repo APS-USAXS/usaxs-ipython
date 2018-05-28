@@ -2,11 +2,15 @@ print(__file__)
 
 """filters & shutters"""
 
-FE_shutter = MyApsPssShutter("9ida:rShtrA", name="FE_shutter")
-# FE shutter state PV = PA:09ID:STA_A_FES_OPEN_PL.VAL
+FE_shutter = MyApsPssShutter(
+    "9ida:rShtrA", 
+    "PA:09ID:STA_A_FES_OPEN_PL.VAL", 
+    name="FE_shutter")
 
-mono_shutter = MyApsPssShutter("9ida:rShtrB", name="mono_shutter")
-# mono_shutter_state PV = PA:09ID:STA_B_SBS_OPEN_PL.VAL
+mono_shutter = MyApsPssShutter(
+    "9ida:rShtrB", 
+    "PA:09ID:STA_B_SBS_OPEN_PL.VAL",
+    name="mono_shutter")
 
 usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
 ti_filter_shutter = usaxs_shutter       # alias
