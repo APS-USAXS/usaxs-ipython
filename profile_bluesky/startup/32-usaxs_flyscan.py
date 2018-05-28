@@ -42,7 +42,7 @@ class UsaxsFlyScanDevice(Device):
 
         def _report_(t):
             msg = "%.02fs - flying " % t
-            msg += "  ar = %.5f" % a_stage.r.position
+            msg += "  ar = %.7f" % a_stage.r.position
             msg += "  ay = %.5f" % a_stage.y.position
             msg += "  dy = %.5f" % d_stage.y.position
             # msg += "  flying = {}".format(self.flying.value)
