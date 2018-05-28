@@ -4,8 +4,6 @@ print(__file__)
 USAXS Fly Scan setup
 """
 
-import enum
-import uuid
 from usaxs_support.saveFlyData import SaveFlyScan
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
@@ -17,15 +15,7 @@ sfs.saveFile()
 """
 
 
-def run_in_thread(func):
-    def wrapper(*args, **kwargs):
-        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-        thread.start()
-		return thread
-    return wrapper
-
-
-class BusyStatus(str, enum.Enum):
+class BusyStatus(str, Enum):
     busy = "Busy"
     done = "Done"
 

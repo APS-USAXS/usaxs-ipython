@@ -1,27 +1,16 @@
 print(__file__)
 
-from ophyd import Component, Device, DeviceStatus, Signal
-from ophyd import EpicsMotor, EpicsScaler, MotorBundle
-from ophyd import EpicsSignal, EpicsSignalRO, EpicsSignalWithRBV
-from ophyd import PVPositioner, PVPositionerPC
-from ophyd.scaler import ScalerCH
-from APS_BlueSky_tools.devices import userCalcsDevice
-from APS_BlueSky_tools.devices import AxisTunerMixin
-from APS_BlueSky_tools.plans import TuneAxis
-from APS_BlueSky_tools.synApps_ophyd import swaitRecord
+"""Set up custom or complex devices"""
 
-from collections import deque, OrderedDict
-import os
-import subprocess
-from ophyd.utils import OrderedDefaultDict
-from enum import Enum
-import threading
-import time
 
-from APS_BlueSky_tools.devices import ApsPssShutter
-from APS_BlueSky_tools.devices import EpicsMotorShutter
+def run_in_thread(func):
+    """run ``func`` in thread"""
+    def wrapper(*args, **kwargs):
+        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
+        thread.start()
+		return thread
+    return wrapper
 
-# Set up custom or complex devices
 
 class TunableEpicsMotor(EpicsMotor, AxisTunerMixin):
     pass
@@ -114,6 +103,7 @@ class InOutShutter(Device):
             elif input_filter(value) in self.valid_close_values:
                 self.close()
         
+        @run_in_thread
         def run_and_delay():
             self.busy.put(True)
             move_shutter()
@@ -122,5 +112,5 @@ class InOutShutter(Device):
             self.busy.put(False)
             status._finished(success=True)
         
-        threading.Thread(target=run_and_delay, daemon=True).start()
+        run_and_delay()
         return status

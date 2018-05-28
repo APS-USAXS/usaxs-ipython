@@ -1,6 +1,5 @@
 print(__file__)
 
-from datetime import datetime
 
 # Set up default metadata
 
@@ -18,7 +17,6 @@ RE.md['login_id'] = USERNAME + '@' + HOSTNAME
 RE.md['BLUESKY_VERSION'] = bluesky.__version__
 RE.md['OPHYD_VERSION'] = ophyd.__version__
 
-import os
 for key, value in os.environ.items():
     if key.startswith("EPICS") and not key.startswith("EPICS_BASE"):
         RE.md[key] = value

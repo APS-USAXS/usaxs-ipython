@@ -24,8 +24,6 @@ and then use it with inline dictionaries use_EPICS_scaler_channels(scaler0)to pi
 """
 
 
-from ophyd.device import DynamicDeviceComponent
-from ophyd.device import FormattedComponent
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
