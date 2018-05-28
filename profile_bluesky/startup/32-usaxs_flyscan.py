@@ -86,7 +86,7 @@ class UsaxsFlyScanDevice(Device):
             if self.saveFlyData is None:
                 raise RuntimeError("Must first call saveDataPrep()")
             self.saveFlyData.saveFile()
-            print("HDF5 output complete: {}".format(self.saveFlyData_config))
+            print("HDF5 output complete: {}".format(self.saveFlyData_HDF5_file))
             self.saveFlyData = None
 
         self.ar0 = a_stage.r.position
