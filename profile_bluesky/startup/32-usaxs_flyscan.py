@@ -36,7 +36,8 @@ class UsaxsFlyScanDevice(Device):
         self.dy0 = None
         self.saveFlyData = None
         self.saveFlyData_config = "usaxs_support/saveFlyData.xml"
-        self.saveFlyData_HDF5_file ="/tmp/sfs.h5"
+        self.saveFlyData_HDF5_dir ="/tmp"
+        self.saveFlyData_HDF5_file ="sfs.h5"
     
     def plan(self):
 
@@ -74,10 +75,19 @@ class UsaxsFlyScanDevice(Device):
 
         @run_in_thread
         def prepare_HDF5_file():
+            fname = os.path.abspath(self.saveFlyData_HDF5_dir)
+            msg = "Must save fly scan data to an existing directory."
+            msg += "  Gave {}".format(fname)
+            assert os.path.exists(fname), msg
+
+            msg = "File {} exists.  Will not overwrite.".format(fname)
+            fname = os.path.join(fname, self.saveFlyData_HDF5_file)
+            assert not os.path.exists(fname), msg
+
             print("HDF5 config: {}".format(self.saveFlyData_config))
-            print("HDF5 output: {}".format(self.saveFlyData_HDF5_file))
+            print("HDF5 output: {}".format(fname))
             self.saveFlyData = SaveFlyScan(
-                self.saveFlyData_HDF5_file,
+                fname,
                 config_file=self.saveFlyData_config)
             self.saveFlyData.preliminaryWriteFile()
 
@@ -86,7 +96,10 @@ class UsaxsFlyScanDevice(Device):
             if self.saveFlyData is None:
                 raise RuntimeError("Must first call saveDataPrep()")
             self.saveFlyData.saveFile()
-            print("HDF5 output complete: {}".format(self.saveFlyData_HDF5_file))
+
+            fname = os.path.abspath(self.saveFlyData_HDF5_dir)
+            fname = os.path.join(fname, self.saveFlyData_HDF5_file)
+            print("HDF5 output complete: {}".format(fname))
             self.saveFlyData = None
 
         self.ar0 = a_stage.r.position
@@ -120,7 +133,8 @@ class UsaxsFlyScanDevice(Device):
 usaxs_flyscan = UsaxsFlyScanDevice(name="usaxs_flyscan")
 # development locations
 usaxs_flyscan.saveFlyData_config = "usaxs_support/saveFlyData.xml"
-usaxs_flyscan.saveFlyData_HDF5_file ="/tmp/sfs.h5"
+usaxs_flyscan.saveFlyData_HDF5_dir ="/tmp"
+usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
 
 
 def fix_faulty():
