@@ -119,3 +119,19 @@ class InOutShutter(Device):
         
         run_and_delay()
         return status
+
+    
+class DualPf4FilterBox(Device):
+    """Dual Xia PF4 filter boxes using support from synApps"""
+    fPosA = Component(EpicsSignal, "fPosA")
+    fPosB = Component(EpicsSignal, "fPosB")
+    bankA = Component(EpicsSignalRO, "bankA")
+    bankB = Component(EpicsSignalRO, "bankB")
+    bitFlagA = Component(EpicsSignalRO, "bitFlagA")
+    bitFlagB = Component(EpicsSignalRO, "bitFlagB")
+    transmission = Component(EpicsSignalRO, "trans")
+    inverse_transmission = Component(EpicsSignalRO, "invTrans")
+    thickness_Al_mm = Component(EpicsSignalRO, "filterAl")
+    thickness_Ti_mm = Component(EpicsSignalRO, "filterTi")
+    energy_keV = Component(EpicsSignal, "E_using")
+    mode = Component(EpicsSignal, "useMono", string=True)
