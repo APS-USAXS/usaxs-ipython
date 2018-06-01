@@ -19,5 +19,6 @@ ti_filter_shutter = usaxs_shutter       # alias
 ccd_shutter = InOutShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
 
 
-pf4_filter_bank_A = EpicsSignal('9idcRIO:pf4:fPosA', name='pf4_filter_bank_A')
-pf4_filter_bank_B = EpicsSignal('9idcRIO:pf4:fPosB', name='pf4_filter_bank_B')
+#pf4_filter_bank_A = EpicsSignal('9idcRIO:pf4:fPosA', name='pf4_filter_bank_A')
+#pf4_filter_bank_B = EpicsSignal('9idcRIO:pf4:fPosB', name='pf4_filter_bank_B')
+pf4 = DualPf4FilterBox("9idcRIO:pf4:", name="pf4")
