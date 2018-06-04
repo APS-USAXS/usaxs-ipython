@@ -6,6 +6,7 @@ from ophyd import Component, Device, DeviceStatus, Signal
 from ophyd import EpicsMotor, EpicsScaler, MotorBundle
 from ophyd import EpicsSignal, EpicsSignalRO, EpicsSignalWithRBV
 from ophyd import PVPositioner, PVPositionerPC
+from ophyd.mca import EpicsMCARecord
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 from ophyd.scaler import ScalerCH
