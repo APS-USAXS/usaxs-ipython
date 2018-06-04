@@ -20,6 +20,8 @@ msr_val_center = EpicsSignal("9idcLAX:USAXS:MSRcenter", name="msr_val_center")
 ar_val_center = EpicsSignal("9idcLAX:USAXS:ARcenter", name="ar_val_center")
 asr_val_center = EpicsSignal("9idcLAX:USAXS:ASRcenter", name="asr_val_center")
 
+struck = Struck3820("9idcLAX:3820:", name="struck")
+
 
 class UserDataDevice(Device):
     run_cycle = Component(EpicsSignal, "RunCycle")

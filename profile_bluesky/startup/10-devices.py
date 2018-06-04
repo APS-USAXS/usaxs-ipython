@@ -135,3 +135,17 @@ class DualPf4FilterBox(Device):
     thickness_Ti_mm = Component(EpicsSignalRO, "filterTi")
     energy_keV = Component(EpicsSignal, "E_using")
     mode = Component(EpicsSignal, "useMono", string=True)
+
+
+class Struck3820(Device):
+    """Struck/SIS 3820 Multi-Channel Scaler (as used by USAXS)"""
+    mca1 = Component(EpicsSignal, "mca1")
+    mca2 = Component(EpicsSignal, "mca2")
+    mca3 = Component(EpicsSignal, "mca3")
+    # mca1Name = Component(EpicsSignal, "scaler1.NM1", string=True)
+    # mca2Name = Component(EpicsSignal, "scaler1.NM2", string=True)
+    # mca3Name = Component(EpicsSignal, "scaler1.NM3", string=True)
+    clock_frequency = Component(EpicsSignal, "clock_frequency")
+    current_channel = Component(EpicsSignal, "CurrentChannel")
+    channel_max = Component(EpicsSignal, "MaxChannels")
+    channels_used = Component(EpicsSignal, "NuseAll")
