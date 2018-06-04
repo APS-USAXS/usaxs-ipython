@@ -2,6 +2,11 @@ print(__file__)
 
 """various detectors"""
 
+# Struck/SIS 3820 Multi-channel scaler
+# used with USAXS fly scans
+struck = Struck3820("9idcLAX:3820:", name="struck")
+
+
 # will become part of APS_BlueSky_tools.devices
 def use_EPICS_scaler_channels(scaler):
     """
