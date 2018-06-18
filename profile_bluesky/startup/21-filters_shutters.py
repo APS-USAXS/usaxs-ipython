@@ -19,5 +19,5 @@ ti_filter_shutter = usaxs_shutter       # alias
 ccd_shutter = InOutShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
 
 
-pf4_AlTi = DualPf4FilterBox("9idcRIO:pf4:", name="pf4")
+pf4_AlTi = DualPf4FilterBox("9idcRIO:pf4:", name="pf4_AlTi")
 pf4_glass = DualPf4FilterBox("9idcRIO:pf42:", name="pf4_glass")
