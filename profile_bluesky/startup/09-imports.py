@@ -26,5 +26,5 @@ import threading
 import time
 import uuid
 
-from APS_BlueSky_tools.devices import ApsPssShutter
+from APS_BlueSky_tools.devices import ApsPssShutterWithStatus
 from APS_BlueSky_tools.devices import EpicsMotorShutter

@@ -16,15 +16,10 @@ class TunableEpicsMotor(EpicsMotor, AxisTunerMixin):
     pass
 
 
-class MyApsPssShutter(ApsPssShutter):
+class MyApsPssShutterWithStatus(ApsPssShutterWithStatus):
     # our shutters use upper case for Open & Close
-    open_bit = Component(EpicsSignal, ":Open")
-    close_bit = Component(EpicsSignal, ":Close")
-    state = FormattedComponent(EpicsSignalRO, "{self.state_pv}")
-
-    def __init__(self, prefix, state_pv, *args, **kwargs):
-        self.state_pv = state_pv
-        super().__init__(prefix, *args, **kwargs)
+    open_bit = Component(EpicsSignal, "Open")
+    close_bit = Component(EpicsSignal, "Close")
 
 
 class BusyStatus(str, Enum):
@@ -77,11 +72,11 @@ class InOutShutter(Device):
     
     def open(self):
         """request shutter to open, interactive use"""
-        self.control_bit.put(self.open_value)
+        return self.set(self.open_value)
     
     def close(self):
         """request shutter to close, interactive use"""
-        self.control_bit.put(self.close_value)
+        return self.set(self.close_value)
     
     def set(self, value, **kwargs):
         """request the shutter to open or close, BlueSky plan use"""
@@ -136,7 +131,8 @@ class DualPf4FilterBox(Device):
     thickness_Al_mm = Component(EpicsSignalRO, "filterAl")
     thickness_Ti_mm = Component(EpicsSignalRO, "filterTi")
     thickness_glass_mm = Component(EpicsSignalRO, "filterGlass")
-    energy_keV = Component(EpicsSignal, "E_using")
+    energy_keV_local = Component(EpicsSignal, "E:local")
+    energy_keV_mono = Component(EpicsSignal, "displayEnergy")
     mode = Component(EpicsSignal, "useMono", string=True)
 
 

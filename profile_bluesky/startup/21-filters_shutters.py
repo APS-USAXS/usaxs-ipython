@@ -2,13 +2,13 @@ print(__file__)
 
 """filters & shutters"""
 
-FE_shutter = MyApsPssShutter(
-    "9ida:rShtrA", 
+FE_shutter = MyApsPssShutterWithStatus(
+    "9ida:rShtrA:", 
     "PA:09ID:STA_A_FES_OPEN_PL.VAL", 
     name="FE_shutter")
 
-mono_shutter = MyApsPssShutter(
-    "9ida:rShtrB", 
+mono_shutter = MyApsPssShutterWithStatus(
+    "9ida:rShtrB:", 
     "PA:09ID:STA_B_SBS_OPEN_PL.VAL",
     name="mono_shutter")
 
