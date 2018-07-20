@@ -8,6 +8,7 @@ from ophyd import AreaDetector
 from ophyd import PilatusDetectorCam
 from ophyd import PointGreyDetectorCam
 from ophyd import SimDetectorCam
+from ophyd import CamBase
 from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
 from ophyd.utils import set_and_wait
 from ophyd.areadetector import ADComponent
