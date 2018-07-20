@@ -20,21 +20,18 @@ if not HDF5_FILE_PATH_PILATUS.startswith(DATABROKER_ROOT_PATH_PILATUS):
     raise ValueError(msg)
     
 
+class MyPilatusHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
+    """adapt HDF5 plugin for Pilatus detector"""
+    
+
 class MyPilatusDetector(SingleTrigger, AreaDetector):
     """Pilatus detector(s) as used by 9-ID-C USAXS"""
     
     cam = ADComponent(PilatusDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
     
-    #hdf1 = ADComponent(
-    #    MyHDF5Plugin, 
-    #    "HDF1:", 
-    #    root=databroker_pilatus_root_path,
-    #    write_path_template = pilatus_file_template_root,
-    #    reg=db.reg,
-    #    )
     hdf1 = ADComponent(
-        MyHDF5Plugin, 
+        MyPilatusHDF5Plugin, 
         suffix = "HDF1:", 
         root = DATABROKER_ROOT_PATH_PILATUS,
         write_path_template = HDF5_FILE_PATH_PILATUS,
