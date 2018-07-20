@@ -5,24 +5,19 @@ print(__file__)
 
 # root path for HDF5 files (for databroker filestore)
 # This is the path BlueSky can see.
-# For the DataBroker, this should be the leading part
-# of `pilatus_file_template_root` that is common.
-databroker_pilatus_root_path = "/"
+DATABROKER_ROOT_PATH_PILATUS = "/"
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # This is the path the detector can see
-# It must start with the path defined in `databroker_pilatus_root_path`
-pilatus_file_template_root = "/mnt/usaxscontrol/USAXS_data/"
+HDF5_FILE_PATH_PILATUS = "/mnt/usaxscontrol/USAXS_data/pilatus/%Y/%m/%d/"
 
-
-
-# class MyPilatusCam(PilatusDetectorCam):
-#     """custom support for detector cam plugin"""
-#     # # FIXME: ophyd has problem with trying to unstage the RBV value inside RE()
-#     # image_mode = ADComponent(EpicsSignal, "ImageMode")
-#     # num_images = ADComponent(EpicsSignal, "NumImages")
-#     # acquire_time = ADComponent(EpicsSignal, "AcquireTime")
-#     # frame_type = ADComponent(EpicsSignal, "FrameType")
+if not HDF5_FILE_PATH_PILATUS.startswith(DATABROKER_ROOT_PATH_PILATUS):
+    msg = "error in file {}:\n  path '{}' must start with '{}".format(
+        __file__,
+        HDF5_FILE_PATH_PILATUS,
+        DATABROKER_ROOT_PATH_PILATUS
+    )
+    raise ValueError(msg)
     
 
 class MyPilatusDetector(SingleTrigger, AreaDetector):
@@ -31,12 +26,18 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
     cam = ADComponent(PilatusDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
     
+    #hdf1 = ADComponent(
+    #    MyHDF5Plugin, 
+    #    "HDF1:", 
+    #    root=databroker_pilatus_root_path,
+    #    write_path_template = pilatus_file_template_root,
+    #    reg=db.reg,
+    #    )
     hdf1 = ADComponent(
         MyHDF5Plugin, 
-        "HDF1:", 
-        root=databroker_pilatus_root_path,
-        write_path_template = pilatus_file_template_root,
-        reg=db.reg,
+        suffix = "HDF1:", 
+        root = DATABROKER_ROOT_PATH_PILATUS,
+        write_path_template = HDF5_FILE_PATH_PILATUS,
         )
 
 
