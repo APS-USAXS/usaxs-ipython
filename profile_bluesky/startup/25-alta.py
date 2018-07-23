@@ -51,7 +51,7 @@ custom class                         superclass(es)
 from ophyd.areadetector.filestore_mixins import resource_factory
 
 
-class MyAltaFileStore(FileStoreBase):
+class MyAltaFileStore(FileStoreHDF5):
     """custom class to give users control of image file name"""
 
     def make_filename(self):
