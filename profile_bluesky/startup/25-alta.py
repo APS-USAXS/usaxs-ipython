@@ -40,7 +40,7 @@ intervening structure:
 ===================================  ============================
 custom class                         superclass(es)
 ===================================  ============================
-`MyAltaFileStorePlugin`              `FileStoreBase`
+`MyAltaFileStore`                    `FileStoreBase`
 `MyAltaHDF5FileStore`                `MyAltaFileStorePlugin`
 `MyAltaFileStoreHDF5IterativeWrite`  `MyAltaHDF5FileStore`, `FileStoreIterativeWrite`
 `MyAltaHDF5Plugin`                   `HDF5Plugin`, `MyAltaFileStoreHDF5IterativeWrite`
@@ -48,7 +48,10 @@ custom class                         superclass(es)
 """
 
 
-class MyAltaFileStorePlugin(FileStoreBase):
+from ophyd.areadetector.filestore_mixins import resource_factory
+
+
+class MyAltaFileStore(FileStoreBase):
     """custom class to give users control of image file name"""
 
     def make_filename(self):
@@ -92,8 +95,39 @@ class MyAltaFileStorePlugin(FileStoreBase):
         
         return filename, read_path, write_path
 
+    def _generate_resource(self, resource_kwargs):
+        fn = PurePath(self._fn).relative_to(self.reg_root)
+        resource, self._datum_factory = resource_factory(
+            spec=self.filestore_spec,
+            root=str(self.reg_root),
+            resource_path=str(fn),
+            resource_kwargs=resource_kwargs,
+            path_semantics=self.path_semantics)
+        print("self.filestore_spec : {}".format(self.filestore_spec))
+        print("self.reg_root : {}".format(self.reg_root))
+        print("resource : {}".format(resource))
+        print("self._datum_factory : {}".format(self._datum_factory))
 
-class MyAltaHDF5FileStore(MyAltaFileStorePlugin):
+        # If a Registry is set, we need to allow it to generate the uid for us.
+        # this code path will eventually be removed
+        if self._reg is not None:
+            logger.debug("Inserting resource with filename %s", self._fn)
+            # register_resource has accidentally different parameter names...
+            self._resource_uid = self._reg.register_resource(
+                rpath=resource['resource_path'],
+                rkwargs=resource['resource_kwargs'],
+                root=resource['root'],
+                spec=resource['spec'],
+                path_semantics=resource['path_semantics'])
+            resource['uid'] = self._resource_uid
+        # If a Registry is not set, we need to generate the uid.
+
+        self._resource_uid = resource['uid']
+
+        self._asset_docs_cache.append(('resource', resource))
+
+
+class MyAltaHDF5FileStore(MyAltaFileStore):
     """custom class to enable users to control image file name"""
 
 
