@@ -26,8 +26,83 @@ class MyAltaCam(CamBase):
     temperature = Component(EpicsSignalWithRBV, 'Temperature')
 
 
-class MyAltaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
-    """adapt HDF5 plugin for Alta detector"""
+"""
+To allow users to control the file name,
+we need to override some underlying code.
+
+The image file name is set in `FileStoreBase.make_filename()` from 
+`ophyd.areadetector.filestore_mixins`.  This is called (during device
+staging) from `FileStoreBase.stage()`
+
+To use this custom class, we need to connect it to some
+intervening structure:
+
+===================================  ============================
+custom class                         superclass(es)
+===================================  ============================
+`MyAltaFileStorePlugin`              `FileStoreBase`
+`MyAltaHDF5FileStore`                `MyAltaFileStorePlugin`
+`MyAltaFileStoreHDF5IterativeWrite`  `MyAltaHDF5FileStore`, `FileStoreIterativeWrite`
+`MyAltaHDF5Plugin`                   `HDF5Plugin`, `MyAltaFileStoreHDF5IterativeWrite`
+===================================  ============================
+"""
+
+
+class MyAltaFileStorePlugin(FileStoreBase):
+    """custom class to give users control of image file name"""
+
+    def make_filename(self):
+        """
+        overrides default behavior: Get info from EPICS HDF5 plugin.
+        
+        Make a filename.  Get the info from EPICS HDF5 plugin.
+
+        This is a hook so that the read and write paths can either be modified
+        or created on disk prior to configuring the areaDetector plugin.
+
+        Returns
+        -------
+        filename : str
+            The start of the filename
+        read_path : str
+            Path that ophyd can read from
+        write_path : str
+            Path that the IOC can write to
+        """
+        # trust EPICS to have these right
+        print("File path: " + self.file_path.value)
+        print("File name: " + self.file_name.value)
+        print("File template: " + self.file_template.value)
+        
+        # start of the file name, file number will be appended per template
+        filename = self.file_name.value
+        
+        # this is where the HDF5 plugin will write the image, 
+        # relative to the IOC's filesystem
+        write_path = self.file_path.value
+        
+        # this is where the DataBroker will find the image, 
+        #on a filesystem accessible to BlueSky
+        read_path = write_path.replace("/mnt/", "/").replace("/usaxscontrol/", "/share1/")
+        
+        msg = "make_filename() filename={}, read_path={}, write_path={}".format(
+            filename, read_path, write_path
+        )
+        print(msg)
+        
+        return filename, read_path, write_path
+
+
+class MyAltaHDF5FileStore(MyAltaFileStorePlugin):
+    """custom class to enable users to control image file name"""
+
+
+class MyAltaFileStoreHDF5IterativeWrite(MyAltaHDF5FileStore, FileStoreIterativeWrite):
+    """custom class to enable users to control image file name"""
+
+
+class MyAltaHDF5Plugin(HDF5Plugin, MyAltaFileStoreHDF5IterativeWrite):
+    """custom features for HDF5 plugin for Alta detector"""
     
 
 class MyAltaDetector(SingleTrigger, AreaDetector):
