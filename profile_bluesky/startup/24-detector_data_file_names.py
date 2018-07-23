@@ -13,6 +13,7 @@ from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
 from ophyd.utils import set_and_wait
 from ophyd.areadetector import ADComponent
 from ophyd.areadetector.filestore_mixins import FileStoreBase
+from ophyd.areadetector.filestore_mixins import FileStoreHDF5
 from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.filestore_mixins import new_short_uid

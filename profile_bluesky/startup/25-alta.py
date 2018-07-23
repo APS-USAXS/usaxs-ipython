@@ -40,43 +40,23 @@ intervening structure:
 ===================================  ============================
 custom class                         superclass(es)
 ===================================  ============================
-`MyAltaFileStore`                    `FileStoreBase`
-`MyAltaHDF5FileStore`                `MyAltaFileStorePlugin`
+`MyAltaFileStoreHDF5`                `FileStoreHDF5`
+`MyAltaHDF5FileStore`                `MyAltaFileStoreHDF5`
 `MyAltaFileStoreHDF5IterativeWrite`  `MyAltaHDF5FileStore`, `FileStoreIterativeWrite`
 `MyAltaHDF5Plugin`                   `HDF5Plugin`, `MyAltaFileStoreHDF5IterativeWrite`
 ===================================  ============================
 """
 
 
-from ophyd.areadetector.filestore_mixins import resource_factory
-
-
-class MyAltaFileStore(FileStoreHDF5):
-    """custom class to give users control of image file name"""
+class MyAltaFileStoreHDF5(FileStoreHDF5):
+    """
+    custom class to define image file name from EPICS
+    """
 
     def make_filename(self):
         """
         overrides default behavior: Get info from EPICS HDF5 plugin.
-        
-        Make a filename.  Get the info from EPICS HDF5 plugin.
-
-        This is a hook so that the read and write paths can either be modified
-        or created on disk prior to configuring the areaDetector plugin.
-
-        Returns
-        -------
-        filename : str
-            The start of the filename
-        read_path : str
-            Path that ophyd can read from
-        write_path : str
-            Path that the IOC can write to
         """
-        # trust EPICS to have these right
-        print("File path: " + self.file_path.value)
-        print("File name: " + self.file_name.value)
-        print("File template: " + self.file_template.value)
-        
         # start of the file name, file number will be appended per template
         filename = self.file_name.value
         
@@ -87,47 +67,11 @@ class MyAltaFileStore(FileStoreHDF5):
         # this is where the DataBroker will find the image, 
         #on a filesystem accessible to BlueSky
         read_path = write_path.replace("/mnt/", "/").replace("/usaxscontrol/", "/share1/")
-        
-        msg = "make_filename() filename={}, read_path={}, write_path={}".format(
-            filename, read_path, write_path
-        )
-        print(msg)
-        
+
         return filename, read_path, write_path
 
-    def _generate_resource(self, resource_kwargs):
-        fn = PurePath(self._fn).relative_to(self.reg_root)
-        resource, self._datum_factory = resource_factory(
-            spec=self.filestore_spec,
-            root=str(self.reg_root),
-            resource_path=str(fn),
-            resource_kwargs=resource_kwargs,
-            path_semantics=self.path_semantics)
-        print("self.filestore_spec : {}".format(self.filestore_spec))
-        print("self.reg_root : {}".format(self.reg_root))
-        print("resource : {}".format(resource))
-        print("self._datum_factory : {}".format(self._datum_factory))
 
-        # If a Registry is set, we need to allow it to generate the uid for us.
-        # this code path will eventually be removed
-        if self._reg is not None:
-            logger.debug("Inserting resource with filename %s", self._fn)
-            # register_resource has accidentally different parameter names...
-            self._resource_uid = self._reg.register_resource(
-                rpath=resource['resource_path'],
-                rkwargs=resource['resource_kwargs'],
-                root=resource['root'],
-                spec=resource['spec'],
-                path_semantics=resource['path_semantics'])
-            resource['uid'] = self._resource_uid
-        # If a Registry is not set, we need to generate the uid.
-
-        self._resource_uid = resource['uid']
-
-        self._asset_docs_cache.append(('resource', resource))
-
-
-class MyAltaHDF5FileStore(MyAltaFileStore):
+class MyAltaHDF5FileStore(MyAltaFileStoreHDF5):
     """custom class to enable users to control image file name"""
 
 
