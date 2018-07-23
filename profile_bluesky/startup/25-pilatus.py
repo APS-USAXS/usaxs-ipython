@@ -9,7 +9,7 @@ DATABROKER_ROOT_PATH_PILATUS = "/"
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # This is the path the detector can see
-HDF5_FILE_PATH_PILATUS = "/mnt/usaxscontrol/USAXS_data/pilatus/%Y/%m/%d/"
+HDF5_FILE_PATH_PILATUS = "/mnt/usaxscontrol/USAXS_data/test/pilatus/%Y/%m/%d/"
 
 if not HDF5_FILE_PATH_PILATUS.startswith(DATABROKER_ROOT_PATH_PILATUS):
     msg = "error in file {}:\n  path '{}' must start with '{}".format(

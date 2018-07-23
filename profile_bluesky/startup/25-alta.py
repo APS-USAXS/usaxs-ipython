@@ -9,7 +9,7 @@ DATABROKER_ROOT_PATH_ALTA = "/"
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # This is the path the detector can see
-HDF5_FILE_PATH_ALTA = "/mnt/share1/USAXS_data/alta/%Y/%m/%d/"
+HDF5_FILE_PATH_ALTA = "/mnt/share1/USAXS_data/test/alta/%Y/%m/%d/"
 
 if not HDF5_FILE_PATH_ALTA.startswith(DATABROKER_ROOT_PATH_ALTA):
     msg = "error in file {}:\n  path '{}' must start with '{}".format(
