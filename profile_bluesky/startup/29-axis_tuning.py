@@ -101,28 +101,35 @@ m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
 
 
-def tune_mr():
+def _tune_base_(axis):
     """
     plan for simple tune and report
     
     satisfies: report of tuning OK/not OK on console
     """
-    mr_start = m_stage.r.position
+    print("tuning axis: ", axis.name)
+    axis_start = axis.position
     yield from bps.mv(ti_filter_shutter, "open")
-    yield from m_stage.r.tune()
+    yield from axis.tune()
     yield from bps.mv(
         ti_filter_shutter, "close",
         scaler0.count_mode, "AutoCount",
     )
 
-    found = m_stage.r.tuner.peak_detected()
-    print("starting mr position:", m_stage.r.position)
+    found = axis.tuner.peak_detected()
+    print("axis: ", axis.name)
+    print("starting position:", axis_start)
     print("peak detected:", found)
     if found:
-        print("  center:", m_stage.r.tuner.peaks.cen)
-        print("  centroid:", m_stage.r.tuner.peaks.com)
-        print("  fwhm:", m_stage.r.tuner.peaks.fwhm)
-    print("final mr position:", m_stage.r.position)
+        print("  max:", axis.tuner.peaks.max)
+        print("  center:", axis.tuner.peaks.cen)
+        print("  centroid:", axis.tuner.peaks.com)
+        print("  fwhm:", axis.tuner.peaks.fwhm)
+    print("final position:", axis.position)
+
+
+def tune_mr():
+    yield from _tune_base_(m_stage.r)
 
 
 # -------------------------------------------
@@ -145,13 +152,17 @@ def m2rp_posttune_hook():
 
 
 # use I00 (if MS stage is used, use I0)
-m_stage.r2p.tuner = TuneAxis([scaler0], m_stage.r2p, signal_name=TUNING_DET_SIGNAL.name)
+m_stage.r2p.tuner = TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r2p.tuner.num = 21
 m_stage.r2p.tuner.width = 6
 
 m_stage.r2p.pre_tune_method = m2rp_pretune_hook
 m_stage.r2p.post_tune_method = m2rp_posttune_hook
+
+
+def tune_m2rp():
+    yield from _tune_base_(m_stage.r2p)
 
 
 # -------------------------------------------
