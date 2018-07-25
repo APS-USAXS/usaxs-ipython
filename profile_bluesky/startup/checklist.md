@@ -8,7 +8,8 @@
 * [x] ti_filter_shutter.open() and .close() (fix: #32)
 * [x] scaler0 operations (prefer ScalerCH since it gets names from EPICS but see #34)
 * [x] mr axis tuning (#38)
-* [ ] ar axis tuning
+* [x] ar axis tuning
+* [x] usaxs optics axis tuning
 * [ ] alta_det EPICS-controlled HDF5 file names (#33)
 * [ ] saxs_det EPICS-controlled HDF5 file names (#33)
 * [ ] waxs_det EPICS-controlled HDF5 file names (#33)
