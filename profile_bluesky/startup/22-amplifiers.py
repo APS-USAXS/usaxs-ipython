@@ -257,7 +257,7 @@ class DetectorAmplifierAutorangeDevice(Device):
     def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
         assert isinstance(nickname, str)
         assert isinstance(scaler, (EpicsScaler, ScalerCH))
-        assert isinstance(signal, EpicsSignalRO)
+        assert isinstance(signal, (EpicsSignalRO, ScalerChannel))
         assert isinstance(amplifier, FemtoAmplifierDevice)
         assert isinstance(auto, AmplifierAutoDevice)
         self.nickname = nickname

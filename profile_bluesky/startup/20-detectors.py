@@ -7,11 +7,9 @@ print(__file__)
 struck = Struck3820("9idcLAX:3820:", name="struck")
 
 
-# the old way ... because ...
-# FIXME:  TuneAxis is not configured or (setup properly) for ScalerCH
-scaler0 = EpicsScaler('9idcLAX:vsc:c0', name='scaler0')
-# scaler1 = EpicsScaler('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
-# scaler2 = EpicsScaler('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback
+scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
+# scaler1 = ScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
+# scaler2 = ScalerCH('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback
 
 #scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
 # chan01 : sec (seconds)
@@ -26,6 +24,8 @@ use_EPICS_scaler_channels(scaler0)
 # use introspection to identify channel names
 if isinstance(scaler0, ScalerCH):
     for ch_attr in scaler0.channels.read_attrs:
+        if ch_attr.find(".") >= 0:
+            continue
         if hasattr(scaler0.channels, ch_attr):
             ch = scaler0.channels.__getattribute__(ch_attr)
             if ch.chname.value == "I0_USAXS":

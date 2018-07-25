@@ -9,7 +9,7 @@ from ophyd import PVPositioner, PVPositionerPC
 from ophyd.mca import EpicsMCARecord
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
-from ophyd.scaler import ScalerCH
+from ophyd.scaler import ScalerCH, ScalerChannel
 from APS_BlueSky_tools.devices import userCalcsDevice
 from APS_BlueSky_tools.devices import AxisTunerMixin
 from APS_BlueSky_tools.devices import use_EPICS_scaler_channels
