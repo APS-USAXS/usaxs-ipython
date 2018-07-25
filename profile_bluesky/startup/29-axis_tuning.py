@@ -84,16 +84,45 @@ def mr_posttune_hook():
     yield from bps.mv(mr_val_center, m_stage.r.position)
  
 
-# TODO: EpicsScaler and ScalerCH both, by default, show too many channels
 # TODO: EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
-# TODO: need report of tuning OK/not OK on console
-m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=TUNING_DET_SIGNAL.name)
+
+def _getScalerSignalName_(scaler, signal):
+    if isinstance(scaler, ScalerCH):
+        return signal.chname.value
+    elif isinstance(scaler, EpicsScaler):
+        return signal.name    
+        
+m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
 m_stage.r.tuner.width = 0.005
 
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
+
+
+def tune_mr():
+    """
+    plan for simple tune and report
+    
+    satisfies: report of tuning OK/not OK on console
+    """
+    mr_start = m_stage.r.position
+    yield from bps.mv(ti_filter_shutter, "open")
+    yield from m_stage.r.tune()
+    yield from bps.mv(
+        ti_filter_shutter, "close",
+        scaler0.count_mode, "AutoCount",
+    )
+
+    found = m_stage.r.tuner.peak_detected()
+    print("starting mr position:", m_stage.r.position)
+    print("peak detected:", found)
+    if found:
+        print("  center:", m_stage.r.tuner.peaks.cen)
+        print("  centroid:", m_stage.r.tuner.peaks.com)
+        print("  fwhm:", m_stage.r.tuner.peaks.fwhm)
+    print("final mr position:", m_stage.r.position)
 
 
 # -------------------------------------------
