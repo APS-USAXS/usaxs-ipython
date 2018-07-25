@@ -210,13 +210,17 @@ def ar_posttune_hook():
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=UPD_SIGNAL.name)
+a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
 a_stage.r.tuner.width = 0.004
 
 a_stage.r.pre_tune_method = ar_pretune_hook
 a_stage.r.post_tune_method = ar_posttune_hook
+
+
+def tune_ar():
+    yield from _tune_base_(a_stage.r)
 
 
 # -------------------------------------------
@@ -267,7 +271,7 @@ def a2rp_posttune_hook():
     yield from bps.mv(scaler0.delay, 0.05)
 
 
-a_stage.r2p.tuner = TuneAxis([scaler0], a_stage.r2p, signal_name=UPD_SIGNAL.name)
+a_stage.r2p.tuner = TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = 6
@@ -275,9 +279,13 @@ a_stage.r2p.pre_tune_method = a2rp_pretune_hook
 a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 
+def tune_a2rp():
+    yield from _tune_base_(a_stage.r2p)
+
+
 
 def tune_usaxs_optics():
-    yield from m_stage.r.tuner.tune()
-    yield from m_stage.r2p.tuner.tune()
-    yield from a_stage.r.tuner.tune()
-    yield from a_stage.r2p.tuner.tune()
+    yield from tune_mr()
+    yield from tune_m2rp()
+    yield from tune_ar()
+    yield from tune_a2rp()
