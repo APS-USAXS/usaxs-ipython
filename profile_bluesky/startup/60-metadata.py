@@ -4,7 +4,7 @@ print(__file__)
 # Set up default metadata
 
 RE.md['beamline_id'] = 'APS USAXS 9-ID-C'
-RE.md['proposal_id'] = None
+RE.md['proposal_id'] = 'testing Bluesky installation'
 RE.md['pid'] = os.getpid()
 
 # Add a callback that prints scan IDs at the start of each scan.
