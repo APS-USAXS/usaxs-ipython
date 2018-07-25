@@ -99,9 +99,9 @@ class InOutShutter(Device):
         
         def move_shutter():
             if input_filter(value) in self.valid_open_values:
-                self.open()     # no need to yield inside a thread
+                self.control_bit.put(self.open_value)     # no need to yield inside a thread
             elif input_filter(value) in self.valid_close_values:
-                self.close()
+                self.control_bit.put(self.close_value)     # no need to yield inside a thread
         
         @run_in_thread
         def run_and_delay():
