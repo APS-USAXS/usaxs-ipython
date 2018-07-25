@@ -66,8 +66,8 @@ class InOutShutter(Device):
     delay_s = 0
     open_value = 1
     close_value = 0
-    valid_open_values = ["open",]   # lower-case strings ONLY
-    valid_close_values = ["close",]
+    valid_open_values = [open_value, "open"]   # lower-case strings ONLY
+    valid_close_values = [close_value, "close"]
     busy = Signal(value=False, name="busy")
     
     def open(self):
