@@ -7,19 +7,6 @@ print(__file__)
 struck = Struck3820("9idcLAX:3820:", name="struck")
 
 
-# will become part of APS_BlueSky_tools.devices
-def use_EPICS_scaler_channels(scaler):
-    """
-    configure scaler for only the channels with names assigned in EPICS 
-    """
-    read_attrs = []
-    for ch in scaler.channels.component_names:
-        _nam = epics.caget("{}.NM{}".format(scaler.prefix, int(ch[4:])))
-        if len(_nam.strip()) > 0:
-            read_attrs.append(ch)
-    scaler.channels.read_attrs = read_attrs
-
-
 # the old way ... because ...
 # FIXME:  TuneAxis is not configured or (setup properly) for ScalerCH
 scaler0 = EpicsScaler('9idcLAX:vsc:c0', name='scaler0')
