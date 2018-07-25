@@ -220,8 +220,11 @@ a_stage.r.post_tune_method = ar_posttune_hook
 
 
 def tune_ar():
-    # autoscale_amplifiers([upd_controls])
+    yield from bps.mv(ti_filter_shutter, "open")
+    autoscale_amplifiers([upd_controls])
+    yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r)
+    yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
 # -------------------------------------------
@@ -281,7 +284,11 @@ a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 
 def tune_a2rp():
+    yield from bps.mv(ti_filter_shutter, "open")
+    autoscale_amplifiers([upd_controls])
+    yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r2p)
+    yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
 
