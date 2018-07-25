@@ -220,6 +220,7 @@ a_stage.r.post_tune_method = ar_posttune_hook
 
 
 def tune_ar():
+    # autoscale_amplifiers([upd_controls])
     yield from _tune_base_(a_stage.r)
 
 
