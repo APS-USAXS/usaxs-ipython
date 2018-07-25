@@ -408,7 +408,12 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
         
             # are we topped up on any detector?
             max_rate = control.auto.max_count_rate.value
-            actual_rate = control.signal.value
+            if isinstance(control.signal, ScalerChannel):
+                actual_rate = control.signal.s.value
+            elif isinstance(control.signal, EpicsSignalRO):
+                actual_rate = control.signal.value
+            else:
+                raise ValueError("unexpected control.signal: {}".format(control.signal))
             converged.append(actual_rate <= max_rate)
         
         if False not in converged:      # all True?
