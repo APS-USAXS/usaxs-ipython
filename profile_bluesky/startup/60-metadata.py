@@ -17,8 +17,9 @@ RE.md['login_id'] = USERNAME + '@' + HOSTNAME
 RE.md['BLUESKY_VERSION'] = bluesky.__version__
 RE.md['OPHYD_VERSION'] = ophyd.__version__
 
+_skip_these_ = "EPICS_BASE EPICS_BASE_PVT EPICS_DISPLAY_PATH EPICS_EXTENSIONS".split()
 for key, value in os.environ.items():
-    if key.startswith("EPICS") and not key.startswith("EPICS_BASE"):
+    if key.startswith("EPICS") and key not in _skip_these_:
         RE.md[key] = value
 
 print("Metadata dictionary:")
