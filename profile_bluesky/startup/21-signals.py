@@ -61,3 +61,6 @@ class APS_Operator_Messages_Device(Device):
 
 
 APS_operator_messages = APS_Operator_Messages_Device(name="APS_operator_messages")
+
+
+dcm_omega2_feedback = DCM_Feedback("9idcLAX:fbe:omega", name="dcm_omega2_feedback")
