@@ -147,18 +147,6 @@ def m2rp_pretune_hook():
 
 def m2rp_posttune_hook():
     #
-def tune_a2rp():
-    yield from bps.mv(
-        ti_filter_shutter, "open",
-        scaler0.preset_time, 0.1,
-    )
-    autoscale_amplifiers([upd_controls])
-    yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(a_stage.r2p)
-    yield from bps.mv(upd_controls.auto.mode, "auto+background")
-
-
-
     # TODO: first, re-position piezo considering hysteresis?
     #
     msg = "Tuning axis {}, final position is {}"
