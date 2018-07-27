@@ -65,7 +65,7 @@ class MyAltaFileStoreHDF5(FileStoreHDF5):
         write_path = self.file_path.value
         
         # this is where the DataBroker will find the image, 
-        #on a filesystem accessible to BlueSky
+        # on a filesystem accessible to BlueSky
         read_path = write_path.replace("/mnt/", "/").replace("/usaxscontrol/", "/share1/")
 
         return filename, read_path, write_path
