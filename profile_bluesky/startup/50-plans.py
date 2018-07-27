@@ -15,7 +15,7 @@ def uascan():
 # TODO: #47
 def preUSAXStune():
     """
-    yield from bps.mv(dcm_omega2_feedback.on, 1)
+    yield from bps.mv(mono_feedback.on, 1)
     ccd_shutter.close()
 !   IfRequestedStopBeforeNextScan           # stop if user chose to do so. 
 !   useModeUSAXS                            # should be done only in USAXS mode. 

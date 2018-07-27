@@ -13,6 +13,7 @@ from ophyd.scaler import ScalerCH, ScalerChannel
 from APS_BlueSky_tools.devices import userCalcsDevice
 from APS_BlueSky_tools.devices import AxisTunerMixin
 from APS_BlueSky_tools.devices import use_EPICS_scaler_channels
+from APS_BlueSky_tools.devices import ApsMachineParametersDevice
 from APS_BlueSky_tools.plans import TuneAxis
 from APS_BlueSky_tools.synApps_ophyd import swaitRecord
 
