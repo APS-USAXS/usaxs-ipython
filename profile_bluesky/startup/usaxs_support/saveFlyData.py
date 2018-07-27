@@ -412,13 +412,13 @@ class SaveFlyScan(object):
                 field.text = field.text.encode('utf8')
             try:
                 ds = makeDataset(field.group_parent.hdf5_group, field.name, [field.text])
-                ds = field.group_parent.hdf5_group
+                #ds = field.group_parent.hdf5_group
+                addAttributes(ds, **field.attrib)
             except Exception as _exc:
                 msg = "problem with field={}, text={}, exception={}".format(
                     field.name, field.text, _exc
                 )
                 raise Exception(msg)
-            addAttributes(ds, **field.attrib)
 
     def _attachEpicsAttributes(self, node, pv):
         '''attach common attributes from EPICS to the HDF5 tree node'''
