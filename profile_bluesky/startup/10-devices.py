@@ -177,6 +177,7 @@ class DCM_Feedback(Device):
     """
     monochromator feedback program
     
+    TODO: #49
     Add support for set() so that we can implement "on" & "off" values
     and also apply additional checks when turning feedback on.
     
@@ -185,8 +186,10 @@ class DCM_Feedback(Device):
         diff_hi = drvh - oval
         diff_lo = oval - drvl
         if diff<0.2 or diff_lo<0.2:
-            if NOTIFY_ON_FEEDBACK:
-                sendNotifications("USAXS Feedback problem","Feedback is very close to its limits.");
+            if email_notices.notify_on_feedback:
+                subject = "USAXS Feedback problem"
+                message = "Feedback is very close to its limits."
+                email_notices.send(subject, message)
         }
 
     """
@@ -202,25 +205,27 @@ class DCM_Feedback(Device):
 
 
 # TODO: #48 send email
-"""
-# /home/beams/USAXS/spec/macros/local/usaxs_commands.mac
-def sendNotifications(subject, message) '{
-    global NOTIFICATION_ADDRESSES
-    global NOTIFICATION_ADDRESSES_COUNT
-    for(i=0;i<NOTIFICATION_ADDRESSES_COUNT;i++) {
-    USER_EMAIL=NOTIFICATION_ADDRESSES[i]
-    command = "echo \""message"\" | mail -s \""subject"\" "USER_EMAIL
-    unix(command);  
-    }
-}'
+class EmailNotifications(object):
+    """
+    send email notifications when requested
+    
+    use default OS mail utility (so no credentials needed)
+    """
+    
+    def __init__(self):
+        self.addresses = []
+        self.notify_on_feedback = True
+    
+    def add_addresses(self, *args):
+        for address in args:
+            self.addresses.append(address)
 
-
-221.USAXS> p NOTIFY_ON_FEEDBACK
-1
-
-222.USAXS> p NOTIFICATION_ADDRESSES
-NOTIFICATION_ADDRESSES["0"] = "ilavsky@aps.anl.gov"
-NOTIFICATION_ADDRESSES["1"] = "kuzmenko@aps.anl.gov"
-NOTIFICATION_ADDRESSES["2"] = "mfrith@anl.gov"
-"""
-
+    def send(self, subject, message):
+        """send ``message`` to all addresses"""
+        for address in self.addresses:
+            command = """echo "{}" | mail -s "{}" {}""".format(
+                message,
+                subject,
+                address
+            )
+            # TODO: unix(command)

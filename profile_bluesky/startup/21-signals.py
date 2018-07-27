@@ -38,3 +38,10 @@ class UserDataDevice(Device):
     state = Component(EpicsSignal, "USAXS:state")
 
 user_data = UserDataDevice("9idcLAX:", name="user_data")
+
+email_notices = EmailNotifications()
+email_notices.add_addresses(
+    "ilavsky@aps.anl.gov",
+    "kuzmenko@aps.anl.gov",
+    "mfrith@anl.gov",
+)
