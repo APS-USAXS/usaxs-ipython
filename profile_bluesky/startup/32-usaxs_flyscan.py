@@ -92,7 +92,7 @@ class UsaxsFlyScanDevice(Device):
             _s_ = os.path.join(fname, s)      # for testing here
             if os.path.exists(_s_):
                 msg = "File {} exists.  Will not overwrite.".format(_s_)
-                s = datetime.isoformat(datetime.now(), sep="_").split(".")[0]
+                s = datetime.datetime.isoformat(datetime.datetime.now(), sep="_").split(".")[0]
                 s = s.replace(":", "").replace("-", "")
                 s = "flyscan_" + s + ".h5"
                 _s_ = os.path.join(fname, s)
