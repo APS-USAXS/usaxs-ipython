@@ -26,8 +26,10 @@ def preUSAXStune():
     )
 !   global useSBUSAXS 
     global useMSstage
-!   epics_put ("9idcLAX:USAXS:timeStamp",   date())
-!   epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tune")
+    yield from bps.mv(
+        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.state, "pre-USAXS optics tune",
+    )
     mono_shutter.open()
 !   usaxs_CheckBeamStandard
 !   chk_beam_on
@@ -47,8 +49,10 @@ def preUSAXStune():
 !   #yield from tune_a2rp_fbe()            # using the feedback    
 !   printf ("USAXS count time: {} second(s)".format(USAXS_TIME))
 !   scaler0.preset_time.put(USAXS_TIME)
-!   epics_put ("9idcLAX:USAXS:timeStamp",   date())
-!   epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tuning done")
+    yield from bps.mv(
+        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.state, "pre-USAXS optics tuning done",
+    )
 !   set_NumScansFromLastTune 0
 !   set_RunPreUSAXStuneNext 0
 !   set_EPOCHTimeOfLastTune time()
