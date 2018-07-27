@@ -26,16 +26,19 @@ asr_val_center = EpicsSignal("9idcLAX:USAXS:ASRcenter", name="asr_val_center")
 
 
 class UserDataDevice(Device):
-    run_cycle = Component(EpicsSignal, "RunCycle")
-    user_name = Component(EpicsSignal, "UserName")
-    GUP_number = Component(EpicsSignal, "GUPNumber")
-    sample_title = Component(EpicsSignal, "USAXS:sampleTitle")
-    spec_file = Component(EpicsSignal, "USAXS:specFile")
-    spec_scan = Component(EpicsSignal, "USAXS:specScan")
-    FS_order_number = Component(EpicsSignal, "USAXS:FS_OrderNumber")
-    user_dir = Component(EpicsSignal, "USAXS:userDir")
-    time_stamp = Component(EpicsSignal, "USAXS:timeStamp")
-    state = Component(EpicsSignal, "USAXS:state")
+    FS_order_number = Component(EpicsSignal,    "USAXS:FS_OrderNumber")
+    GUP_number = Component(EpicsSignal,         "GUPNumber")
+    macro_file_time = Component(EpicsSignal,    "USAXS:macroFileTime")
+    run_cycle = Component(EpicsSignal,          "RunCycle")
+    sample_thickness = Component(EpicsSignal,   "USAXS:SampleThickness")
+    sample_title = Component(EpicsSignal,       "USAXS:sampleTitle")
+    spec_file = Component(EpicsSignal,          "USAXS:specFile")
+    spec_scan = Component(EpicsSignal,          "USAXS:specScan")
+    state = Component(EpicsSignal,              "USAXS:state")
+    time_stamp = Component(EpicsSignal,         "USAXS:timeStamp")
+    user_dir = Component(EpicsSignal,           "USAXS:userDir")
+    user_name = Component(EpicsSignal,          "UserName")
+
 
 user_data = UserDataDevice("9idcLAX:", name="user_data")
 
