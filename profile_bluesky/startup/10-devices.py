@@ -206,9 +206,9 @@ class DCM_Feedback(Device):
 
 # TODO: #48 send email
 # TODO: move all below to APR_BlueSky_Tools project
-from subprocess import Popen, PIPE
+import subprocess
 def unix_cmd(command_list):
-    process = Popen(command_list, stdout=PIPE, stderr=PIPE)
+    process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     return stdout, stderr
 
