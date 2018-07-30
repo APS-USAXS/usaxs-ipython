@@ -10,13 +10,16 @@ from ophyd.mca import EpicsMCARecord
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 from ophyd.scaler import ScalerCH, ScalerChannel
-#import APS_BlueSky_tools.callbacks
-#import APS_BlueSky_tools.filewriters
+
 import APS_BlueSky_tools.callbacks as APS_callbacks
 import APS_BlueSky_tools.devices as APS_devices
 import APS_BlueSky_tools.filewriters as APS_filewriters
 import APS_BlueSky_tools.plans as APS_plans
 import APS_BlueSky_tools.synApps_ophyd as APS_synApps_ophyd
+
+# import specific methods by name, we need to customize them sometimes
+from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
+from APS_BlueSky_tools.filewriters import SpecWriterCallback
 
 from collections import deque, OrderedDict
 from ophyd.utils import OrderedDefaultDict
