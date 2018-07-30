@@ -26,8 +26,18 @@ from pathlib import PurePath
 logger = logging.getLogger(__name__)
 
 
+def _validate_AD_HDF5_path_(path, root_path):
+    if not path.startswith(root_path):
+        msg = "error in file {}:\n  path '{}' must start with '{}".format(
+            __file__,
+            path,
+            root_path
+        )
+        raise ValueError(msg)
+
+
 """
-file systems on Pilatus detectors need more work
+file systems on some area detectors need more work
 
 saxs:  /mnt/share1/USAXS_data/yyyy-mm/user_working_folder_saxs/
 waxs:  /mnt/usaxscontrol/USAXS_data/yyyy-mm/user_working_folder_waxs/
