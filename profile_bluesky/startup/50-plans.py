@@ -27,7 +27,7 @@ def preUSAXStune():
 !   global useSBUSAXS 
     global useMSstage
     yield from bps.mv(
-        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.time_stamp, str(datetime.now()),
         user_data.state, "pre-USAXS optics tune",
     )
     mono_shutter.open()
@@ -50,7 +50,7 @@ def preUSAXStune():
 !   printf ("USAXS count time: {} second(s)".format(USAXS_TIME))
 !   scaler0.preset_time.put(USAXS_TIME)
     yield from bps.mv(
-        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.time_stamp, str(datetime.now()),
         user_data.state, "pre-USAXS optics tuning done",
     )
 !   set_NumScansFromLastTune 0
