@@ -2,8 +2,6 @@ print(__file__)
 
 # custom callbacks
 
-import APS_BlueSky_tools.callbacks
-import APS_BlueSky_tools.filewriters
 
 # collect last scan's documents into doc_collector.documents
 doc_collector = APS_BlueSky_tools.callbacks.DocumentCollectorCallback()
