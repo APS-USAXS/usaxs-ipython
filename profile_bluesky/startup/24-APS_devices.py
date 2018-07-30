@@ -24,7 +24,3 @@ class ApsFileStoreHDF5IterativeWrite(ApsFileStoreHDF5, FileStoreIterativeWrite):
 
 class ApsHDF5Plugin(HDF5Plugin, ApsFileStoreHDF5IterativeWrite):
     """override"""
-
-# reset for now
-#class ApsHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
-#    pass
