@@ -16,6 +16,8 @@ from APS_BlueSky_tools.devices import use_EPICS_scaler_channels
 from APS_BlueSky_tools.devices import ApsMachineParametersDevice
 from APS_BlueSky_tools.plans import TuneAxis
 from APS_BlueSky_tools.synApps_ophyd import swaitRecord
+import APS_BlueSky_tools.callbacks
+import APS_BlueSky_tools.filewriters
 
 from collections import deque, OrderedDict
 from ophyd.utils import OrderedDefaultDict
