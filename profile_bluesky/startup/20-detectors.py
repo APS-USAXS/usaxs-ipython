@@ -18,7 +18,7 @@ scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
 # chan04 : upd2 (USAXS_PD)
 # chan05 : trd (TR_diode)
 # chan06 : I000 (I000)
-use_EPICS_scaler_channels(scaler0)
+APS_devices.use_EPICS_scaler_channels(scaler0)
 
 
 # use introspection to identify channel names

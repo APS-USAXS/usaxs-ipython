@@ -2,7 +2,7 @@ print(__file__)
 
 """other signals"""
 
-APS = ApsMachineParametersDevice(name="APS")
+APS = APS_devices.ApsMachineParametersDevice(name="APS")
 aps_current = APS.current
 
 mono_energy = EpicsSignal('9ida:BraggERdbkAO', name='mono_energy', write_pv="9ida:BraggEAO")
@@ -14,9 +14,9 @@ mono_temperature = EpicsSignal("9ida:DP41:s1:temp", name="mono_temperature")
 cryo_level = EpicsSignal("9idCRYO:MainLevel:val", name="cryo_level")
 
 
-userCalcs_lax = userCalcsDevice("9idcLAX:", name="userCalcs_lax")
+userCalcs_lax = APS_devices.userCalcsDevice("9idcLAX:", name="userCalcs_lax")
 
-usaxs_q_calc = swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
+usaxs_q_calc = APS_synApps_ophyd.swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
 usaxs_q = usaxs_q_calc.val
 
 mr_val_center = EpicsSignal("9idcLAX:USAXS:MRcenter", name="mr_val_center")

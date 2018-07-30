@@ -32,7 +32,7 @@ For reference, `APS_BlueSky_tools.plans.TuneAxis().tune()` uses these default at
 
 These attributes, set internally, are available for reference::
 
-    axis : instance of `EpicsMotor` (or other positioner with `AxisTunerMixin`)
+    axis : instance of `EpicsMotor` (or other positioner with `APS_devices.AxisTunerMixin`)
         positioner to be used
 
     signals : list of instances of `ScalerCH`, `EpicsScaler`, or similar
@@ -92,7 +92,7 @@ def _getScalerSignalName_(scaler, signal):
     elif isinstance(scaler, EpicsScaler):
         return signal.name    
         
-m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
+m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
 m_stage.r.tuner.width = 0.005
@@ -156,7 +156,7 @@ def m2rp_posttune_hook():
 
 
 # use I00 (if MS stage is used, use I0)
-m_stage.r2p.tuner = TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
+m_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r2p.tuner.num = 21
 m_stage.r2p.tuner.width = 6
@@ -186,7 +186,7 @@ def msrp_posttune_hook():
  
  
 # use I00 (if MS stage is used, use I0)
-ms_stage.rp.tuner = TuneAxis([scaler0], ms_stage.rp, signal_name=TUNING_DET_SIGNAL.name)
+ms_stage.rp.tuner = APS_plans.TuneAxis([scaler0], ms_stage.rp, signal_name=TUNING_DET_SIGNAL.name)
 ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 ms_stage.rp.tuner.num = 21
 ms_stage.rp.tuner.width = 6
@@ -215,7 +215,7 @@ def ar_posttune_hook():
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+a_stage.r.tuner = APS_plans.TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
 a_stage.r.tuner.width = 0.004
@@ -249,7 +249,7 @@ def asrp_posttune_hook():
  
  
 # use I00 (if MS stage is used, use I0)
-as_stage.rp.tuner = TuneAxis([scaler0], as_stage.rp, signal_name=UPD_SIGNAL.name)
+as_stage.rp.tuner = APS_plans.TuneAxis([scaler0], as_stage.rp, signal_name=UPD_SIGNAL.name)
 as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 as_stage.rp.tuner.num = 21
 as_stage.rp.tuner.width = 6
@@ -281,7 +281,7 @@ def a2rp_posttune_hook():
     yield from bps.mv(scaler0.delay, 0.05)
 
 
-a_stage.r2p.tuner = TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+a_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = 6

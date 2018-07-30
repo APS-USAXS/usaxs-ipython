@@ -12,7 +12,7 @@ def run_in_thread(func):
     return wrapper
 
 
-class TunableEpicsMotor(EpicsMotor, AxisTunerMixin):
+class TunableEpicsMotor(EpicsMotor, APS_devices.AxisTunerMixin):
     pass
 
 

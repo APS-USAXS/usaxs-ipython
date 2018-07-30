@@ -20,7 +20,7 @@ IOC boots, based on a soft link that configures the IOC.  The soft
 link may be changed using the ``use200pd``  or  ``use300pd`` script.
 
 We only need to get this once, get it via one-time call with PyEpics
-and then use it with inline dictionaries use_EPICS_scaler_channels(scaler0)to pick the right PVs.
+and then use it with inline dictionaries to pick the right PVs.
 """
 
 
