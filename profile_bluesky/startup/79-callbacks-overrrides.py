@@ -22,7 +22,7 @@ class DocumentCollectorCallback(object):
         print(doc_collector.documents["stop"])
     
     """
-    data_event_names = "descriptor event bulk_events".split()
+    data_event_names = "descriptor event resource datum bulk_events".split()
     
     def __init__(self):
         self.documents = {}     # key: name, value: document
@@ -67,7 +67,7 @@ class DocumentCollectorCallback(object):
 # full copy of APS_BlueSky_tools.filewriters.SpecWriterCallback
 
 
-SPEC_TIME_FORMAT = "%a %b %d %H:%M:%S %Y".warn
+SPEC_TIME_FORMAT = "%a %b %d %H:%M:%S %Y"
 
 def _rebuild_scan_command(doc):
     """reconstruct the scan command for SPEC data file #S line"""
