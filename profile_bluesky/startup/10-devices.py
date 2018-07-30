@@ -205,6 +205,14 @@ class DCM_Feedback(Device):
 
 
 # TODO: #48 send email
+# TODO: move all below to APR_BlueSky_Tools project
+import subprocess
+def unix_cmd(command_list):
+    process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    return stdout, stderr
+
+
 class EmailNotifications(object):
     """
     send email notifications when requested
@@ -223,9 +231,16 @@ class EmailNotifications(object):
     def send(self, subject, message):
         """send ``message`` to all addresses"""
         for address in self.addresses:
-            command = """echo "{}" | mail -s "{}" {}""".format(
+            command = [
+                "mail",
                 message,
+                "-s",
                 subject,
-                address
-            )
-            # TODO: unix(command)
+                address,
+            ]
+            #command = """echo "{}" | mail -s "{}" {}""".format(
+            #    message,
+            #    subject,
+            #    address
+            #)
+            unix_cmd(command)
