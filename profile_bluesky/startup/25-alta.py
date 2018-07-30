@@ -12,13 +12,19 @@ DATABROKER_ROOT_PATH_ALTA = "/"
 WRITE_HDF5_FILE_PATH_ALTA = "/mnt/share1/USAXS_data/test/alta/%Y/%m/%d/"
 READ_HDF5_FILE_PATH_ALTA = "/share1/USAXS_data/test/alta/%Y/%m/%d/"
 
-if not HDF5_FILE_PATH_ALTA.startswith(DATABROKER_ROOT_PATH_ALTA):
-    msg = "error in file {}:\n  path '{}' must start with '{}".format(
-        __file__,
-        HDF5_FILE_PATH_ALTA,
-        DATABROKER_ROOT_PATH_ALTA
-    )
-    raise ValueError(msg)
+
+def _validate_HDF5_path_(path, root_path):
+    if not path.startswith(root_path):
+        msg = "error in file {}:\n  path '{}' must start with '{}".format(
+            __file__,
+            path,
+            root_path
+        )
+        raise ValueError(msg)
+
+
+_validate_HDF5_path_(WRITE_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH_ALTA)
+_validate_HDF5_path_(READ_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH_ALTA)
 
 
 class MyAltaCam(CamBase):
