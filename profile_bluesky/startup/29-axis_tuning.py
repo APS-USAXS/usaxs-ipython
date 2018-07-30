@@ -132,6 +132,7 @@ def _tune_base_(axis):
 
 
 def tune_mr():
+    scaler0.stage_sigs["preset_time"] = 0.1
     yield from _tune_base_(m_stage.r)
 
 
@@ -165,6 +166,7 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
 
 def tune_m2rp():
+    scaler0.stage_sigs["preset_time"] = 0.1
     yield from _tune_base_(m_stage.r2p)
 
 
@@ -225,6 +227,7 @@ a_stage.r.post_tune_method = ar_posttune_hook
 def tune_ar():
     yield from bps.mv(ti_filter_shutter, "open")
     autoscale_amplifiers([upd_controls])
+    scaler0.stage_sigs["preset_time"] = 0.1
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
@@ -287,15 +290,12 @@ a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 
 def tune_a2rp():
-    yield from bps.mv(
-        ti_filter_shutter, "open",
-        scaler0.preset_time, 0.1,
-    )
+    yield from bps.mv(ti_filter_shutter, "open")
     autoscale_amplifiers([upd_controls])
+    scaler0.stage_sigs["preset_time"] = 0.1
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r2p)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
-
 
 
 def tune_usaxs_optics():
