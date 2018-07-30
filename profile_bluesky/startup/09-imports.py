@@ -20,6 +20,7 @@ import APS_BlueSky_tools.synApps_ophyd as APS_synApps_ophyd
 # import specific methods by name, we need to customize them sometimes
 from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
 from APS_BlueSky_tools.filewriters import SpecWriterCallback
+from APS_BlueSky_tools.devices import ApsHDF5Plugin
 
 from collections import deque, OrderedDict
 from ophyd.utils import OrderedDefaultDict
