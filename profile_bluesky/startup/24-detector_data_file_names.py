@@ -24,6 +24,7 @@ from pathlib import PurePath
 
 
 logger = logging.getLogger(__name__)
+DATABROKER_ROOT_PATH = "/"
 
 
 def _validate_AD_HDF5_path_(path, root_path):

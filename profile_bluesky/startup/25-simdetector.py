@@ -2,32 +2,28 @@ print(__file__)
 
 """ADSimDetector"""
 
-
-# root path for HDF5 files (for databroker filestore)
-# This is the path BlueSky can see.
-# For the DataBroker, this should be the leading part
-# of `simdetector_file_template_root` that is common.
-databroker_simdetector_root_path = "/share1/USAXS_data/"
-
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
-# This is the path the detector can see
-# It must start with the path defined in `databroker_simdetector_root_path`
-simdetector_file_template_root = "/share1/USAXS_data/"
-    
+# path seen by detector IOC
+WRITE_HDF5_FILE_PATH_ADSIMDET = "/share1/USAXS_data/test/adsimdet/%Y/%m/%d/"
+# path seen by databroker
+READ_HDF5_FILE_PATH_ADSIMDET = WRITE_HDF5_FILE_PATH_ADSIMDET
+
+_validate_AD_HDF5_path_(WRITE_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
+_validate_AD_HDF5_path_(READ_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
+
 
 class MySimDetector(SingleTrigger, AreaDetector):
     """ADSimDetector instance used by 9-ID-C USAXS"""
     
     cam = ADComponent(SimDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
-    hdf1 = ADComponent(HDF5Plugin, "HDF1:")
-    #hdf1 = ADComponent(
-    #    MyHDF5Plugin, 
-    #    "HDF1:", 
-    #    root=databroker_simdetector_root_path,
-    #    write_path_template = simdetector_file_template_root,
-    #    reg=db.reg,
-    #    )
+    hdf1 = ADComponent(
+        ApsHDF5Plugin, 
+        suffix = "HDF1:", 
+        root = DATABROKER_ROOT_PATH,
+        write_path_template = WRITE_HDF5_FILE_PATH_ADSIMDET,
+        read_path_template = READ_HDF5_FILE_PATH_ADSIMDET,
+        )
 
 
 try:
