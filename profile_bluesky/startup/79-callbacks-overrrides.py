@@ -5,7 +5,7 @@ print(__file__)
 
 # full copy of APS_BlueSky_tools.callbacks.DocumentCollectorCallback
 
-class DocumentCollectorCallback(object):
+class _xx_DocumentCollectorCallback(object):
     """
     BlueSky callback to collect *all* documents from most-recent plan
     
@@ -65,7 +65,7 @@ class DocumentCollectorCallback(object):
 
 SPEC_TIME_FORMAT = "%a %b %d %H:%M:%S %Y"
 
-def _rebuild_scan_command(doc):
+def _xx__rebuild_scan_command(doc):
     """reconstruct the scan command for SPEC data file #S line"""
     
     def get_name(src):
@@ -107,7 +107,7 @@ def _rebuild_scan_command(doc):
     return "{}  {}".format(scan_id, cmd)
 
 
-class SpecWriterCallback(object):
+class _xx_SpecWriterCallback(object):
     """
     collect data from BlueSky RunEngine documents to write as SPEC data
     
