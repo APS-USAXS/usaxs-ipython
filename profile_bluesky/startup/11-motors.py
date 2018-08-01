@@ -3,6 +3,21 @@ print(__file__)
 """motors, stages, positioners, ..."""
 
 
+def move_motors(*args):
+    """
+    move one or more motors at the same time, returns when all moves are done
+    
+    move_motors(m1, 0)
+    move_motors(m2, 0, m3, 0, m4, 0)
+    """
+    status = []
+    for m, v in pairwise(args):
+        status.append(m.move(v))
+    
+    for st in status:
+        ophyd.status.wait(st)
+
+
 class UsaxsSampleStageDevice(MotorBundle):
     """USAXS sample stage"""
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m1', labels=("sample",))
