@@ -4,7 +4,6 @@ print(__file__)
 replace BlueSky file name scheme when used with area detector
 """
 
-import itertools
 from ophyd import AreaDetector
 from ophyd import PilatusDetectorCam
 from ophyd import PointGreyDetectorCam
