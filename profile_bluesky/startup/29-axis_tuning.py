@@ -186,13 +186,18 @@ def msrp_posttune_hook():
  
  
 # use I00 (if MS stage is used, use I0)
-ms_stage.rp.tuner = APS_plans.TuneAxis([scaler0], ms_stage.rp, signal_name=TUNING_DET_SIGNAL.name)
+ms_stage.rp.tuner = APS_plans.TuneAxis([scaler0], ms_stage.rp, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 ms_stage.rp.tuner.num = 21
 ms_stage.rp.tuner.width = 6
 
 ms_stage.rp.pre_tune_method = msrp_pretune_hook
 ms_stage.rp.post_tune_method = msrp_posttune_hook
+
+
+def tune_msrp():
+    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from _tune_base_(ms_stage.rp)
 
 
 # -------------------------------------------
@@ -249,13 +254,23 @@ def asrp_posttune_hook():
  
  
 # use I00 (if MS stage is used, use I0)
-as_stage.rp.tuner = APS_plans.TuneAxis([scaler0], as_stage.rp, signal_name=UPD_SIGNAL.name)
+as_stage.rp.tuner = APS_plans.TuneAxis([scaler0], as_stage.rp, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 as_stage.rp.tuner.num = 21
 as_stage.rp.tuner.width = 6
 
 as_stage.rp.pre_tune_method = asrp_pretune_hook
 as_stage.rp.post_tune_method = asrp_posttune_hook
+
+
+def tune_asrp():
+    yield from bps.mv(ti_filter_shutter, "open")
+    autoscale_amplifiers([upd_controls])
+    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(upd_controls.auto.mode, "manual")
+    yield from _tune_base_(as_stage.rp)
+    yield from bps.mv(upd_controls.auto.mode, "auto+background")
+
 
 # -------------------------------------------
 
@@ -298,8 +313,11 @@ def tune_a2rp():
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
-def tune_usaxs_optics():
+def tune_usaxs_optics(side=False):
     yield from tune_mr()
     yield from tune_m2rp()
+    if side:
+        yield from tune_msrp()
+        yield from tune_asrp()
     yield from tune_ar()
     yield from tune_a2rp()
