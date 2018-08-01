@@ -23,6 +23,7 @@ EXAMPLE::
 """
 
 
+
 def mode_USAXS():
     pass
 
@@ -52,7 +53,17 @@ def mode_pinSAXS():
 
 
 def mode_OpenBeamPath():
-    pass
+    StopIfPLCEmergencyProtectionOn()
+    user_data.state.put("Moving USAXS to OpenBeamPath mode")
+    ccd_shutter.close()
+    ti_filter_shutter.close()
+    if USAXSSAXSMODE.value != 1:
+        print("Found USAXSSAXSMODE = {}".format(USAXSSAXSMODE))
+        print("Opening the beam path, moving all components out")
+        move_SAXSOut()
+        move_WAXSOut()
+        move_USAXSOut()
+        user_data.state.put("USAXS moved to OpenBeamPath mode")
 
 
 use_mode.add(mode_USAXS, "USAXS")
