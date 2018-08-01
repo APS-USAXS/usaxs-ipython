@@ -21,11 +21,11 @@ EXAMPLE::
     def useMyScalerNames(): # Bluesky plan
         yield from bps.mv(
             m1, 5,
-            use_mode, "clearScalerNames",
+            use_mode, "clear",
         )
         yield from bps.mv(
             m1, 0,
-            use_mode, "setMyScalerNames",
+            use_mode, "set",
         )
 
     def demo():
@@ -39,10 +39,10 @@ EXAMPLE::
 
 
     use_mode.add(demo)
-    use_mode.add(clearScalerNames)
-    use_mode.add(setMyScalerNames)
+    use_mode.add(clearScalerNames, "clear")
+    use_mode.add(setMyScalerNames, "set")
     # use_mode.set("demo")
-    # use_mode.set("clearScalerNames")
+    # use_mode.set("clear")
     # RE(useMyScalerNames())
 
 """
@@ -88,24 +88,24 @@ class ProcedureRegistry(Device):
         """tuple of procedure names"""
         return tuple(sorted(self.registry.keys()))
     
-    def add(self, procedure):
+    def add(self, procedure, proc_name=None):
         """
         add procedure to registry
-
-        procedure (function) : function
         """
         #if procedure.__class__ == "function":
-        self.registry[procedure.__name__] = procedure
+        nm = proc_name or procedure.__name__
+        self.registry[nm] = procedure
     
     def remove(self, procedure):
         """
         remove procedure from registry
-
-        procedure (function) : function
         """
-        #if procedure.__class__ == "function":
-        if procedure.__name__ in self.registry:
-            del self.registry[procedure.__name__]
+        if isinstance(procedure, str):
+            nm = procedure
+        else:
+            nm = procedure.__name__
+        if nm in self.registry:
+            del self.registry[nm]
     
     def set(self, proc_name):
         """

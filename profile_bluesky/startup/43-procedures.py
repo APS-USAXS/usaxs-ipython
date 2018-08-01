@@ -55,12 +55,12 @@ def mode_OpenBeamPath():
     pass
 
 
-use_mode.add(mode_USAXS)
-use_mode.add(mode_SBUSAXS)
-use_mode.add(mode_SAXS)
-use_mode.add(mode_WAXS)
-use_mode.add(mode_radiography)
-use_mode.add(mode_imaging)
-use_mode.add(mode_pinSAXS)
-use_mode.add(mode_OpenBeamPath)
+use_mode.add(mode_USAXS, "USAXS")
+use_mode.add(mode_SBUSAXS, "SBUSAXS")
+use_mode.add(mode_SAXS, "SAXS")
+use_mode.add(mode_WAXS, "WAXS")
+use_mode.add(mode_radiography, "radiography")
+use_mode.add(mode_imaging, "imaging")
+use_mode.add(mode_pinSAXS, "pinSAXS")
+use_mode.add(mode_OpenBeamPath, "OpenBeamPath")
 use_mode.dir
