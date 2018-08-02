@@ -4,8 +4,8 @@ print(__file__)
 
 ### This file is work-in-progress
 
-USAXSSAXSMODE = EpicsSignal("9idcLAX:USAXS_Pin:USAXSSAXSMode", name="USAXSSAXSMODE")
-USAXSSAXSMODE_dict{
+UsaxsSaxsMode = EpicsSignal("9idcLAX:USAXS_Pin:USAXSSAXSMode", name="UsaxsSaxsMode")
+UsaxsSaxsMode_dict{
     "dirty": -1,        # prior move did not finish correctly
     "out of beam": 1,   # SAXS, WAXS, and USAXS out of beam
     "USAXS in beam": 2,
@@ -133,7 +133,7 @@ def move_WAXSOut():
 
     print ("Moving WAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
 
     # move the pin_z away from sample
     waxsx.move(WAXS_Xout)               # FIXME: WAXS_Xout
@@ -142,7 +142,7 @@ def move_WAXSOut():
     set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_Xout + WAXS_XLimOffset))
 
     print "Removed WAXS from beam position"
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["out of beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
 
 
 def move_WAXSIn():
@@ -150,15 +150,15 @@ def move_WAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to WAXS mode")
-    if USAXSSAXSMODE.value != 1:
-        print("Found USAXSSAXSMODE = %s " % USAXSSAXSMODE)
-        msg = "Incorrect USAXSSAXSMODE mode found."
-        msg += " If SAXS, WAXS, and USAXS are out of beam, USAXSSAXSMODE.put(%d)" 
-        raise ValueError(msg % USAXSSAXSMODE_dict["out of beam"])
+    if UsaxsSaxsMode.value != 1:
+        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
+        msg = "Incorrect UsaxsSaxsMode mode found."
+        msg += " If SAXS, WAXS, and USAXS are out of beam, UsaxsSaxsMode.put(%d)" 
+        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
 
     __usaxs_wait_for_Interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
     # first move USAXS out of way
     set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_XIn + WAXS_XLimOffset))
     GSlit1V.put(SAXS_VGSlit)   # change slits
@@ -168,7 +168,7 @@ def move_WAXSIn():
     A[uslhap] = SAXS_HSlit
     move_em; waitmove
     print("WAXS is in position")
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["WAXS in beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["WAXS in beam"])
 
 
 def move_SAXSOut():
@@ -178,7 +178,7 @@ def move_SAXSOut():
 
     print("Moving SAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
     
     # move the pin_z away from sample
     saxs_stage.z.move(PIN_ZOut)               # FIXME: 
@@ -193,7 +193,7 @@ def move_SAXSOut():
 
     print("Removed SAXS from beam position")
     ###sleep(1)    #waxs seems to be getting ahead of saxs limit switch - should not be needed, we have __usaxs_wait_for_Interlock now. 
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["out of beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
 
 
 def move_SAXSIn():
@@ -201,15 +201,15 @@ def move_SAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to Pinhole SAXS mode")
-    if USAXSSAXSMODE.value != 1:
-        print("Found USAXSSAXSMODE = %s " % USAXSSAXSMODE)
-        msg = "Incorrect USAXSSAXSMODE mode found."
-        msg += " If USAXS is out of beam, USAXSSAXSMODE.put(%d)" 
-        raise ValueError(msg % USAXSSAXSMODE_dict["out of beam"])
+    if UsaxsSaxsMode.value != 1:
+        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
+        msg = "Incorrect UsaxsSaxsMode mode found."
+        msg += " If USAXS is out of beam, UsaxsSaxsMode.put(%d)" 
+        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
 
     __usaxs_wait_for_Interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
     # first move USAXS out of way
     set_lim(pin_y,dial(pin_y,PIN_YIn - PIN_YLimOffset),get_lim(pin_y,-1))
 
@@ -224,7 +224,7 @@ def move_SAXSIn():
     A[pin_z] = PIN_ZIn
     move_em; waitmove
     print("Pinhole SAXS is in position")
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["SAXS in beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["SAXS in beam"])
 
 
 def move_USAXSOut():
@@ -234,7 +234,7 @@ def move_USAXSOut():
 
     print("Moving USAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
     move_motors(
         a_stage.x, AX_Out,  # FIXME:
         d_stage.x, DX_Out,  # FIXME:
@@ -246,7 +246,7 @@ def move_USAXSOut():
     set_lim(dx,get_lim(dx,1),dial(dx,(DX_Out + DX_LimOffset)))
 
     print("Removed USAXS from beam position")
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["out of beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
 
 
 def move_USAXSIn():
@@ -254,15 +254,15 @@ def move_USAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to USAXS mode")
-    if USAXSSAXSMODE.value != 1:
-        print("Found USAXSSAXSMODE = %s " % USAXSSAXSMODE)
-        msg = "Incorrect USAXSSAXSMODE mode found."
-        msg += " If SAXS is out of beam, USAXSSAXSMODE.put(%d)" 
-        raise ValueError(msg % USAXSSAXSMODE_dict["out of beam"])
+    if UsaxsSaxsMode.value != 1:
+        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
+        msg = "Incorrect UsaxsSaxsMode mode found."
+        msg += " If SAXS is out of beam, UsaxsSaxsMode.put(%d)" 
+        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
 
     __usaxs_wait_for_Interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["dirty"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
@@ -282,4 +282,4 @@ def move_USAXSIn():
     )
 
     print("USAXS is in position")
-    USAXSSAXSMODE.put(USAXSSAXSMODE_dict["USAXS in beam"])
+    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["USAXS in beam"])

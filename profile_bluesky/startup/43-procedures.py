@@ -57,8 +57,8 @@ def mode_OpenBeamPath():
     user_data.state.put("Moving USAXS to OpenBeamPath mode")
     ccd_shutter.close()
     ti_filter_shutter.close()
-    if USAXSSAXSMODE.value != 1:
-        print("Found USAXSSAXSMODE = {}".format(USAXSSAXSMODE))
+    if UsaxsSaxsMode.value != 1:
+        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Opening the beam path, moving all components out")
         move_SAXSOut()
         move_WAXSOut()
