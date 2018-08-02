@@ -38,6 +38,11 @@ class UserDataDevice(Device):
     time_stamp = Component(EpicsSignal,         "USAXS:timeStamp")
     user_dir = Component(EpicsSignal,           "USAXS:userDir")
     user_name = Component(EpicsSignal,          "UserName")
+    
+    # FIXME: comment needs fixing
+    # for GUI to know if user is collecting data: 1-not running, 0 running ???
+    # for GUI to know if user is collecting data: 1=running, 0=not running
+    collection_in_progress = Component(EpicsSignal, "dataColInProgress")
 
 
 user_data = UserDataDevice("9idcLAX:", name="user_data")
@@ -48,3 +53,6 @@ email_notices.add_addresses(
     "kuzmenko@aps.anl.gov",
     "mfrith@anl.gov",
 )
+
+PauseBeforeNextScan = EpicsSignal("9idcLAX:USAXS:PauseBeforeNextScan", name="PauseBeforeNextScan")
+StopBeforeNextScan = EpicsSignal("9idcLAX:USAXS:StopBeforeNextScan", name="StopBeforeNextScan")
