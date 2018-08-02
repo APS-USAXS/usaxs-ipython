@@ -99,15 +99,6 @@ print(__file__)
 	WAXS_AcquireTime		9idcLAX:USAXS_WAXS:AcquireTime	
 	WAXS_EXP_TIME		9idcLAX:USAXS_WAXS:AcquireTime	
 
-# FlyScan values
-	FS_NumberOfPoints		9idcLAX:USAXS:FS_NumberOfPoints	
-	FS_ScanTime		9idcLAX:USAXS:FS_ScanTime	
-	useFlyscan		9idcLAX:USAXS:UseFlyscan	
-	FS_enableASRP	if(	9idcLAX:USAXS:is2DUSAXSscan")){	9idcLAX:userStringCalc2.SCAN",9)}'
-	FS_disableASRP		9idcLAX:userStringCalc2.SCAN",0)'
-	FS_orderNumber		9idcLAX:USAXS:FS_OrderNumber	
-	FS_increaseOrderNumber		9idcLAX:USAXS:FS_OrderNumber", (	9idcLAX:USAXS:FS_OrderNumber")+1))'
-
 # USAXS Imaging
 	UImg_ImageKey		9idcLAX:USAXS_Img:ImageKey	 
 ##  UImg_ImageKey: "0-image, 1-flat field, 2-dark field")
@@ -250,13 +241,6 @@ print(__file__)
 	set_WAXS_EXP_TIME		9idcLAX:USAXS_WAXS:AcquireTime	
 	set_WAXS_NumImages		9idcLAX:USAXS_WAXS:NumImages	
 
-# FlyScan values
-	set_FS_NumberOfPoints		9idcLAX:USAXS:FS_NumberOfPoints	
-	set_FS_ScanTime		9idcLAX:USAXS:FS_ScanTime	
-	set_FS_ElapsedTime		9idcLAX:USAXS:FS_ElapsedTime	
-	set_useFlyscan		9idcLAX:USAXS:UseFlyscan	
-	set_FS_orderNumber		9idcLAX:USAXS:FS_OrderNumber	
-
 #transmission
  	set_USAXS_MEASURE_PIN_TRANS		9idcLAX:USAXS:TR_MeasurePinTrans	      # measure transmission in USAXS using pin diode
  	set_USAXSPinT_AyPosition		9idcLAX:USAXS:TR_AyPosition	      		 # Ay to hit pin diode
@@ -266,3 +250,29 @@ print(__file__)
  	set_USAXSPinT_I0Counts		9idcLAX:USAXS:TR_I0Counts				# How many counts were on I0
  	set_USAXSPinT_I0Gain		9idcLAX:USAXS:TR_I0Gain					# gain of I0
 """
+
+
+# TODO: this belongs somewhere else, but where?
+is2DUSAXSscan = EpicsSignal("9idcLAX:USAXS:is2DUSAXSscan", name="is2DUSAXSscan")
+
+
+class FlyScanParameters(Device):
+    """FlyScan values"""
+    number_points = Component(EpicsSignal, "9idcLAX:USAXS:FS_NumberOfPoints")
+    scan_time = Component(EpicsSignal, "9idcLAX:USAXS:FS_ScanTime")
+    use_flyscan = Component(EpicsSignal, "9idcLAX:USAXS:UseFlyscan")
+    asrp_calc_SCAN = Component(EpicsSignal, "9idcLAX:userStringCalc2.SCAN")
+    order_number = Component(EpicsSignal, "9idcLAX:USAXS:FS_OrderNumber")
+    
+    def enable_ASRP(self):
+        if is2DUSAXSscan.value: # TODO: check return value here
+            self.asrp_calc_SCAN.put(9)
+    
+    def disable_ASRP(self):
+        self.asrp_calc_SCAN.put(0)
+    
+    def increment_order_number(self):
+        self.order_number.put(self.order_number.value+1)
+
+
+FS_terms = FlyScanParameters(name="FS_terms")
