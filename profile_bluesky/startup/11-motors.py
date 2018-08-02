@@ -69,15 +69,11 @@ class UsaxsSampleStageDevice(MotorBundle):
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m1', labels=("sample",))
     y = Component(EpicsMotor, '9idcLAX:m58:c2:m2', labels=("sample",))
 
-s_stage = UsaxsSampleStageDevice('', name='s_stage')
-
 
 class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m3', labels=("detector",))
     y = Component(EpicsMotor, '9idcLAX:aero:c2:m1', labels=("detector",))
-
-d_stage = UsaxsDetectorStageDevice('', name='d_stage')
 
 
 class UsaxsSlitDevice(MotorBundle):
@@ -99,8 +95,6 @@ class UsaxsSlitDevice(MotorBundle):
         if v is None:
             raise ValueError("must define vertical size")
         move_motors(self.h_size, h, self.v_size=v)
-
-usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
 
 
 class GSlitDevice(MotorBundle):
@@ -128,17 +122,12 @@ class GSlitDevice(MotorBundle):
         move_motors(self.h_size, h, self.v_size=v)
     
 
-guard_slit = GSlitDevice('', name='guard_slit')
-
-
 class UsaxsCollimatorStageDevice(MotorBundle):
     """USAXS Collimator (Monochromator) stage"""
     r = Component(TunableEpicsMotor, '9idcLAX:aero:c3:m1', labels=("collimator", "tunable",))
     x = Component(EpicsMotor, '9idcLAX:m58:c0:m2', labels=("collimator",))
     y = Component(EpicsMotor, '9idcLAX:m58:c0:m3', labels=("collimator",))
     r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m2', labels=("collimator", "tunable",))
-
-m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
 
 
 class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
@@ -148,8 +137,6 @@ class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
     x = Component(EpicsMotor, '9idcLAX:m58:c1:m1', labels=("side_collimator",))
     y = Component(EpicsMotor, '9idcLAX:m58:c1:m2')
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m3', labels=("side_collimator", "tunable",))
-
-ms_stage = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 
 
 class UsaxsAnalyzerStageDevice(MotorBundle):
@@ -161,8 +148,6 @@ class UsaxsAnalyzerStageDevice(MotorBundle):
     r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m1', labels=("analyzer", "tunable"))
     rt = Component(EpicsMotor, '9idcLAX:m58:c1:m3', labels=("analyzer",))
 
-a_stage = UsaxsAnalyzerStageDevice('', name='a_stage')
-
 
 class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     """USAXS Analyzer side-reflection stage"""
@@ -171,8 +156,6 @@ class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:m58:c1:m4', labels=("analyzer",))
     rp = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m4', labels=("analyzer", "tunable"))
 
-as_stage = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
-
 
 class SaxsDetectorStageDevice(MotorBundle):
     """SAXS detector stage (aka: pin SAXS stage)"""
@@ -180,10 +163,22 @@ class SaxsDetectorStageDevice(MotorBundle):
     y = Component(EpicsMotor, '9idcLAX:mxv:c0:m8', labels=("saxs",))
     z = Component(EpicsMotor, '9idcLAX:mxv:c0:m2', labels=("saxs",))
     
+
+guard_slit = GSlitDevice('', name='guard_slit')
+usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
+
+s_stage    = UsaxsSampleStageDevice('', name='s_stage')
+d_stage    = UsaxsDetectorStageDevice('', name='d_stage')
+
+m_stage    = UsaxsCollimatorStageDevice('', name='m_stage')
+ms_stage   = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
+
+a_stage    = UsaxsAnalyzerStageDevice('', name='a_stage')
+as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
+
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 
-
-camy = EpicsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
-tcam = EpicsMotor('9idcLAX:m58:c1:m6', name='tcam')  # tcam
-tens = EpicsMotor('9idcLAX:m58:c1:m8', name='tens')  # Tension
-waxsx = EpicsMotor('9idcLAX:m58:c0:m4', name='waxsx', labels=("waxs",))  # WAXS X
+camy       = EpicsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
+tcam       = EpicsMotor('9idcLAX:m58:c1:m6', name='tcam')  # tcam
+tens       = EpicsMotor('9idcLAX:m58:c1:m8', name='tens')  # Tension
+waxsx      = EpicsMotor('9idcLAX:m58:c0:m4', name='waxsx', labels=("waxs",))  # WAXS X
