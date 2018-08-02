@@ -6,35 +6,8 @@ print(__file__)
 # these are the global settings PVs for various parts of the instrument
 
 """
+from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
-### These functions make original global spec variables - now in EPICS
-### accessible by name. 
-	CCD_DX		9idcLAX:USAXS:CCD_dx	
-	CCD_DY		9idcLAX:USAXS:CCD_dy	
-	DIODE_DY		9idcLAX:USAXS:DY0	
-	DIODE_DX		9idcLAX:USAXS:Diode_dx	
-	USAXS_TIME		9idcLAX:USAXS:CountTime	
-	NUMPNTS		9idcLAX:USAXS:NumPoints	
-	UATERM		9idcLAX:USAXS:UATerm	
-	SAMPLE_Y_STEP		9idcLAX:USAXS:Sample_Y_Step	
-	AY0		9idcLAX:USAXS:AY0	
-	DY0		9idcLAX:USAXS:DY0	
-	SAD		9idcLAX:USAXS:SAD	
-	SDD		9idcLAX:USAXS:SDD	
-	USAXS_MINSTEP		9idcLAX:USAXS:MinStep	
-	AR_VAL_CENTER		9idcLAX:USAXS:ARcenter	
-	ASR_VAL_CENTER		9idcLAX:USAXS:ASRcenter	
-	MR_VAL_CENTER		9idcLAX:USAXS:MRcenter	
-	MSR_VAL_CENTER		9idcLAX:USAXS:MSRcenter	
-	IMG_AL_FILTER		9idcLAX:USAXS:Img_Al_Filter	
-	IMG_TI_FILTER		9idcLAX:USAXS:Img_Ti_Filter	
-	SCAN_AL_FILTER		9idcLAX:USAXS:Scan_Al_Filter	
-	SCAN_TI_FILTER		9idcLAX:USAXS:Scan_Ti_Filter	
-	ASRP0		9idcLAX:USAXS:ASRcenter	
-	START_OFFSET		9idcLAX:USAXS:StartOffset	
-	FINISH		9idcLAX:USAXS:Finish	
-	MOTOR_PRESCALER_WAIT		9idcLAX:USAXS:Prescaler_Wait	
-	UPDRange	epics_get(sprintf("%s:lurange",UPD_PV),"short	
 
 
 #And these functions make the pinhole globals work...
@@ -153,32 +126,6 @@ print(__file__)
 
 ## standard set commands... 
 
-	set_CCD_DX		9idcLAX:USAXS:CCD_dx	
-	set_CCD_DY		9idcLAX:USAXS:CCD_dy	
-	set_DIODE_DY		9idcLAX:USAXS:DY0	
-	set_DIODE_DX		9idcLAX:USAXS:Diode_dx	
-	set_USAXS_TIME		9idcLAX:USAXS:CountTime	
-	set_NUMPNTS		9idcLAX:USAXS:NumPoints	
-	set_UATERM		9idcLAX:USAXS:UATerm	
-	set_SAMPLE_Y_STEP		9idcLAX:USAXS:Sample_Y_Step	
-	set_AY0		9idcLAX:USAXS:AY0	
-	set_DY0		9idcLAX:USAXS:DY0	
-	set_SAD		9idcLAX:USAXS:SAD	
-	set_SDD		9idcLAX:USAXS:SDD	
-	set_USAXS_MINSTEP		9idcLAX:USAXS:MinStep	
-	set_AR_VAL_CENTER		9idcLAX:USAXS:ARcenter	
-	set_ASR_VAL_CENTER		9idcLAX:USAXS:ASRcenter	
-	set_MR_VAL_CENTER		9idcLAX:USAXS:MRcenter	
-	set_MSR_VAL_CENTER		9idcLAX:USAXS:MSRcenter	
-	set_IMG_AL_FILTER		9idcLAX:USAXS:Img_Al_Filter	
-	set_IMG_TI_FILTER		9idcLAX:USAXS:Img_Ti_Filter	
-	set_SCAN_AL_FILTER		9idcLAX:USAXS:Scan_Al_Filter	
-	set_SCAN_TI_FILTER		9idcLAX:USAXS:Scan_Ti_Filter	
-	set_ASRP0		9idcLAX:USAXS:ASRcenter	
-	set_START_OFFSET		9idcLAX:USAXS:StartOffset	
-	set_FINISH		9idcLAX:USAXS:Finish	
-	set_MOTOR_PRESCALER_WAIT		9idcLAX:USAXS:Prescaler_Wait	
-
 	set_PIN_ZIn		9idcLAX:USAXS_Pin:Pin_z_in	
 	set_PIN_ZOut		9idcLAX:USAXS_Pin:Pin_z_out	
 	set_PIN_ZLimOffset		9idcLAX:USAXS_Pin:Pin_z_limit_offset	
@@ -269,6 +216,57 @@ class PreUsaxsTuneParameters(Device):
     req_time_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqTimeBetweenTune")
     run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneOnQdo")
     run_tune_next = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneNext")
+
+
+class GeneralParametersCCD(Device):
+    "part of GeneralParameters Device"
+    dx = Component(EpicsSignal, "dx")
+    dy = Component(EpicsSignal, "dy")
+
+
+class GeneralParametersDiode(Device):
+    "part of GeneralParameters Device"
+    dx = Component(EpicsSignal, "Diode_dx")
+    dy = Component(EpicsSignal, "DY0")
+
+
+class GeneralParametersCenters(Device):
+    "part of GeneralParameters Device"
+    AR = Component(EpicsSignal,  "ARcenter")
+    ASR = Component(EpicsSignal, "ASRcenter")
+    MR = Component(EpicsSignal,  "MRcenter")
+    MSR = Component(EpicsSignal, "MSRcenter")
+
+
+class GeneralParametersFilters(Device):
+    "part of GeneralParameters Device"
+    Al = Component(EpicsSignal,  "Al_Filter")
+    Ti = Component(EpicsSignal,  "Ti_Filter")
+
+
+class GeneralParameters(Device):
+    """internal values shared with EPICS"""
+    AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
+    DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
+    ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRP0")
+    SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
+    SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
+    center = Component(GeneralParametersCenters,      "9idcLAX:USAXS:")
+    ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
+    diode = Component(GeneralParametersDiode,         "9idcLAX:USAXS:")
+    img_filter = Component(GeneralParametersCenters,  "9idcLAX:USAXS:Img_")
+    finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
+    motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
+    num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
+    sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
+    scan_filter = Component(GeneralParametersCenters, "9idcLAX:USAXS:Scan_")
+    start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
+    uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
+    usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
+    usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
+    
+    def UPDRange(self):
+        return upd_controls.auto.lurange.value  # TODO: check return value is int
 
 
 FS_terms = FlyScanParameters(name="FS_terms")
