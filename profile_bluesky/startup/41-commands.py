@@ -49,50 +49,6 @@ def IfRequestedStopBeforeNextScan():
         # time.sleep(2)         # so, sleep not needed
 
 
-"""
-get_lim(motor, flag)
-    Returns the dial limit of motor number motor. 
-    If flag > 0, returns the high limit. 
-    If flag < 0, returns the low limit. 
-    Resets to command level if not configured for motor. 
-
-set_lim(motor, low, high)
-    Sets the low and high limits of motor number motor. 
-    low and high are in dial units. 
-    It does not actually matter in which order the limits are given. 
-    Returns nonzero if not configured for motor or if the protection 
-    flags prevent the user from changing the limits on this motor. 
-    Resets to command level if any motors are moving. 
-
-"""
-
-def get_lim(motor, flag):
-    """
-    Returns the dial limit of motor
-    
-    flag > 0: returns high limit
-    flag < 0: returns low limit
-    flag == 0: returns None
-    """
-    if flag > 0:
-        return motor.high_limit # TODO: dial?
-    else:
-        return motor.low_limit  # TODO: dial?
-
-def set_lim(motor, low, high):
-    """
-    Sets the low and high limits of motor number motor
-    
-    low and high are in dial units
-    
-    It does not actually matter in which order the limits are given. 
-
-    !Returns nonzero if not configured for motor or if the protection 
-    !flags prevent the user from changing the limits on this motor. 
-    !Resets to command level if any motors are moving. 
-    """
-
-
 def move_WAXSOut():
     StopIfPLCEmergencyProtectionOn()
     ccd_shutter.close()
