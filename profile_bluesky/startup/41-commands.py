@@ -41,6 +41,15 @@ def IfRequestedStopBeforeNextScan():
         # time.sleep(2)         # so, sleep not needed
 
 
+def checkUsaxsSaxsOutOfBeam():
+    """raise ValueError if not"""
+    if UsaxsSaxsMode.value != UsaxsSaxsMode_dict["out of beam"]:
+        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
+        msg = "Incorrect UsaxsSaxsMode mode found."
+        msg += " If SAXS, WAXS, and USAXS are out of beam, UsaxsSaxsMode.put(%d)" 
+        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
+
+
 def move_WAXSOut():
     plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
@@ -53,7 +62,9 @@ def move_WAXSOut():
     # move the pin_z away from sample
     waxsx.move(WAXS_Xout)               # FIXME: WAXS_Xout
 
-    set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_Xout + WAXS_XLimOffset))  # FIXME:
+    waxsx.set_lim(
+        waxsx.soft_limit_hi.value, 
+        WAXS_Xout + WAXS_XLimOffset)  # FIXME: and TEST
 
     print "Removed WAXS from beam position"
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
@@ -64,17 +75,17 @@ def move_WAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to WAXS mode")
-    if UsaxsSaxsMode.value != 1:
-        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
-        msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If SAXS, WAXS, and USAXS are out of beam, UsaxsSaxsMode.put(%d)" 
-        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
+
+    checkUsaxsSaxsOutOfBeam()
 
     plc_protect.wait_for_interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+
     # first move USAXS out of way
-    set_lim(waxsx,get_lim(waxsx,1),dial(waxsx,WAXS_XIn + WAXS_XLimOffset))  # FIXME:
+    waxsx.set_lim(
+        waxsx.soft_limit_hi.value, 
+        WAXS_XIn + WAXS_XLimOffset)  # FIXME: and TEST
     
     move_motors(
         guard_slit.v_size, SAXS_VGSlit,
@@ -97,15 +108,21 @@ def move_SAXSOut():
     # in case there is an error in moving, it is NOT SAFE to start a scan
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
     
+    pin_y = saxs_stage.y
+    pin_z = saxs_stage.z
     # move the pin_z away from sample
-    saxs_stage.z.move(PIN_ZOut)               # FIXME: 
+    pin_z.move(PIN_ZOut)               # FIXME: 
 
-    set_lim(pin_z,get_lim(pin_z,1),dial(pin_z,PIN_ZOut - PIN_ZLimOffset))  # FIXME:
+    pin_z.set_lim(
+        pin_z.soft_limit_hi.value, 
+        PIN_ZOut - PIN_ZLimOffset)  # FIXME:
     
     # move pinhole up to out of beam position
-    saxs_stage.y.move(PIN_YOut)               # FIXME: 
+    pin_y.y.move(PIN_YOut)               # FIXME: 
 
-    set_lim(pin_y,dial(pin_y,(PIN_YOut-PIN_YLimOffset)),get_lim(pin_y,-1))  # FIXME:
+    pin_y.set_lim(
+        PIN_YOut - PIN_YLimOffset),
+        pin_y.soft_limit_lo.value)  # FIXME:
 
     print("Removed SAXS from beam position")
     ###sleep(1)    
@@ -119,30 +136,34 @@ def move_SAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to Pinhole SAXS mode")
-    if UsaxsSaxsMode.value != 1:
-        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
-        msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If USAXS is out of beam, UsaxsSaxsMode.put(%d)" 
-        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
+
+    checkUsaxsSaxsOutOfBeam()
 
     plc_protect.wait_for_interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+
     # first move USAXS out of way
-    set_lim(pin_y,dial(pin_y,PIN_YIn - PIN_YLimOffset),get_lim(pin_y,-1))  # FIXME:
+    pin_y = saxs_stage.y
+    pin_z = saxs_stage.z
+    pin_y.set_lim(
+        PIN_YIn - PIN_YLimOffset),
+        pin_y.soft_limit_lo.value)  # FIXME:
 
     move_motors(
         guard_slit.v_size, SAXS_VGSlit,
         guard_slit.h_size, SAXS_HGSlit,
-        saxs_stage.y, WAXS_XIn,
+        pin_y, WAXS_XIn,
         usaxs_slit.v_size, SAXS_VSlit,
         usaxs_slit.h_size, SAXS_HSlit,
     )
 
-    set_lim(pin_z,get_lim(pin_z,1), dial(pin_z,PIN_ZIn - PIN_ZLimOffset))  # FIXME:
+    pin_z.set_lim(
+        pin_z.soft_limit_hi.value, 
+        PIN_ZIn - PIN_ZLimOffset)  # FIXME:
 
     # move Z _AFTER_ the others finish moving
-    saxs_stage.z.move(PIN_ZIn)
+    pin_z.move(PIN_ZIn)
 
     print("Pinhole SAXS is in position")
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["SAXS in beam"])
@@ -156,15 +177,22 @@ def move_USAXSOut():
     print("Moving USAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+
+    ax = a_stage.x
+    dx = d_stage.x
     move_motors(
-        a_stage.x, AX_Out,  # FIXME:
-        d_stage.x, DX_Out,  # FIXME:
+        ax, AX_Out,  # FIXME:
+        dx, DX_Out,  # FIXME:
     )
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
-    set_lim(ax,dial(ax,AX_Out - AX_LimOffset),get_lim(ax,1))  # FIXME:
-    set_lim(dx,get_lim(dx,1),dial(dx,(DX_Out + DX_LimOffset)))  # FIXME:
+    ax.set_lim(
+        AX_Out - AX_LimOffset,
+        ax.soft_limit_hi.value)      # FIXME: and TEST
+    dx.set_lim(
+        DX_Out + DX_LimOffset,
+        dx.soft_limit_hi.value)      # FIXME: and TEST
 
     print("Removed USAXS from beam position")
     UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
@@ -175,11 +203,8 @@ def move_USAXSIn():
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to USAXS mode")
-    if UsaxsSaxsMode.value != 1:
-        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
-        msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If SAXS is out of beam, UsaxsSaxsMode.put(%d)" 
-        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
+
+    checkUsaxsSaxsOutOfBeam()
 
     plc_protect.wait_for_interlock()
     # in case there is an error in moving, it is NOT SAFE to start a scan
@@ -187,8 +212,14 @@ def move_USAXSIn():
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
-    set_lim(ax,dial(ax,AX_In - AX_LimOffset),get_lim(ax,1))  # FIXME:
-    set_lim(dx,get_lim(dx,1),dial(dx,usaxs_terms.diode.dx.value + DX_LimOffset))  # FIXME:
+    ax = a_stage.x
+    dx = d_stage.x
+    ax.set_lim(
+        AX_In - AX_LimOffset,
+        ax.soft_limit_hi.value)      # FIXME: and TEST
+    dx.set_lim(
+        dx.soft_limit_hi.value),
+        usaxs_terms.diode.dx.value + DX_LimOffset)  # FIXME: and TEST
 
     guard_slit.set_size(h=USAXS_HGSlit, v=USAXS_VGSlit)
 
