@@ -123,20 +123,6 @@ print(__file__)
 	UImg_Img_Ti_Filters		9idcLAX:USAXS_Img:Img_Ti_Filters	
 	UImg_FilterTransmision	epics_get(9idcLAX:USAXS_Img:Img_FilterTransmission	
 
-# preUSAXStune handling
-	NumScansFromLastTune		9idcLAX:USAXS:NumScansFromLastTune	
-	EPOCHTimeOfLastTune		9idcLAX:USAXS:EPOCHTimeOfLastTune	
-	ReqNumScansBetweenTune		9idcLAX:USAXS:ReqNumScansBetweenTune	
-	ReqTimeBetweenTune		9idcLAX:USAXS:ReqTimeBetweenTune	
-	RunPreUSAXStuneOnQdo		9idcLAX:USAXS:RunPreUSAXStuneOnQdo	
-	RunPreUSAXStuneNext		9idcLAX:USAXS:RunPreUSAXStuneNext	
-
-	set_NumScansFromLastTune		9idcLAX:USAXS:NumScansFromLastTune	
-	set_EPOCHTimeOfLastTune		9idcLAX:USAXS:EPOCHTimeOfLastTune	
-	set_ReqNumScansBetweenTune		9idcLAX:USAXS:ReqNumScansBetweenTune	
-	set_ReqTimeBetweenTune		9idcLAX:USAXS:ReqTimeBetweenTune	
-	set_RunPreUSAXStuneOnQdo		9idcLAX:USAXS:RunPreUSAXStuneOnQdo	
-	set_RunPreUSAXStuneNext		9idcLAX:USAXS:RunPreUSAXStuneNext	
 
 # set commands 
 
@@ -275,4 +261,15 @@ class FlyScanParameters(Device):
         self.order_number.put(self.order_number.value+1)
 
 
+class PreUsaxsTuneParameters(Device):
+    """preUSAXStune handling"""
+    num_scans_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:NumScansFromLastTune")
+    epoch_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:EPOCHTimeOfLastTune")
+    req_num_scans_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqNumScansBetweenTune")
+    req_time_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqTimeBetweenTune")
+    run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneOnQdo")
+    run_tune_next = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneNext")
+
+
 FS_terms = FlyScanParameters(name="FS_terms")
+preUSAXStune_terms = PreUsaxsTuneParameters(name="preUSAXStune")
