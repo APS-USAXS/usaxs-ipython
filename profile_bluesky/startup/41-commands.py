@@ -188,17 +188,17 @@ def move_USAXSIn():
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
     set_lim(ax,dial(ax,AX_In - AX_LimOffset),get_lim(ax,1))  # FIXME:
-    set_lim(dx,get_lim(dx,1),dial(dx,DIODE_DX + DX_LimOffset))  # FIXME:
+    set_lim(dx,get_lim(dx,1),dial(dx,usaxs_terms.diode.dx.value + DX_LimOffset))  # FIXME:
 
     guard_slit.set_size(h=USAXS_HGSlit, v=USAXS_VGSlit)
 
     move_motors(
         usaxs_slit.vap = USAXS_VSlit,
         usaxs_slit.hap = USAXS_HSlit,
-        a_stage.y = AY0,
+        a_stage.y = usaxs_terms.AY0.value,
         a_stage.x = AX_In,
         d_stage.x = DX_In,
-        d_stage.y = DY0,
+        d_stage.y = usaxs_terms.DY0.value,
     )
 
     print("USAXS is in position")

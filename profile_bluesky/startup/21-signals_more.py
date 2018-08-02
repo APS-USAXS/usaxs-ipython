@@ -224,13 +224,13 @@ class GeneralParametersCCD(Device):
     dy = Component(EpicsSignal, "dy")
 
 
-class GeneralParametersDiode(Device):
+class GeneralUsaxsParametersDiode(Device):
     "part of GeneralParameters Device"
     dx = Component(EpicsSignal, "Diode_dx")
     dy = Component(EpicsSignal, "DY0")
 
 
-class GeneralParametersCenters(Device):
+class GeneralUsaxsParametersCenters(Device):
     "part of GeneralParameters Device"
     AR = Component(EpicsSignal,  "ARcenter")
     ASR = Component(EpicsSignal, "ASRcenter")
@@ -238,28 +238,28 @@ class GeneralParametersCenters(Device):
     MSR = Component(EpicsSignal, "MSRcenter")
 
 
-class GeneralParametersFilters(Device):
+class GeneralUsaxsParametersFilters(Device):
     "part of GeneralParameters Device"
     Al = Component(EpicsSignal,  "Al_Filter")
     Ti = Component(EpicsSignal,  "Ti_Filter")
 
 
-class GeneralParameters(Device):
+class GeneralUsaxsParameters(Device):
     """internal values shared with EPICS"""
     AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
     DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
     ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRP0")
     SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
-    center = Component(GeneralParametersCenters,      "9idcLAX:USAXS:")
-    ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
-    diode = Component(GeneralParametersDiode,         "9idcLAX:USAXS:")
-    img_filter = Component(GeneralParametersCenters,  "9idcLAX:USAXS:Img_")
+    center = Component(GeneralUsaxsParametersCenters,      "9idcLAX:USAXS:")
+    ccd = Component(GeneralUsaxsParametersCCD,             "9idcLAX:USAXS:CCD_")
+    diode = Component(GeneralUsaxsParametersDiode,         "9idcLAX:USAXS:")
+    img_filter = Component(GeneralUsaxsParametersCenters,  "9idcLAX:USAXS:Img_")
     finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
     motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
-    scan_filter = Component(GeneralParametersCenters, "9idcLAX:USAXS:Scan_")
+    scan_filter = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:Scan_")
     start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
@@ -269,5 +269,6 @@ class GeneralParameters(Device):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
 
 
+usaxs_terms = GeneralUsaxsParameters(name="usaxs_terms")
 FS_terms = FlyScanParameters(name="FS_terms")
 preUSAXStune_terms = PreUsaxsTuneParameters(name="preUSAXStune")
