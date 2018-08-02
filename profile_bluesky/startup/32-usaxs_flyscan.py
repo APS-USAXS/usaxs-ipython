@@ -72,7 +72,7 @@ class UsaxsFlyScanDevice(Device):
             msg = _report_(time.time() - self.t0)
             print(msg)
             logger.debug(msg)
-            user_data.state.put("flying: " + msg.split()[0])
+            user_data.set_state("flying: " + msg.split()[0])
             if t > timeout:
                 logger.error("{}s - progress_reporting timeout!!".format(time.time()-self.t0))
             else:
@@ -103,7 +103,7 @@ class UsaxsFlyScanDevice(Device):
             print("HDF5 config: {}".format(self.saveFlyData_config))
             print("HDF5 output: {}".format(fname))
             self._output_HDF5_file_ = fname
-            #user_data.state.put("HDF5 file:" + fname)
+            #user_data.set_state("HDF5 file:" + fname)
 
             self.saveFlyData = SaveFlyScan(
                 fname,
@@ -137,7 +137,7 @@ class UsaxsFlyScanDevice(Device):
         yield from bps.wait(group=g)
         self.flying.put(False)
         
-        user_data.state.put("writing fly scan HDF5 file")
+        user_data.set_state("writing fly scan HDF5 file")
         finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
 
         yield from bps.mv(
@@ -145,7 +145,7 @@ class UsaxsFlyScanDevice(Device):
             a_stage.y.user_setpoint, self.ay0, 
             d_stage.y.user_setpoint, self.dy0)
         logger.debug("after return", time.time() - self.t0)
-        user_data.state.put("fly scan finished")
+        user_data.set_state("fly scan finished")
 
 
 # #21 : w-i-p

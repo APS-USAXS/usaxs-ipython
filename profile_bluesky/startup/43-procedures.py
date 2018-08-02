@@ -56,7 +56,7 @@ def mode_pinSAXS():
 
 def mode_OpenBeamPath():
     plc_protect.stop_if_emergency_ON()
-    user_data.state.put("Moving USAXS to OpenBeamPath mode")
+    user_data.set_state("Moving USAXS to OpenBeamPath mode")
     ccd_shutter.close()
     ti_filter_shutter.close()
     if UsaxsSaxsMode.value != 1:
@@ -65,7 +65,7 @@ def mode_OpenBeamPath():
         move_SAXSOut()
         move_WAXSOut()
         move_USAXSOut()
-        user_data.state.put("USAXS moved to OpenBeamPath mode")
+        user_data.set_state("USAXS moved to OpenBeamPath mode")
 
 
 use_mode.add(mode_USAXS, "USAXS")

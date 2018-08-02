@@ -2,6 +2,9 @@ print(__file__)
 
 """other signals"""
 
+
+MAX_EPICS_STRINGOUT_LENGTH = 40
+
 APS = APS_devices.ApsMachineParametersDevice(name="APS")
 aps_current = APS.current
 
@@ -41,6 +44,11 @@ class UserDataDevice(Device):
     
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "dataColInProgress")
+    
+    def set_state(self, msg):
+        if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
+            msg = msg[:MAX_EPICS_STRINGOUT_LENGTH]
+        self.state.put(msg)
 
 
 user_data = UserDataDevice("9idcLAX:", name="user_data")

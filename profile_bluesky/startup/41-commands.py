@@ -25,7 +25,7 @@ def IfRequestedStopBeforeNextScan():
     while PauseBeforeNextScan.value > 0.5:
         msg = pv_txt % (time.time() - t0)
         print(msg)
-        user_data.state.put(msg)
+        user_data.set_state(msg)
         time.sleep(1)
         open_the_shutter = True
 
