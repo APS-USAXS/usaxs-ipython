@@ -72,7 +72,6 @@ class UsaxsSampleStageDevice(MotorBundle):
 s_stage = UsaxsSampleStageDevice('', name='s_stage')
 
 
-
 class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
     x = Component(EpicsMotor, '9idcLAX:m58:c2:m3', labels=("detector",))
@@ -81,40 +80,65 @@ class UsaxsDetectorStageDevice(MotorBundle):
 d_stage = UsaxsDetectorStageDevice('', name='d_stage')
 
 
-
 class UsaxsSlitDevice(MotorBundle):
-    """USAXS slit just before the sample"""
-    hap  = Component(EpicsMotor, '9idcLAX:m58:c2:m8', labels=("uslit",))
-    hcen = Component(EpicsMotor, '9idcLAX:m58:c2:m6', labels=("uslit",))
-    vap  = Component(EpicsMotor, '9idcLAX:m58:c2:m7', labels=("uslit",))
-    vcen = Component(EpicsMotor, '9idcLAX:m58:c2:m5', labels=("uslit",))
+    """
+    USAXS slit just before the sample
+    
+    * center of slit: (x, y)
+    * aperture: (h_size, v_size)
+    """
+    h_size = Component(EpicsMotor, '9idcLAX:m58:c2:m8', labels=("uslit",))
+    x      = Component(EpicsMotor, '9idcLAX:m58:c2:m6', labels=("uslit",))
+    v_size = Component(EpicsMotor, '9idcLAX:m58:c2:m7', labels=("uslit",))
+    y      = Component(EpicsMotor, '9idcLAX:m58:c2:m5', labels=("uslit",))
+    
+    def set_size(self, *args, h=None, v=None):
+        """move the slits to the specified size"""
+        if h is None:
+            raise ValueError("must define horizontal size")
+        if v is None:
+            raise ValueError("must define vertical size")
+        move_motors(self.h_size, h, self.v_size=v)
 
 usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
 
 
-
 class MonoSlitDevice(MotorBundle):
     """mono beam slit"""
-    bot = Component(EpicsMotor, '9ida:m46', labels=("mslit",))
-    inb = Component(EpicsMotor, '9ida:m43', labels=("mslit",))
-    out = Component(EpicsMotor, '9ida:m44', labels=("mslit",))
-    top = Component(EpicsMotor, '9ida:m45', labels=("mslit",))
+    bot  = Component(EpicsMotor, '9ida:m46', labels=("mslit",))
+    inb  = Component(EpicsMotor, '9ida:m43', labels=("mslit",))
+    outb = Component(EpicsMotor, '9ida:m44', labels=("mslit",))
+    top  = Component(EpicsMotor, '9ida:m45', labels=("mslit",))
 
 mono_slit = MonoSlitDevice('', name='mono_slit')
 
 
-
 class GSlitDevice(MotorBundle):
-    """guard slit"""
-    bot = Component(EpicsMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
-    inb = Component(EpicsMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
-    out = Component(EpicsMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
-    top = Component(EpicsMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
-    x = Component(EpicsMotor, '9idcLAX:m58:c1:m5', labels=("gslit",))
-    y = Component(EpicsMotor, '9idcLAX:m58:c0:m6', labels=("gslit",))
+    """
+    guard slit
+
+    * aperture: (h_size, v_size)
+    """
+    bot  = Component(EpicsMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
+    inb  = Component(EpicsMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
+    outb = Component(EpicsMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
+    top  = Component(EpicsMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
+    x    = Component(EpicsMotor, '9idcLAX:m58:c1:m5', labels=("gslit",))
+    y    = Component(EpicsMotor, '9idcLAX:m58:c0:m6', labels=("gslit",))
+
+    h_size = Component(EpicsSignal, '9idcLAX:GSlit1H:size')
+    v_size = Component(EpicsSignal, '9idcLAX:GSlit1V:size')
+    
+    def set_size(self, *args, h=None, v=None):
+        """move the slits to the specified size"""
+        if h is None:
+            raise ValueError("must define horizontal size")
+        if v is None:
+            raise ValueError("must define vertical size")
+        move_motors(self.h_size, h, self.v_size=v)
+    
 
 guard_slit = GSlitDevice('', name='guard_slit')
-
 
 
 class UsaxsCollimatorStageDevice(MotorBundle):
@@ -125,7 +149,6 @@ class UsaxsCollimatorStageDevice(MotorBundle):
     r2p = Component(TunableEpicsMotor, '9idcLAX:pi:c0:m2', labels=("collimator", "tunable",))
 
 m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
-
 
 
 class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
@@ -151,7 +174,6 @@ class UsaxsAnalyzerStageDevice(MotorBundle):
 a_stage = UsaxsAnalyzerStageDevice('', name='a_stage')
 
 
-
 class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
     """USAXS Analyzer side-reflection stage"""
     #r = Component(EpicsMotor, '9idcLAX:xps:c0:m6', labels=("analyzer",))
@@ -162,15 +184,13 @@ class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
 as_stage = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
 
 
-
 class SaxsDetectorStageDevice(MotorBundle):
-    """SAXS detector stage"""
+    """SAXS detector stage (aka: pin SAXS stage)"""
     x = Component(EpicsMotor, '9idcLAX:mxv:c0:m1', labels=("saxs",))
     y = Component(EpicsMotor, '9idcLAX:mxv:c0:m8', labels=("saxs",))
     z = Component(EpicsMotor, '9idcLAX:mxv:c0:m2', labels=("saxs",))
     
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
-
 
 
 camy = EpicsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
