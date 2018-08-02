@@ -5,6 +5,8 @@ print(__file__)
 
 # these are the global settings PVs for various parts of the instrument
 
+# NOTE: avoid using any PV more than once!
+
 """
 from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
@@ -269,6 +271,49 @@ class GeneralUsaxsParameters(Device):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
 
 
-usaxs_terms = GeneralUsaxsParameters(name="usaxs_terms")
-FS_terms = FlyScanParameters(name="FS_terms")
-preUSAXStune_terms = PreUsaxsTuneParameters(name="preUSAXStune")
+class Parameters_USAXS(Device):
+    pass
+
+
+class Parameters_SBUSAXS(Device):
+    pass
+
+
+class Parameters_SAXS(Device):
+    pass
+
+
+class Parameters_WAXS(Device):
+    pass
+
+
+class Parameters_Radiography(Device):
+    pass
+
+
+class Parameters_Imaging(Device):
+    pass
+
+
+class Parameters_OutOfBeam(Device):
+    pass
+
+
+class GeneralParameters(Device):
+    """
+    cache of program parameters to share with/from EPICS
+    """
+    USAXS = Component(Parameters_USAXS)
+    SBUSAXS = Component(Parameters_SBUSAXS)
+    SAXS = Component(Parameters_SAXS)
+    WAXS = Component(Parameters_WAXS)
+    Radiography = Component(Parameters_Radiography)
+    Imaging = Component(Parameters_Imaging)
+    OutOfBeam = Component(Parameters_OutOfBeam)
+    
+    # consider refactoring
+    usaxs = Component(GeneralUsaxsParameters)
+    FlyScan = Component(FlyScanParameters)
+    preUSAXStune = Component(PreUsaxsTuneParameters)
+
+terms = GeneralParameters(name="terms")
