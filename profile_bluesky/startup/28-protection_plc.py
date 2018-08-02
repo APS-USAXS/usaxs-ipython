@@ -31,15 +31,17 @@ class PlcProtectionDevice(Device):
             time.sleep(self.SLEEP_POLL_s)
             if verbose:
                 print(msg % time.time()-t0)
+    
+    def stop_if_emergency_ON(self, verbose=True):   # TODO: should be a Bluesky suspender?
+        if self.emergency_ON.value < 1:
+            if verbose:
+                print("Equipment protection is engaged, no power on motors.")
+                print("Fix PLC protection before any move. Stopping now.")
+                print("Call beamline scientists if you do not understand.")
+                print("!!!!!!  DO NOT TRY TO FIX YOURSELF  !!!!!!")
+            ti_filter_shutter.close()
+            user_data.collection_in_progress.put(0)     # notify the GUI and others
 
 
 plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
 
-
-def StopIfPLCEmergencyProtectionOn():   # TODO: should be a Bluesky suspender?
-    if plc_protect.emergency_ON.value < 1:
-        print("Equipment protection is engaged, no power on motors.")
-        print("Fix PLC protection before any move. Stopping now.")
-        print("Call bealine scientists if you do not understand. DO NOT TRY TO FIX YOURSELF  !!!!!!")
-        ti_filter_shutter.close()
-        user_data.collection_in_progress.put(0)     # notify the GUI and others

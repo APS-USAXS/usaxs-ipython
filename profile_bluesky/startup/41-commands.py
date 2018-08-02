@@ -42,7 +42,7 @@ def IfRequestedStopBeforeNextScan():
 
 
 def move_WAXSOut():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -60,7 +60,7 @@ def move_WAXSOut():
 
 
 def move_WAXSIn():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to WAXS mode")
@@ -89,7 +89,7 @@ def move_WAXSIn():
 
 
 def move_SAXSOut():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -115,7 +115,7 @@ def move_SAXSOut():
 
 
 def move_SAXSIn():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to Pinhole SAXS mode")
@@ -149,7 +149,7 @@ def move_SAXSIn():
 
 
 def move_USAXSOut():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -171,7 +171,7 @@ def move_USAXSOut():
 
 
 def move_USAXSIn():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to USAXS mode")

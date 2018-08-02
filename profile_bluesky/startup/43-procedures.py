@@ -55,7 +55,7 @@ def mode_pinSAXS():
 
 
 def mode_OpenBeamPath():
-    StopIfPLCEmergencyProtectionOn()
+    plc_protect.stop_if_emergency_ON()
     user_data.state.put("Moving USAXS to OpenBeamPath mode")
     ccd_shutter.close()
     ti_filter_shutter.close()
