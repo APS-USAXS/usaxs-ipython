@@ -26,19 +26,17 @@ GSlit1H = EpicsSignal("9idcLAX:GSlit1H:size.VAL", name="GSlit1H")
 def IfRequestedStopBeforeNextScan():
     open_the_shutter = False
     t0 = time.time()
-    elapsed_time = time.time() - t0
 
-    txt = "User requested pause, sleeping and waiting for change in Pause PV for %g s\r"
     pv_txt = "Pausing for user for %g s"
     while PauseBeforeNextScan.value > 0.5:
-        print(txt % elapsed_time)
-        user_data.state.put(pv_txt % elapsed_time))
+        msg = pv_txt % (time.time() - t0)
+        print(msg)
+        user_data.state.put(msg)
         time.sleep(1)
-        elapsed_time = time.time() - t0
         open_the_shutter = True
 
     if StopBeforeNextScan.value:
-        print("User requested stop before next scan, stopping data collection")
+        print("User requested stop data collection before next scan")
         ti_filter_shutter.close()
         StopBeforeNextScan.put(0)
         user_data.collection_in_progress.put(0)
