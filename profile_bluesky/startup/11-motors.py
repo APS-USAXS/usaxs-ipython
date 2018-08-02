@@ -103,16 +103,6 @@ class UsaxsSlitDevice(MotorBundle):
 usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
 
 
-class MonoSlitDevice(MotorBundle):
-    """mono beam slit"""
-    bot  = Component(EpicsMotor, '9ida:m46', labels=("mslit",))
-    inb  = Component(EpicsMotor, '9ida:m43', labels=("mslit",))
-    outb = Component(EpicsMotor, '9ida:m44', labels=("mslit",))
-    top  = Component(EpicsMotor, '9ida:m45', labels=("mslit",))
-
-mono_slit = MonoSlitDevice('', name='mono_slit')
-
-
 class GSlitDevice(MotorBundle):
     """
     guard slit
