@@ -3,6 +3,7 @@ print(__file__)
 """USAXS commands"""
 
 ### This file is work-in-progress
+# see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
 UsaxsSaxsMode = EpicsSignal("9idcLAX:USAXS_Pin:USAXSSAXSMode", name="UsaxsSaxsMode")
 UsaxsSaxsMode_dict{
