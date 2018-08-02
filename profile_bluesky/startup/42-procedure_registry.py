@@ -77,7 +77,7 @@ class ProcedureRegistry(Device):
 
     """
     
-    busy = Signal(value=False, name="busy")
+    busy = Component(Signal, value=False)
     registry = {}
     delay_s = 0
     timeout_s = None

@@ -111,7 +111,7 @@ class InOutShutter(Device):
     close_value = 0
     valid_open_values = [open_value, "open"]   # lower-case strings ONLY
     valid_close_values = [close_value, "close"]
-    busy = Signal(value=False, name="busy")
+    busy = Component(Signal, value=False)
     
     def open(self):
         """request shutter to open, interactive use"""
