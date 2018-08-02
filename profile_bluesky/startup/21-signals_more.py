@@ -1,143 +1,15 @@
 print(__file__)
 
-"""more signals"""
+"""
+more signals
+
+from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
+"""
 # TODO: eventually merge with 21-signals.py
 
 # these are the global settings PVs for various parts of the instrument
 
 # NOTE: avoid using any PV more than once!
-
-"""
-from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
-
-
-
-#And these functions make the pinhole globals work...
-
-	PIN_ZIn		9idcLAX:USAXS_Pin:Pin_z_in	
-	PIN_ZOut		9idcLAX:USAXS_Pin:Pin_z_out	
-	PIN_ZLimOffset		9idcLAX:USAXS_Pin:Pin_z_limit_offset	
-	PIN_YIn		9idcLAX:USAXS_Pin:Pin_y_in	
-	PIN_YOut		9idcLAX:USAXS_Pin:Pin_y_out	
-	PIN_YLimOffset		9idcLAX:USAXS_Pin:Pin_y_limit_offset	
-	AX_In		9idcLAX:USAXS_Pin:ax_in	
-	AX_Out		9idcLAX:USAXS_Pin:ax_out	
-	AX_LimOffset		9idcLAX:USAXS_Pin:ax_limit_offset	
-	DX_In		9idcLAX:USAXS:Diode_dx	
-	DX_Out		9idcLAX:USAXS_Pin:dx_out	
-	DX_LimOffset		9idcLAX:USAXS_Pin:dx_limit_offset	
-	USAXS_HSlit		9idcLAX:USAXS_Pin:USAXS_hslit_ap	
-	USAXS_VSlit		9idcLAX:USAXS_Pin:USAXS_vslit_ap	
-	SAXS_VSlit 		9idcLAX:USAXS_Pin:Pin_vslit_ap	
-	SAXS_HSlit		9idcLAX:USAXS_Pin:Pin_hslit_ap	
-
-	USAXS_HGSlit		9idcLAX:USAXS_Pin:USAXS_hgslit_ap	
-	USAXS_VGSlit		9idcLAX:USAXS_Pin:USAXS_vgslit_ap	
-	SAXS_VGSlit 		9idcLAX:USAXS_Pin:Pin_vgslit_ap	
-	SAXS_HGSlit		9idcLAX:USAXS_Pin:Pin_hgslit_ap	
-
-
-	PIN_AL_FILTER		9idcLAX:USAXS_Pin:Exp_Al_Filter	
-	PIN_TI_FILTER		9idcLAX:USAXS_Pin:Exp_Ti_Filter	
-
-	PIN_TRPD		9idcLAX:USAXS_Pin:Pin_TrPD	
-	PIN_TRI0		9idcLAX:USAXS_Pin:Pin_TrI0	
-	PIN_TRPDGain		9idcLAX:USAXS_Pin:Pin_TrPDgain	
-	PIN_TRI0Gain		9idcLAX:USAXS_Pin:Pin_TrI0gain	
-
-	PIN_IMAGE_BASEDIR		9idcLAX:USAXS_Pin:directory	
-
-	USAXSSAXSMODE		9idcLAX:USAXS_Pin:USAXSSAXSMode	
-	PIN_NumImages		9idcLAX:USAXS_Pin:NumImages	
-	PIN_AcquireTime		9idcLAX:USAXS_Pin:AcquireTime	
-	PIN_EXP_TIME		9idcLAX:USAXS_Pin:AcquireTime	
-
-	USAXS_MEASURE_PIN_TRANS		9idcLAX:USAXS:TR_MeasurePinTrans	             # measure transmission in USAXS using pin diode
-	USAXSPinT_AyPosition		9idcLAX:USAXS:TR_AyPosition	      		# Ay to hit pin diode
-	USAXSPinT_MeasurementTime		9idcLAX:USAXS:TR_MeasurementTime		        # How long to count
-	USAXSPinT_pinCounts		9idcLAX:USAXS:TR_pinCounts			        # How many counts were on pin diode
-	USAXSPinT_pinGain		9idcLAX:USAXS:TR_pinGain					# gain of pin diode (note, we are using I00 amplifier here)
-	USAXSPinT_I0Counts		9idcLAX:USAXS:TR_I0Counts					# How many counts were on I0 
-	USAXSPinT_I0Gain		9idcLAX:USAXS:TR_I0Gain					# gain of I0
-
-	
-# this is Io value from gates scalar in LAX for Nexus file
-	PIN_I0		9idcLAX:USAXS_Pin:I0	
-# WAXS
-	WAXS_XIn		9idcLAX:USAXS_Pin:waxs_x_in	
-	WAXS_Xout		9idcLAX:USAXS_Pin:waxs_x_out	
-	WAXS_XLimOffset		9idcLAX:USAXS_Pin:waxs_x_limit_offset	
-	WEXP_AL_FILTER		9idcLAX:USAXS_WAXS:Exp_Al_Filter	
-	WEXP_TI_FILTER		9idcLAX:USAXS_WAXS:Exp_Ti_Filter	
-	WAXS_IMAGE_BASEDIR		9idcLAX:USAXS_WAXS:directory	
-	WAXS_NumImages		9idcLAX:USAXS_WAXS:NumImages	
-	WAXS_AcquireTime		9idcLAX:USAXS_WAXS:AcquireTime	
-	WAXS_EXP_TIME		9idcLAX:USAXS_WAXS:AcquireTime	
-
-
-
-# set commands 
-
-
-## standard set commands... 
-
-	set_PIN_ZIn		9idcLAX:USAXS_Pin:Pin_z_in	
-	set_PIN_ZOut		9idcLAX:USAXS_Pin:Pin_z_out	
-	set_PIN_ZLimOffset		9idcLAX:USAXS_Pin:Pin_z_limit_offset	
-	set_PIN_YIn		9idcLAX:USAXS_Pin:Pin_y_in	
-	set_PIN_YOut		9idcLAX:USAXS_Pin:Pin_y_out	
-	set_PIN_YLimOffset		9idcLAX:USAXS_Pin:Pin_y_limit_offset	
-	set_AX_In		9idcLAX:USAXS_Pin:ax_in	
-	set_AX_Out		9idcLAX:USAXS_Pin:ax_out	
-	set_AX_LimOffset		9idcLAX:USAXS_Pin:ax_limit_offset	
-	set_DX_In		9idcLAX:USAXS:Diode_dx	
-	set_DX_Out		9idcLAX:USAXS_Pin:dx_out	
-	set_DX_LimOffset		9idcLAX:USAXS_Pin:dx_limit_offset	
-	set_USAXS_HSlit		9idcLAX:USAXS_Pin:USAXS_hslit_ap	
-	set_USAXS_VSlit		9idcLAX:USAXS_Pin:USAXS_vslit_ap	
-	set_SAXS_VSlit 		9idcLAX:USAXS_Pin:Pin_vslit_ap	
-	set_SAXS_HSlit		9idcLAX:USAXS_Pin:Pin_hslit_ap	
-
-	set_USAXS_HGSlit		9idcLAX:USAXS_Pin:USAXS_hgslit_ap	
-	set_USAXS_VGSlit		9idcLAX:USAXS_Pin:USAXS_vgslit_ap	
-	set_SAXS_VGSlit 		9idcLAX:USAXS_Pin:Pin_vgslit_ap	
-	set_SAXS_HGSlit		9idcLAX:USAXS_Pin:Pin_hgslit_ap	
-
-	set_PIN_AL_FILTER		9idcLAX:USAXS_Pin:Exp_Al_Filter	
-	set_PIN_TI_FILTER		9idcLAX:USAXS_Pin:Exp_Ti_Filter	
-	set_PIN_NumImages		9idcLAX:USAXS_Pin:NumImages	
-
-	set_PIN_AcquireTime		9idcLAX:USAXS_Pin:AcquireTime	
-	set_PIN_EXP_TIME		9idcLAX:USAXS_Pin:AcquireTime	
-	set_PIN_TRPD		9idcLAX:USAXS_Pin:Pin_TrPD	
-	set_PIN_TRI0		9idcLAX:USAXS_Pin:Pin_TrI0	
-	set_PIN_TRPDGain		9idcLAX:USAXS_Pin:Pin_TrPDgain	
-	set_PIN_TRI0Gain		9idcLAX:USAXS_Pin:Pin_TrI0gain	
-
-	set_PIN_IMAGE_BASEDIR		9idcLAX:USAXS_Pin:directory	
-
-
-# WAXS
-	set_WAXS_IMAGE_BASEDIR		9idcLAX:USAXS_WAXS:directory	
-
-	set_WAXS_XIn		9idcLAX:USAXS_Pin:waxs_x_in	
-	set_WAXS_Xout		9idcLAX:USAXS_Pin:waxs_x_out	
-	set_WAXS_XLimOffset		9idcLAX:USAXS_Pin:waxs_x_limit_offset	
-	set_WEXP_AL_FILTER		9idcLAX:USAXS_WAXS:Exp_Al_Filter	
-	set_WEXP_TI_FILTER		9idcLAX:USAXS_WAXS:Exp_Ti_Filter	
-	set_WAXS_AcquireTime		9idcLAX:USAXS_WAXS:AcquireTime	
-	set_WAXS_EXP_TIME		9idcLAX:USAXS_WAXS:AcquireTime	
-	set_WAXS_NumImages		9idcLAX:USAXS_WAXS:NumImages	
-
-#transmission
- 	set_USAXS_MEASURE_PIN_TRANS		9idcLAX:USAXS:TR_MeasurePinTrans	      # measure transmission in USAXS using pin diode
- 	set_USAXSPinT_AyPosition		9idcLAX:USAXS:TR_AyPosition	      		 # Ay to hit pin diode
- 	set_USAXSPinT_MeasurementTime		9idcLAX:USAXS:TR_MeasurementTime		# How long to count
- 	set_USAXSPinT_pinCounts		9idcLAX:USAXS:TR_pinCounts				# How many counts were on pin diode
- 	set_USAXSPinT_pinGain		9idcLAX:USAXS:TR_pinGain					# gain of pin diode (note, we are using I00 amplifier here)
- 	set_USAXSPinT_I0Counts		9idcLAX:USAXS:TR_I0Counts				# How many counts were on I0
- 	set_USAXSPinT_I0Gain		9idcLAX:USAXS:TR_I0Gain					# gain of I0
-"""
 
 
 class FlyScanParameters(Device):
@@ -194,7 +66,7 @@ class Parameters_Al_Ti_Filters(Device):
     Ti = Component(EpicsSignal,  "Ti_Filter")
 
 
-class GeneralUsaxsParameters(Device):
+class Parameters_USAXS(Device):
     """internal values shared with EPICS"""
     AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
     DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
@@ -204,12 +76,12 @@ class GeneralUsaxsParameters(Device):
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
     ccd = Component(GeneralUsaxsParametersCCD,        "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
-    img_filter = Component(Parameters_Al_Ti_Filters,  "9idcLAX:USAXS:Img_")
+    img_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Img_")
     finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
     motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
-    scan_filter = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
+    scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
     start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
@@ -221,20 +93,78 @@ class GeneralUsaxsParameters(Device):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
 
 
-class Parameters_USAXS(Device):
-    pass
-
-
 class Parameters_SBUSAXS(Device):
     pass
 
 
 class Parameters_SAXS(Device):
-    pass
+    z_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_in")
+    z_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_out")
+    z_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_limit_offset")
+
+    y_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_in")
+    y_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_out")
+    y_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_limit_offset")
+
+    ax_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_in")
+    ax_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_out")
+    ax_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_limit_offset")
+
+    dx_in = Component(EpicsSignal, "9idcLAX:USAXS:Diode_dx")
+    dx_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_out")
+    dx_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_limit_offset")
+
+    usaxs_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_hslit_ap")
+    usaxs_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_vslit_ap")
+    v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_vslit_ap")
+    h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_hslit_ap")
+
+    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_hgslit_ap")
+    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_vgslit_ap")
+    guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_vgslit_ap")
+    guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_hgslit_ap")
+
+    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_Pin:Exp_")
+
+    diode_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrPD")
+    I0_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrI0")
+    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrPDgain")
+    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrI0gain")
+
+    base_dir = Component(EpicsSignal, "9idcLAX:USAXS_Pin:directory")
+
+    UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode")
+    num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
+    acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
+    exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")      # FIXME: redundant!
+	
+    # this is Io value from gates scalar in LAX for Nexus file
+    I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
+    
+    transmission = Component(Parameters_transmission)
+
+class Parameters_transmission(Device):
+    # measure transmission in USAXS using pin diode
+    measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
+    
+    # Ay to hit pin diode
+    ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
+    count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
+    diode_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinCounts")
+    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinGain") # I00 amplifier
+    I0_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Counts")
+    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Gain")
 
 
 class Parameters_WAXS(Device):
-    pass
+    x_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_in")
+    x_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_out")
+    x_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_limit_offset")
+    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_WAXS:Exp_")
+    base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory")
+    num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
+    acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")
+    exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")      # FIXME: redundant!
 
 
 class Parameters_Radiography(Device):
@@ -273,9 +203,9 @@ class Parameters_OutOfBeam(Device):
 
 class GeneralParameters(Device):
     """
-    cache of program parameters to share with/from EPICS
+    cache of parameters to share with/from EPICS
     """
-    USAXS = Component(Parameters_USAXS)
+    USAXS = Component(GeneralUsaxsParameters)
     SBUSAXS = Component(Parameters_SBUSAXS)
     SAXS = Component(Parameters_SAXS)
     WAXS = Component(Parameters_WAXS)
@@ -284,8 +214,12 @@ class GeneralParameters(Device):
     OutOfBeam = Component(Parameters_OutOfBeam)
     
     # consider refactoring
-    usaxs = Component(GeneralUsaxsParameters)
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
+
+# NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!
 terms = GeneralParameters(name="terms")
+
+# terms.summary() to see all the fields
+# terms.read() to read all the fields from EPICS

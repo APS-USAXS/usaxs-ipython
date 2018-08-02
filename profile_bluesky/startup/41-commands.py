@@ -5,8 +5,7 @@ print(__file__)
 ### This file is work-in-progress
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
-UsaxsSaxsMode = EpicsSignal("9idcLAX:USAXS_Pin:USAXSSAXSMode", name="UsaxsSaxsMode")
-UsaxsSaxsMode_dict{
+UsaxsSaxsModes = {
     "dirty": -1,        # prior move did not finish correctly
     "out of beam": 1,   # SAXS, WAXS, and USAXS out of beam
     "USAXS in beam": 2,
@@ -43,11 +42,11 @@ def IfRequestedStopBeforeNextScan():
 
 def checkUsaxsSaxsOutOfBeam():
     """raise ValueError if not"""
-    if UsaxsSaxsMode.value != UsaxsSaxsMode_dict["out of beam"]:
-        print("Found UsaxsSaxsMode = %s " % UsaxsSaxsMode.value)
+    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
+        print("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
         msg = "Incorrect UsaxsSaxsMode mode found."
         msg += " If SAXS, WAXS, and USAXS are out of beam, UsaxsSaxsMode.put(%d)" 
-        raise ValueError(msg % UsaxsSaxsMode_dict["out of beam"])
+        raise ValueError(msg % UsaxsSaxsModes["out of beam"])
 
 
 def move_WAXSOut():
@@ -57,7 +56,7 @@ def move_WAXSOut():
 
     print ("Moving WAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
     # move the pin_z away from sample
     waxsx.move(WAXS_Xout)               # FIXME: WAXS_Xout
@@ -67,7 +66,7 @@ def move_WAXSOut():
         WAXS_Xout + WAXS_XLimOffset)  # FIXME: and TEST
 
     print "Removed WAXS from beam position"
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
 
 
 def move_WAXSIn():
@@ -77,10 +76,10 @@ def move_WAXSIn():
     print("Moving to WAXS mode")
 
     checkUsaxsSaxsOutOfBeam()
-
     plc_protect.wait_for_interlock()
+
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
     waxsx.set_lim(
@@ -96,7 +95,7 @@ def move_WAXSIn():
     )
 
     print("WAXS is in position")
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["WAXS in beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["WAXS in beam"])
 
 
 def move_SAXSOut():
@@ -106,7 +105,7 @@ def move_SAXSOut():
 
     print("Moving SAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
     
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
@@ -128,7 +127,7 @@ def move_SAXSOut():
     ###sleep(1)    
     #waxs seems to be getting ahead of saxs limit switch
     # - should not be needed, we have plc_protect.wait_for_interlock() now. 
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
 
 
 def move_SAXSIn():
@@ -138,10 +137,10 @@ def move_SAXSIn():
     print("Moving to Pinhole SAXS mode")
 
     checkUsaxsSaxsOutOfBeam()
-
     plc_protect.wait_for_interlock()
+
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
     pin_y = saxs_stage.y
@@ -166,7 +165,7 @@ def move_SAXSIn():
     pin_z.move(PIN_ZIn)
 
     print("Pinhole SAXS is in position")
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["SAXS in beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["SAXS in beam"])
 
 
 def move_USAXSOut():
@@ -176,7 +175,7 @@ def move_USAXSOut():
 
     print("Moving USAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
     ax = a_stage.x
     dx = d_stage.x
@@ -195,7 +194,7 @@ def move_USAXSOut():
         dx.soft_limit_hi.value)      # FIXME: and TEST
 
     print("Removed USAXS from beam position")
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["out of beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
 
 
 def move_USAXSIn():
@@ -205,10 +204,10 @@ def move_USAXSIn():
     print("Moving to USAXS mode")
 
     checkUsaxsSaxsOutOfBeam()
-
     plc_protect.wait_for_interlock()
+
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["dirty"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
@@ -233,4 +232,4 @@ def move_USAXSIn():
     )
 
     print("USAXS is in position")
-    UsaxsSaxsMode.put(UsaxsSaxsMode_dict["USAXS in beam"])
+    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["USAXS in beam"])
