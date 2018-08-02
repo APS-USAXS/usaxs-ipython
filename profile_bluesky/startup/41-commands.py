@@ -25,15 +25,31 @@ EmergencyProtectionOn = EpicsSignal("9idcLAX:plc:Y0", name="EmergencyProtectionO
 # (1-not running, 0 running)
 dataColInProgress = EpicsSignal("9idcLAX:dataColInProgress", name="dataColInProgress")
 
-plc_X13 = EpicsSignal("9idcLAX:plc:X13", name="plc_X13")
-
 # TODO: Shouldn't these be part of a motor stage? Guard slit?
 GSlit1V = EpicsSignal("9idcLAX:GSlit1V:size.VAL", name="GSlit1V")
 GSlit1H = EpicsSignal("9idcLAX:GSlit1H:size.VAL", name="GSlit1H")
 
 
-def __usaxs_wait_for_Interlock():       # TODO: explain why?
-    # this function waits for the three 
+class PlcProtectionDevice(Device):
+    """
+    Detector Protection PLC interface
+    
+    
+    """
+    # motion limit switches: zero when OFF
+    # two limits must be ON to allow safe move of the third
+    SAXS_Y = Component(EpicsSignal, 'X11')
+    WAXS_X = Component(EpicsSignal, 'X12')
+    AX = Component(EpicsSignal, 'X13')
+
+plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
+
+
+def __usaxs_wait_for_Interlock():
+    """waits for the three stages to reach safe position"""
+    """
+    old logic, plc_X13 is 9idcLAX:plc:X13
+    
     waiting_1234 = plc_X13.value
     waiting_1235 = plc_X13.value
     waiting_1236 = plc_X13.value
@@ -44,7 +60,11 @@ def __usaxs_wait_for_Interlock():       # TODO: explain why?
         waiting_1235 = plc_X13.value
         waiting_1236 = plc_X13.value
         printf("Waiting for Interlock  %g sec, check limit switches\r" % time.time()-t0)
-
+    """
+    t0 = time.time()
+    while 0 in (plc_protect.SAXS_Y.value, plc_protect.WAXS_X.value, plc_protect.AX.value):
+        sleep(0.1)
+        printf("Waiting for Interlock  %g sec, check limit switches\r" % time.time()-t0)
 
 
 def StopIfPLCEmergencyProtectionOn():   # TODO: should be a Bluesky suspender?

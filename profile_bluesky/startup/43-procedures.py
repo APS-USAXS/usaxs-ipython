@@ -3,6 +3,8 @@ print(__file__)
 """
 USAXS mode change procedures
 
+see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
+
 each mode is defined by a setup function that takes no arguments
 and returns only when it complete
 
