@@ -17,38 +17,23 @@ class PlcProtectionDevice(Device):
     AX = Component(EpicsSignal, 'X13')
     
     emergency_ON = Component(EpicsSignal, 'Y0')
+    
+    SLEEP_POLL_s = 0.1
+    
+    @property
+    def interlocked(self):
+        return not 0 in (self.SAXS_Y.value, self.WAXS_X.value, self.AX.value)
+    
+    def wait_for_interlock(self, verbose=True):
+        t0 = time.time()
+        msg = "Waiting %g for PLC interlock, check limit switches"
+        while not self.interlocked:
+            time.sleep(self.SLEEP_POLL_s)
+            if verbose:
+                print(msg % time.time()-t0)
 
 
 plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
-
-
-def __usaxs_wait_for_Interlock():
-    """
-    waits for the three stages to reach safe position
-    
-    original::
-    
-        def __usaxs_wait_for_Interlock'{
-           # this function waits for the three 
-           local Waiting_1234, Waiting_1235, Waiting_1236, __timer9876
-           Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
-           Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
-           Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
-           __timer9876 = 1
-            while (Waiting_1234==0 || Waiting_1235==0 || Waiting_1236==0) {
-                sleep(0.1)
-                Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
-                Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
-                Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
-                printf("Waiting for Interlock  %g sec, check limit switches\r", (__timer9876/10))
-              __timer9876++
-           }
-        }'
-    """
-    t0 = time.time()
-    while 0 in (plc_protect.SAXS_Y.value, plc_protect.WAXS_X.value, plc_protect.AX.value):
-        sleep(0.1)
-        printf("Waiting for Interlock  %g sec, check limit switches\r" % time.time()-t0)
 
 
 def StopIfPLCEmergencyProtectionOn():   # TODO: should be a Bluesky suspender?
