@@ -74,56 +74,9 @@ from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/loca
 	WAXS_AcquireTime		9idcLAX:USAXS_WAXS:AcquireTime	
 	WAXS_EXP_TIME		9idcLAX:USAXS_WAXS:AcquireTime	
 
-# USAXS Imaging
-	UImg_ImageKey		9idcLAX:USAXS_Img:ImageKey	 
-##  UImg_ImageKey: "0-image, 1-flat field, 2-dark field")
-	UImg_ExposureTime		9idcLAX:USAXS_Img:ExposureTime	
-
-	UImg_Tomo_Rot_Angle		9idcLAX:USAXS_Img:Tomo_Rot_Angle	
-	UImg_Img_I0_value		9idcLAX:USAXS_Img:Img_I0_value	
-	UImg_Img_I0_gain		9idcLAX:USAXS_Img:Img_I0_gain	
-
-	UImg_AxPosition		9idcLAX:USAXS_Img:ax_in	
-	UImg_WaxsXPosition		9idcLAX:USAXS_Img:waxs_x_in	
-
-	UImg_FlatFieldImage		9idcLAX:USAXS_Img:FlatFieldImage	
-	UImg_DarkFieldImage		9idcLAX:USAXS_Img:DarkFieldImage	
-	UImg_ExperimentTitle		9idcLAX:USAXS_Img:ExperimentTitle	
-
-	UImg_ImgHorApperture		9idcLAX:USAXS_Img:ImgHorApperture	 
-	UImg_ImgVertApperture		9idcLAX:USAXS_Img:ImgVertApperture	 
-	UImg_ImgGuardHorApperture		9idcLAX:USAXS_Img:ImgGuardHorApperture	 
-	UImg_ImgGuardVertApperture		9idcLAX:USAXS_Img:ImgGuardVertApperture	 
-	UImg_Img_Al_Filters		9idcLAX:USAXS_Img:Img_Al_Filters	
-	UImg_Img_Ti_Filters		9idcLAX:USAXS_Img:Img_Ti_Filters	
-	UImg_FilterTransmision	epics_get(9idcLAX:USAXS_Img:Img_FilterTransmission	
 
 
 # set commands 
-
-## USAXS Imaging set commands:
-	set_UImg_ImageKey		9idcLAX:USAXS_Img:ImageKey	 
-##  "0-image, 1-flat field, 2-dark field")
-	set_UImg_ExposureTime		9idcLAX:USAXS_Img:ExposureTime	
-
-	set_UImg_Tomo_Rot_Angle		9idcLAX:USAXS_Img:Tomo_Rot_Angle	
-	set_UImg_Img_I0_value		9idcLAX:USAXS_Img:Img_I0_value	
-	set_UImg_Img_I0_gain		9idcLAX:USAXS_Img:Img_I0_gain	
-
-	set_UImg_AxPosition		9idcLAX:USAXS_Img:ax_in"v)'
-	set_UImg_WaxsXPosition		9idcLAX:USAXS_Img:waxs_x_in	
-
-	set_UImg_FlatFieldImage		9idcLAX:USAXS_Img:FlatFieldImage
-	set_UImg_DarkFieldImage		9idcLAX:USAXS_Img:DarkFieldImage
-	set_UImg_ExperimentTitle		9idcLAX:USAXS_Img:ExperimentTitle
-
-	set_UImg_ImgHorApperture		9idcLAX:USAXS_Img:ImgHorApperture	 
-	set_UImg_ImgVertApperture		9idcLAX:USAXS_Img:ImgVertApperture	 
-	set_UImg_ImgVertApperture		9idcLAX:USAXS_Img:ImgVertApperture	 
-	set_UImg_ImgGuardVertApperture		9idcLAX:USAXS_Img:ImgGuardVertApperture	 
-	set_UImg_Img_Al_Filters		9idcLAX:USAXS_Img:Img_Al_Filters	
-	set_UImg_Img_Ti_Filters		9idcLAX:USAXS_Img:Img_Ti_Filters	
-	set_UImg_FilterTransmision		9idcLAX:USAXS_Img:Img_FilterTransmission	
 
 
 ## standard set commands... 
@@ -187,10 +140,6 @@ from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/loca
 """
 
 
-# TODO: this belongs somewhere else, but where?
-is2DUSAXSscan = EpicsSignal("9idcLAX:USAXS:is2DUSAXSscan", name="is2DUSAXSscan")
-
-
 class FlyScanParameters(Device):
     """FlyScan values"""
     number_points = Component(EpicsSignal, "9idcLAX:USAXS:FS_NumberOfPoints")
@@ -240,8 +189,7 @@ class GeneralUsaxsParametersCenters(Device):
     MSR = Component(EpicsSignal, "MSRcenter")
 
 
-class GeneralUsaxsParametersFilters(Device):
-    "part of GeneralParameters Device"
+class Parameters_Al_Ti_Filters(Device):
     Al = Component(EpicsSignal,  "Al_Filter")
     Ti = Component(EpicsSignal,  "Ti_Filter")
 
@@ -253,19 +201,21 @@ class GeneralUsaxsParameters(Device):
     ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRP0")
     SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
-    center = Component(GeneralUsaxsParametersCenters,      "9idcLAX:USAXS:")
-    ccd = Component(GeneralUsaxsParametersCCD,             "9idcLAX:USAXS:CCD_")
-    diode = Component(GeneralUsaxsParametersDiode,         "9idcLAX:USAXS:")
-    img_filter = Component(GeneralUsaxsParametersCenters,  "9idcLAX:USAXS:Img_")
+    center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
+    ccd = Component(GeneralUsaxsParametersCCD,        "9idcLAX:USAXS:CCD_")
+    diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
+    img_filter = Component(Parameters_Al_Ti_Filters,  "9idcLAX:USAXS:Img_")
     finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
     motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
-    scan_filter = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:Scan_")
+    scan_filter = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
     start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
     usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
+    is2DUSAXSscan = Component(EpicsSignal,            "9idcLAX:USAXS:is2DUSAXSscan")
+
     
     def UPDRange(self):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
@@ -292,7 +242,29 @@ class Parameters_Radiography(Device):
 
 
 class Parameters_Imaging(Device):
-    pass
+    image_key = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImageKey")
+    # 0=image, 1=flat field, 2=dark field
+
+    exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Img:ExposureTime")
+
+    tomo_rotation_angle = Component(EpicsSignal, "9idcLAX:USAXS_Img:Tomo_Rot_Angle")
+    I0 = Component(EpicsSignal, "9idcLAX:USAXS_Img:Img_I0_value")
+    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS_Img:Img_I0_gain")
+
+    ax_in = Component(EpicsSignal, "9idcLAX:USAXS_Img:ax_in")
+    waxs_x_in = Component(EpicsSignal, "9idcLAX:USAXS_Img:waxs_x_in")
+
+    flat_field = Component(EpicsSignal, "9idcLAX:USAXS_Img:FlatFieldImage")
+    dark_field = Component(EpicsSignal, "9idcLAX:USAXS_Img:DarkFieldImage")
+    title = Component(EpicsSignal, "9idcLAX:USAXS_Img:ExperimentTitle")
+
+    h_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgHorApperture")
+    v_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgVertApperture")
+    guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgGuardHorApperture")
+    guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgGuardVertApperture")
+
+    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_Img:Img_")
+    filter_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Img:Img_FilterTransmission")
 
 
 class Parameters_OutOfBeam(Device):
