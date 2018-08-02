@@ -34,10 +34,11 @@ class PlcProtectionDevice(Device):
     """
     Detector Protection PLC interface
     
-    
+    motion limit switches: 
+    * SAXS_Y, WAXS_X, AX
+    * zero when OFF
+    * two limits must be ON to allow safe move of the third
     """
-    # motion limit switches: zero when OFF
-    # two limits must be ON to allow safe move of the third
     SAXS_Y = Component(EpicsSignal, 'X11')
     WAXS_X = Component(EpicsSignal, 'X12')
     AX = Component(EpicsSignal, 'X13')
@@ -46,20 +47,27 @@ plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
 
 
 def __usaxs_wait_for_Interlock():
-    """waits for the three stages to reach safe position"""
     """
-    old logic, plc_X13 is 9idcLAX:plc:X13
+    waits for the three stages to reach safe position
     
-    waiting_1234 = plc_X13.value
-    waiting_1235 = plc_X13.value
-    waiting_1236 = plc_X13.value
-    t0 = time.time()
-    while waiting_1234 == 0 or waiting_1235 == 0 or waiting_1236 == 0:
-        sleep(0.1)
-        waiting_1234 = plc_X13.value
-        waiting_1235 = plc_X13.value
-        waiting_1236 = plc_X13.value
-        printf("Waiting for Interlock  %g sec, check limit switches\r" % time.time()-t0)
+    original::
+    
+        def __usaxs_wait_for_Interlock'{
+           # this function waits for the three 
+           local Waiting_1234, Waiting_1235, Waiting_1236, __timer9876
+           Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
+           Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
+           Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
+           __timer9876 = 1
+            while (Waiting_1234==0 || Waiting_1235==0 || Waiting_1236==0) {
+                sleep(0.1)
+                Waiting_1234 = epics_get("9idcLAX:plc:X13","short")
+                Waiting_1235 = epics_get("9idcLAX:plc:X13","short")
+                Waiting_1236 = epics_get("9idcLAX:plc:X13","short")
+                printf("Waiting for Interlock  %g sec, check limit switches\r", (__timer9876/10))
+              __timer9876++
+           }
+        }'
     """
     t0 = time.time()
     while 0 in (plc_protect.SAXS_Y.value, plc_protect.WAXS_X.value, plc_protect.AX.value):
@@ -90,7 +98,6 @@ def IfRequestedStopBeforeNextScan():
         elapsed_time = time.time() - t0
         open_the_shutter = True
 
-    txt = "User requested pause, sleeping and waiting for change in Pause PV for %g s\r"
     if StopBeforeNextScan.value:
         print("User requested stop before next scan, stopping data collection")
         ti_filter_shutter.close()
@@ -99,8 +106,8 @@ def IfRequestedStopBeforeNextScan():
         open_the_shutter = False
 
     if open_the_shutter:
-        mono_shutter.open()
-        # time.sleep(2)       # not needed since mono_shutter.open() waits until complete
+        mono_shutter.open()     # waits until complete
+        # time.sleep(2)         # so, sleep not needed
 
 
 """
