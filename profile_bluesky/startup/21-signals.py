@@ -39,9 +39,7 @@ class UserDataDevice(Device):
     user_dir = Component(EpicsSignal,           "USAXS:userDir")
     user_name = Component(EpicsSignal,          "UserName")
     
-    # FIXME: comment needs fixing
-    # for GUI to know if user is collecting data: 1-not running, 0 running ???
-    # for GUI to know if user is collecting data: 1=running, 0=not running
+    # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "dataColInProgress")
 
 
