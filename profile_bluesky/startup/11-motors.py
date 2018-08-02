@@ -12,56 +12,47 @@ def move_motors(*args):
     """
     status = []
     for m, v in pairwise(args):
-        status.append(m.move(v))
+        status.append(m.move(v, wait=False))
     
     for st in status:
         ophyd.status.wait(st)
 
 
-"""
-get_lim(motor, flag)
-    Returns the dial limit of motor number motor. 
-    If flag > 0, returns the high limit. 
-    If flag < 0, returns the low limit. 
-    Resets to command level if not configured for motor. 
-
-set_lim(motor, low, high)
-    Sets the low and high limits of motor number motor. 
-    low and high are in dial units. 
-    It does not actually matter in which order the limits are given. 
-    Returns nonzero if not configured for motor or if the protection 
-    flags prevent the user from changing the limits on this motor. 
-    Resets to command level if any motors are moving. 
-
-"""
-
-def get_lim(motor, flag):
+class EpicsMotorLimitsMixin(Device):
     """
-    Returns the dial limit of motor
+    add motor record HLM & LLM fields & compatibility get_lim() and set_lim()
+    """
     
-    flag > 0: returns high limit
-    flag < 0: returns low limit
-    flag == 0: returns None
-    """
-    raise NotImplementedError("Needs to consider DIAL coordinate")  # FIXME:
-    if flag > 0:
-        return motor.high_limit # TODO: dial?
-    else:
-        return motor.low_limit  # TODO: dial?
-
-def set_lim(motor, low, high):
-    """
-    Sets the low and high limits of motor number motor
+    soft_limit_lo = Component(EpicsSignal, ".LLM")
+    soft_limit_hi = Component(EpicsSignal, ".HLM")
     
-    low and high are in dial units
+    def get_lim(self, flag):
+        """
+        Returns the user limit of motor
+        
+        flag > 0: returns high limit
+        flag < 0: returns low limit
+        flag == 0: returns None
+        """
+        if flag > 0:
+            return self.high_limit
+        else:
+            return self.low_limit
     
-    It does not actually matter in which order the limits are given. 
+    def set_lim(self, low, high):
+        """
+        Sets the low and high limits of motor
+        
+        * Low limit is set to lesser of (low, high)
+        * High limit is set to greater of (low, high)
+        * No action taken if motor is moving. 
+        """
+        if not self.moving:
+            self.soft_limit_lo.put(min(low, high))
+            self.soft_limit_hi.put(max(low, high))
 
-    !Returns nonzero if not configured for motor or if the protection 
-    !flags prevent the user from changing the limits on this motor. 
-    !Resets to command level if any motors are moving. 
-    """
-    raise NotImplementedError("Needs to consider DIAL coordinate")  # FIXME:
+
+class EpicsMotorWithLimits(EpicsMotor, EpicsMotorLimitsMixin): pass
 
 
 class UsaxsSampleStageDevice(MotorBundle):
