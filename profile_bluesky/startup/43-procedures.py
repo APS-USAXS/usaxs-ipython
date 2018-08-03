@@ -25,13 +25,24 @@ EXAMPLE::
 """
 
 
+def DCMfeedbackON():
+    mono_feedback.on.put(1)     # TODO: see issue #49
+    mono_feedback.check_position()
+
+
+def insertScanFilters():
+    # Bank A: Al
+    # Bank B: Ti
+    pf4_AlTi.fPosA.put(terms.USAXS.scan_filters.Al.value)
+    pf4_AlTi.fPosB.put(terms.USAXS.scan_filters.Ti.value)
+
 
 def mode_USAXS():
     plc_protect.stop_if_emergency_ON()
     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
     ccd_shutter.close()
     ti_filter_shutter.close()
-    # TODO: DCMfeedbackON()
+    DCMfeedbackON()
     retune_needed = False
 
     if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["USAXS in beam"]:
@@ -59,7 +70,7 @@ def mode_USAXS():
 
         # print("Change TV input selector to show image in hutch")
         # print("Turn off BLUE switch on CCD controller")
-        # TODO: insertScanFilters()
+        insertScanFilters()
         ccd_shutter.close()
 
         print("Prepared for USAXS mode")

@@ -223,18 +223,6 @@ class DCM_Feedback(Device):
     TODO: #49
     Add support for set() so that we can implement "on" & "off" values
     and also apply additional checks when turning feedback on.
-    
-    from SPEC code
-
-        diff_hi = drvh - oval
-        diff_lo = oval - drvl
-        if diff<0.2 or diff_lo<0.2:
-            if email_notices.notify_on_feedback:
-                subject = "USAXS Feedback problem"
-                message = "Feedback is very close to its limits."
-                email_notices.send(subject, message)
-        }
-
     """
     control = Component(EpicsSignal, "")
     on = Component(EpicsSignal, ":on")
@@ -245,6 +233,15 @@ class DCM_Feedback(Device):
     @property
     def is_on(self):
         return self.on.value == 1
+    
+    def check_position(self):
+        diff_hi = self.drvh - self.oval
+        diff_lo = self.oval - self.drvl
+        if min(diff_hi, diff_lo) < 0.2:
+            if email_notices.notify_on_feedback:
+                subject = "USAXS Feedback problem"
+                message = "Feedback is very close to its limits."
+                email_notices.send(subject, message)
 
 
 # TODO: #48 send email
