@@ -35,11 +35,67 @@ def mode_SBUSAXS():
 
 
 def mode_SAXS():
-    pass
+    plc_protect.stop_if_emergency_ON()
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to SAXS mode" ))
+    ccd_shutter.close()
+    ti_filter_shutter.close()
+
+    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["SAXS in beam"]:
+        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        print("Moving to proper SAXS mode")
+        move_WAXSOut()
+        move_USAXSOut()
+        move_SAXSIn()
+        
+    print("Prepared for SAXS mode")
+    #insertScanFilters
+    user_data.set_state("SAXS Mode")
+    ts = str(datetime.now()
+    user_data.time_stamp.put(ts)
+    user_data.macro_file_time.put(ts)
+    user_data.scanning.put(0)
 
 
 def mode_WAXS():
-    pass
+    plc_protect.stop_if_emergency_ON()
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to WAXS mode" ))
+    ccd_shutter.close()
+    ti_filter_shutter.close()
+
+    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["WAXS in beam"]:
+        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        print("Moving to proper WAXS mode")
+        move_SAXSOut()
+        move_USAXSOut()
+        move_WAXSIn()
+
+    # move SAXS slits in, used for WAXS mode also
+    v_diff = abs(guard_slit.v_size.value - terms.SAXS.guard_v_size.value)
+    h_diff = abs(guard_slit.h_size.value - terms.SAXS.guard_h_size.value)
+
+    if max(v_diff, h_diff) > 0.03:
+        print("changing G slits")
+        guard_slit.set_size(h=terms.SAXS.guard_h_size.value, v=terms.SAXS.guard_v_size.value)
+        time.sleep(0.5)  
+        while max(v_diff, h_diff) > 0.02:
+            time.sleep(0.5)
+            v_diff = abs((guard_slit.top.value-guard_slit.bot.value) - terms.SAXS.guard_v_size.value)
+            h_diff = abs((guard_slit.outb.value-guard_slit.inb.value) - terms.SAXS.guard_h_size.value)
+       
+    v_diff = abs(usaxs_slit.v_size.value- terms.SAXS.v_size.value)
+    h_diff = abs(usaxs_slit.h_size.value-terms.SAXS.h_size.value)
+    if max(v_diff, h_diff) > 0.02:
+       print "Moving Beam defining slits"
+       usaxs_slit.set_size(h=terms.SAXS.h_size.value, v=terms.SAXS.v_size.value)
+       time.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
+
+    print("Prepared for WAXS mode")
+    #insertScanFilters
+    user_data.set_state("WAXS Mode")
+    ts = str(datetime.now()
+    user_data.time_stamp.put(ts)
+    user_data.macro_file_time.put(ts)
+    user_data.scanning.put(0)
 
 
 def mode_radiography():
