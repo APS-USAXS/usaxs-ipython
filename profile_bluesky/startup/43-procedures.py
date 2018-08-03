@@ -27,7 +27,51 @@ EXAMPLE::
 
 
 def mode_USAXS():
-    pass
+    plc_protect.stop_if_emergency_ON()
+    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
+    ccd_shutter.close()
+    ti_filter_shutter.close()
+    # TODO: DCMfeedbackON()
+    retune_needed = False
+
+    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["USAXS in beam"]:
+        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        print("Moving to proper USAXS mode")
+        move_WAXSOut()
+        move_SAXSOut()
+        move_USAXSIn()
+        retune_needed = True
+
+    print "Preparing for USAXS mode ... please wait ..."
+    # set scalar to autocount mode for USAXS
+    scaler0.count_mode.put(1)
+    move_motors(
+        d_stage.x, terms.USAXS.diode.dx.value,
+        d_stage.y, terms.USAXS.diode.dy.value,
+    )
+    time.sleep(0.1)
+
+    if (ccd_shutter.value == 1) {
+        print("!!!CCD shutter failed to close!!!")
+        # TODO: logging?
+    else:
+        # mono_shutter.open()
+
+        # print("Change TV input selector to show image in hutch")
+        # print("Turn off BLUE switch on CCD controller")
+        # TODO: insertScanFilters()
+        ccd_shutter.close()
+
+        print("Prepared for USAXS mode")
+        #insertScanFilters
+        user_data.set_state("USAXS Mode")
+        ts = str(datetime.now()
+        user_data.time_stamp.put(ts)
+        user_data.macro_file_time.put(ts)
+        user_data.scanning.put(0)
+
+    #if retune_needed:
+    # FIXME: tune_after_imaging()   # but this is a plan!
 
 
 def mode_SBUSAXS():
