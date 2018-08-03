@@ -158,7 +158,6 @@ class Parameters_SAXS(Device):
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode")
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
-    exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")      # FIXME: redundant!
 	
     # this is Io value from gates scalar in LAX for Nexus file
     I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
@@ -186,7 +185,6 @@ class Parameters_WAXS(Device):
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory")
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")
-    exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")      # FIXME: redundant!
 
 
 class Parameters_Radiography(Device):
