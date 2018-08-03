@@ -321,3 +321,11 @@ def tune_usaxs_optics(side=False):
         yield from tune_asrp()
     yield from tune_ar()
     yield from tune_a2rp()
+
+
+def tune_after_imaging():
+    a_stage.r.tuner.width = 0.005
+    yield from tune_ar()
+    a_stage.r.tuner.width = 0.004
+    yield from tune_ar()
+    yield from tune_a2rp()
