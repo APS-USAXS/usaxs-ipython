@@ -72,6 +72,8 @@ def mode_USAXS():
 
     #if retune_needed:
     # FIXME: tune_after_imaging()   # but this is a plan!
+    # don't tune here
+    # TODO: set a signal to be caught by the plan in the RunEngine
 
 
 def mode_SBUSAXS():
