@@ -8,18 +8,18 @@ from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/loca
 
 
 class UserDataDevice(Device):
-    FS_order_number = Component(EpicsSignal,    "USAXS:FS_OrderNumber")
-    GUP_number = Component(EpicsSignal,         "GUPNumber")
-    macro_file_time = Component(EpicsSignal,    "USAXS:macroFileTime")
-    run_cycle = Component(EpicsSignal,          "RunCycle")
-    sample_thickness = Component(EpicsSignal,   "USAXS:SampleThickness")
-    sample_title = Component(EpicsSignal,       "USAXS:sampleTitle")
-    spec_file = Component(EpicsSignal,          "USAXS:specFile")
-    spec_scan = Component(EpicsSignal,          "USAXS:specScan")
-    state = Component(EpicsSignal,              "USAXS:state")
-    time_stamp = Component(EpicsSignal,         "USAXS:timeStamp")
-    user_dir = Component(EpicsSignal,           "USAXS:userDir")
-    user_name = Component(EpicsSignal,          "UserName")
+    FS_order_number = Component(EpicsSignal,    "9idcLAX:USAXS:FS_OrderNumber")
+    GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
+    macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
+    run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
+    sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
+    sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle")
+    spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile")
+    spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan")
+    state = Component(EpicsSignal,              "9idcLAX:USAXS:state")
+    time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
+    user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir")
+    user_name = Component(EpicsSignal,          "9idcLAX:UserName")
     
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "dataColInProgress")
@@ -266,7 +266,7 @@ ar_val_center = EpicsSignal("9idcLAX:USAXS:ARcenter", name="ar_val_center")
 asr_val_center = EpicsSignal("9idcLAX:USAXS:ASRcenter", name="asr_val_center")
 
 
-user_data = UserDataDevice("9idcLAX:", name="user_data")
+user_data = UserDataDevice(name="user_data")
 
 email_notices = EmailNotifications()
 email_notices.add_addresses(
