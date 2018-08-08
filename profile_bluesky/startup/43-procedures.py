@@ -27,7 +27,7 @@ EXAMPLE::
 
 def DCMfeedbackON():
     mono_feedback.on.put(1)     # TODO: see issue #49
-    mono_feedback.check_position()
+    mono_feedback.check_position()  # FIXME: where is this?  Sends email if too close.
 
 
 def insertScanFilters():
@@ -38,7 +38,7 @@ def insertScanFilters():
 
 
 def mode_USAXS():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
     ccd_shutter.close()
     ti_filter_shutter.close()
@@ -94,7 +94,7 @@ def mode_SBUSAXS():
 
 
 def mode_SAXS():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to SAXS mode" ))
     ccd_shutter.close()
     ti_filter_shutter.close()
@@ -116,7 +116,7 @@ def mode_SAXS():
 
 
 def mode_WAXS():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to WAXS mode" ))
     ccd_shutter.close()
     ti_filter_shutter.close()
@@ -170,7 +170,7 @@ def mode_pinSAXS():
 
 
 def mode_OpenBeamPath():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     user_data.set_state("Moving USAXS to OpenBeamPath mode")
     ccd_shutter.close()
     ti_filter_shutter.close()

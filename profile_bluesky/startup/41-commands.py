@@ -50,7 +50,7 @@ def checkUsaxsSaxsOutOfBeam():
 
 
 def move_WAXSOut():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -70,7 +70,7 @@ def move_WAXSOut():
 
 
 def move_WAXSIn():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to WAXS mode")
@@ -99,7 +99,7 @@ def move_WAXSIn():
 
 
 def move_SAXSOut():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -133,7 +133,7 @@ def move_SAXSOut():
 
 
 def move_SAXSIn():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to Pinhole SAXS mode")
@@ -172,7 +172,7 @@ def move_SAXSIn():
 
 
 def move_USAXSOut():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
 
@@ -201,7 +201,7 @@ def move_USAXSOut():
 
 
 def move_USAXSIn():
-    plc_protect.stop_if_emergency_ON()
+    plc_protect.stop_if_tripped()
     ccd_shutter.close()
     ti_filter_shutter.close()
     print("Moving to USAXS mode")
