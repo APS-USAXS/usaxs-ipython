@@ -239,3 +239,21 @@ def move_USAXSIn():
 
     print("USAXS is in position")
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["USAXS in beam"])
+
+
+def set_USAXS_Slits():
+    #diffs = [
+    #    abs(usaxs_slit.vap.value - terms.SAXS.usaxs_v_size.value),
+    #    abs(usaxs_slit.hap.value - terms.SAXS.usaxs_h_size.value),
+    #    abs(guard_slit.v_size.value - terms.SAXS.usaxs_guard_v_size.value),
+    #    abs(guard_slit.h_size.value - terms.SAXS.usaxs_guard_h_size.value),
+    #]
+    # if max(diffs) > 0.01:
+    comment "Moving USAXS slits and guard slits to correct place"
+    # move USAXS slits and guard slits in place
+    move_motors(
+        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
+        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
+    )

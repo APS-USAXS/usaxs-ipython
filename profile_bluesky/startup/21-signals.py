@@ -25,8 +25,26 @@ userCalcs_lax = APS_devices.userCalcsDevice("9idcLAX:", name="userCalcs_lax")
 usaxs_q_calc = APS_synApps_ophyd.swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
 usaxs_q = usaxs_q_calc.val
 
-
 user_data = UserDataDevice(name="user_data")
+
+
+
+  # this sets the check beam PV to use I000 PD on Mirror window, limit is set
+  # in user calc. This would fail for tune_dcmth and other macros, which may take
+  # the intensity there down. For that use the other macro... 
+usaxs_CheckBeamStandard = EpicsSignal(
+    "9idcLAX:blCalc:userCalc1", 
+    name="usaxs_CheckBeamStandard"
+)
+
+
+  # this sets the check beam PV to use maqny PVs and conditions to decide, 
+  # if there is chance to have beam. Uses also userCalc on lax
+usaxs_CheckBeamSpecial = EpicsSignal(
+    "9idcLAX:blCalc:userCalc2", 
+    name="usaxs_CheckBeamSpecial"
+)
+
 
 email_notices = EmailNotifications()
 email_notices.add_addresses(
