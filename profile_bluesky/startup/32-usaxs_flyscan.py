@@ -113,7 +113,7 @@ class UsaxsFlyScanDevice(Device):
         @run_in_thread
         def finish_HDF5_file():
             if self.saveFlyData is None:
-                raise RuntimeError("Must first call saveDataPrep()")
+                raise RuntimeError("Must first call prepare_HDF5_file()")
             self.saveFlyData.saveFile()
 
             print("HDF5 output complete: {}".format(self._output_HDF5_file_))
