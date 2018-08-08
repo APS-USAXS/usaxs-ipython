@@ -92,6 +92,11 @@ class MyWaveform(Device):
 
 
 class ApsUndulator(Device):
+    """
+    APS Undulator
+    
+    USAGE:  ``undulator = ApsUndulator("ID09ds:", name="undulator")``
+    """
     # TODO: add to APS_BlueSky_tools
     energy = Component(EpicsSignal, "Energy", write_pv="EnergySet")
     energy_taper = Component(EpicsSignal, "TaperEnergy", write_pv="TaperEnergySet")
@@ -114,6 +119,18 @@ class ApsUndulator(Device):
     device = Component(EpicsSignalRO, "Device")
     location = Component(EpicsSignalRO, "Location")
     version = Component(EpicsSignalRO, "Version")
+
+
+class ApsUndulatorDual(Device):
+    """
+    APS Undulator with upstream *and* downstream controls
+    
+    USAGE:  ``undulator = ApsUndulatorDual("ID09", name="undulator")``
+    
+    note:: the trailing ``:`` in the PV prefix should be omitted
+    """
+    upstream = Component(ApsUndulator, "us:")
+    downstream = Component(ApsUndulator, "ds:")
 
 
 class InOutShutter(Device):
