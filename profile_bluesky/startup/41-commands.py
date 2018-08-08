@@ -21,17 +21,17 @@ def IfRequestedStopBeforeNextScan():
     t0 = time.time()
 
     pv_txt = "Pausing for user for %g s"
-    while PauseBeforeNextScan.value > 0.5:
+    while terms.PauseBeforeNextScan.value > 0.5:
         msg = pv_txt % (time.time() - t0)
         print(msg)
         user_data.set_state(msg)
         time.sleep(1)
         open_the_shutter = True
 
-    if StopBeforeNextScan.value:
+    if terms.StopBeforeNextScan.value:
         print("User requested stop data collection before next scan")
         ti_filter_shutter.close()
-        StopBeforeNextScan.put(0)
+        terms.StopBeforeNextScan.put(0)
         user_data.collection_in_progress.put(0)
         open_the_shutter = False
 

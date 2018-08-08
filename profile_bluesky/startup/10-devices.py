@@ -338,12 +338,17 @@ class Parameters_USAXS(Device):
     ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRcenter")
     SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
+    ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
+    asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
     ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
     img_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Img_")
     finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
+    is2DUSAXSscan = Component(EpicsSignal,            "9idcLAX:USAXS:is2DUSAXSscan")
     motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
+    mr_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:MRcenter")
+    msr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:MSRcenter")
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
     scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
@@ -351,9 +356,7 @@ class Parameters_USAXS(Device):
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
     usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
-    is2DUSAXSscan = Component(EpicsSignal,            "9idcLAX:USAXS:is2DUSAXSscan")
 
-    
     def UPDRange(self):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
 
@@ -477,10 +480,12 @@ class GeneralParameters(Device):
     Imaging = Component(Parameters_Imaging)
     OutOfBeam = Component(Parameters_OutOfBeam)
     
+    PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:USAXS:PauseBeforeNextScan")
+    StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:USAXS:StopBeforeNextScan")
+
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
-
 
 
 # TODO: #48 send email

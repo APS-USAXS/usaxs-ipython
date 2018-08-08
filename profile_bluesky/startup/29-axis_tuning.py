@@ -81,7 +81,7 @@ def mr_pretune_hook():
 def mr_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    yield from bps.mv(mr_val_center, m_stage.r.position)
+    yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
  
 
 # TODO: EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
@@ -182,7 +182,7 @@ def msrp_pretune_hook():
 def msrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
-    yield from bps.mv(msr_val_center, ms_stage.rp.position)
+    yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
  
  
 # use I00 (if MS stage is used, use I0)
@@ -214,7 +214,7 @@ def ar_posttune_hook():
     print(msg.format(a_stage.r.name, a_stage.r.position))
 
     if a_stage.r.tuner.tune_ok:
-        yield from bps.mv(ar_val_center, a_stage.r.position)
+        yield from bps.mv(terms.USAXS.ar_val_center, a_stage.r.position)
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
         yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
@@ -250,7 +250,7 @@ def asrp_pretune_hook():
 def asrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(as_stage.rp.name, as_stage.rp.position))
-    yield from bps.mv(msr_val_center, as_stage.rp.position)
+    yield from bps.mv(terms.USAXS.asr_val_center, as_stage.rp.position)
  
  
 # use I00 (if MS stage is used, use I0)

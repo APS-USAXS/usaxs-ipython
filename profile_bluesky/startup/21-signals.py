@@ -25,12 +25,6 @@ userCalcs_lax = APS_devices.userCalcsDevice("9idcLAX:", name="userCalcs_lax")
 usaxs_q_calc = APS_synApps_ophyd.swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
 usaxs_q = usaxs_q_calc.val
 
-# TODO: should these signals go into "terms" somewhere?
-mr_val_center = EpicsSignal("9idcLAX:USAXS:MRcenter", name="mr_val_center")
-msr_val_center = EpicsSignal("9idcLAX:USAXS:MSRcenter", name="msr_val_center")
-ar_val_center = EpicsSignal("9idcLAX:USAXS:ARcenter", name="ar_val_center")
-asr_val_center = EpicsSignal("9idcLAX:USAXS:ASRcenter", name="asr_val_center")
-
 
 user_data = UserDataDevice(name="user_data")
 
@@ -41,9 +35,6 @@ email_notices.add_addresses(
     "mfrith@anl.gov",
 )
 
-# TODO: should these two signals go into "terms" somewhere?
-PauseBeforeNextScan = EpicsSignal("9idcLAX:USAXS:PauseBeforeNextScan", name="PauseBeforeNextScan")
-StopBeforeNextScan = EpicsSignal("9idcLAX:USAXS:StopBeforeNextScan", name="StopBeforeNextScan")
 
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!
 terms = GeneralParameters(name="terms")
