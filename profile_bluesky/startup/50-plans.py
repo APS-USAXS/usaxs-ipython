@@ -19,8 +19,10 @@ def preUSAXStune():
     
     USAGE:  ``RE(preUSAXStune())``
     """
-    yield from bps.mv(mono_feedback.on, 1)
-    ccd_shutter.close()
+    yield from bps.mv(
+        mono_feedback.on, 1,
+        ccd_shutter, "close",
+    )
     IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
     if not confirm_instrument_mode("USAXS in beam"):
         raise ValueError("Must be in USAXS mode to tune!")
