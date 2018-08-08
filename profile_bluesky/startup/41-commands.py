@@ -54,7 +54,7 @@ def move_WAXSOut():
     ccd_shutter.close()
     ti_filter_shutter.close()
 
-    print ("Moving WAXS out of beam")
+    print("Moving WAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
@@ -65,7 +65,7 @@ def move_WAXSOut():
         waxsx.soft_limit_hi.value, 
         WAXS_Xout + WAXS_XLimOffset)  # FIXME: and TEST
 
-    print "Removed WAXS from beam position"
+    print("Removed WAXS from beam position")
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
 
 
@@ -114,14 +114,16 @@ def move_SAXSOut():
 
     pin_z.set_lim(
         pin_z.soft_limit_hi.value, 
-        PIN_ZOut - PIN_ZLimOffset)  # FIXME:
+        PIN_ZOut - PIN_ZLimOffset,
+        )  # FIXME:
     
     # move pinhole up to out of beam position
     pin_y.y.move(PIN_YOut)               # FIXME: 
 
     pin_y.set_lim(
-        PIN_YOut - PIN_YLimOffset),
-        pin_y.soft_limit_lo.value)  # FIXME:
+        PIN_YOut - PIN_YLimOffset,
+        pin_y.soft_limit_lo.value,
+        )  # FIXME:
 
     print("Removed SAXS from beam position")
     ###sleep(1)    
@@ -146,8 +148,9 @@ def move_SAXSIn():
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
     pin_y.set_lim(
-        PIN_YIn - PIN_YLimOffset),
-        pin_y.soft_limit_lo.value)  # FIXME:
+        PIN_YIn - PIN_YLimOffset,
+        pin_y.soft_limit_lo.value,
+        )  # FIXME:
 
     move_motors(
         guard_slit.v_size, SAXS_VGSlit,
@@ -217,18 +220,18 @@ def move_USAXSIn():
         AX_In - AX_LimOffset,
         ax.soft_limit_hi.value)      # FIXME: and TEST
     dx.set_lim(
-        dx.soft_limit_hi.value),
+        dx.soft_limit_hi.value,
         usaxs_terms.diode.dx.value + DX_LimOffset)  # FIXME: and TEST
 
     guard_slit.set_size(h=USAXS_HGSlit, v=USAXS_VGSlit)
 
     move_motors(
-        usaxs_slit.vap = USAXS_VSlit,
-        usaxs_slit.hap = USAXS_HSlit,
-        a_stage.y = usaxs_terms.AY0.value,
-        a_stage.x = AX_In,
-        d_stage.x = DX_In,
-        d_stage.y = usaxs_terms.DY0.value,
+        usaxs_slit.vap,USAXS_VSlit,
+        usaxs_slit.hap,USAXS_HSlit,
+        a_stage.y, usaxs_terms.AY0.value,
+        a_stage.x, AX_In,
+        d_stage.x, DX_In,
+        d_stage.y, usaxs_terms.DY0.value,
     )
 
     print("USAXS is in position")

@@ -53,7 +53,7 @@ def mode_USAXS():
         move_USAXSIn()
         retune_needed = True
 
-    print "Preparing for USAXS mode ... please wait ..."
+    print("Preparing for USAXS mode ... please wait ...")
     # set scalar to autocount mode for USAXS
     scaler0.count_mode.put(1)
     move_motors(
@@ -62,6 +62,7 @@ def mode_USAXS():
     )
     time.sleep(0.1)
 
+"""
     if (ccd_shutter.value == 1) {
         print("!!!CCD shutter failed to close!!!")
         # TODO: logging?
@@ -76,7 +77,7 @@ def mode_USAXS():
         print("Prepared for USAXS mode")
         #insertScanFilters
         user_data.set_state("USAXS Mode")
-        ts = str(datetime.now()
+        ts = str(datetime.now())
         user_data.time_stamp.put(ts)
         user_data.macro_file_time.put(ts)
         user_data.scanning.put(0)
@@ -85,6 +86,7 @@ def mode_USAXS():
     # FIXME: tune_after_imaging()   # but this is a plan!
     # don't tune here
     # TODO: set a signal to be caught by the plan in the RunEngine
+"""
 
 
 def mode_SBUSAXS():
@@ -107,7 +109,7 @@ def mode_SAXS():
     print("Prepared for SAXS mode")
     #insertScanFilters
     user_data.set_state("SAXS Mode")
-    ts = str(datetime.now()
+    ts = str(datetime.now())
     user_data.time_stamp.put(ts)
     user_data.macro_file_time.put(ts)
     user_data.scanning.put(0)
@@ -142,14 +144,14 @@ def mode_WAXS():
     v_diff = abs(usaxs_slit.v_size.value- terms.SAXS.v_size.value)
     h_diff = abs(usaxs_slit.h_size.value-terms.SAXS.h_size.value)
     if max(v_diff, h_diff) > 0.02:
-       print "Moving Beam defining slits"
+       print("Moving Beam defining slits")
        usaxs_slit.set_size(h=terms.SAXS.h_size.value, v=terms.SAXS.v_size.value)
        time.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
 
     print("Prepared for WAXS mode")
     #insertScanFilters
     user_data.set_state("WAXS Mode")
-    ts = str(datetime.now()
+    ts = str(datetime.now())
     user_data.time_stamp.put(ts)
     user_data.macro_file_time.put(ts)
     user_data.scanning.put(0)
