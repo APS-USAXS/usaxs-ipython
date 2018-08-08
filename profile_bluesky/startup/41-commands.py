@@ -6,7 +6,7 @@ print(__file__)
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
 UsaxsSaxsModes = {
-    "dirty": -1,        # prior move did not finish correctly
+    "dirty": -1,        # moving or prior move did not finish correctly
     "out of beam": 1,   # SAXS, WAXS, and USAXS out of beam
     "USAXS in beam": 2,
     "SAXS in beam": 3,
@@ -40,7 +40,7 @@ def IfRequestedStopBeforeNextScan():
         # time.sleep(2)         # so, sleep not needed
 
 
-def checkUsaxsSaxsOutOfBeam():
+def confirmUsaxsSaxsOutOfBeam():
     """raise ValueError if not"""
     if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
         print("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
@@ -58,12 +58,12 @@ def move_WAXSOut():
     # in case there is an error in moving, it is NOT SAFE to start a scan
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
-    # move the pin_z away from sample
-    waxsx.move(WAXS_Xout)               # FIXME: WAXS_Xout
+    # move the pin_z away from sample       FIXME: "pin_z"?
+    waxsx.move(terms.WAXS.x_out.value)
 
     waxsx.set_lim(
         waxsx.soft_limit_hi.value, 
-        WAXS_Xout + WAXS_XLimOffset)  # FIXME: and TEST
+        terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
 
     print("Removed WAXS from beam position")
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
@@ -75,7 +75,7 @@ def move_WAXSIn():
     ti_filter_shutter.close()
     print("Moving to WAXS mode")
 
-    checkUsaxsSaxsOutOfBeam()
+    confirmUsaxsSaxsOutOfBeam()
     plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
@@ -84,14 +84,14 @@ def move_WAXSIn():
     # first move USAXS out of way
     waxsx.set_lim(
         waxsx.soft_limit_hi.value, 
-        WAXS_XIn + WAXS_XLimOffset)  # FIXME: and TEST
+        terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
     
     move_motors(
-        guard_slit.v_size, SAXS_VGSlit,
-        guard_slit.h_size, SAXS_HGSlit,
-        waxsx, WAXS_XIn,
-        usaxs_slit.v_size, SAXS_VSlit,
-        usaxs_slit.h_size, SAXS_HSlit,
+        guard_slit.v_size, terms.SAXS.guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        waxsx,             terms.WAXS.x_in.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.value,
+        usaxs_slit.h_size, terms.SAXS.h_size.value,
     )
 
     print("WAXS is in position")
@@ -110,20 +110,20 @@ def move_SAXSOut():
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
     # move the pin_z away from sample
-    pin_z.move(PIN_ZOut)               # FIXME: 
+    pin_z.move(terms.SAXS.z_out.value)
 
     pin_z.set_lim(
         pin_z.soft_limit_hi.value, 
-        PIN_ZOut - PIN_ZLimOffset,
-        )  # FIXME:
+        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
+        )
     
     # move pinhole up to out of beam position
-    pin_y.y.move(PIN_YOut)               # FIXME: 
+    pin_y.y.move(terms.SAXS.y_out.value)
 
     pin_y.set_lim(
-        PIN_YOut - PIN_YLimOffset,
+        terms.SAXS.y_out.value - terms.SAXS.y_limit_offset.value,
         pin_y.soft_limit_lo.value,
-        )  # FIXME:
+        )
 
     print("Removed SAXS from beam position")
     ###sleep(1)    
@@ -138,7 +138,7 @@ def move_SAXSIn():
     ti_filter_shutter.close()
     print("Moving to Pinhole SAXS mode")
 
-    checkUsaxsSaxsOutOfBeam()
+    confirmUsaxsSaxsOutOfBeam()
     plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
@@ -148,24 +148,24 @@ def move_SAXSIn():
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
     pin_y.set_lim(
-        PIN_YIn - PIN_YLimOffset,
+        terms.SAXS.y_in.value - terms.SAXS.y_limit_offset.value,
         pin_y.soft_limit_lo.value,
-        )  # FIXME:
+        )
 
     move_motors(
-        guard_slit.v_size, SAXS_VGSlit,
-        guard_slit.h_size, SAXS_HGSlit,
-        pin_y, WAXS_XIn,
-        usaxs_slit.v_size, SAXS_VSlit,
-        usaxs_slit.h_size, SAXS_HSlit,
+        guard_slit.v_size, terms.SAXS.guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        pin_y,             terms.SAXS.y_in.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.value,
+        usaxs_slit.h_size, terms.SAXS.h_size.value,
     )
 
     pin_z.set_lim(
         pin_z.soft_limit_hi.value, 
-        PIN_ZIn - PIN_ZLimOffset)  # FIXME:
+        terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value)
 
     # move Z _AFTER_ the others finish moving
-    pin_z.move(PIN_ZIn)
+    pin_z.move(terms.SAXS.z_in.value)
 
     print("Pinhole SAXS is in position")
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["SAXS in beam"])
@@ -183,18 +183,18 @@ def move_USAXSOut():
     ax = a_stage.x
     dx = d_stage.x
     move_motors(
-        ax, AX_Out,  # FIXME:
-        dx, DX_Out,  # FIXME:
+        ax, terms.SAXS.ax_out.value,
+        dx, terms.SAXS.dx_out.value,
     )
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
     ax.set_lim(
-        AX_Out - AX_LimOffset,
-        ax.soft_limit_hi.value)      # FIXME: and TEST
+        terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
+        ax.soft_limit_hi.value)
     dx.set_lim(
-        DX_Out + DX_LimOffset,
-        dx.soft_limit_hi.value)      # FIXME: and TEST
+        terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value,
+        dx.soft_limit_hi.value)
 
     print("Removed USAXS from beam position")
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
@@ -206,7 +206,7 @@ def move_USAXSIn():
     ti_filter_shutter.close()
     print("Moving to USAXS mode")
 
-    checkUsaxsSaxsOutOfBeam()
+    confirmUsaxsSaxsOutOfBeam()
     plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
@@ -217,21 +217,24 @@ def move_USAXSIn():
     ax = a_stage.x
     dx = d_stage.x
     ax.set_lim(
-        AX_In - AX_LimOffset,
-        ax.soft_limit_hi.value)      # FIXME: and TEST
+        terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
+        ax.soft_limit_hi.value)
     dx.set_lim(
         dx.soft_limit_hi.value,
-        usaxs_terms.diode.dx.value + DX_LimOffset)  # FIXME: and TEST
+        terms.USAXS.diode.dx.value + terms.SAXS.dx_limit_offset.value)
 
-    guard_slit.set_size(h=USAXS_HGSlit, v=USAXS_VGSlit)
+    guard_slit.set_size(
+        h = terms.SAXS.usaxs_guard_h_size.value, 
+        v = terms.SAXS.usaxs_guard_v_size.value,
+    )
 
     move_motors(
-        usaxs_slit.vap,USAXS_VSlit,
-        usaxs_slit.hap,USAXS_HSlit,
-        a_stage.y, usaxs_terms.AY0.value,
-        a_stage.x, AX_In,
-        d_stage.x, DX_In,
-        d_stage.y, usaxs_terms.DY0.value,
+        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
+        a_stage.y,      terms.USAXS.AY0.value,
+        a_stage.x,      terms.SAXS.ax_in.value,
+        d_stage.x,      terms.SAXS.dx_in.value,
+        d_stage.y,      terms.USAXS.DY0.value,
     )
 
     print("USAXS is in position")
