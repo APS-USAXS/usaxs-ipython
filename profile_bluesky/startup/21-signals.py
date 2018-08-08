@@ -22,7 +22,7 @@ class UserDataDevice(Device):
     user_name = Component(EpicsSignal,          "9idcLAX:UserName")
     
     # for GUI to know if user is collecting data: 0="On", 1="Off"
-    collection_in_progress = Component(EpicsSignal, "dataColInProgress")
+    collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
     
     def set_state(self, msg):
         if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:

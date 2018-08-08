@@ -16,7 +16,7 @@ class PlcProtectionDevice(Device):
     WAXS_X = Component(EpicsSignal, 'X12')
     AX = Component(EpicsSignal, 'X13')
     
-    emergency_ON = Component(EpicsSignal, 'Y0')
+    operations_status = Component(EpicsSignal, 'Y0')     # 0=not good, 1=good
     
     SLEEP_POLL_s = 0.1
     
@@ -32,8 +32,8 @@ class PlcProtectionDevice(Device):
             if verbose:
                 print(msg % time.time()-t0)
     
-    def stop_if_emergency_ON(self, verbose=True):   # TODO: should be a Bluesky suspender?
-        if self.emergency_ON.value < 1:
+    def stop_if_tripped(self, verbose=True):   # TODO: should be a Bluesky suspender?
+        if self.operations_status.value < 1:
             if verbose:
                 print("Equipment protection is engaged, no power on motors.")
                 print("Fix PLC protection before any move. Stopping now.")
