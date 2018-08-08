@@ -37,6 +37,12 @@ def insertScanFilters():
     pf4_AlTi.fPosB.put(terms.USAXS.scan_filters.Ti.value)
 
 
+def confirm_instrument_mode(mode_name):
+    """True if instrument is in the named mode"""
+    expected_mode = UsaxsSaxsModes[mode_name]
+    return terms.SAXS.UsaxsSaxsMode.value == expected_mode
+
+
 def mode_USAXS():
     plc_protect.stop_if_tripped()
     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
@@ -45,7 +51,7 @@ def mode_USAXS():
     DCMfeedbackON()
     retune_needed = False
 
-    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["USAXS in beam"]:
+    if not confirm_instrument_mode("USAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper USAXS mode")
         move_WAXSOut()
@@ -62,7 +68,7 @@ def mode_USAXS():
     )
     time.sleep(0.1)
 
-    if (ccd_shutter.value == 1) {
+    if not ccd_shutter.is_closed:
         print("!!!CCD shutter failed to close!!!")
         # TODO: logging?
     else:
@@ -97,7 +103,7 @@ def mode_SAXS():
     ccd_shutter.close()
     ti_filter_shutter.close()
 
-    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["SAXS in beam"]:
+    if not confirm_instrument_mode("SAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper SAXS mode")
         move_WAXSOut()
@@ -119,7 +125,7 @@ def mode_WAXS():
     ccd_shutter.close()
     ti_filter_shutter.close()
 
-    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["WAXS in beam"]:
+    if not confirm_instrument_mode("WAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper WAXS mode")
         move_SAXSOut()
@@ -172,7 +178,8 @@ def mode_OpenBeamPath():
     user_data.set_state("Moving USAXS to OpenBeamPath mode")
     ccd_shutter.close()
     ti_filter_shutter.close()
-    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
+
+    if not confirm_instrument_mode("out of beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Opening the beam path, moving all components out")
         move_SAXSOut()
