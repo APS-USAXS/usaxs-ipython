@@ -226,7 +226,7 @@ class GeneralParameters(Device):
     """
     cache of parameters to share with/from EPICS
     """
-    USAXS = Component(GeneralUsaxsParameters)
+    USAXS = Component(Parameters_USAXS)
     SBUSAXS = Component(Parameters_SBUSAXS)
     SAXS = Component(Parameters_SAXS)
     WAXS = Component(Parameters_WAXS)
