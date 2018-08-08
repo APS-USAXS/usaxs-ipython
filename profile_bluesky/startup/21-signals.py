@@ -11,6 +11,9 @@ MAX_EPICS_STRINGOUT_LENGTH = 40
 APS = APS_devices.ApsMachineParametersDevice(name="APS")
 aps_current = APS.current
 
+und_us = ApsUndulator("ID09us:", name="und_us")
+und_ds = ApsUndulator("ID09ds:", name="und_ds")
+
 mono_energy = EpicsSignal('9ida:BraggERdbkAO', name='mono_energy', write_pv="9ida:BraggEAO")
 und_us_energy = EpicsSignal('ID09us:Energy', name='und_us_energy', write_pv="ID09us:EnergySet")
 und_ds_energy = EpicsSignal('ID09ds:Energy', name='und_ds_energy', write_pv="ID09ds:EnergySet")
