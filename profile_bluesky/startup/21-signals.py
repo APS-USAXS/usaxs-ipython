@@ -141,19 +141,19 @@ class Parameters_transmission(Device):
 class Parameters_SAXS(Device):
     z_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_in")
     z_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_out")
-    z_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_limit_offset")
+    z_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_limit_offset")
 
     y_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_in")
     y_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_out")
-    y_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_limit_offset")
+    y_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_limit_offset")
 
     ax_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_in")
     ax_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_out")
-    ax_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_limit_offset")
+    ax_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_limit_offset")
 
     dx_in = Component(EpicsSignal, "9idcLAX:USAXS:Diode_dx")
     dx_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_out")
-    dx_lim_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_limit_offset")
+    dx_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_limit_offset")
 
     usaxs_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_hslit_ap")
     usaxs_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_vslit_ap")
