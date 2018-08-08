@@ -249,8 +249,7 @@ def set_USAXS_Slits():
     #    abs(guard_slit.h_size.value - terms.SAXS.usaxs_guard_h_size.value),
     #]
     # if max(diffs) > 0.01:
-    comment "Moving USAXS slits and guard slits to correct place"
-    # move USAXS slits and guard slits in place
+    print("Moving USAXS slits and guard slits to correct place")
     move_motors(
         usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
         usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
