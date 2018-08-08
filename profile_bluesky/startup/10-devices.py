@@ -121,6 +121,14 @@ class InOutShutter(Device):
         """request shutter to close, interactive use"""
         return self.set(self.close_value)
     
+    @property
+    def is_opened(self):
+        return self.control_bit.value == self.open_value
+    
+    @property
+    def is_closed(self):
+        return self.control_bit.value == self.close_value
+
     def set(self, value, **kwargs):
         """request the shutter to open or close, BlueSky plan use"""
         # ensure numerical additions to lists are now strings
