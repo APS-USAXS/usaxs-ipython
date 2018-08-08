@@ -119,6 +119,19 @@ class Parameters_SBUSAXS(Device):
     pass
 
 
+class Parameters_transmission(Device):
+    # measure transmission in USAXS using pin diode
+    measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
+    
+    # Ay to hit pin diode
+    ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
+    count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
+    diode_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinCounts")
+    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinGain") # I00 amplifier
+    I0_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Counts")
+    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Gain")
+
+
 class Parameters_SAXS(Device):
     z_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_in")
     z_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_out")
@@ -163,18 +176,6 @@ class Parameters_SAXS(Device):
     I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
     
     transmission = Component(Parameters_transmission)
-
-class Parameters_transmission(Device):
-    # measure transmission in USAXS using pin diode
-    measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
-    
-    # Ay to hit pin diode
-    ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
-    count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
-    diode_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinCounts")
-    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinGain") # I00 amplifier
-    I0_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Counts")
-    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Gain")
 
 
 class Parameters_WAXS(Device):
