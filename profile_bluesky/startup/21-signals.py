@@ -96,7 +96,7 @@ class Parameters_USAXS(Device):
     SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
-    ccd = Component(GeneralUsaxsParametersCCD,        "9idcLAX:USAXS:CCD_")
+    ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
     img_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Img_")
     finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
