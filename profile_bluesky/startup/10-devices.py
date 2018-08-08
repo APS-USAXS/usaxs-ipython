@@ -364,6 +364,8 @@ class Parameters_USAXS(Device):
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
     usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
+    
+    retune_needed = Component(Signal, value=False)     # TODO: could have EPICS PV
 
     def UPDRange(self):
         return upd_controls.auto.lurange.value  # TODO: check return value is int

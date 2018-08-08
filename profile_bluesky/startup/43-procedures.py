@@ -87,10 +87,10 @@ def mode_USAXS():
         user_data.macro_file_time.put(ts)
         user_data.scanning.put(0)
 
-    #if retune_needed:
-    # FIXME: tune_after_imaging()   # but this is a plan!
-    # don't tune here
-    # TODO: set a signal to be caught by the plan in the RunEngine
+    if retune_needed:
+        # don't tune here
+        # Instead, set a signal to be caught by the plan in the RunEngine
+        terms.USAXS.retune_needed.put(True)
 
 
 def mode_SBUSAXS():
