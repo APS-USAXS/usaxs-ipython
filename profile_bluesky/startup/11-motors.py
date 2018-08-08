@@ -48,7 +48,7 @@ class UsaxsSlitDevice(MotorBundle):
             raise ValueError("must define horizontal size")
         if v is None:
             raise ValueError("must define vertical size")
-        move_motors(self.h_size, h, self.v_size=v)
+        move_motors(self.h_size, h, self.v_size, v)
 
 
 class GSlitDevice(MotorBundle):
@@ -73,7 +73,7 @@ class GSlitDevice(MotorBundle):
             raise ValueError("must define horizontal size")
         if v is None:
             raise ValueError("must define vertical size")
-        move_motors(self.h_size, h, self.v_size=v)
+        move_motors(self.h_size, h, self.v_size, v)
     
 
 class UsaxsCollimatorStageDevice(MotorBundle):
