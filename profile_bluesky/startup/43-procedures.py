@@ -62,7 +62,6 @@ def mode_USAXS():
     )
     time.sleep(0.1)
 
-"""
     if (ccd_shutter.value == 1) {
         print("!!!CCD shutter failed to close!!!")
         # TODO: logging?
@@ -86,7 +85,6 @@ def mode_USAXS():
     # FIXME: tune_after_imaging()   # but this is a plan!
     # don't tune here
     # TODO: set a signal to be caught by the plan in the RunEngine
-"""
 
 
 def mode_SBUSAXS():
