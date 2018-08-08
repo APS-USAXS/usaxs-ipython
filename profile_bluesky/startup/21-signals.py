@@ -12,16 +12,26 @@ APS = APS_devices.ApsMachineParametersDevice(name="APS")
 aps_current = APS.current
 
 undulator = ApsUndulatorDual("ID09", name="undulator")
+# shortcuts, necessary?
 #und_us = undulator.upstream
 #und_ds = undulator.downstream
 #und_us_energy = und_us.energy
 #und_ds_energy = und_ds.energy
 
-mono_energy = EpicsSignal('9ida:BraggERdbkAO', name='mono_energy', write_pv="9ida:BraggEAO")
 
-mono_feedback = DCM_Feedback("9idcLAX:fbe:omega", name="mono_feedback")
-mono_temperature = EpicsSignal("9ida:DP41:s1:temp", name="mono_temperature")
-cryo_level = EpicsSignal("9idCRYO:MainLevel:val", name="cryo_level")
+class MyMonochromator(Device):
+    dcm = Component(KohzuSeqCtl_Monochromator, "9ida:")
+    feedback = Component(DCM_Feedback, "9idcLAX:fbe:omega")
+    temperature = Component(EpicsSignal, "9ida:DP41:s1:temp")
+    cryo_level = Component(EpicsSignal, "9idCRYO:MainLevel:val")
+
+
+monochromator = MyMonochromator(name="monochromator")
+# shortcuts, necessary?
+mono_energy = monochromator.dcm.energy
+mono_feedback = monochromator.feedback
+mono_temperature = monochromator.temperature
+cryo_level = monochromator.cryo_level
 
 
 userCalcs_lax = APS_devices.userCalcsDevice("9idcLAX:", name="userCalcs_lax")

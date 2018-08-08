@@ -266,6 +266,31 @@ class Struck3820(Device):
     do_readl_all = Component(EpicsSignal, "DoReadAll")
 
 
+class KohzuSeqCtl_Monochromator(Device):
+    """
+    synApps Kohzu double-crystal monochromator sequence control program
+    """
+    # lambda is reserved word in Python, can't use it
+    wavelength = Component(EpicsSignal, "BraggLambdaRdbkAO", write_pv="BraggLambdaAO")
+    energy = Component(EpicsSignal, "BraggERdbkAO", write_pv="BraggEAO")
+    theta = Component(EpicsSignal, "BraggThetaRdbkAO", write_pv="BraggThetaAO")
+    message1 = Component(EpicsSignalRO, "KohzuSeqMsg1SI")
+    message2 = Component(EpicsSignalRO, "KohzuSeqMsg2SI")
+    operator_acknowledge = Component(EpicsSignal, "KohzuOperAckBO")
+    use_set = Component(EpicsSignal, "KohzuUseSetBO")
+    mode = Component(EpicsSignal, "KohzuModeBO")
+    move_button = Component(EpicsSignal, "KohzuPutBO")
+    y_offset = Component(EpicsSignal, "Kohzu_yOffsetAO")
+
+    crystal_mode = Component(EpicsSignal, "KohzuMode2MO")
+    crystal_h = Component(EpicsSignal, "BraggHAO")
+    crystal_k = Component(EpicsSignal, "BraggKAO")
+    crystal_l = Component(EpicsSignal, "BraggLAO")
+    crystal_lattice_constant = Component(EpicsSignal, "BraggAAO")
+    crystal_mode = Component(EpicsSignal, "Bragg2dSpacingAO")
+    crystal_type = Component(EpicsSignal, "BraggTypeMO")
+
+
 class DCM_Feedback(Device):
     """
     monochromator feedback program
