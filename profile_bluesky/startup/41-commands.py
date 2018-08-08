@@ -58,7 +58,7 @@ def move_WAXSOut():
     # in case there is an error in moving, it is NOT SAFE to start a scan
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
 
-    # move the pin_z away from sample       FIXME: "pin_z"?
+    # move the WAXS X away from sample
     waxsx.move(terms.WAXS.x_out.value)
 
     waxsx.set_lim(
