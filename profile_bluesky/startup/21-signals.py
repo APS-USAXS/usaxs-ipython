@@ -88,11 +88,17 @@ class Parameters_Al_Ti_Filters(Device):
     Ti = Component(EpicsSignal,  "Ti_Filter")
 
 
+class Parameters_Al_Ti_Filters_Imaging(Device):
+    # because there is one in every crowd!
+    Al = Component(EpicsSignal,  "Al_Filters")
+    Ti = Component(EpicsSignal,  "Ti_Filters")
+
+
 class Parameters_USAXS(Device):
     """internal values shared with EPICS"""
     AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
     DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
-    ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRP0")
+    ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRcenter")
     SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
@@ -214,7 +220,7 @@ class Parameters_Imaging(Device):
     guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgGuardHorApperture")
     guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgGuardVertApperture")
 
-    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_Img:Img_")
+    filters = Component(Parameters_Al_Ti_Filters_Imaging, "9idcLAX:USAXS_Img:Img_")
     filter_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Img:Img_FilterTransmission")
 
 
