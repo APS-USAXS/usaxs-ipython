@@ -209,13 +209,15 @@ def USAXS_in():
 
 
 def move_USAXSIn():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter, "close",
+        ti_filter_shutter, "close",
+    )
     print("Moving to USAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
-    plc_protect.wait_for_interlock()
+    yield from plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
