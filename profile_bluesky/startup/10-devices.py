@@ -310,13 +310,17 @@ class DCM_Feedback(Device):
         return self.on.value == 1
     
     def check_position(self):
-        diff_hi = self.drvh - self.oval
-        diff_lo = self.oval - self.drvl
+        diff_hi = self.drvh.value - self.oval.value
+        diff_lo = self.oval.value - self.drvl.value
         if min(diff_hi, diff_lo) < 0.2:
             if email_notices.notify_on_feedback:
                 subject = "USAXS Feedback problem"
                 message = "Feedback is very close to its limits."
-                email_notices.send(subject, message)
+                # TODO: must call in thread
+                #email_notices.send(subject, message)
+                print("!"*15)
+                print(subject, message)
+                print("!"*15)
 
 
 class UserDataDevice(Device):
