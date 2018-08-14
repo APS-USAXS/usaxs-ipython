@@ -76,96 +76,89 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
-        use_mode, "USAXS",
+        # TODO: use_mode, "USAXS",
         # USAXS and guard slits by mode_USAXS command on previous line
         usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
         usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
+    if terms.USAXS.retune_needed.value:
+        pass    # implement run_preUSAXStuneIfNeeded(called_from_where)
+    
+    # TODO: scan_title = __get_clean_user_string(scan_title)
+    
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.sample_title, scan_title,
+        user_data.macro_file_time, ts,
+        user_data.state, "starting USAXS Flyscan",
+        user_data.sample_thickness, thickness,
+        user_data.user_name, USERNAME,
+        user_data.user_dir, os.getcwd(),
+        user_data.spec_file, "-tba-",   # TODO: 
+        user_data.spec_scan, "-tba-",   # TODO: 
+        user_data.time_stamp, ts,
+        user_data.scan_macro, "FlyScan",
+    )
+    
+    # offset the calc from exact zero so can plot log(|Q|)
+    ar0_calc_offset = terms.USAXS.ar_val_center.value - 0.00005
+    yield from bps.mv(
+        a_stage.r, terms.USAXS.ar_val_center.value,
+        # these two were moved by mode_USAXS()
+        # d_stage.y, terms.USAXS.diode.dy.value,
+        # a_stage.y, terms.USAXS.AY0.value,
+        # sample stage already moved to pos_X, pos_Y
+        user_data.state, "Moving to Q=0 ",
+        usaxs_q_calc.channels.B, ar0_calc_offset,
+    )
+
+    # TODO: what to do with USAXSScanUp?
+    # it's used to cal Finish_in_Angle and START
+    # both of which get passed to EPICS
+    # That happens outside of this code.  completely.
+    """
+    #Calculate Finish in angle, since now it is in Q units
+    #use en as energy in keV, 
+    _USAXS_Lambda = 12.4 / A[en]
+    ########################################################################
+    # decide if we are scaning up or down...
+    if(USAXSScanUp) {
+        # scanning up, new method
+        Finish_in_Angle = AR_VAL_CENTER + (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
+        START = AR_VAL_CENTER + (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
+    } else {
+        # scanning down, old method
+        Finish_in_Angle = AR_VAL_CENTER - (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
+        START = AR_VAL_CENTER - (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
+    }
+    """
+
+    # measure transmission values using pin diode if desired
+    # TODO: measure_USAXS_PinT
+
+    # TODO: #49
+    # yield from bps.mv(monochromator.feedback.on, 0)
+
+    # enable asrp link to ar for 2D USAXS
+    # FS_enableASRP
+    if terms.USAXS.is2DUSAXSscan.value:
+        yield from bps.mv(self.asrp_calc_SCAN, 9)
+
+    yield from bps.mv(
+        upd_controls.femto.change_gain_up, terms.FlyScan.setpoint_up.value,
+        upd_controls.femto.change_gain_down, terms.FlyScan.setpoint_down.value,
+        ti_filter_shutter, "open",
+    )
+    # TODO: autoscale_amplifiers()   # must run in thread since this is not a plan
+
 
 
 # TODO: #45 Flyscan
 """
 def Flyscan '{
 
-   #####################################################
-   # make sure we are in USAXS mode, cannot run otherwise. 
-   useModeUSAXS  
-   ##################################################### 
-   set_USAXS_Slits  			  # make sure USAXS slits are set correctly...
-   #####################################################
-   # check if we are ready to run preUSAXStune and run if requested. 
-   run_preUSAXStuneIfNeeded  2
-   # done tuning, if requested by user or by number of scans recently done...     
-   ##################################################### 
-   ## clean the user name and append any information needed
-   scan_title  = __get_clean_user_string(scan_title) 
-   #####################################################
-   SPEC_STD_TITLE = TITLE		# what is TITLE here???
-   TITLE      = scan_title
-   epics_put ("9idcLAX:USAXS:sampleTitle", scan_title)
-   epics_put ("9idcLAX:USAXS:macroFileTime",      date())
-   epics_put ("9idcLAX:USAXS:state",       sprintf("starting USAXS Flyscan"))
-   epics_put ("9idcLAX:USAXS:userName",    USER)
-   epics_put ("9idcLAX:USAXS:userDir",     CWD)
-   epics_put ("9idcLAX:USAXS:specFile",    DATAFILE)
-   epics_put ("9idcLAX:USAXS:specScan",    SCAN_N+1)
-   epics_put ("9idcLAX:USAXS:timeStamp",   date())
-   epics_put ("9idcLAX:USAXS:SampleThickness",    USAXS_SAMPLE_THICKNESS)
-   if (useSBUSAXS) {
-    epics_put ("9idcLAX:USAXS:scanMacro",   "FlyScan")
-  } else {
-    epics_put ("9idcLAX:USAXS:scanMacro",   "FlyScan")
-  }
-   #####################################################
-   # is this necessary for measurement of transmission using pindiode
-   get_angles
-   A[ar] = AR_VAL_CENTER
-   A[dy] = DY0
-   A[ay] = AY0
-   A[sx] = pos_X
-   A[sy] = pos_Y
-   epics_put ("9idcLAX:USAXS:state",  sprintf("Moving to Q=0 "))
-   ###moveSample pos_X pos_Y
-   comment "Moving AR motor to %g degrees (beam center)" AR_VAL_CENTER
-   move_em; waitmove; get_angles;
-   ARenc_CENTER = AR_VAL_CENTER
-   comment "for next scan: encoder ARenc_CENTER  = %7.4f" ARenc_CENTER
-              # Set the center for the Q calculation for plotting here
-   epics_put("9idcLAX:USAXS:Q.B", ARenc_CENTER-0.00005)
-   #####################################################
-   #####################################################
-   #####################################################
-   #Calculate Finish in angle, since now it is in Q units
-   #use en as energy in keV, 
-   _USAXS_Lambda = 12.4 / A[en]
-   ########################################################################
-   # decide if we are scaning up or down...
-   if(USAXSScanUp) {
-        # scanning up, new method
-        Finish_in_Angle = AR_VAL_CENTER + (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
-        START = AR_VAL_CENTER + (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
-   } else {
-        # scanning down, old method
-        Finish_in_Angle = AR_VAL_CENTER - (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
-        START = AR_VAL_CENTER - (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
-   }
-   #####################################################
-   # measure transmission values using pin diode if desired 
-   measure_USAXS_PinT
-   #####################################################
-   # define cleanup macro for ^C usage
-   rdef _cleanup3 \'resetFlyScan\'      
-   #####################################################
-   DCMfeedbackOFF 
-   #####################################################
-   # enable asrp link to ar for 2D USAXS
-   FS_enableASRP
-   #####################################################
-   ### change sequence program limits for FS
-   epics_put("9idcUSX:pd01:seq02:gainU",FS_UPD_UpRangeChange )
-   epics_put("9idcUSX:pd01:seq02:gainD",FS_UPD_DownRangeChange )
    #####################################################
    # autorange upd/I0/I00
    openTiFilterShutter

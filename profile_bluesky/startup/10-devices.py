@@ -326,6 +326,7 @@ class UserDataDevice(Device):
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
     sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle")
+    scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile")
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan")
     state = Component(EpicsSignal,              "9idcLAX:USAXS:state")
@@ -353,9 +354,12 @@ class FlyScanParameters(Device):
     use_flyscan = Component(EpicsSignal, "9idcLAX:USAXS:UseFlyscan")
     asrp_calc_SCAN = Component(EpicsSignal, "9idcLAX:userStringCalc2.SCAN")
     order_number = Component(EpicsSignal, "9idcLAX:USAXS:FS_OrderNumber")
+
+    setpoint_up = Component(Signal, value=6000)     # decrease range
+    setpoint_down = Component(Signal, value=850000)    # increase range
     
     def enable_ASRP(self):
-        if is2DUSAXSscan.value: # TODO: check return value here
+        if is2DUSAXSscan.value: # return value of 0.0 is "not True"
             self.asrp_calc_SCAN.put(9)
     
     def disable_ASRP(self):
@@ -435,6 +439,10 @@ class Parameters_USAXS(Device):
     useSBUSAXS = Component(Signal,                    value=False)
     
     retune_needed = Component(Signal, value=False)     # TODO: could have EPICS PV
+
+    # TODO: these are particular to the amplifier
+    setpoint_up = Component(Signal, value=4000)     # decrease range
+    setpoint_down = Component(Signal, value=650000)    # increase range
 
     def UPDRange(self):
         return upd_controls.auto.lurange.value  # TODO: check return value is int

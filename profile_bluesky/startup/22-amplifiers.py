@@ -53,6 +53,9 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
     # gain settling time for the device is <150ms
     settling_time = Component(Signal, value=0.08)
     
+    change_gain_up = Component(EpicsSignal, "gainU")
+    change_gain_down = Component(EpicsSignal, "gainD")
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
