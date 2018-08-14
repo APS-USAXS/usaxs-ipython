@@ -12,7 +12,6 @@ def uascan():
     # TODO: needs proper args & kwargs matching SPEC's signature
 
 
-# TODO: #47
 def preUSAXStune():
     """
     tune the USAXS optics *only* if in USAXS mode
