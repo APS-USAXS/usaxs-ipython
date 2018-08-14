@@ -95,7 +95,7 @@ def _getScalerSignalName_(scaler, signal):
 m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
-m_stage.r.tuner.width = 0.005
+m_stage.r.tuner.width = 0.002
 
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
