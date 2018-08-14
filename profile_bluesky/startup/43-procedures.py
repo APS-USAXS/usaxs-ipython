@@ -26,8 +26,9 @@ EXAMPLE::
 
 
 def DCMfeedbackON():
-    mono_feedback.on.put(1)     # TODO: see issue #49
-    mono_feedback.check_position()  # FIXME: where is this?  Sends email if too close.
+    """plan: could send email"""
+    yield from bps.mv(monochromator.feedback.on, 1)
+    mono_feedback.check_position()
 
 
 def insertScanFilters():
@@ -45,10 +46,10 @@ def confirm_instrument_mode(mode_name):
 
 def mode_USAXS():
     plc_protect.stop_if_tripped()
-    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to USAXS mode" ))
+    user_data.state.put("Moving USAXS to USAXS mode")
     ccd_shutter.close()
     ti_filter_shutter.close()
-    DCMfeedbackON()
+    DCMfeedbackON() 
     retune_needed = False
 
     if not confirm_instrument_mode("USAXS in beam"):

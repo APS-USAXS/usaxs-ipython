@@ -17,6 +17,7 @@ UsaxsSaxsModes = {
 
 
 def IfRequestedStopBeforeNextScan():
+    """plan: wait if requested"""
     open_the_shutter = False
     t0 = time.time()
 
@@ -24,20 +25,22 @@ def IfRequestedStopBeforeNextScan():
     while terms.PauseBeforeNextScan.value > 0.5:
         msg = pv_txt % (time.time() - t0)
         print(msg)
-        user_data.set_state(msg)
-        time.sleep(1)
+        yield from bps.mv(user_data.state, msg)
+        yield from bps.sleep(1)
         open_the_shutter = True
 
     if terms.StopBeforeNextScan.value:
         print("User requested stop data collection before next scan")
-        ti_filter_shutter.close()
-        terms.StopBeforeNextScan.put(0)
-        user_data.collection_in_progress.put(0)
+        yield from bps.mv(
+            ti_filter_shutter,                  "close",
+            terms.StopBeforeNextScan,           0,
+            user_data.collection_in_progress,   0,
+        )
         open_the_shutter = False
 
     if open_the_shutter:
-        mono_shutter.open()     # waits until complete
-        # time.sleep(2)         # so, sleep not needed
+        yield from bps.mv(mono_shutter, "open")     # waits until complete
+        # yield from bps.sleep(2)         # so, sleep not needed
 
 
 def confirmUsaxsSaxsOutOfBeam():
@@ -200,6 +203,11 @@ def move_USAXSOut():
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
 
 
+def USAXS_in():
+    """plan: configure instrument for USAXS measurements"""
+    pass
+
+
 def move_USAXSIn():
     plc_protect.stop_if_tripped()
     ccd_shutter.close()
@@ -238,18 +246,9 @@ def move_USAXSIn():
     terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["USAXS in beam"])
 
 
-def set_USAXS_Slits():
-    #diffs = [
-    #    abs(usaxs_slit.vap.value - terms.SAXS.usaxs_v_size.value),
-    #    abs(usaxs_slit.hap.value - terms.SAXS.usaxs_h_size.value),
-    #    abs(guard_slit.v_size.value - terms.SAXS.usaxs_guard_v_size.value),
-    #    abs(guard_slit.h_size.value - terms.SAXS.usaxs_guard_h_size.value),
-    #]
-    # if max(diffs) > 0.01:
-    print("Moving USAXS slits and guard slits to correct place")
-    move_motors(
-        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
-        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
-    )
+def set_USAXS_slits():
+    """move the USAXS slits to expected values"""
+    usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
+    usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
+    guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
+    guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
