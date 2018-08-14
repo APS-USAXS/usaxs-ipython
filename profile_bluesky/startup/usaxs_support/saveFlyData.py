@@ -389,7 +389,7 @@ class SaveFlyScan(object):
                 # create the file and internal structure
                 f = h5py.File(self.hdf5_file_name, "w")
                 # the following are attributes to the root element of the HDF5 file
-                addAttributes(f, 
+                addAttributes(f,
                     **dict(
                         file_name = self.hdf5_file_name,
                         creator = __file__,
@@ -435,8 +435,8 @@ class SaveFlyScan(object):
 def makeDataset(parent, name, data = None, **attr):
     '''
     create and write data to a dataset in the HDF5 file hierarchy
-    
-    Any named parameters in the call to this method 
+
+    Any named parameters in the call to this method
     will be saved as attributes of the dataset.
 
     :param obj parent: parent group
@@ -455,7 +455,7 @@ def makeDataset(parent, name, data = None, **attr):
                 return value.encode("ascii", "ignore")
             return value
 
-        if not isinstance(data, (tuple, list)):
+        if not isinstance(data, (tuple, list, numpy.ndarray)):
             data = [data, ]
         if isinstance(data, (tuple, list)):
             data = list(map(encoder, data))
@@ -534,9 +534,17 @@ def developer():
     sfs = SaveFlyScan('test.h5', XML_CONFIGURATION_FILE)
     sfs.waitForData()
 
+
+def developer2():
+    sfs = SaveFlyScan("/tmp/sfs.h5", "./saveFlyData.xml")
+    sfs.preliminaryWriteFile()
+    sfs.saveFile()
+
+
 if __name__ == '__main__':
-    main()  # production system
+    # main()  # production system
     # developer()
+    developer2()
 
 
 '''
