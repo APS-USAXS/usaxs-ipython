@@ -28,7 +28,7 @@ class PlcProtectionDevice(Device):
         t0 = time.time()
         msg = "Waiting %g for PLC interlock, check limit switches"
         while not self.interlocked:
-            time.sleep(self.SLEEP_POLL_s)
+            yield from bps.sleep(self.SLEEP_POLL_s)
             if verbose:
                 print(msg % time.time()-t0)
     
@@ -39,8 +39,10 @@ class PlcProtectionDevice(Device):
                 print("Fix PLC protection before any move. Stopping now.")
                 print("Call beamline scientists if you do not understand.")
                 print("!!!!!!  DO NOT TRY TO FIX YOURSELF  !!!!!!")
-            ti_filter_shutter.close()
-            user_data.collection_in_progress.put(0)     # notify the GUI and others
+            yield from bps.mv(
+                ti_filter_shutter, "close",
+                user_data.collection_in_progress, 0,     # notify the GUI and others
+            )
 
 
 plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
