@@ -223,18 +223,15 @@ def move_USAXSIn():
         dx.soft_limit_hi.value,
         terms.USAXS.diode.dx.value + terms.SAXS.dx_limit_offset.value)
 
-    guard_slit.set_size(
-        h = terms.SAXS.usaxs_guard_h_size.value, 
-        v = terms.SAXS.usaxs_guard_v_size.value,
-    )
-
     move_motors(
-        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
-        a_stage.y,      terms.USAXS.AY0.value,
-        a_stage.x,      terms.SAXS.ax_in.value,
-        d_stage.x,      terms.SAXS.dx_in.value,
-        d_stage.y,      terms.USAXS.DY0.value,
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
+        usaxs_slit.vap,     terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.hap,     terms.SAXS.usaxs_h_size.value,
+        a_stage.y,          terms.USAXS.AY0.value,
+        a_stage.x,          terms.SAXS.ax_in.value,
+        d_stage.x,          terms.SAXS.dx_in.value,
+        d_stage.y,          terms.USAXS.DY0.value,
     )
 
     print("USAXS is in position")
