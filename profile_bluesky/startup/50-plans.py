@@ -67,47 +67,28 @@ def preUSAXStune():
     )
 
 
+# TODO: make this look less like a mode
+use_mode.add(IfRequestedStopBeforeNextScan, "IfRequestedStopBeforeNextScan")
+
+
+def Flyscan(pos_X, pos_Y, thickness, scan_title):
+    yield from bps.mv(use_mode, "IfRequestedStopBeforeNextScan")
+    yield from bps.mv(
+        s_stage.x, pos_X,
+        s_stage.y, pos_Y,
+        use_mode, "USAXS",
+        # USAXS and guard slits by mode_USAXS command on previous line
+        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
+        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
+    )
+
+
 # TODO: #45 Flyscan
 """
 def Flyscan '{
-   local pos_X pos_Y scan_title Finish_in_Angle 
 
-   global ARenc_CENTER
-   global SPEC_STD_TITLE
-   global USAXS_SAMPLE_THICKNESS
-   global useSBUSAXS
-   global USAXS_MEASURE_DARK_CURENTS
-   global USAXSScanUp
-   global TITLE
-   global FSScanFailed
-   global FS_UPD_OldUpRangeChange  
-   global FS_UPD_UpRangeChange  
-   global FS_UPD_OldDownRangeChange  
-   global FS_UPD_DownRangeChange  
-   local _USAXS_Lambda
-
-   #####################################################
-   if( $# != 4) {
-        printf ("Flyscan pos_X pos_Y thickness_mm scan_title\n");
-        exit;
-   }
-   pos_X = $1
-   pos_Y = $2
-   USAXS_SAMPLE_THICKNESS = $3
-   scan_title = __returnSampleName("$4")
-   #comment "Sample Name is %s" scan_title ##  <<< comment out
-   #exit                                  ##  <<< comment out
-    IfRequestedStopBeforeNextScan
-   
-   #####################################################
-   # need to check pos_X and pos_Y against soft limits before proceeding
-   _bad_lim = 0
-   _chk_lim sx pos_X
-   _chk_lim sy pos_Y
-   if (_bad_lim) {
-     printf("sample position (%.3f,%.3f) exceeds soft limits\n", pos_X, pos_Y)
-     exit;
-   }
    #####################################################
    # make sure we are in USAXS mode, cannot run otherwise. 
    useModeUSAXS  
