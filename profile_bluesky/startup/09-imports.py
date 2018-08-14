@@ -26,7 +26,7 @@ from APS_BlueSky_tools.filewriters import SpecWriterCallback
 from APS_BlueSky_tools.devices import ApsHDF5Plugin
 
 from collections import deque, OrderedDict
-from datetime import datetime
+import datetime
 from enum import Enum
 import itertools
 import os
