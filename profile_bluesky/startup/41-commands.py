@@ -25,7 +25,7 @@ def IfRequestedStopBeforeNextScan():
     while terms.PauseBeforeNextScan.value > 0.5:
         msg = pv_txt % (time.time() - t0)
         print(msg)
-        yield from bps.mv(user_data.state, msg)
+        yield from user_data.set_state_plan(msg)
         yield from bps.sleep(1)
         open_the_shutter = True
 
@@ -53,43 +53,48 @@ def confirmUsaxsSaxsOutOfBeam():
 
 
 def move_WAXSOut():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     print("Moving WAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # move the WAXS X away from sample
-    waxsx.move(terms.WAXS.x_out.value)
+    yield from bps.mv(waxsx, terms.WAXS.x_out.value)
 
-    waxsx.set_lim(
+    yield from waxsx.set_lim(
         waxsx.soft_limit_hi.value, 
         terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
 
     print("Removed WAXS from beam position")
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
 def move_WAXSIn():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
+
     print("Moving to WAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
-    plc_protect.wait_for_interlock()
+    yield from plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
-    waxsx.set_lim(
+    yield from waxsx.set_lim(
         waxsx.soft_limit_hi.value, 
         terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
     
-    move_motors(
+    yield from bps.mv(
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         waxsx,             terms.WAXS.x_in.value,
@@ -98,32 +103,35 @@ def move_WAXSIn():
     )
 
     print("WAXS is in position")
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["WAXS in beam"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["WAXS in beam"])
 
 
 def move_SAXSOut():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     print("Moving SAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
     
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
     # move the pin_z away from sample
-    pin_z.move(terms.SAXS.z_out.value)
+    
+    yield from bps.mv(pin_z, terms.SAXS.z_out.value)
 
-    pin_z.set_lim(
+    yield from pin_z.set_lim(
         pin_z.soft_limit_hi.value, 
         terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
         )
     
     # move pinhole up to out of beam position
-    pin_y.y.move(terms.SAXS.y_out.value)
+    yield from bps.mv(pin_y, terms.SAXS.y_out.value)
 
-    pin_y.set_lim(
+    yield from pin_y.set_lim(
         terms.SAXS.y_out.value - terms.SAXS.y_limit_offset.value,
         pin_y.soft_limit_lo.value,
         )
@@ -132,30 +140,33 @@ def move_SAXSOut():
     ###sleep(1)    
     #waxs seems to be getting ahead of saxs limit switch
     # - should not be needed, we have plc_protect.wait_for_interlock() now. 
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
 def move_SAXSIn():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
+
     print("Moving to Pinhole SAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
-    plc_protect.wait_for_interlock()
+    yield from plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
     pin_y = saxs_stage.y
     pin_z = saxs_stage.z
-    pin_y.set_lim(
+    yield from pin_y.set_lim(
         terms.SAXS.y_in.value - terms.SAXS.y_limit_offset.value,
         pin_y.soft_limit_lo.value,
         )
 
-    move_motors(
+    yield from bps.mv(
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         pin_y,             terms.SAXS.y_in.value,
@@ -163,77 +174,75 @@ def move_SAXSIn():
         usaxs_slit.h_size, terms.SAXS.h_size.value,
     )
 
-    pin_z.set_lim(
+    yield from pin_z.set_lim(
         pin_z.soft_limit_hi.value, 
         terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value)
 
     # move Z _AFTER_ the others finish moving
-    pin_z.move(terms.SAXS.z_in.value)
+    yield from bps.mv(pin_z, terms.SAXS.z_in.value)
 
     print("Pinhole SAXS is in position")
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["SAXS in beam"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["SAXS in beam"])
 
 
 def move_USAXSOut():
-    plc_protect.stop_if_tripped()
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from plc_protect.stop_if_tripped()
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     print("Moving USAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     ax = a_stage.x
     dx = d_stage.x
-    move_motors(
+    yield from bps.mv(
         ax, terms.SAXS.ax_out.value,
         dx, terms.SAXS.dx_out.value,
     )
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
-    ax.set_lim(
+    yield from ax.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
-    dx.set_lim(
+    yield from dx.set_lim(
         terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value,
         dx.soft_limit_hi.value)
 
     print("Removed USAXS from beam position")
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["out of beam"])
-
-
-def USAXS_in():
-    """plan: configure instrument for USAXS measurements"""
-    pass
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
 def move_USAXSIn():
     yield from plc_protect.stop_if_tripped()
     yield from bps.mv(
-        ccd_shutter, "close",
-        ti_filter_shutter, "close",
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
     )
+
     print("Moving to USAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
     yield from plc_protect.wait_for_interlock()
 
     # in case there is an error in moving, it is NOT SAFE to start a scan
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["dirty"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
     ax = a_stage.x
     dx = d_stage.x
-    ax.set_lim(
+    yield from ax.set_lim(
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
-    dx.set_lim(
+    yield from dx.set_lim(
         dx.soft_limit_hi.value,
         terms.USAXS.diode.dx.value + terms.SAXS.dx_limit_offset.value)
 
-    move_motors(
+    yield from bps.mv(
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
         guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
         usaxs_slit.vap,     terms.SAXS.usaxs_v_size.value,
@@ -245,9 +254,10 @@ def move_USAXSIn():
     )
 
     print("USAXS is in position")
-    terms.SAXS.UsaxsSaxsMode.put(UsaxsSaxsModes["USAXS in beam"])
+    yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["USAXS in beam"])
 
 
+# TODO: necessary to keep this?
 def set_USAXS_slits():
     """move the USAXS slits to expected values"""
     usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,

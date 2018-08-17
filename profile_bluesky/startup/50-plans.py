@@ -29,7 +29,7 @@ def preUSAXStune():
         # TODO: BLOCKING    use_mode, "USAXS",      # Must be in USAXS mode to tune
 
         # ensure diode in place (Radiography puts it elsewhere)
-        d_stage.x, terms.USAXS.diode.dx.value,    
+        d_stage.x, terms.USAXS.diode.dx.value,
         d_stage.y, terms.USAXS.diode.dy.value,
 
         user_data.time_stamp, str(datetime.datetime.now()),
@@ -150,7 +150,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         upd_controls.femto.change_gain_down, terms.FlyScan.setpoint_down.value,
         ti_filter_shutter, "open",
     )
-    # TODO: autoscale_amplifiers()   # must run in thread since this is not a plan
+    APS_plans.run_blocker_in_plan(
+        # must run in thread since this is not a plan
+        autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+    )
 
 
 

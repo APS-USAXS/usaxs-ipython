@@ -9,8 +9,6 @@ RE.md['pid'] = os.getpid()
 
 # Add a callback that prints scan IDs at the start of each scan.
 
-import socket 
-import getpass 
 HOSTNAME = socket.gethostname() or 'localhost' 
 USERNAME = getpass.getuser() or 'APS USAXS user' 
 RE.md['login_id'] = USERNAME + '@' + HOSTNAME

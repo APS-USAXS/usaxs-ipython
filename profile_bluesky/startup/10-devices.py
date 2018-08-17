@@ -3,20 +3,17 @@ print(__file__)
 """Set up custom or complex devices"""
 
 
-def run_in_thread(func):
-    """run ``func`` in thread"""
-    def wrapper(*args, **kwargs):
-        thread = threading.Thread(target=func, args=args, kwargs=kwargs)
-        thread.start()
-        return thread
-    return wrapper
-
-
 def pairwise(iterable):
     "s -> (s0, s1), (s2, s3), (s4, s5), ..."
     a = iter(iterable)
     return zip(a, a)
 
+
+def trim_string_for_EPICS(msg):
+    """string must not be too long for EPICS PV"""
+    if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
+        msg = msg[:MAX_EPICS_STRINGOUT_LENGTH]
+    return msg
 
 class EpicsMotorLimitsMixin(Device):
     """
@@ -41,15 +38,17 @@ class EpicsMotorLimitsMixin(Device):
     
     def set_lim(self, low, high):
         """
-        Sets the low and high limits of motor
+        plan: Sets the low and high limits of motor
         
         * Low limit is set to lesser of (low, high)
         * High limit is set to greater of (low, high)
         * No action taken if motor is moving. 
         """
         if not self.moving:
-            self.soft_limit_lo.put(min(low, high))
-            self.soft_limit_hi.put(max(low, high))
+            yield from bps.mv(
+                self.soft_limit_lo, min(low, high),
+                self.soft_limit_hi, max(low, high),
+            )
 
 
 class UsaxsMotor(EpicsMotor, EpicsMotorLimitsMixin): pass
@@ -191,13 +190,15 @@ class InOutShutter(Device):
         status = DeviceStatus(self)
         
         def move_shutter():
+            """BLOCKING: no need to yield since this is run inside a thread"""
             if input_filter(value) in self.valid_open_values:
-                self.control_bit.put(self.open_value)     # no need to yield inside a thread
+                self.control_bit.put(self.open_value)
             elif input_filter(value) in self.valid_close_values:
-                self.control_bit.put(self.close_value)     # no need to yield inside a thread
+                self.control_bit.put(self.close_value)
         
-        @run_in_thread
+        @APS_plans.run_in_thread
         def run_and_delay():
+            """BLOCKING: no need to yield since this is run inside a thread"""
             self.busy.put(True)
             move_shutter()
             # sleep, since we don't *know* when the shutter has moved
@@ -342,9 +343,13 @@ class UserDataDevice(Device):
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
     
     def set_state(self, msg):
-        if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
-            msg = msg[:MAX_EPICS_STRINGOUT_LENGTH]
-        self.state.put(msg)
+        """BLOCKING: tell EPICS about what we are doing"""
+        self.state.put(trim_string_for_EPICS(msg))
+    
+    def set_state_plan(self, msg):
+        """plan: tell EPICS about what we are doing"""
+        # no need to wait for this to complete, it's just a notification
+        yield from bps.abs_set(self.state, trim_string_for_EPICS(msg))
 
 
 # these are the global settings PVs for various parts of the instrument
@@ -363,13 +368,16 @@ class FlyScanParameters(Device):
     setpoint_down = Component(Signal, value=850000)    # increase range
     
     def enable_ASRP(self):
+        """BLOCKING: """
         if is2DUSAXSscan.value: # return value of 0.0 is "not True"
             self.asrp_calc_SCAN.put(9)
     
     def disable_ASRP(self):
+        """BLOCKING: """
         self.asrp_calc_SCAN.put(0)
     
     def increment_order_number(self):
+        """BLOCKING: """
         self.order_number.put(self.order_number.value+1)
 
 
@@ -581,7 +589,6 @@ class GeneralParameters(Device):
 
 # TODO: #48 send email
 # TODO: move all below to APR_BlueSky_Tools project
-import subprocess
 def unix_cmd(command_list):
     process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()

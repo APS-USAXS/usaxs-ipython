@@ -4,24 +4,6 @@ print(__file__)
 replace BlueSky file name scheme when used with area detector
 """
 
-from ophyd import AreaDetector
-from ophyd import PilatusDetectorCam
-from ophyd import PointGreyDetectorCam
-from ophyd import SimDetectorCam
-from ophyd import CamBase
-from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
-from ophyd.utils import set_and_wait
-from ophyd.areadetector import ADComponent
-from ophyd.areadetector.filestore_mixins import FileStoreBase
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5
-from ophyd.areadetector.filestore_mixins import FileStorePluginBase
-from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
-from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
-from ophyd.areadetector.filestore_mixins import new_short_uid
-
-from pathlib import PurePath
-
-
 logger = logging.getLogger(__name__)
 DATABROKER_ROOT_PATH = "/"
 
@@ -169,6 +151,7 @@ class MyFileStoreHDF5IterativeWrite(MyFileStoreHDF5, FileStoreIterativeWrite):
     pass
 
 
+# TODO: switch to class from APS_BlueSky_tools
 class MyHDF5Plugin(HDF5Plugin, MyFileStoreHDF5IterativeWrite):
     """adapt HDF5 plugin for AD 2.5+"""
     

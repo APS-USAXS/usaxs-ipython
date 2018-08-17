@@ -4,7 +4,6 @@ print(__file__)
 USAXS Fly Scan setup
 """
 
-from usaxs_support.saveFlyData import SaveFlyScan
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
@@ -53,7 +52,7 @@ class UsaxsFlyScanDevice(Device):
             # msg += "  flying = {}".format(self.flying.value)
             return msg
 
-        @run_in_thread
+        @APS_plans.run_in_thread
         def progress_reporting():
             logger.debug("progress_reporting has arrived")
             t = time.time()
@@ -78,7 +77,7 @@ class UsaxsFlyScanDevice(Device):
             else:
                 logger.debug("{}s - progress_reporting is done".format(time.time()-self.t0))
 
-        @run_in_thread
+        @APS_plans.run_in_thread
         def prepare_HDF5_file():
             fname = os.path.abspath(self.saveFlyData_HDF5_dir)
             if not os.path.exists(fname):
@@ -110,7 +109,7 @@ class UsaxsFlyScanDevice(Device):
                 config_file=self.saveFlyData_config)
             self.saveFlyData.preliminaryWriteFile()
 
-        @run_in_thread
+        @APS_plans.run_in_thread
         def finish_HDF5_file():
             if self.saveFlyData is None:
                 raise RuntimeError("Must first call prepare_HDF5_file()")
@@ -125,19 +124,19 @@ class UsaxsFlyScanDevice(Device):
 
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
-        self.flying.put(False)
+        yield from bps.aps_set(self.flying, False)
         
         prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
 
         g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
         progress_reporting()
-        self.flying.put(True)
+        yield from bps.aps_set(self.flying, True)
 
         yield from bps.wait(group=g)
-        self.flying.put(False)
+        yield from bps.aps_set(self.flying, False)
         
-        user_data.set_state("writing fly scan HDF5 file")
+        yield from user_data.set_state_plan("writing fly scan HDF5 file")
         finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
 
         yield from bps.mv(
@@ -145,7 +144,7 @@ class UsaxsFlyScanDevice(Device):
             a_stage.y.user_setpoint, self.ay0, 
             d_stage.y.user_setpoint, self.dy0)
         logger.debug("after return", time.time() - self.t0)
-        user_data.set_state("fly scan finished")
+        yield from user_data.set_state_plan("fly scan finished")
 
 
 # #21 : w-i-p

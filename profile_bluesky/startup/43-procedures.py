@@ -4,24 +4,6 @@ print(__file__)
 USAXS mode change procedures
 
 see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
-
-each mode is defined by a setup function that takes no arguments
-and returns only when it complete
-
-EXAMPLE::
-
-    def demo():
-        print(1)
-        m1.move(5)
-        print(2)
-        time.sleep(2)
-        print(3)
-        m1.move(0)
-        print(4)
-
-
-    use_mode.add(demo)
-
 """
 
 
@@ -32,10 +14,11 @@ def DCMfeedbackON():
 
 
 def insertScanFilters():
-    # Bank A: Al
-    # Bank B: Ti
-    pf4_AlTi.fPosA.put(terms.USAXS.scan_filters.Al.value)
-    pf4_AlTi.fPosB.put(terms.USAXS.scan_filters.Ti.value)
+    """plan: insert the EPICS-specified filters"""
+    yield from bps.mv(
+        pf4_AlTi.fPosA, terms.USAXS.scan_filters.Al.value,    # Bank A: Al
+        pf4_AlTi.fPosB, terms.USAXS.scan_filters.Ti.value,    # Bank B: Ti
+    )
 
 
 def confirm_instrument_mode(mode_name):
@@ -46,28 +29,32 @@ def confirm_instrument_mode(mode_name):
 
 def mode_USAXS():
     plc_protect.stop_if_tripped()
-    user_data.state.put("Moving USAXS to USAXS mode")
-    ccd_shutter.close()
-    ti_filter_shutter.close()
-    DCMfeedbackON() 
+    yield from user_data.set_state_plan("Moving USAXS to USAXS mode")
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
+    yield from DCMfeedbackON() 
     retune_needed = False
 
     if not confirm_instrument_mode("USAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper USAXS mode")
-        move_WAXSOut()
-        move_SAXSOut()
-        move_USAXSIn()
+        yield from move_WAXSOut()
+        yield from move_SAXSOut()
+        yield from move_USAXSIn()
         retune_needed = True
 
     print("Preparing for USAXS mode ... please wait ...")
-    # set scalar to autocount mode for USAXS
-    scaler0.count_mode.put(1)
-    move_motors(
+    yield from bps.mv(
+        # set scalar to autocount mode for USAXS
+        scaler0, 1,
+
+        # put detector stage in position
         d_stage.x, terms.USAXS.diode.dx.value,
         d_stage.y, terms.USAXS.diode.dy.value,
     )
-    time.sleep(0.1)
+    yield from bps(0.1)
 
     if not ccd_shutter.is_closed:
         print("!!!CCD shutter failed to close!!!")
@@ -77,21 +64,22 @@ def mode_USAXS():
 
         # print("Change TV input selector to show image in hutch")
         # print("Turn off BLUE switch on CCD controller")
-        insertScanFilters()
-        ccd_shutter.close()
+        yield from insertScanFilters()
+        yield from bps.mv(ccd_shutter, "close")
 
         print("Prepared for USAXS mode")
-        #insertScanFilters
-        user_data.set_state("USAXS Mode")
+        yield from user_data.set_state_plan("USAXS Mode")
         ts = str(datetime.now())
-        user_data.time_stamp.put(ts)
-        user_data.macro_file_time.put(ts)
-        user_data.scanning.put(0)
+        yield from bps.mv(
+            user_data.time_stamp, ts,
+            user_data.macro_file_time, ts,
+            user_data.scanning, 0,
+        )
 
     if retune_needed:
         # don't tune here
         # Instead, set a signal to be caught by the plan in the RunEngine
-        terms.USAXS.retune_needed.put(True)
+        yield from bps.mv(terms.USAXS.retune_needed, True)
 
 
 def mode_SBUSAXS():
@@ -100,38 +88,44 @@ def mode_SBUSAXS():
 
 def mode_SAXS():
     plc_protect.stop_if_tripped()
-    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to SAXS mode" ))
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from user_data.set_state_plan("Moving USAXS to SAXS mode")
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     if not confirm_instrument_mode("SAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper SAXS mode")
-        move_WAXSOut()
-        move_USAXSOut()
-        move_SAXSIn()
+        yield from move_WAXSOut()
+        yield from move_USAXSOut()
+        yield from move_SAXSIn()
         
     print("Prepared for SAXS mode")
     #insertScanFilters
-    user_data.set_state("SAXS Mode")
+    yield from user_data.set_state_plan("SAXS Mode")
     ts = str(datetime.now())
-    user_data.time_stamp.put(ts)
-    user_data.macro_file_time.put(ts)
-    user_data.scanning.put(0)
+    yield from bps.mv(
+        user_data.time_stamp, ts,
+        user_data.macro_file_time, ts,
+        user_data.scanning, 0,
+    )
 
 
 def mode_WAXS():
     plc_protect.stop_if_tripped()
-    epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to WAXS mode" ))
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from user_data.set_state_plan("Moving USAXS to WAXS mode")
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     if not confirm_instrument_mode("WAXS in beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Moving to proper WAXS mode")
-        move_SAXSOut()
-        move_USAXSOut()
-        move_WAXSIn()
+        yield from move_SAXSOut()
+        yield from move_USAXSOut()
+        yield from move_WAXSIn()
 
     # move SAXS slits in, used for WAXS mode also
     v_diff = abs(guard_slit.v_size.value - terms.SAXS.guard_v_size.value)
@@ -139,27 +133,35 @@ def mode_WAXS():
 
     if max(v_diff, h_diff) > 0.03:
         print("changing G slits")
-        guard_slit.set_size(h=terms.SAXS.guard_h_size.value, v=terms.SAXS.guard_v_size.value)
-        time.sleep(0.5)  
-        while max(v_diff, h_diff) > 0.02:
-            time.sleep(0.5)
+        yield from bps.mv(
+            guard_slit.h_size, terms.SAXS.guard_h_size.value,
+            guard_slit.v_size, terms.SAXS.guard_v_size.value,
+        )
+        yield from bps.sleep(0.5)  
+        while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
+            yield from bps.sleep(0.5)
             v_diff = abs((guard_slit.top.value-guard_slit.bot.value) - terms.SAXS.guard_v_size.value)
             h_diff = abs((guard_slit.outb.value-guard_slit.inb.value) - terms.SAXS.guard_h_size.value)
        
-    v_diff = abs(usaxs_slit.v_size.value- terms.SAXS.v_size.value)
-    h_diff = abs(usaxs_slit.h_size.value-terms.SAXS.h_size.value)
+    v_diff = abs(usaxs_slit.v_size.value - terms.SAXS.v_size.value)
+    h_diff = abs(usaxs_slit.h_size.value - terms.SAXS.h_size.value)
     if max(v_diff, h_diff) > 0.02:
        print("Moving Beam defining slits")
-       usaxs_slit.set_size(h=terms.SAXS.h_size.value, v=terms.SAXS.v_size.value)
-       time.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
+       yield from bps.mv(
+           usaxs_slit.h_size, terms.SAXS.h_size.value,
+           usaxs_slit.v_size, terms.SAXS.v_size.value,
+       )
+       yield from bps.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
 
     print("Prepared for WAXS mode")
     #insertScanFilters
-    user_data.set_state("WAXS Mode")
+    yield from user_data.set_state_plan("WAXS Mode")
     ts = str(datetime.now())
-    user_data.time_stamp.put(ts)
-    user_data.macro_file_time.put(ts)
-    user_data.scanning.put(0)
+    yield from bps.mv(
+        user_data.time_stamp, ts,
+        user_data.macro_file_time, ts,
+        user_data.scanning, 0,
+    )
 
 
 def mode_radiography():
@@ -176,25 +178,16 @@ def mode_pinSAXS():
 
 def mode_OpenBeamPath():
     plc_protect.stop_if_tripped()
-    user_data.set_state("Moving USAXS to OpenBeamPath mode")
-    ccd_shutter.close()
-    ti_filter_shutter.close()
+    yield from user_data.set_state_plan("Moving USAXS to OpenBeamPath mode")
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        ti_filter_shutter,  "close",
+    )
 
     if not confirm_instrument_mode("out of beam"):
         print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
         print("Opening the beam path, moving all components out")
-        move_SAXSOut()
-        move_WAXSOut()
-        move_USAXSOut()
-        user_data.set_state("USAXS moved to OpenBeamPath mode")
-
-
-use_mode.add(mode_USAXS, "USAXS")
-use_mode.add(mode_SBUSAXS, "SBUSAXS")
-use_mode.add(mode_SAXS, "SAXS")
-use_mode.add(mode_WAXS, "WAXS")
-use_mode.add(mode_radiography, "radiography")
-use_mode.add(mode_imaging, "imaging")
-use_mode.add(mode_pinSAXS, "pinSAXS")
-use_mode.add(mode_OpenBeamPath, "OpenBeamPath")
-use_mode.dir
+        yield from move_SAXSOut()
+        yield from move_WAXSOut()
+        yield from move_USAXSOut()
+        yield from user_data.set_state_plan("USAXS moved to OpenBeamPath mode")

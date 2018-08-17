@@ -197,20 +197,20 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         self._gain_info_known = True
 
     def setAutoMode(self):
-        """use "automatic" operations mode"""
+        """BLOCKING: use "automatic" operations mode"""
         self.mode.put(AutorangeSettings.automatic)
 
     def setBAutoMode(self):
-        """use "auto+background" operations mode"""
+        """BLOCKING: use "auto+background" operations mode"""
         self.mode.put(AutorangeSettings.auto_background)
 
     def setManualMode(self):
-        """use "manual" operations mode"""
+        """BLOCKING: use "manual" operations mode"""
         self.mode.put(AutorangeSettings.manual)
 
     def setGain(self, target):
         """
-        request the gain on the autorange controls
+        BLOCKING: set the gain on the autorange controls
         
         Since the gain values are available from EPICS, 
         we use that to provide a method that can request the 
@@ -293,7 +293,7 @@ def group_controls_by_scaler(controls):
 
 
 def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8):
-    """internal, blocking: measure amplifier backgrounds for signals sharing a common scaler"""
+    """BLOCKING: internal: measure amplifier backgrounds for signals sharing a common scaler"""
     scaler = control_list[0].scaler
     signals = [c.signal for c in control_list]
     
@@ -340,7 +340,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
 
 def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
     """
-    interactive function to measure detector backgrounds simultaneously
+    BLOCKING: interactive function to measure detector backgrounds simultaneously
     
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
@@ -362,7 +362,7 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
 _last_autorange_gain_ = OrderedDefaultDict(dict)
 
 def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
-    """internal, blocking: autoscale amplifiers for signals sharing a common scaler"""
+    """BLOCKING: internal: autoscale amplifiers for signals sharing a common scaler"""
     global _last_autorange_gain_
 
     scaler = controls[0].scaler
