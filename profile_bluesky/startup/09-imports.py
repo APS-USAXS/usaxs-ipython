@@ -48,10 +48,10 @@ import APS_BlueSky_tools.plans as APS_plans
 import APS_BlueSky_tools.synApps_ophyd as APS_synApps_ophyd
 
 # import specific methods by name, we need to customize them sometimes
-from APS_callbacks import DocumentCollectorCallback
-from APS_devices import ApsHDF5Plugin
-from APS_devices import ApsPssShutterWithStatus
-from APS_devices import EpicsMotorShutter
-from APS_filewriters import SpecWriterCallback
+from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
+from APS_BlueSky_tools.devices import ApsHDF5Plugin
+from APS_BlueSky_tools.devices import ApsPssShutterWithStatus
+from APS_BlueSky_tools.devices import EpicsMotorShutter
+from APS_BlueSky_tools.filewriters import SpecWriterCallback
 
 from usaxs_support.saveFlyData import SaveFlyScan
