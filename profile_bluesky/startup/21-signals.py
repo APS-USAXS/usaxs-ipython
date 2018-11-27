@@ -6,15 +6,22 @@ signals
 from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 """
 
-MAX_EPICS_STRINGOUT_LENGTH = 40
-
 aps = APS_devices.ApsMachineParametersDevice(name="aps")
 sd.baseline.append(aps)
-if aps.inUserOperations:
-    sd.monitors.append(aps.current)
 
 undulator = ApsUndulatorDual("ID09", name="undulator")
 sd.baseline.append(undulator)
+
+if aps.inUserOperations:
+    sd.monitors.append(aps.current)
+    suspend_APS_current = bluesky.suspenders.SuspendFloor(aps.current, 2, resume_thresh=10)
+    RE.install_suspender(suspend_APS_current)
+
+    suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
+    RE.install_suspender(suspend_FE_shutter)
+
+    suspend_mono_shutter = bluesky.suspenders.SuspendFloor(mono_shutter.pss_state, 1)
+    RE.install_suspender(suspend_mono_shutter)
 
 
 class MyMonochromator(Device):
@@ -58,7 +65,7 @@ usaxs_CheckBeamSpecial = EpicsSignal(
 )
 
 
-email_notices = EmailNotifications()
+email_notices = EmailNotifications("usaxs@aps.anl.gov")
 email_notices.add_addresses(
     "ilavsky@aps.anl.gov",
     "kuzmenko@aps.anl.gov",

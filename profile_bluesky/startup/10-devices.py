@@ -3,6 +3,8 @@ print(__file__)
 """Set up custom or complex devices"""
 
 
+MAX_EPICS_STRINGOUT_LENGTH = 40
+
 def pairwise(iterable):
     "s -> (s0, s1), (s2, s3), (s4, s5), ..."
     a = iter(iterable)
@@ -588,12 +590,22 @@ class GeneralParameters(Device):
 
 
 # TODO: #48 send email
-# TODO: move all below to APR_BlueSky_Tools project
+# TODO: to be replaced by APS_utils.unix_cmd()
+# https://github.com/BCDA-APS/APS_BlueSky_tools/issues/60
 def unix_cmd(command_list):
     process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     return stdout, stderr
 
+
+# TODO: to be replaced by APS_utils.EmailNotifications()
+# https://github.com/BCDA-APS/APS_BlueSky_tools/issues/61
+
+# Import smtplib for the actual sending function
+import smtplib
+
+# Import the email modules we'll need
+from email.mime.text import MIMEText
 
 class EmailNotifications(object):
     """
@@ -602,9 +614,10 @@ class EmailNotifications(object):
     use default OS mail utility (so no credentials needed)
     """
     
-    def __init__(self):
+    def __init__(self, sender=None):
         self.addresses = []
         self.notify_on_feedback = True
+        self.sender = sender or "nobody@localhost"
     
     def add_addresses(self, *args):
         for address in args:
@@ -612,20 +625,13 @@ class EmailNotifications(object):
 
     def send(self, subject, message):
         """send ``message`` to all addresses"""
-        for address in self.addresses:
-            command = [
-                "mail",
-                message,
-                "-s",
-                subject,
-                address,
-            ]
-            #command = """echo "{}" | mail -s "{}" {}""".format(
-            #    message,
-            #    subject,
-            #    address
-            #)
-            unix_cmd(command)
+        msg = MIMEText(message)
+        msg['Subject'] = subject
+        msg['From'] = self.sender
+        msg['To'] = ",".join(self.addresses)
+        s = smtplib.SMTP('localhost')
+        s.sendmail(self.sender, self.addresses, msg.as_string())
+        s.quit()
 
 
 class ApsBssUserInfoDevice(Device):
