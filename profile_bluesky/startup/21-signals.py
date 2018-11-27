@@ -48,22 +48,24 @@ bss_user_info = ApsBssUserInfoDevice("9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
 
 
+if False:       # TODO: needs some thought and refactoring
+    # https://github.com/APS-USAXS/ipython-usaxs/issues/83
+    # from: /home/beams/USAXS/spec/macros/local/usaxs_CheckBeam.mac
+    # used: def chk_beam_setup   in /home/beams/USAXS/spec/macros/std/checkbeam.mac
+      # this is used to set the check beam PV to use I000 PD on Mirror window, limit is set
+      # in user calc. This would fail for tune_dcmth and other macros, which may take
+      # the intensity there down. For that use the other macro... 
+    usaxs_CheckBeamStandard = EpicsSignal(
+        "9idcLAX:blCalc:userCalc1", 
+        name="usaxs_CheckBeamStandard"
+    )
 
-  # this is used to set the check beam PV to use I000 PD on Mirror window, limit is set
-  # in user calc. This would fail for tune_dcmth and other macros, which may take
-  # the intensity there down. For that use the other macro... 
-usaxs_CheckBeamStandard = EpicsSignal(
-    "9idcLAX:blCalc:userCalc1", 
-    name="usaxs_CheckBeamStandard"
-)
-
-
-  # this is used to set the check beam PV to use many PVs and conditions to decide, 
-  # if there is chance to have beam. Uses also userCalc on lax
-usaxs_CheckBeamSpecial = EpicsSignal(
-    "9idcLAX:blCalc:userCalc2", 
-    name="usaxs_CheckBeamSpecial"
-)
+      # this is used to set the check beam PV to use many PVs and conditions to decide, 
+      # if there is chance to have beam. Uses also userCalc on lax
+    usaxs_CheckBeamSpecial = EpicsSignal(
+        "9idcLAX:blCalc:userCalc2", 
+        name="usaxs_CheckBeamSpecial"
+    )
 
 
 email_notices = EmailNotifications("usaxs@aps.anl.gov")
