@@ -43,6 +43,7 @@ usaxs_q = usaxs_q_calc.val
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)
 
+# TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
 bss_user_info = ApsBssUserInfoDevice("9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
 

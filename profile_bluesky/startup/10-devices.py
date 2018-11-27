@@ -633,7 +633,7 @@ class EmailNotifications(object):
         s.sendmail(self.sender, self.addresses, msg.as_string())
         s.quit()
 
-
+# TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
 class ApsBssUserInfoDevice(Device):
     """
     get current experiment info for 9-ID-B,C from the APS BSS
