@@ -19,7 +19,7 @@ def preUSAXStune():
     USAGE:  ``RE(preUSAXStune())``
     """
     yield from bps.mv(
-        mono_feedback.on, 1,
+        monochromator.feedback.on, 1,
         mono_shutter, "open",
         ccd_shutter, "close",
     )

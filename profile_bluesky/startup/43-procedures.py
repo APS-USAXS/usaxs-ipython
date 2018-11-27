@@ -10,7 +10,7 @@ see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local
 def DCMfeedbackON():
     """plan: could send email"""
     yield from bps.mv(monochromator.feedback.on, 1)
-    mono_feedback.check_position()
+    monochromator.feedback.check_position()
 
 
 def insertScanFilters():

@@ -120,6 +120,8 @@ class SaxsDetectorStageDevice(MotorBundle):
 
 guard_slit = GSlitDevice('', name='guard_slit')
 usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
+sd.baseline.append(guard_slit)
+sd.baseline.append(usaxs_slit)
 
 s_stage    = UsaxsSampleStageDevice('', name='s_stage')
 d_stage    = UsaxsDetectorStageDevice('', name='d_stage')
