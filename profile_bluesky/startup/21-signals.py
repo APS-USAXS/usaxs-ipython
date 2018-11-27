@@ -41,6 +41,9 @@ usaxs_q = usaxs_q_calc.val
 
 user_data = UserDataDevice(name="user_data")
 
+bss_user_info = ApsBssUserInfoDevice("9id_bss:", name="bss_user_info")
+sd.baseline.append(bss_user_info)
+
 
 
   # this sets the check beam PV to use I000 PD on Mirror window, limit is set
