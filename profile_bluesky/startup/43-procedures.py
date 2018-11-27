@@ -28,7 +28,7 @@ def confirm_instrument_mode(mode_name):
 
 
 def mode_USAXS():
-    plc_protect.stop_if_tripped()
+    # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to USAXS mode")
     yield from bps.mv(
         ccd_shutter,        "close",
@@ -87,7 +87,7 @@ def mode_SBUSAXS():
 
 
 def mode_SAXS():
-    plc_protect.stop_if_tripped()
+    # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to SAXS mode")
     yield from bps.mv(
         ccd_shutter,        "close",
@@ -113,7 +113,7 @@ def mode_SAXS():
 
 
 def mode_WAXS():
-    plc_protect.stop_if_tripped()
+    # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to WAXS mode")
     yield from bps.mv(
         ccd_shutter,        "close",
@@ -177,7 +177,7 @@ def mode_pinSAXS():
 
 
 def mode_OpenBeamPath():
-    plc_protect.stop_if_tripped()
+    # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to OpenBeamPath mode")
     yield from bps.mv(
         ccd_shutter,        "close",

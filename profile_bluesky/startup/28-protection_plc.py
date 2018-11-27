@@ -32,7 +32,7 @@ class PlcProtectionDevice(Device):
             if verbose:
                 print(msg % time.time()-t0)
     
-    def stop_if_tripped(self, verbose=True):   # TODO: should be a Bluesky suspender?
+    def stop_if_tripped(self, verbose=True):
         if self.operations_status.value < 1:
             if verbose:
                 print("Equipment protection is engaged, no power on motors.")
@@ -45,5 +45,39 @@ class PlcProtectionDevice(Device):
             )
 
 
+class SuspendWhenChanged(APS_suspenders.SuspendWhenChanged):
+    
+    def _get_justification(self):
+        """override default method to call plc_protect.stop_if_tripped()"""
+        if not self.tripped:
+            return ''
+
+        just = 'Signal {}, got "{}", expected "{}"'.format(
+            self._sig.name,
+            self._sig.get(),
+            self.expected_value)
+        if not self.allow_resume:
+            just += '.  '
+            just += '"RE.abort()" to finalize current data streams (if any)'
+            just += ' and then restart bluesky session to clear this.'
+            just += "\n"
+            just += "\n Equipment protection is engaged, no power on motors."
+            just += "\n Fix PLC protection before any move. Stopping now."
+            just += "\n Call beamline scientists if you do not understand."
+            just += "\n !!!!!!  DO NOT TRY TO FIX YOURSELF  !!!!!!\n"
+
+        plc_protect.stop_if_tripped()       # TODO: test this
+
+        return ': '.join(s for s in (just, self._tripped_message)
+                         if s)
+
+
 plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
+
+suspend_plc_protect_saxs_y = SuspendWhenChanged(plc_protect.SAXS_Y, expected_value=1)
+suspend_plc_protect_waxs_x = SuspendWhenChanged(plc_protect.WAXS_X, expected_value=1)
+suspend_plc_protect_ax = SuspendWhenChanged(plc_protect.AX, expected_value=1)
+RE.install_suspender(suspend_plc_protect_saxs_y)
+RE.install_suspender(suspend_plc_protect_waxs_x)
+RE.install_suspender(suspend_plc_protect_ax)
 
