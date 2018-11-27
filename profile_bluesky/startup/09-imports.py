@@ -47,6 +47,7 @@ import APS_BlueSky_tools.filewriters as APS_filewriters
 import APS_BlueSky_tools.plans as APS_plans
 import APS_BlueSky_tools.synApps_ophyd as APS_synApps_ophyd
 import APS_BlueSky_tools.suspenders as APS_suspenders
+import APS_BlueSky_tools.utils as APS_utils
 
 # import specific methods by name, we need to customize them sometimes
 from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
