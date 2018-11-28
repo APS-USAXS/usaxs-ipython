@@ -249,6 +249,22 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         return v
 
 
+class ComputedScalerAmplifierSignal(SynSignal):
+    """
+    Scales signal from counter by amplifier gain.
+    """
+
+    def __init__(self, name, parent, **kwargs):
+
+        def func():		# runs only when Device is triggered
+            counts = parent.signal.s.value
+            volts = counts / parent.auto.counts_per_volt.value
+            volts_per_amp = parent.femto.gain.value
+            return volts / volts_per_amp
+
+        super().__init__(func=func, name=name, **kwargs)
+
+
 class DetectorAmplifierAutorangeDevice(Device):
     """
     Coordinate the different objects that control a diode or ion chamber
@@ -259,8 +275,8 @@ class DetectorAmplifierAutorangeDevice(Device):
 
     def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
         assert isinstance(nickname, str)
-        assert isinstance(scaler, (EpicsScaler, ScalerCH))
-        assert isinstance(signal, (EpicsSignalRO, ScalerChannel))
+        assert isinstance(scaler, ScalerCH)      # dropped EpicsScaler
+        assert isinstance(signal, ScalerChannel) # dropped EpicsSignalRO
         assert isinstance(amplifier, FemtoAmplifierDevice)
         assert isinstance(auto, AmplifierAutoDevice)
         self.nickname = nickname
@@ -485,6 +501,9 @@ upd_controls = DetectorAmplifierAutorangeDevice(
     upd_autorange_controls,
     name="upd_controls",
 )
+upd_photocurrent = ComputedScalerAmplifierSignal(
+    name="upd_photocurrent", parent=upd_controls)
+
 
 trd_controls = DetectorAmplifierAutorangeDevice(
     "TR diode",
@@ -494,6 +513,8 @@ trd_controls = DetectorAmplifierAutorangeDevice(
     trd_autorange_controls,
     name="trd_controls",
 )
+trd_photocurrent = ComputedScalerAmplifierSignal(
+    name="trd_photocurrent", parent=trd_controls)
 
 I0_controls = DetectorAmplifierAutorangeDevice(
     "I0_USAXS",
@@ -503,6 +524,8 @@ I0_controls = DetectorAmplifierAutorangeDevice(
     I0_autorange_controls,
     name="I0_controls",
 )
+I0_photocurrent = ComputedScalerAmplifierSignal(
+    name="I0_photocurrent", parent=I0_controls)
 
 I00_controls = DetectorAmplifierAutorangeDevice(
     "I0_USAXS",
@@ -512,6 +535,9 @@ I00_controls = DetectorAmplifierAutorangeDevice(
     I00_autorange_controls,
     name="I00_controls",
 )
+I00_photocurrent = ComputedScalerAmplifierSignal(
+    name="I00_photocurrent", parent=I00_controls)
+
 
 controls_list_I0_I00_TRD = [I0_controls, I00_controls, trd_controls]
 controls_list_UPD_I0_I00_TRD = [upd_controls] + controls_list_I0_I00_TRD
