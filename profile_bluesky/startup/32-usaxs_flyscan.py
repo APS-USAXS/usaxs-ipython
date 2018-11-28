@@ -49,6 +49,8 @@ class UsaxsFlyScanDevice(Device):
             msg += "  ar = %.7f" % a_stage.r.position
             msg += "  ay = %.5f" % a_stage.y.position
             msg += "  dy = %.5f" % d_stage.y.position
+            msg += f"  channel = {struck.current_channel.value}"
+            msg += "  elapsed time = %.2f" % struck.elapsed_real_time.value
             # msg += "  flying = {}".format(self.flying.value)
             return msg
 
