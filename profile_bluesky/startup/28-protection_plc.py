@@ -31,6 +31,7 @@ class PlcProtectionDevice(Device):
             yield from bps.sleep(self.SLEEP_POLL_s)
             if verbose:
                 print(msg % time.time()-t0)
+        yield from bps.null()   # always yield at least one Msg
     
     def stop_if_tripped(self, verbose=True):
         if self.operations_status.value < 1:
