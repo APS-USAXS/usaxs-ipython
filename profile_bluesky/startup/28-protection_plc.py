@@ -19,6 +19,7 @@ class PlcProtectionDevice(Device):
     operations_status = Component(EpicsSignal, 'Y0')     # 0=not good, 1=good
     
     SLEEP_POLL_s = 0.1
+    _tripped_message = None
     
     @property
     def interlocked(self):
@@ -34,7 +35,9 @@ class PlcProtectionDevice(Device):
         yield from bps.null()   # always yield at least one Msg
     
     def stop_if_tripped(self, verbose=True):
-        if self.operations_status.value < 1:
+        if self.operations_status.value == 1:
+            self._tripped_message = None
+        else:
             msg = """
             Equipment protection is engaged, no power on motors.
             Fix PLC protection before any move. Stopping now.
@@ -52,6 +55,7 @@ class PlcProtectionDevice(Device):
             # send email to staff ASAP!!!
             msg +="\n P.S. Can resume Bluesky scan: {}\n".format(
                 suspend_plc_protect.allow_resume)
+            self._tripped_message = msg
             email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
 
 
