@@ -34,18 +34,27 @@ class PlcProtectionDevice(Device):
     
     def stop_if_tripped(self, verbose=True):
         if self.operations_status.value < 1:
+            msg = """
+            Equipment protection is engaged, no power on motors.
+            Fix PLC protection before any move. Stopping now.
+            Call beamline scientists if you do not understand.
+            
+            !!!!!!  DO NOT TRY TO FIX THIS YOURSELF  !!!!!!
+            
+            """
             if verbose:
-                print("Equipment protection is engaged, no power on motors.")
-                print("Fix PLC protection before any move. Stopping now.")
-                print("Call beamline scientists if you do not understand.")
-                print("!!!!!!  DO NOT TRY TO FIX YOURSELF  !!!!!!")
+                print(msg)
             yield from bps.mv(
                 ti_filter_shutter, "close",
                 user_data.collection_in_progress, 0,     # notify the GUI and others
             )
+            # send email to staff ASAP!!!
+            msg +="\n P.S. Can resume Bluesky scan: {}\n".format(
+                suspend_plc_protect.allow_resume)
+            email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
 
 
-class SuspendWhenChanged(APS_suspenders.SuspendWhenChanged):
+class PlcProtectSuspendWhenChanged(APS_suspenders.SuspendWhenChanged):
     
     def _get_justification(self):
         """override default method to call plc_protect.stop_if_tripped()"""
@@ -74,10 +83,9 @@ class SuspendWhenChanged(APS_suspenders.SuspendWhenChanged):
 
 plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
 
-suspend_plc_protect_saxs_y = SuspendWhenChanged(plc_protect.SAXS_Y, expected_value=1)
-suspend_plc_protect_waxs_x = SuspendWhenChanged(plc_protect.WAXS_X, expected_value=1)
-suspend_plc_protect_ax = SuspendWhenChanged(plc_protect.AX, expected_value=1)
-RE.install_suspender(suspend_plc_protect_saxs_y)
-RE.install_suspender(suspend_plc_protect_waxs_x)
-RE.install_suspender(suspend_plc_protect_ax)
+suspend_plc_protect = PlcProtectSuspendWhenChanged(
+    plc_protect.operations_status, 
+    expected_value=1)
+# this will suspend whenever PLC Y0 = 0 -- we want that
+RE.install_suspender(suspend_plc_protect)
 
