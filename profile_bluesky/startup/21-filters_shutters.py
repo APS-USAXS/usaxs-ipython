@@ -12,9 +12,13 @@ mono_shutter = MyApsPssShutterWithStatus(
     "PA:09ID:STA_B_SBS_OPEN_PL.VAL",
     name="mono_shutter")
 
-usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
+#usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
+#ti_filter_shutter = usaxs_shutter       # alias
+## a bit more complex to open ti_filter_shutter: open ALL blades
+
+usaxs_shutter = APS_devices.EpicsOnOffShutter("9idcLAX:userTran3.A", name="usaxs_shutter")
 ti_filter_shutter = usaxs_shutter       # alias
-# a bit more complex to open ti_filter_shutter: open ALL blades
+
 
 ccd_shutter = InOutShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
 
