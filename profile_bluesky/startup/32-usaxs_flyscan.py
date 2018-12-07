@@ -126,17 +126,17 @@ class UsaxsFlyScanDevice(Device):
 
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
-        yield from bps.aps_set(self.flying, False)
+        yield from bps.abs_set(self.flying, False)
         
         prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
 
         g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
         progress_reporting()
-        yield from bps.aps_set(self.flying, True)
+        yield from bps.abs_set(self.flying, True)
 
         yield from bps.wait(group=g)
-        yield from bps.aps_set(self.flying, False)
+        yield from bps.abs_set(self.flying, False)
         
         yield from user_data.set_state_plan("writing fly scan HDF5 file")
         finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
@@ -158,9 +158,9 @@ usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
 
 
 def fix_faulty():
-    a_stage.r.user_setpoint.set(8.7628359)
+    a_stage.r.user_setpoint.set(8.883668382596136)
     a_stage.y.user_setpoint.set(0)
-    d_stage.y.user_setpoint.set(13.2833635)
+    d_stage.y.user_setpoint.set(13.456867)
 
 
 # RE(usaxs_flyscan.plan())
