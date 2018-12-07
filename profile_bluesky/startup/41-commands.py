@@ -239,7 +239,7 @@ def move_USAXSIn():
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
     yield from dx.set_lim(
-        dx.soft_limit_hi.value,
+        dx.soft_limit_lo.value,
         terms.USAXS.diode.dx.value + terms.SAXS.dx_limit_offset.value)
 
     yield from bps.mv(
