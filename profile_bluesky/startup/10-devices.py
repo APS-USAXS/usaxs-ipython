@@ -214,8 +214,8 @@ class InOutShutter(Device):
     
 class DualPf4FilterBox(Device):
     """Dual Xia PF4 filter boxes using support from synApps"""
-    fPosA = Component(EpicsSignal, "fPosA")
-    fPosB = Component(EpicsSignal, "fPosB")
+    fPosA = Component(EpicsSignal, "fPosA", put_complete=True)
+    fPosB = Component(EpicsSignal, "fPosB", put_complete=True)
     bankA = Component(EpicsSignalRO, "bankA")
     bankB = Component(EpicsSignalRO, "bankB")
     bitFlagA = Component(EpicsSignalRO, "bitFlagA")
