@@ -77,8 +77,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         s_stage.y, pos_Y,
         # TODO: use_mode, "USAXS",
         # USAXS and guard slits by mode_USAXS command on previous line
-        usaxs_slit.vap, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.hap, terms.SAXS.usaxs_h_size.value,
+        usaxs_slit.usaxs_v_size, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.usaxs_h_size, terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
