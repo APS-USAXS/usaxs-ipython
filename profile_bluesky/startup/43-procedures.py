@@ -96,7 +96,8 @@ def mode_SAXS():
     )
 
     if not confirm_instrument_mode("SAXS in beam"):
-        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
+        print("Found UsaxsSaxsMode = {}".format(mode_now))
         print("Moving to proper SAXS mode")
         yield from move_WAXSOut()
         yield from move_USAXSOut()
@@ -122,7 +123,8 @@ def mode_WAXS():
     )
 
     if not confirm_instrument_mode("WAXS in beam"):
-        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
+        print("Found UsaxsSaxsMode = {}".format(mode_now))
         print("Moving to proper WAXS mode")
         yield from move_SAXSOut()
         yield from move_USAXSOut()
@@ -186,7 +188,8 @@ def mode_OpenBeamPath():
     )
 
     if not confirm_instrument_mode("out of beam"):
-        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
+        print("Found UsaxsSaxsMode = {}".format(mode_now))
         print("Opening the beam path, moving all components out")
         yield from move_SAXSOut()
         yield from move_WAXSOut()
