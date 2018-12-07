@@ -48,7 +48,7 @@ def confirmUsaxsSaxsOutOfBeam():
     if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
         print("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
         msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If SAXS, WAXS, and USAXS are out of beam, UsaxsSaxsMode.put(%d)" 
+        msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)" 
         raise ValueError(msg % UsaxsSaxsModes["out of beam"])
 
 
@@ -217,7 +217,7 @@ def move_USAXSOut():
 
 
 def move_USAXSIn():
-    # yield from plc_protect.stop_if_tripped()
+    yield from plc_protect.stop_if_tripped()
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",

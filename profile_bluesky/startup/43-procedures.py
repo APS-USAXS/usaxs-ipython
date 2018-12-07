@@ -52,6 +52,7 @@ def mode_USAXS():
         scaler0, 1,
 
         # put detector stage in position
+        # TODO: redundant with move_USAXSIn() above?
         d_stage.x, terms.USAXS.diode.dx.value,
         d_stage.y, terms.USAXS.diode.dy.value,
     )
