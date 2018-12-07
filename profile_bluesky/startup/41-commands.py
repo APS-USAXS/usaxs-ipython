@@ -67,7 +67,7 @@ def move_WAXSOut():
     yield from bps.mv(waxsx, terms.WAXS.x_out.value)
 
     yield from waxsx.set_lim(
-        waxsx.soft_limit_hi.value, 
+        waxsx.soft_limit_lo.value, 
         terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
 
     print("Removed WAXS from beam position")
@@ -124,7 +124,7 @@ def move_SAXSOut():
     yield from bps.mv(pin_z, terms.SAXS.z_out.value)
 
     yield from pin_z.set_lim(
-        pin_z.soft_limit_hi.value, 
+        pin_z.soft_limit_lo.value, 
         terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
         )
     
@@ -175,7 +175,7 @@ def move_SAXSIn():
     )
 
     yield from pin_z.set_lim(
-        pin_z.soft_limit_hi.value, 
+        pin_z.soft_limit_lo.value, 
         terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value)
 
     # move Z _AFTER_ the others finish moving
