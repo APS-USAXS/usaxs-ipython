@@ -333,6 +333,7 @@ class UserDataDevice(Device):
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
     sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle")
+    scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile")
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan")
