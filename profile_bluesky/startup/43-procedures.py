@@ -38,7 +38,8 @@ def mode_USAXS():
     retune_needed = False
 
     if not confirm_instrument_mode("USAXS in beam"):
-        print("Found UsaxsSaxsMode = {}".format(UsaxsSaxsMode.value))
+        mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
+        print("Found UsaxsSaxsMode = {}".format(mode_now))
         print("Moving to proper USAXS mode")
         yield from move_WAXSOut()
         yield from move_SAXSOut()
