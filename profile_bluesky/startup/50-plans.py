@@ -26,7 +26,9 @@ def preUSAXStune():
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
     yield from bps.mv(
-        # TODO: BLOCKING    use_mode, "USAXS",      # Must be in USAXS mode to tune
+        # TODO: 
+        #if not confirm_instrument_mode("USAXS in beam"):
+        #    raise RuntimeError("Must be in USAXS mode to tune")
 
         # ensure diode in place (Radiography puts it elsewhere)
         d_stage.x, terms.USAXS.diode.dx.value,
@@ -40,20 +42,37 @@ def preUSAXStune():
         usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+        
+        scaler0.preset_time,  0.1,
     )
     # when all that is complete, then ...
     yield from bps.mv(ti_filter_shutter, "open")
     
     # TODO: install suspender using usaxs_CheckBeamStandard.value
 
-    yield from tune_mr()                   # tune M stage to monochromator
-    yield from tune_m2rp()                 # tune M stage paralelity
+    tuners = OrderedDict()                 # list the axes to tune
+    tuners[m_stage.r] = tune_mr            # tune M stage to monochromator
+    tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
     if terms.USAXS.useMSstage.value:
-        yield from tune_msrp()             # tune msrp stage
+        tuners[ms_stage.rp] = tune_msrp    # align MSR stage with M stage
     if terms.USAXS.useSBUSAXS.value:
-        yield from tune_asrp()             # tune asrp stage and set ASRP0 value
-    yield from tune_ar()                   # tune up the analyzer crystal pair
-    yield from tune_a2rp()                 # tune up the analyzer crystal pair
+        tuners[as_stage.rp] = tune_asrp    # align ASR stage with MSR stage and set ASRP0 value
+    tuners[a_stage.r] = tune_ar            # tune A stage to M stage
+    tuners[a_stage.r2p] = tune_a2rp        # make A stage crystals parallel
+    
+    # now, tune the desired axes, bail out if a tune fails
+    for axis, tune in tuners.items():
+        yield from bps.mv(ti_filter_shutter, "open")
+        yield from tune()
+        if axis.tuner.tune_ok:
+            # If we don't wait, the next tune often fails
+            # intensity stays flat, statistically
+            # TODO: Why is that?
+            yield from bps.sleep(1)
+        else:
+            print("!!! tune failed for axis {} !!!".format(axis.name))
+            break
+
     print("USAXS count time: {} second(s)".format(terms.USAXS.usaxs_time.value))
     yield from bps.mv(
         scaler0.preset_time,        terms.USAXS.usaxs_time.value,
