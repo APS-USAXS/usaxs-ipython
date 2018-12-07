@@ -70,7 +70,7 @@ def mode_USAXS():
 
         print("Prepared for USAXS mode")
         yield from user_data.set_state_plan("USAXS Mode")
-        ts = str(datetime.now())
+        ts = str(datetime.datetime.now())
         yield from bps.mv(
             user_data.time_stamp, ts,
             user_data.macro_file_time, ts,
@@ -106,7 +106,7 @@ def mode_SAXS():
     print("Prepared for SAXS mode")
     #insertScanFilters
     yield from user_data.set_state_plan("SAXS Mode")
-    ts = str(datetime.now())
+    ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.time_stamp, ts,
         user_data.macro_file_time, ts,
@@ -159,7 +159,7 @@ def mode_WAXS():
     print("Prepared for WAXS mode")
     #insertScanFilters
     yield from user_data.set_state_plan("WAXS Mode")
-    ts = str(datetime.now())
+    ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.time_stamp, ts,
         user_data.macro_file_time, ts,
