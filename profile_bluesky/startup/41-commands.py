@@ -91,7 +91,7 @@ def move_WAXSIn():
 
     # first move USAXS out of way
     yield from waxsx.set_lim(
-        waxsx.soft_limit_hi.value, 
+        waxsx.soft_limit_lo.value, 
         terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
     
     yield from bps.mv(
