@@ -351,8 +351,7 @@ class UserDataDevice(Device):
     
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
-        # no need to wait for this to complete, it's just a notification
-        yield from bps.abs_set(self.state, trim_string_for_EPICS(msg))
+        yield from bps.mv(self.state, trim_string_for_EPICS(msg))
 
 
 # these are the global settings PVs for various parts of the instrument
