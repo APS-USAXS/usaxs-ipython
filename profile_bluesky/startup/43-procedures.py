@@ -55,7 +55,7 @@ def mode_USAXS():
         d_stage.x, terms.USAXS.diode.dx.value,
         d_stage.y, terms.USAXS.diode.dy.value,
     )
-    yield from bps(0.1)
+    yield from bps.sleep(0.1)   # TODO: still needed?
 
     if not ccd_shutter.is_closed:
         print("!!!CCD shutter failed to close!!!")
