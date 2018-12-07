@@ -516,7 +516,7 @@ class Parameters_SAXS(Device):
 
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_Pin:directory")
 
-    UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode")
+    UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
 	
