@@ -269,14 +269,17 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                logger.debug("{} = {}".format(pv_spec.label, value))
+                logger.debug(f"{pv_spec.label} = {value}")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
+                if ds is None:
+                    logger.debug(f"Could not create {pv_spec.label}")
+                    continue
                 self._attachEpicsAttributes(ds, pv_spec.pv)
                 addAttributes(ds, **pv_spec.attrib)
             #except Exception as e:
             except IOError as e:
                 print("preliminaryWriteFile():")
-                print("ERROR: pv_spec.label={}, value={}".format(pv_spec.label, value))
+                print(f"ERROR: pv_spec.label={pv_spec.label}, value={value}")
                 print("MESSAGE: ", e)
                 print("RESOLUTION: writing as error message string")
                 ds = makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
@@ -469,10 +472,16 @@ def makeDataset(parent, name, data = None, **attr):
         # lzf          861396
         # ===========  =================
         #
-        obj = parent.create_dataset(name, data=data)
+        try:
+            obj = parent.create_dataset(name, data=data)
+        except TypeError as _exc:
+            print(f"Could not save name = {name}")
+            # want to re-raise the exception
+            obj = None
         #obj = parent.create_dataset(name, data=data, compression="gzip")
         #obj = parent.create_dataset(name, data=data, compression="lzf")
-    addAttributes(obj, **attr)
+    if obj is not None:
+        addAttributes(obj, **attr)
     return obj
 
 
@@ -536,7 +545,7 @@ def developer():
 
 
 def developer2():
-    sfs = SaveFlyScan("/tmp/sfs.h5", "./saveFlyData.xml")
+    sfs = SaveFlyScan("/tmp/sfs.h5", XML_CONFIGURATION_FILE)
     sfs.preliminaryWriteFile()
     sfs.saveFile()
 
