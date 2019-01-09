@@ -52,7 +52,6 @@ import APS_BlueSky_tools.utils as APS_utils
 
 # import specific methods by name, we need to customize them sometimes
 from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
-from APS_BlueSky_tools.devices import ApsHDF5Plugin
 from APS_BlueSky_tools.devices import ApsPssShutterWithStatus
 from APS_BlueSky_tools.devices import EpicsMotorShutter
 from APS_BlueSky_tools.filewriters import SpecWriterCallback
