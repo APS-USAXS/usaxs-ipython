@@ -53,10 +53,10 @@ class EpicsMotorLimitsMixin(Device):
             )
 
 
-class UsaxsMotor(EpicsMotor, EpicsMotorLimitsMixin): pass
+class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 
 
-class UsaxsMotorTunable(UsaxsMotor, APS_devices.AxisTunerMixin):
+class UsaxsMotorTunable(APS_devices.AxisTunerMixin, UsaxsMotor):
     pass
 
 
