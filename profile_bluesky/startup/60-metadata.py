@@ -9,11 +9,15 @@ RE.md['pid'] = os.getpid()
 
 # Add a callback that prints scan IDs at the start of each scan.
 
+
 HOSTNAME = socket.gethostname() or 'localhost' 
 USERNAME = getpass.getuser() or 'APS USAXS user' 
 RE.md['login_id'] = USERNAME + '@' + HOSTNAME
 RE.md['BLUESKY_VERSION'] = bluesky.__version__
 RE.md['OPHYD_VERSION'] = ophyd.__version__
+from APS_BlueSky_tools import __version__ as APS_BST_version
+RE.md['APS_BLUESKY_TOOLS_VERSION'] = APS_BST_version
+del APS_BST_version
 
 _skip_these_ = "EPICS_BASE EPICS_BASE_PVT EPICS_DISPLAY_PATH EPICS_EXTENSIONS".split()
 for key, value in os.environ.items():
