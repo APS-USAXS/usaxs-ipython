@@ -23,7 +23,7 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
     image = ADComponent(ImagePlugin, "image1:")
     
     hdf1 = ADComponent(
-        ApsHDF5Plugin, 
+        EpicsDefinesHDF5FileNames, 
         suffix = "HDF1:", 
         root = DATABROKER_ROOT_PATH,
         write_path_template = WRITE_HDF5_FILE_PATH_PILATUS,
