@@ -155,7 +155,7 @@ def mode_WAXS():
             guard_slit.h_size, terms.SAXS.guard_h_size.value,
             guard_slit.v_size, terms.SAXS.guard_v_size.value,
         )
-        yield from bps.sleep(0.5)           # FIXME: needed now?
+        yield from bps.sleep(0.5)           # TODO: needed now?
         # while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
         #     logger.debug("waiting for guard slits to finish their move")
         #     yield from bps.sleep(0.5)
