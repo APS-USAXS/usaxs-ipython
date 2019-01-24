@@ -14,7 +14,9 @@ sd.baseline.append(undulator)
 
 if aps.inUserOperations:
     sd.monitors.append(aps.current)
-    suspend_APS_current = bluesky.suspenders.SuspendFloor(aps.current, 2, resume_thresh=10)
+    # suspend when current < 2 mA
+    # resume 100s after current > 10 mA
+    suspend_APS_current = bluesky.suspenders.SuspendFloor(aps.current, 2, resume_thresh=10, sleep=100)
     RE.install_suspender(suspend_APS_current)
 
     suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
