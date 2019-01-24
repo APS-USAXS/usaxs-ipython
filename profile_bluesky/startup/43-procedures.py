@@ -154,11 +154,11 @@ def mode_WAXS():
         yield from bps.sleep(0.5)  
         while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
             yield from bps.sleep(0.5)
-            v_diff = abs((guard_slit.top.value-guard_slit.bot.value) - terms.SAXS.guard_v_size.value)
-            h_diff = abs((guard_slit.outb.value-guard_slit.inb.value) - terms.SAXS.guard_h_size.value)
+            v_diff = abs((guard_slit.top.position  - guard_slit.bot.position) - terms.SAXS.guard_v_size.value)
+            h_diff = abs((guard_slit.outb.position - guard_slit.inb.position) - terms.SAXS.guard_h_size.value)
        
-    v_diff = abs(usaxs_slit.v_size.value - terms.SAXS.v_size.value)
-    h_diff = abs(usaxs_slit.h_size.value - terms.SAXS.h_size.value)
+    v_diff = abs(usaxs_slit.v_size.position - terms.SAXS.v_size.value)
+    h_diff = abs(usaxs_slit.h_size.position - terms.SAXS.h_size.value)
     if max(v_diff, h_diff) > 0.02:
        logger.info("Moving Beam defining slits")
        yield from bps.mv(
