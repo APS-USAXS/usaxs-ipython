@@ -201,7 +201,6 @@ def move_USAXSOut():
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from ax.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
@@ -232,7 +231,6 @@ def move_USAXSIn():
     # set the limits so we can move pinhole in place.
     ax = a_stage.x
     dx = d_stage.x
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from ax.set_lim(
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
