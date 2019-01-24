@@ -7,6 +7,9 @@ see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local
 """
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 def DCMfeedbackON():
     """plan: could send email"""
     yield from bps.mv(monochromator.feedback.on, 1)
@@ -46,14 +49,14 @@ def mode_USAXS():
 
     if not confirm_instrument_mode("USAXS in beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        print("Found UsaxsSaxsMode = {}".format(mode_now))
-        print("Moving to proper USAXS mode")
+        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info("Moving to proper USAXS mode")
         yield from move_WAXSOut()
         yield from move_SAXSOut()
         yield from move_USAXSIn()
         retune_needed = True
 
-    print("Preparing for USAXS mode ... please wait ...")
+    logger.info("Preparing for USAXS mode ... please wait ...")
     yield from bps.mv(
         # set scalar to autocount mode for USAXS
         scaler0, SCALER_AUTOCOUNT_MODE,
@@ -66,7 +69,7 @@ def mode_USAXS():
     yield from bps.sleep(0.1)   # TODO: still needed?
 
     if not ccd_shutter.is_closed:
-        print("!!!CCD shutter failed to close!!!")
+        logger.info("!!!CCD shutter failed to close!!!")
         # TODO: logging?
     else:
         # mono_shutter.open()
@@ -76,7 +79,7 @@ def mode_USAXS():
         yield from insertScanFilters()
         yield from bps.mv(ccd_shutter, "close")
 
-        print("Prepared for USAXS mode")
+        logger.info("Prepared for USAXS mode")
         yield from user_data.set_state_plan("USAXS Mode")
         ts = str(datetime.datetime.now())
         yield from bps.mv(
@@ -105,13 +108,13 @@ def mode_SAXS():
 
     if not confirm_instrument_mode("SAXS in beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        print("Found UsaxsSaxsMode = {}".format(mode_now))
-        print("Moving to proper SAXS mode")
+        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info("Moving to proper SAXS mode")
         yield from move_WAXSOut()
         yield from move_USAXSOut()
         yield from move_SAXSIn()
         
-    print("Prepared for SAXS mode")
+    logger.info("Prepared for SAXS mode")
     #insertScanFilters
     yield from user_data.set_state_plan("SAXS Mode")
     ts = str(datetime.datetime.now())
@@ -132,8 +135,8 @@ def mode_WAXS():
 
     if not confirm_instrument_mode("WAXS in beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        print("Found UsaxsSaxsMode = {}".format(mode_now))
-        print("Moving to proper WAXS mode")
+        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info("Moving to proper WAXS mode")
         yield from move_SAXSOut()
         yield from move_USAXSOut()
         yield from move_WAXSIn()
@@ -143,7 +146,7 @@ def mode_WAXS():
     h_diff = abs(guard_slit.h_size.value - terms.SAXS.guard_h_size.value)
 
     if max(v_diff, h_diff) > 0.03:
-        print("changing G slits")
+        logger.info("changing G slits")
         yield from bps.mv(
             guard_slit.h_size, terms.SAXS.guard_h_size.value,
             guard_slit.v_size, terms.SAXS.guard_v_size.value,
@@ -157,14 +160,14 @@ def mode_WAXS():
     v_diff = abs(usaxs_slit.v_size.value - terms.SAXS.v_size.value)
     h_diff = abs(usaxs_slit.h_size.value - terms.SAXS.h_size.value)
     if max(v_diff, h_diff) > 0.02:
-       print("Moving Beam defining slits")
+       logger.info("Moving Beam defining slits")
        yield from bps.mv(
            usaxs_slit.h_size, terms.SAXS.h_size.value,
            usaxs_slit.v_size, terms.SAXS.v_size.value,
        )
        yield from bps.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
 
-    print("Prepared for WAXS mode")
+    logger.info("Prepared for WAXS mode")
     #insertScanFilters
     yield from user_data.set_state_plan("WAXS Mode")
     ts = str(datetime.datetime.now())
@@ -197,8 +200,8 @@ def mode_OpenBeamPath():
 
     if not confirm_instrument_mode("out of beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        print("Found UsaxsSaxsMode = {}".format(mode_now))
-        print("Opening the beam path, moving all components out")
+        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info("Opening the beam path, moving all components out")
         yield from move_SAXSOut()
         yield from move_WAXSOut()
         yield from move_USAXSOut()
