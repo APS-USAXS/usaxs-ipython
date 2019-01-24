@@ -192,10 +192,6 @@ def mode_imaging():
     pass
 
 
-def mode_pinSAXS():
-    pass
-
-
 def mode_OpenBeamPath():
     # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to OpenBeamPath mode")
