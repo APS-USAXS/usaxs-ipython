@@ -56,7 +56,7 @@ def mode_USAXS():
     print("Preparing for USAXS mode ... please wait ...")
     yield from bps.mv(
         # set scalar to autocount mode for USAXS
-        scaler0, 1,
+        scaler0, SCALER_AUTOCOUNT_MODE,
 
         # put detector stage in position
         # TODO: redundant with move_USAXSIn() above?
