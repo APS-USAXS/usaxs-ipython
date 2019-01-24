@@ -22,7 +22,14 @@ def insertScanFilters():
 
 
 def confirm_instrument_mode(mode_name):
-    """True if instrument is in the named mode"""
+    """
+    True if instrument is in the named mode
+    
+    Parameter
+    
+    mode_name (str) :
+        One of the strings defined in ``UsaxsSaxsModes``
+    """
     expected_mode = UsaxsSaxsModes[mode_name]
     return terms.SAXS.UsaxsSaxsMode.value == expected_mode
 
