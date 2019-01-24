@@ -90,12 +90,12 @@ use_mode.add(IfRequestedStopBeforeNextScan, "IfRequestedStopBeforeNextScan")
 
 
 def Flyscan(pos_X, pos_Y, thickness, scan_title):
-    yield from bps.mv(use_mode, "IfRequestedStopBeforeNextScan")
+    #yield from bps.mv(use_mode, "IfRequestedStopBeforeNextScan")
+    yield from IfRequestedStopBeforeNextScan()
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
-        # TODO: use_mode, "USAXS",
-        # USAXS and guard slits by mode_USAXS command on previous line
+        # move these at same time as sample stage motors
         usaxs_slit.usaxs_v_size, terms.SAXS.usaxs_v_size.value,
         usaxs_slit.usaxs_h_size, terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
