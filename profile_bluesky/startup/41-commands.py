@@ -66,7 +66,6 @@ def move_WAXSOut():
     # move the WAXS X away from sample
     yield from bps.mv(waxsx, terms.WAXS.x_out.value)
 
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from waxsx.set_lim(
         waxsx.soft_limit_lo.value, 
         terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
@@ -91,7 +90,6 @@ def move_WAXSIn():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from waxsx.set_lim(
         waxsx.soft_limit_lo.value, 
         terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
@@ -119,26 +117,21 @@ def move_SAXSOut():
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
     
-    pin_y = saxs_stage.y
-    pin_z = saxs_stage.z
     # move the pin_z away from sample
-    
-    yield from bps.mv(pin_z, terms.SAXS.z_out.value)
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_out.value)
 
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
-    yield from pin_z.set_lim(
-        pin_z.soft_limit_lo.value, 
-        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
+    yield from saxs_stage.z.set_lim(
+        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value, 
+        saxs_stage.z.soft_limit_hi.value,  # don't change this value
         )
     
     # move pinhole up to out of beam position
-    yield from bps.mv(pin_y, terms.SAXS.y_out.value)
+    yield from bps.mv(saxs_stage.y, terms.SAXS.y_out.value)
 
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
-    #yield from pin_y.set_lim(
-    #    terms.SAXS.y_out.value - terms.SAXS.y_limit_offset.value,
-    #    pin_y.soft_limit_lo.value,
-    #    )
+    yield from saxs_stage.y.set_lim(
+        terms.SAXS.y_out.value - terms.SAXS.y_limit_offset.value,
+        saxs_stage.y.soft_limit_hi.value,  # don't change this value
+        )
 
     print("Removed SAXS from beam position")
     ###sleep(1)    
@@ -163,29 +156,26 @@ def move_SAXSIn():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
-    pin_y = saxs_stage.y
-    pin_z = saxs_stage.z
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
-    #yield from pin_y.set_lim(
-    #    terms.SAXS.y_in.value - terms.SAXS.y_limit_offset.value,
-    #    pin_y.soft_limit_lo.value,
-    #    )
+    yield from saxs_stage.y.set_lim(
+        terms.SAXS.y_in.value - terms.SAXS.y_limit_offset.value,
+        saxs_stage.y.soft_limit_hi.value,
+        )
 
     yield from bps.mv(
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
-        pin_y,             terms.SAXS.y_in.value,
+        saxs_stage.y,      terms.SAXS.y_in.value,
         usaxs_slit.v_size, terms.SAXS.v_size.value,
         usaxs_slit.h_size, terms.SAXS.h_size.value,
     )
 
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
-    yield from pin_z.set_lim(
-        pin_z.soft_limit_lo.value, 
-        terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value)
+    yield from saxs_stage.z.set_lim(
+        terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value,
+        saxs_stage.z.soft_limit_hi.value   # do NOT change the hi value
+        )
 
     # move Z _AFTER_ the others finish moving
-    yield from bps.mv(pin_z, terms.SAXS.z_in.value)
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.value)
 
     print("Pinhole SAXS is in position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["SAXS in beam"])
@@ -215,10 +205,9 @@ def move_USAXSOut():
     yield from ax.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from dx.set_lim(
-        terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value,
-        dx.soft_limit_hi.value)
+        dx.soft_limit_lo.value,
+        terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
 
     print("Removed USAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
@@ -247,10 +236,9 @@ def move_USAXSIn():
     yield from ax.set_lim(
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
         ax.soft_limit_hi.value)
-    # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/96
     yield from dx.set_lim(
         dx.soft_limit_lo.value,
-        terms.USAXS.diode.dx.value + terms.SAXS.dx_limit_offset.value)
+        terms.SAXS.dx_in.value + terms.SAXS.dx_limit_offset.value)
 
     yield from bps.mv(
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
