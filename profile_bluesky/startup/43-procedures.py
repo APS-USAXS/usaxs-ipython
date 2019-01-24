@@ -133,7 +133,9 @@ def mode_WAXS():
         ti_filter_shutter,  "close",
     )
 
-    if not confirm_instrument_mode("WAXS in beam"):
+    if confirm_instrument_mode("WAXS in beam"):
+        logger.debug("WAXS is in beam")
+    else:
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
         logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
         logger.info("Moving to proper WAXS mode")
@@ -144,21 +146,27 @@ def mode_WAXS():
     # move SAXS slits in, used for WAXS mode also
     v_diff = abs(guard_slit.v_size.value - terms.SAXS.guard_v_size.value)
     h_diff = abs(guard_slit.h_size.value - terms.SAXS.guard_h_size.value)
+    logger.debug("guard slits horizontal difference = %g" % h_diff)
+    logger.debug("guard slits vertical difference = %g" % v_diff)
 
     if max(v_diff, h_diff) > 0.03:
-        logger.info("changing G slits")
+        logger.info("changing Guard slits")
         yield from bps.mv(
             guard_slit.h_size, terms.SAXS.guard_h_size.value,
             guard_slit.v_size, terms.SAXS.guard_v_size.value,
         )
-        yield from bps.sleep(0.5)  
+        yield from bps.sleep(0.5)           # FIXME: needed now?
         while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
+            logger.debug("waiting for guard slits to finish their move")
             yield from bps.sleep(0.5)
             v_diff = abs((guard_slit.top.position  - guard_slit.bot.position) - terms.SAXS.guard_v_size.value)
             h_diff = abs((guard_slit.outb.position - guard_slit.inb.position) - terms.SAXS.guard_h_size.value)
        
     v_diff = abs(usaxs_slit.v_size.position - terms.SAXS.v_size.value)
     h_diff = abs(usaxs_slit.h_size.position - terms.SAXS.h_size.value)
+    logger.debug("USAXS slits horizontal difference = %g" % h_diff)
+    logger.debug("USAXS slits vertical difference = %g" % v_diff)
+
     if max(v_diff, h_diff) > 0.02:
        logger.info("Moving Beam defining slits")
        yield from bps.mv(
