@@ -156,12 +156,14 @@ def mode_WAXS():
             guard_slit.v_size, terms.SAXS.guard_v_size.value,
         )
         yield from bps.sleep(0.5)           # FIXME: needed now?
-        while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
-            logger.debug("waiting for guard slits to finish their move")
-            yield from bps.sleep(0.5)
-            v_diff = abs((guard_slit.top.position  - guard_slit.bot.position) - terms.SAXS.guard_v_size.value)
-            h_diff = abs((guard_slit.outb.position - guard_slit.inb.position) - terms.SAXS.guard_h_size.value)
-       
+        # while max(v_diff, h_diff) > 0.02:   # FIXME: What good is this loop?
+        #     logger.debug("waiting for guard slits to finish their move")
+        #     yield from bps.sleep(0.5)
+        #     v_diff = abs((guard_slit.top.position  - guard_slit.bot.position) - terms.SAXS.guard_v_size.value)
+        #     h_diff = abs((guard_slit.outb.position - guard_slit.inb.position) - terms.SAXS.guard_h_size.value)
+        #     logger.debug("guard slits horizontal difference = %g" % h_diff)
+        #     logger.debug("guard slits vertical difference = %g" % v_diff)
+
     v_diff = abs(usaxs_slit.v_size.position - terms.SAXS.v_size.value)
     h_diff = abs(usaxs_slit.h_size.position - terms.SAXS.h_size.value)
     logger.debug("USAXS slits horizontal difference = %g" % h_diff)
