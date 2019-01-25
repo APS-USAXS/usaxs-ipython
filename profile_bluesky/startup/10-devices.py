@@ -368,6 +368,7 @@ class FlyScanParameters(Device):
     use_flyscan = Component(EpicsSignal, "9idcLAX:USAXS:UseFlyscan")
     asrp_calc_SCAN = Component(EpicsSignal, "9idcLAX:userStringCalc2.SCAN")
     order_number = Component(EpicsSignal, "9idcLAX:USAXS:FS_OrderNumber")
+    elapsed_time = Component(EpicsSignal, "9idcLAX:USAXS:FS_ElapsedTime")
 
     setpoint_up = Component(Signal, value=6000)     # decrease range
     setpoint_down = Component(Signal, value=850000)    # increase range

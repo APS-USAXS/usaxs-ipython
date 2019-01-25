@@ -41,7 +41,7 @@ class UsaxsFlyScanDevice(Device):
         self.fallback_dir = FALLBACK_DIR
         self.saveFlyData_HDF5_file ="sfs.h5"
         self._output_HDF5_file_ = None
-    
+
     def plan(self):
 
         def _report_(t):
@@ -52,6 +52,7 @@ class UsaxsFlyScanDevice(Device):
             msg += f"  channel = {struck.current_channel.value}"
             msg += "  elapsed time = %.2f" % struck.elapsed_real_time.value
             # msg += "  flying = {}".format(self.flying.value)
+            terms.FlyScan.elapsed_time.put(struck.elapsed_real_time.value)  # for our GUI display
             return msg
 
         @APS_plans.run_in_thread
@@ -128,7 +129,7 @@ class UsaxsFlyScanDevice(Device):
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
         yield from bps.abs_set(self.flying, False)
-        
+
         prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
 
         g = uuid.uuid4()
@@ -138,13 +139,13 @@ class UsaxsFlyScanDevice(Device):
 
         yield from bps.wait(group=g)
         yield from bps.abs_set(self.flying, False)
-        
+
         yield from user_data.set_state_plan("writing fly scan HDF5 file")
         finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
 
         yield from bps.mv(
-            a_stage.r.user_setpoint, self.ar0, 
-            a_stage.y.user_setpoint, self.ay0, 
+            a_stage.r.user_setpoint, self.ar0,
+            a_stage.y.user_setpoint, self.ay0,
             d_stage.y.user_setpoint, self.dy0)
         logger.debug("after return", time.time() - self.t0)
         yield from user_data.set_state_plan("fly scan finished")
