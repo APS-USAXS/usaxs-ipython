@@ -13,22 +13,22 @@ undulator = ApsUndulatorDual("ID09", name="undulator")
 sd.baseline.append(undulator)
 
 """
-This EPICS PV calculates *BeamInHutch* boolean. 
+This EPICS PV calculates *BeamInHutch* boolean.
 This is used to set the check beam PV to use I000 PD on Mirror window, limit is set
 in user calc. This would fail for tune_dcmth and other macros, which may take
-the intensity there down. For that use the other macro (?usaxs_CheckBeamSpecial?)... 
+the intensity there down. For that use the other macro (?usaxs_CheckBeamSpecial?)...
 """
 BeamInHutch = EpicsSignal(
-    "9idcLAX:blCalc:userCalc1", 
+    "9idcLAX:blCalc:userCalc1",
     name="usaxs_CheckBeamStandard"
 )
 
 
 if False:       # TODO: needs some thought and refactoring
-      # this is used to set the check beam PV to use many PVs and conditions to decide, 
+      # this is used to set the check beam PV to use many PVs and conditions to decide,
       # if there is chance to have beam. Uses also userCalc on lax
     usaxs_CheckBeamSpecial = EpicsSignal(
-        "9idcLAX:blCalc:userCalc2", 
+        "9idcLAX:blCalc:userCalc2",
         name="usaxs_CheckBeamSpecial"
     )
 
@@ -80,6 +80,28 @@ email_notices.add_addresses(
     "kuzmenko@aps.anl.gov",
     "mfrith@anl.gov",
 )
+
+class Autosave(Device):
+    """control of autosave routine in EPICS IOC"""
+    disable = Component(EpicsSignal, "SR_disable")
+    max_time = Component(EpicsSignal, "SR_disableMaxSecs")
+
+# autosave on LAX
+lax_autosave = Autosave("9idcLAX:", name="lax_autosave")    # LAX is an IOC
+
+class Trajectories(Device):
+    """fly scan trajectories"""
+    ar = Component(EpicsSignal, "9idcLAX:traj1:M1Traj")
+    ay = Component(EpicsSignal, "9idcLAX:traj3:M1Traj")
+    dy = Component(EpicsSignal, "9idcLAX:traj2:M1Traj")
+    num_pulse_positions = Component(EpicsSignal, "9idcLAX:traj1:NumPulsePositions")
+
+flyscan_trajectories = Trajectories(name="flyscan_trajectories")
+
+
+ar_start = EpicsSignal("9idcLAX:USAXS:ARstart", name="ar_start")
+ay_start = EpicsSignal("9idcLAX:USAXS:AYstart", name="ar_start")
+dy_start = EpicsSignal("9idcLAX:USAXS:DYstart", name="ar_start")
 
 
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!

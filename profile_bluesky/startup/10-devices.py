@@ -294,6 +294,7 @@ class KohzuSeqCtl_Monochromator(Device):
     crystal_type = Component(EpicsSignal, "BraggTypeMO")
 
 
+# this makes an enumeration
 MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
 
 
@@ -330,7 +331,6 @@ class DCM_Feedback(Device):
 
 
 class UserDataDevice(Device):
-    FS_order_number = Component(EpicsSignal,    "9idcLAX:USAXS:FS_OrderNumber")
     GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
@@ -619,7 +619,7 @@ class EmailNotifications(object):
 
     def __init__(self, sender=None):
         self.addresses = []
-        self.notify_on_feedback = True
+        self.notify_on_feedback = True      # trigger an email if mono feedback is too close its limits
         self.sender = sender or "nobody@localhost"
 
     def add_addresses(self, *args):
@@ -635,6 +635,7 @@ class EmailNotifications(object):
         s = smtplib.SMTP('localhost')
         s.sendmail(self.sender, self.addresses, msg.as_string())
         s.quit()
+
 
 # TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
 class ApsBssUserInfoDevice(Device):
