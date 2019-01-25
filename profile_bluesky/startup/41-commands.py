@@ -196,10 +196,10 @@ def move_USAXSOut():
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
-    yield from ax.set_lim(
+    yield from a_stage.x.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
         a_stage.x.soft_limit_hi.value)
-    yield from dx.set_lim(
+    yield from da_stage.x.set_lim(
         d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
 
@@ -224,10 +224,10 @@ def move_USAXSIn():
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
-    yield from ax.set_lim(
+    yield from a_stage.x.set_lim(
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
         a_stage.x.soft_limit_hi.value)
-    yield from dx.set_lim(
+    yield from d_stage.x.set_lim(
         d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_in.value + terms.SAXS.dx_limit_offset.value)
 
