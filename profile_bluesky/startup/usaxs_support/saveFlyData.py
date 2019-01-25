@@ -292,7 +292,7 @@ class SaveFlyScan(object):
         f = group_registry['/'].hdf5_group
         f.attrs["timestamp"] = timestamp
 
-        # TODO: will len(caget(array)) = NORD or NELM? (useful data or full array)
+        # note: len(caget(array)) returns NORD (number of useful data)
         for pv_spec in pv_registry.values():
             if not pv_spec.acquire_after_scan:
                 continue
