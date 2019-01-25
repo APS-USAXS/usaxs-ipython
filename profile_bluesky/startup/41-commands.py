@@ -134,9 +134,6 @@ def move_SAXSOut():
         )
 
     print("Removed SAXS from beam position")
-    ###sleep(1)    
-    #waxs seems to be getting ahead of saxs limit switch
-    # - should not be needed, we have plc_protect.wait_for_interlock() now. 
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
@@ -192,20 +189,18 @@ def move_USAXSOut():
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
-    ax = a_stage.x
-    dx = d_stage.x
     yield from bps.mv(
-        ax, terms.SAXS.ax_out.value,
-        dx, terms.SAXS.dx_out.value,
+        a_stage.x, terms.SAXS.ax_out.value,
+        d_stage.x, terms.SAXS.dx_out.value,
     )
 
     # now Main stages are out of place, 
     # so we can now set the limits and then move pinhole in place.
     yield from ax.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
-        ax.soft_limit_hi.value)
+        a_stage.x.soft_limit_hi.value)
     yield from dx.set_lim(
-        dx.soft_limit_lo.value,
+        d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
 
     print("Removed USAXS from beam position")
@@ -229,13 +224,11 @@ def move_USAXSIn():
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
-    ax = a_stage.x
-    dx = d_stage.x
     yield from ax.set_lim(
         terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
-        ax.soft_limit_hi.value)
+        a_stage.x.soft_limit_hi.value)
     yield from dx.set_lim(
-        dx.soft_limit_lo.value,
+        d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_in.value + terms.SAXS.dx_limit_offset.value)
 
     yield from bps.mv(
