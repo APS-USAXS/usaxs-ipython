@@ -15,6 +15,7 @@ import six
 import sys
 import time
 
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
 # do not warn if the HDF5 library version has changed
@@ -269,7 +270,7 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                logger.debug(f"{pv_spec.label} = {value}")
+                logger.debug(f"preliminaryWriteFile(): {pv_spec.label} = {value}")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 if ds is None:
                     logger.debug(f"Could not create {pv_spec.label}")
@@ -309,6 +310,7 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
+                logger.debug(f"saveFile(): {pv_spec.label} = {value}")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 self._attachEpicsAttributes(ds, pv_spec.pv)
                 addAttributes(ds, **pv_spec.attrib)
@@ -451,6 +453,8 @@ def makeDataset(parent, name, data = None, **attr):
     if data is None:
         obj = parent.create_dataset(name)
     else:
+        logger.debug("makeDataset(name=\"%s\", data=%s)" % (name, str(data)))
+
         # https://stackoverflow.com/questions/23220513/storing-a-list-of-strings-to-a-hdf5-dataset-from-python
         # [n.encode("ascii", "ignore") for n in data]
         def encoder(value):
@@ -475,7 +479,7 @@ def makeDataset(parent, name, data = None, **attr):
         try:
             obj = parent.create_dataset(name, data=data)
         except TypeError as _exc:
-            print(f"Could not save name = {name}")
+            print(f"Could not save name = {name} due to {_exc}")
             # want to re-raise the exception
             obj = None
         #obj = parent.create_dataset(name, data=data, compression="gzip")
