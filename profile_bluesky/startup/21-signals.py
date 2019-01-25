@@ -81,6 +81,15 @@ email_notices.add_addresses(
     "mfrith@anl.gov",
 )
 
+# user will write code to check the corresponding symbol to send EmailNotifications
+NOTIFY_ON_RESET = True
+NOTIFY_ON_SCAN_DONE = False
+NOTIFY_ON_BEAM_LOSS = True
+NOTIFY_ON_BAD_FLY_SCAN = True
+NOTIFY_ON_FEEDBACK = True
+NOTIFY_ON_BADTUNE = True
+
+
 class Autosave(Device):
     """control of autosave routine in EPICS IOC"""
     disable = Component(EpicsSignal, "SR_disable")

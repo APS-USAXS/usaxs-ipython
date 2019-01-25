@@ -268,7 +268,7 @@ def _flyscan_internal():
 
     yield from bp.mv(
         user_data.scanning, 0,          # for sure, we are not scanning now
-        # TODO: set PV 9showing elapsed fly scan time) to zero
+        terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
     )
 
     # Check if we had bad number of PSO pulses
@@ -276,22 +276,6 @@ def _flyscan_internal():
     if diff > 5:
         msg = "WARNING: Flyscan finished with %g less points" % diff
         logger.warning(msg)
-        email_notices.send("!!! bad number of PSO pulses !!!", msg)
-
-"""
-# /home/beams/USAXS/spec/macros/local/usaxs_flyscan.mac
-def _flyscanInternal '{
-   #####################################################
-   ##Check if we had bad number of PSO pulses  #########
-   local __tmpDIffInPnts
-   local __FSErromsg
-   __tmpDIffInPnts = epics_get("9idcLAX:traj1:NumPulsePositions") - epics_get("9idcLAX:3820:CurrentChannel")
-   ## if OK, the difference should be 1 point (due to 1 based and 0 based 8k points).
-   if( __tmpDIffInPnts > 5 ){
-       comment "WARNING: Flyscan finished with %g less points." __tmpDIffInPnts
-        __FSErromsg = sprintf("Flyscan finished with %g less points.", __tmpDIffInPnts)
-       if(NOTIFY_ON_BADFSSCAN) { sendNotifications("FlyScan had wrong number of points",__FSErromsg);}
-   }
-   #####################################################
-}'
-"""
+        if NOTIFY_ON_BAD_FLY_SCAN:
+            subject = "!!! bad number of PSO pulses !!!"
+            email_notices.send(subject, msg)
