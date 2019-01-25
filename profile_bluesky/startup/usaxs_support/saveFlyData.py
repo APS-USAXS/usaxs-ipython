@@ -15,7 +15,7 @@ import six
 import sys
 import time
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
 # do not warn if the HDF5 library version has changed
@@ -110,7 +110,8 @@ class Group_Specification(object):
             self.group_parent = None
             self.hdf5_path = '/'
         if self.hdf5_path in group_registry:
-            msg = "Cannot create duplicate HDF5 path names: " + self.hdf5_path
+            msg = "Cannot create duplicate HDF5 path names: path=%s name=%s nx_class=%s" % (
+                self.hdf5_path, self.name, self.nx_class)
             raise RuntimeError(msg)
         group_registry[self.hdf5_path] = self
 
@@ -214,6 +215,7 @@ class SaveFlyScan(object):
 
     def __init__(self, hdf5_file, config_file = None):
         self.hdf5_file_name = hdf5_file
+
         path = self._get_support_code_dir()
         self.config_file = config_file or os.path.join(path, XML_CONFIGURATION_FILE)
         self._read_configuration()
@@ -329,6 +331,8 @@ class SaveFlyScan(object):
         f.close()    # be CERTAIN to close the file
 
     def _read_configuration(self):
+        global field_registry, group_registry, link_registry, pv_registry
+
         # first, validate configuration file against an XML Schema
         path = self._get_support_code_dir()
         xml_schema_file = os.path.join(path, XSD_SCHEMA_FILE)
@@ -365,6 +369,13 @@ class SaveFlyScan(object):
         # allow XML configuration to override trigger_poll_interval_s
         default_value = float(xsd_node[0].get('default', self.trigger_poll_interval_s))
         self.trigger_poll_interval_s = node.get('poll_time_s', default_value)
+
+        # reset these global variables
+        field_registry = {}    # key: node/@label,        value: Field_Specification object
+        group_registry = {}    # key: HDF5 absolute path, value: Group_Specification object
+        link_registry = {}     # key: node/@label,        value: Link_Specification object
+        pv_registry = {}       # key: node/@label,        value: PV_Specification object
+
 
         nx_structure = root.xpath('/saveFlyData/NX_structure')[0]
         for node in nx_structure.xpath('//group'):
