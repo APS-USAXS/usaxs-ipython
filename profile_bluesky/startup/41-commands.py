@@ -16,6 +16,25 @@ UsaxsSaxsModes = {
 }
 
 
+def cleanupText(text):
+    """
+    given some input text string, return a clean version
+
+    remove troublesome characters, perhaps other cleanup as well
+
+    this is best done with regular expression pattern matching
+    """
+    import re
+    pattern = "[a-zA-Z0-9._]"
+
+    def mapper(c):
+        if re.match(pattern, c) is not None:
+            return c
+        return "_"
+
+    return "".join([mapper(c) for c in text])
+
+
 def IfRequestedStopBeforeNextScan():
     """plan: wait if requested"""
     open_the_shutter = False
@@ -48,7 +67,7 @@ def confirmUsaxsSaxsOutOfBeam():
     if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
         print("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
         msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)" 
+        msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)"
         raise ValueError(msg % UsaxsSaxsModes["out of beam"])
 
 
@@ -67,7 +86,7 @@ def move_WAXSOut():
     yield from bps.mv(waxsx, terms.WAXS.x_out.value)
 
     yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.value, 
+        waxsx.soft_limit_lo.value,
         terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
 
     print("Removed WAXS from beam position")
@@ -91,9 +110,9 @@ def move_WAXSIn():
 
     # first move USAXS out of way
     yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.value, 
+        waxsx.soft_limit_lo.value,
         terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
-    
+
     yield from bps.mv(
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
@@ -116,15 +135,15 @@ def move_SAXSOut():
     print("Moving SAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
-    
+
     # move the pin_z away from sample
     yield from bps.mv(saxs_stage.z, terms.SAXS.z_out.value)
 
     yield from saxs_stage.z.set_lim(
-        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value, 
+        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
         saxs_stage.z.soft_limit_hi.value,  # don't change this value
         )
-    
+
     # move pinhole up to out of beam position
     yield from bps.mv(saxs_stage.y, terms.SAXS.y_out.value)
 
@@ -194,7 +213,7 @@ def move_USAXSOut():
         d_stage.x, terms.SAXS.dx_out.value,
     )
 
-    # now Main stages are out of place, 
+    # now Main stages are out of place,
     # so we can now set the limits and then move pinhole in place.
     yield from a_stage.x.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
