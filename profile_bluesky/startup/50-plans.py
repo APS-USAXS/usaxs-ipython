@@ -85,12 +85,7 @@ def preUSAXStune():
     )
 
 
-# TODO: make this look less like a mode
-use_mode.add(IfRequestedStopBeforeNextScan, "IfRequestedStopBeforeNextScan")
-
-
 def Flyscan(pos_X, pos_Y, thickness, scan_title):
-    #yield from bps.mv(use_mode, "IfRequestedStopBeforeNextScan")
     yield from IfRequestedStopBeforeNextScan()
     yield from bps.mv(
         s_stage.x, pos_X,
