@@ -120,6 +120,7 @@ class UsaxsFlyScanDevice(Device):
             print("HDF5 output complete: {}".format(self._output_HDF5_file_))
             self.saveFlyData = None
 
+        # plan starts here
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
