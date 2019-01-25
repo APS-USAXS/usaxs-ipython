@@ -449,39 +449,30 @@ def makeDataset(parent, name, data = None, **attr):
     :param obj data: the information to be written
     :param dict attr: optional dictionary of attributes
     :return: h5py dataset object
+
+    # note: Does dataset compression make smaller files?
+    #
+    # ===========  =================
+    # compression  file size (bytes)
+    # ===========  =================
+    # None         362756
+    # gzip         815366
+    # lzf          861396
+    # ===========  =================
     '''
     if data is None:
         obj = parent.create_dataset(name)
     else:
-        logger.debug("makeDataset(name=\"%s\", data=%s)" % (name, str(data)))
-
-        # https://stackoverflow.com/questions/23220513/storing-a-list-of-strings-to-a-hdf5-dataset-from-python
-        # [n.encode("ascii", "ignore") for n in data]
-        def encoder(value):
-            if isinstance(value, six.string_types):
-                return value.encode("ascii", "ignore")
-            return value
-
-        if not isinstance(data, (tuple, list, numpy.ndarray)):
-            data = [data, ]
-        if isinstance(data, (tuple, list)):
-            data = list(map(encoder, data))
-        # note: Does dataset compression make smaller files?
-        #
-        # ===========  =================
-        # compression  file size (bytes)
-        # ===========  =================
-        # None         362756
-        # gzip         815366
-        # lzf          861396
-        # ===========  =================
-        #
         try:
+            if len(data) == 1 and isinstance(data[0], str):
+                data = [numpy.string_(data[0])]
+                logger.debug("converting [string] to [numpy.string]")
+            logger.debug("makeDataset(name=\"%s\", data=%s)" % (name, str(data)))
             obj = parent.create_dataset(name, data=data)
         except TypeError as _exc:
-            print(f"Could not save name = {name} due to {_exc}")
-            # want to re-raise the exception
+            logger.debug(f"Could not save name = {name} : {_exc}")
             obj = None
+            # raise _exc            # if want to re-raise the exception
         #obj = parent.create_dataset(name, data=data, compression="gzip")
         #obj = parent.create_dataset(name, data=data, compression="lzf")
     if obj is not None:
