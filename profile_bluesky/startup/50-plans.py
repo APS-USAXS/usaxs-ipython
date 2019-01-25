@@ -6,7 +6,7 @@ print(__file__)
 def uascan():
     """
     USAXS step scan
-    
+
     https://github.com/APS-USAXS/ipython-usaxs/issues/8
     """
     # TODO: needs proper args & kwargs matching SPEC's signature
@@ -15,18 +15,18 @@ def uascan():
 def preUSAXStune():
     """
     tune the USAXS optics *only* if in USAXS mode
-    
+
     USAGE:  ``RE(preUSAXStune())``
     """
     yield from bps.mv(
-        monochromator.feedback.on, 1,
+        monochromator.feedback.on, MONO_FEEDBACK_ON,
         mono_shutter, "open",
         ccd_shutter, "close",
     )
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
     yield from bps.mv(
-        # TODO: 
+        # TODO:
         #if not confirm_instrument_mode("USAXS in beam"):
         #    raise RuntimeError("Must be in USAXS mode to tune")
 
@@ -42,12 +42,12 @@ def preUSAXStune():
         usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
-        
+
         scaler0.preset_time,  0.1,
     )
     # when all that is complete, then ...
     yield from bps.mv(ti_filter_shutter, "open")
-    
+
     # TODO: install suspender using usaxs_CheckBeamStandard.value
 
     tuners = OrderedDict()                 # list the axes to tune
@@ -59,7 +59,7 @@ def preUSAXStune():
         tuners[as_stage.rp] = tune_asrp    # align ASR stage with MSR stage and set ASRP0 value
     tuners[a_stage.r] = tune_ar            # tune A stage to M stage
     tuners[a_stage.r2p] = tune_a2rp        # make A stage crystals parallel
-    
+
     # now, tune the desired axes, bail out if a tune fails
     for axis, tune in tuners.items():
         yield from bps.mv(ti_filter_shutter, "open")
@@ -78,7 +78,7 @@ def preUSAXStune():
         scaler0.preset_time,        terms.USAXS.usaxs_time.value,
         user_data.time_stamp,       str(datetime.datetime.now()),
         user_data.state,            "pre-USAXS optics tuning done",
-        
+
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.run_tune_next,       0,
         terms.preUSAXStune.epoch_last_tune,     time.time(),
@@ -97,10 +97,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
     if terms.USAXS.retune_needed.value:
-        pass    # implement run_preUSAXStuneIfNeeded(called_from_where)
-    
-    # TODO: scan_title = __get_clean_user_string(scan_title)
-    
+        pass    # TODO: implement run_preUSAXStuneIfNeeded(called_from_where)
+
+    scan_title = cleanupText(scan_title)
+
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
@@ -109,12 +109,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
         user_data.user_dir, os.getcwd(),
-        user_data.spec_file, "-tba-",   # TODO: 
-        user_data.spec_scan, "-tba-",   # TODO: 
+        # user_data.spec_file, "-tba-",   # TODO:
+        # user_data.spec_scan, "-tba-",   # TODO:
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",
     )
-    
+
     # offset the calc from exact zero so can plot log(|Q|)
     ar0_calc_offset = terms.USAXS.ar_val_center.value - 0.00005
     yield from bps.mv(
@@ -133,7 +133,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # That happens outside of this code.  completely.
     """
     #Calculate Finish in angle, since now it is in Q units
-    #use en as energy in keV, 
+    #use en as energy in keV,
     _USAXS_Lambda = 12.4 / A[en]
     ########################################################################
     # decide if we are scaning up or down...
@@ -151,8 +151,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # measure transmission values using pin diode if desired
     # TODO: measure_USAXS_PinT
 
-    # TODO: #49
-    # yield from bps.mv(monochromator.feedback.on, 0)
+    # TODO: #49 to use yield from bps.mv(monochromator.feedback.on, "off")
+    yield from bps.mv(monochromator.feedback.on, MONO_FEEDBACK_OFF)
 
     # enable asrp link to ar for 2D USAXS
     # FS_enableASRP
@@ -181,31 +181,31 @@ def Flyscan '{
    autorange_UPDI0I00
    #modeAutoBRange_I0
    #modeAutoBRange_I00
-   set_UPD_gain 6            ## start with higher gain than needed in center position. 
+   set_UPD_gain 6            ## start with higher gain than needed in center position.
    modeAutoBRange_UPD
   #####################################################
-   # setup upd amplifier to autorange  
-   local FLyScanAUtoscaleTime 
+   # setup upd amplifier to autorange
+   local FLyScanAUtoscaleTime
    FLyScanAUtoscaleTime = 0.025
-   epics_put ("9idcLAX:vsc:c0.RATE",0) 
-   epics_put ("9idcLAX:vsc:c0.RAT1",0) 
+   epics_put ("9idcLAX:vsc:c0.RATE",0)
+   epics_put ("9idcLAX:vsc:c0.RAT1",0)
    epics_put ("9idcUSX:pd01:seq02:mode",2)
    epics_put ("9idcLAX:vsc:c0.TP1", FLyScanAUtoscaleTime)
    epics_put ("9idcLAX:vsc:c0.TP", FLyScanAUtoscaleTime)
    epics_put ("9idcLAX:vsc:c0.DLY1", FLyScanAUtoscaleTime)
    epics_put ("9idcLAX:vsc:c0.DLY", 0)
-   epics_put ("9idcLAX:vsc:c0.CONT", 1)   
+   epics_put ("9idcLAX:vsc:c0.CONT", 1)
    #####################################################
    # Pause autosave on LAX to prevent delays in PVs processing.
    epics_put ("9idcLAX:SR_disable",1)			## this disables autosave
    epics_put ("9idcLAX:SR_disableMaxSecs",FS_ScanTime+9)   ##this sets max time of autosave disable
    #####################################################
-   # and here we really scan 
+   # and here we really scan
    epics_put ("9idcLAX:USAXS:state",  sprintf("Running Flyscan"))
    ### scanning...
-   
+
    _flyscanInternal START AR_VAL_CENTER Finish_in_Angle
-   
+
    ### done
    epics_put ("9idcLAX:USAXS:state",  sprintf("Flyscan finished"))
    comment "FlyScan finished"
@@ -216,17 +216,17 @@ def Flyscan '{
    #####################################################
    closeTiFilterShutter
    DCMfeedbackON
-   epics_put ("9idcLAX:vsc:c0.RATE",5) 
+   epics_put ("9idcLAX:vsc:c0.RATE",5)
    epics_put ("9idcLAX:vsc:c0.DLY1", 0.25)
    epics_put ("9idcLAX:vsc:c0.DLY", 0.05)
    epics_put ("9idcLAX:vsc:c0.TP", 1)
-   epics_put ("9idcLAX:vsc:c0.CONT", 1)   
+   epics_put ("9idcLAX:vsc:c0.CONT", 1)
    #####################################################
    ### change sequence program limits for FS
    epics_put("9idcUSX:pd01:seq02:gainU",FS_UPD_OldUpRangeChange )
    epics_put("9idcUSX:pd01:seq02:gainD",FS_UPD_OldDownRangeChange )
    #####################################################
-   # Move to start conditions... 
+   # Move to start conditions...
    # move back to starting conditions while saving data...
    epics_put ("9idcLAX:USAXS:state", sprintf("Moving USAXS back and saving data"))
    A[ar] = AR_VAL_CENTER
@@ -238,7 +238,7 @@ def Flyscan '{
    # disable asrp link to ar for 2D USAXS
    FS_disableASRP
    #####################################################
-   if (USAXS_MEASURE_DARK_CURENTS) { 
+   if (USAXS_MEASURE_DARK_CURENTS) {
        epics_put ("9idcLAX:USAXS:state",  sprintf("measuring dark currents"))
    #    measure_USAXS_PD_dark_currents
    }
@@ -266,19 +266,19 @@ def Flyscan(pos_X, pos_Y, thickness_mm, scan_title):
 def _flyscanInternal '{
   if ($# != 3) {
     printf("Usage: flyscanInternal %s\n",         \
-       "start center finish")  
+       "start center finish")
     exit
-  } 
+  }
   local _sFly ; local _fFly ; local _dFly ; local _centerFly
   local _asrp0 ; local _ms ; local _dy0 ; local _sad
   local _ay0 ; local _sdd  ; local _exp ; local _n1
   local _ctime, _NumStruckChannels
   local _ScanTimeTotal
   local _FSWritingTimer
-  local _UnixCommand    
-         # read header into internal (local) parameters. 
-  _sFly = $1; _centerFly = $2; _fFly = $3; 
-         # these are global parameters, so just copy them here... 
+  local _UnixCommand
+         # read header into internal (local) parameters.
+  _sFly = $1; _centerFly = $2; _fFly = $3;
+         # these are global parameters, so just copy them here...
 
   _ms     = USAXS_MINSTEP ;
   _dy0    = DY0 ;
@@ -289,16 +289,16 @@ def _flyscanInternal '{
   _n1     = int(FS_NumberOfPoints) ;
   _ScanTimeTotal = FS_ScanTime
   _ctime  = _ScanTimeTotal /_n1 ;
-   global TITLE 
+   global TITLE
 
   ### Flyscan vars ###
   local _i
-  local _flyPV 
-  local _flynumpts 
+  local _flyPV
+  local _flynumpts
   local _flystat
-  local array _flyArPos[400] 
-  local array _flyDyPos[400] 
-  local array _flyAyPos[400] 
+  local array _flyArPos[400]
+  local array _flyDyPos[400]
+  local array _flyAyPos[400]
   global FlyScan_ArPosArray
 
   local array _flydata[4][100000]
@@ -308,7 +308,7 @@ def _flyscanInternal '{
   local _FlyDataFile
   local _SampleTitle
   local _DataCollectionTimer
-  local LocalFldrName 
+  local LocalFldrName
   local __FS_HangedScanFound
   local __tmp_234
   global FSScanFailed
@@ -319,7 +319,7 @@ def _flyscanInternal '{
    #####################################################
   ###_SampleTitle = __get_clean_user_string(epics_get ("9idcLAX:USAXS:sampleTitle"))
   _SampleTitle = epics_get ("9idcLAX:USAXS:sampleTitle")
-  _flynumpts = FS_NumberOfPoints 
+  _flynumpts = FS_NumberOfPoints
   _trajPV = "9idcLAX:traj1:"
   _flyPV  = "9idcLAX:USAXSfly:"
   _EPD = "/APSshare/anaconda/x86_64/bin/python"
@@ -328,32 +328,32 @@ def _flyscanInternal '{
    TITLE  =_SampleTitle
    #####################################################
    _NumStruckChannels =(fabs(_fFly - _sFly)/_ms)
-		   	# test if number of channels on Struck is sufficient. 
-	 		#  if(_NumStruckChannels>159999){
-	 		#     printf("Too Many Struck channels used: %g, reduce Q range or increase MinStep \n", _NumStruckChannels)
-	 		##     exit; 
-	 		# }
+               # test if number of channels on Struck is sufficient.
+             #  if(_NumStruckChannels>159999){
+             #     printf("Too Many Struck channels used: %g, reduce Q range or increase MinStep \n", _NumStruckChannels)
+             ##     exit;
+             # }
    #####################################################
    # create spec scan record...
    # set heading for scans to show if we are running USAXS or SBUSAXS
-	HEADING = (useSBUSAXS) ?  "sbFlyScan " : "FlyScan "
-	HEADING=sprintf("%s%s",HEADING,sprintf(" %s %g %g %g %g ",\
-		"ar",START ,_AR_VAL_CENTER , Finish_in_Angle , _ms))
-	FPRNT=PPRNT=VPRNT=""
-	FPRNT=sprintf("%s%s  ",FPRNT,motor_name(ar))
-	PPRNT=sprintf("%s%8.8s ",PPRNT,motor_name(ar))start
-	VPRNT=sprintf("%s%9.9s ",VPRNT,motor_name(ar))start
-	scan_head
-	PFMT=sprintf("%%s%%8.%df ",UP)
-	VFMT=sprintf("%%s%%9.%df ",UP)
-	# UP is user precision, defined in standard.mac as 4
+    HEADING = (useSBUSAXS) ?  "sbFlyScan " : "FlyScan "
+    HEADING=sprintf("%s%s",HEADING,sprintf(" %s %g %g %g %g ",\
+        "ar",START ,_AR_VAL_CENTER , Finish_in_Angle , _ms))
+    FPRNT=PPRNT=VPRNT=""
+    FPRNT=sprintf("%s%s  ",FPRNT,motor_name(ar))
+    PPRNT=sprintf("%s%8.8s ",PPRNT,motor_name(ar))start
+    VPRNT=sprintf("%s%9.9s ",VPRNT,motor_name(ar))start
+    scan_head
+    PFMT=sprintf("%%s%%8.%df ",UP)
+    VFMT=sprintf("%%s%%9.%df ",UP)
+    # UP is user precision, defined in standard.mac as 4
     # it can be redefined to show more decimal places if needed
     # done with spec scan record...
     #####################################################
     #####################################################
-    ### move to start conditions... 
+    ### move to start conditions...
     A[ay]=_ay0
-    A[ar]=_sFly 
+    A[ar]=_sFly
     A[dy]=_dy0
     move_em; waitmove
     #####################################################
@@ -363,58 +363,58 @@ def _flyscanInternal '{
     epics_put("9idcLAX:USAXS:ARstart.DESC", "AR_start of fly scan")
     epics_put("9idcLAX:USAXS:ARstart.EGU",  "degrees")
    #####################################################
-   # create name for the folder for data and full path to future Nexus file for the data. 
-   LocalFldrName  = USAXS_CleanupFileName (DATAFILE , "usaxs") 
+   # create name for the folder for data and full path to future Nexus file for the data.
+   LocalFldrName  = USAXS_CleanupFileName (DATAFILE , "usaxs")
    _FlyDataFile =sprintf("./%s/%s_%04d.h5", LocalFldrName, _SampleTitle, FS_orderNumber)
    # and increase the order number
    FS_increaseOrderNumber
-   #####################################################   
+   #####################################################
     ### Call epics to start fly scan... and wait for done
     __tmp_234 =_ctime*_flynumpts + 15
     comment "FlyScan #%d started" SCAN_N
     comment "FlyScan file name = %s"  _FlyDataFile
-    comment "Please wait approximately %gs to complete FlyScan." __tmp_234 
-    #####################################################   
-    			### store max expected time for python code to read PVs so it will not hang for too long.  
-    			###				epics_put("9idcLAX:USAXS:FS_timeout", 20)
-   			### set our scan to not failed
-    			#__FS_HangedScanFound = 0
-   #####################################################   
-   ###  collect the data using epics fly scan.... 
+    comment "Please wait approximately %gs to complete FlyScan." __tmp_234
+    #####################################################
+                ### store max expected time for python code to read PVs so it will not hang for too long.
+                ###				epics_put("9idcLAX:USAXS:FS_timeout", 20)
+               ### set our scan to not failed
+                #__FS_HangedScanFound = 0
+   #####################################################
+   ###  collect the data using epics fly scan....
    set_FS_ElapsedTime 0
    # set the user bit to indicate FlyScan scan is running
    epics_put ("9idcLAX:USAXS:scanning",  1)
    #####################################################
    #SaveStruck data using unix command
    _UnixCommand = sprintf("mkdir.sh %s/%s", CWD, LocalFldrName) ";"  sprintf("%s %s %s %s", _EPD, _EPDsaveFlyData, _FlyDataFile, _EPDcfgFlyData) " &"
-   			# print _UnixCommand 
-   			# unix( sprintf("mkdir.sh %s/%s", CWD, LocalFldrName))
-   			# unix( sprintf("%s %s %s %s", _EPD, _EPDsaveFlyData, _FlyDataFile, _EPDcfgFlyData))
-   # Collect data and wait for it to finish... 
+               # print _UnixCommand
+               # unix( sprintf("mkdir.sh %s/%s", CWD, LocalFldrName))
+               # unix( sprintf("%s %s %s %s", _EPD, _EPDsaveFlyData, _FlyDataFile, _EPDcfgFlyData))
+   # Collect data and wait for it to finish...
    epics_par(sprintf("%sStart",_flyPV), "monitor_set")
    #this starts the FLyscan itself:
-   epics_put(sprintf("%sStart",_flyPV), "Busy")	
+   epics_put(sprintf("%sStart",_flyPV), "Busy")
    # set the flag of Python code that it needs to save data
    epics_put("9idcLAX:USAXS:FlyScanNotSaved", 1)
-   # timeout to make sure flyscan started... 
+   # timeout to make sure flyscan started...
    sleep(5)
    unix (_UnixCommand)   # this should start the Python program in the background
    _DataCollectionTimer = 5
-   
+
    while (epics_get(sprintf("%sStart",_flyPV)) != "Done") {
         sleep(1)
         _DataCollectionTimer++
         set_FS_ElapsedTime _DataCollectionTimer
         printf("Waiting for Flyscan to collect data %g sec\r", _DataCollectionTimer)
         # Josh added this to collect uvvis data
-       
+
         epics_put ("9idcLAX:USAXS:state", sprintf("Running Flyscan for %gs",_DataCollectionTimer))
         wait(0x28)
    }
    epics_par(sprintf("%sStart",_flyPV), "monitor_clear")
    #####################################################
    # return to Q=0 while waiting for data to be written (that should take only second)
-   ### move to Q=0 conditions... 
+   ### move to Q=0 conditions...
    A[dy] = DY0
    A[ay] = AY0
    A[ar] = AR_VAL_CENTER
@@ -438,14 +438,14 @@ def _flyscanInternal '{
    set_FS_ElapsedTime 0
    #####################################################
    ##Check if we had bad number of PSO pulses  #########
-   local __tmpDIffInPnts 
+   local __tmpDIffInPnts
    local __FSErromsg
    __tmpDIffInPnts = epics_get("9idcLAX:traj1:NumPulsePositions") - epics_get("9idcLAX:3820:CurrentChannel")
-   ## if OK, the difference should be 1 point (due to 1 based and 0 based 8k points). 
+   ## if OK, the difference should be 1 point (due to 1 based and 0 based 8k points).
    if( __tmpDIffInPnts > 5 ){
-   	comment "WARNING: Flyscan finished with %g less points." __tmpDIffInPnts
+       comment "WARNING: Flyscan finished with %g less points." __tmpDIffInPnts
         __FSErromsg = sprintf("Flyscan finished with %g less points.", __tmpDIffInPnts)
-   	if(NOTIFY_ON_BADFSSCAN) { sendNotifications("FlyScan had wrong number of points",__FSErromsg);}
+       if(NOTIFY_ON_BADFSSCAN) { sendNotifications("FlyScan had wrong number of points",__FSErromsg);}
    }
    #####################################################
 }'

@@ -21,14 +21,14 @@ class EpicsMotorLimitsMixin(Device):
     """
     add motor record HLM & LLM fields & compatibility get_lim() and set_lim()
     """
-    
+
     soft_limit_lo = Component(EpicsSignal, ".LLM")
     soft_limit_hi = Component(EpicsSignal, ".HLM")
-    
+
     def get_lim(self, flag):
         """
         Returns the user limit of motor
-        
+
         flag > 0: returns high limit
         flag < 0: returns low limit
         flag == 0: returns None
@@ -37,14 +37,14 @@ class EpicsMotorLimitsMixin(Device):
             return self.high_limit
         else:
             return self.low_limit
-    
+
     def set_lim(self, low, high):
         """
         plan: Sets the low and high limits of motor
-        
+
         * Low limit is set to lesser of (low, high)
         * High limit is set to greater of (low, high)
-        * No action taken if motor is moving. 
+        * No action taken if motor is moving.
         """
         if not self.moving:
             yield from bps.mv(
@@ -95,7 +95,7 @@ class MyWaveform(Device):
 class ApsUndulator(Device):
     """
     APS Undulator
-    
+
     USAGE:  ``undulator = ApsUndulator("ID09ds:", name="undulator")``
     """
     # TODO: add to APS_BlueSky_tools
@@ -125,9 +125,9 @@ class ApsUndulator(Device):
 class ApsUndulatorDual(Device):
     """
     APS Undulator with upstream *and* downstream controls
-    
+
     USAGE:  ``undulator = ApsUndulatorDual("ID09", name="undulator")``
-    
+
     note:: the trailing ``:`` in the PV prefix should be omitted
     """
     upstream = Component(ApsUndulator, "us:")
@@ -137,16 +137,16 @@ class ApsUndulatorDual(Device):
 class InOutShutter(Device):
     """
     In/Out shutter
-    
+
     * In/Out shutters have the same bit PV for open and close
-    
-    Otherwise, they should have the same interface as other 
+
+    Otherwise, they should have the same interface as other
     shutters such as the `ApsPssShutter`.
-    
+
     USAGE:
-    
+
         shutter = InOutShutter("48bmc:bit12", name="shutter")
-    
+
     """
     control_bit = Component(EpicsSignal, "")
     delay_s = 0
@@ -155,19 +155,19 @@ class InOutShutter(Device):
     valid_open_values = [open_value, "open"]   # lower-case strings ONLY
     valid_close_values = [close_value, "close"]
     busy = Component(Signal, value=False)
-    
+
     def open(self):
         """request shutter to open, interactive use"""
         return self.set(self.open_value)
-    
+
     def close(self):
         """request shutter to close, interactive use"""
         return self.set(self.close_value)
-    
+
     @property
     def is_opened(self):
         return self.control_bit.value == self.open_value
-    
+
     @property
     def is_closed(self):
         return self.control_bit.value == self.close_value
@@ -179,7 +179,7 @@ class InOutShutter(Device):
             return str(v).lower()
         self.valid_open_values = list(map(input_filter, self.valid_open_values))
         self.valid_close_values = list(map(input_filter, self.valid_close_values))
-        
+
         if self.busy.value:
             raise RuntimeError("shutter is operating")
 
@@ -188,16 +188,16 @@ class InOutShutter(Device):
             msg = "value should be one of " + " | ".join(acceptables)
             msg += " : received " + str(value)
             raise ValueError(msg)
-        
+
         status = DeviceStatus(self)
-        
+
         def move_shutter():
             """BLOCKING: no need to yield since this is run inside a thread"""
             if input_filter(value) in self.valid_open_values:
                 self.control_bit.put(self.open_value)
             elif input_filter(value) in self.valid_close_values:
                 self.control_bit.put(self.close_value)
-        
+
         @APS_plans.run_in_thread
         def run_and_delay():
             """BLOCKING: no need to yield since this is run inside a thread"""
@@ -207,11 +207,11 @@ class InOutShutter(Device):
             time.sleep(self.delay_s)
             self.busy.put(False)
             status._finished(success=True)
-        
+
         run_and_delay()
         return status
 
-    
+
 class DualPf4FilterBox(Device):
     """Dual Xia PF4 filter boxes using support from synApps"""
     fPosA = Component(EpicsSignal, "fPosA", put_complete=True)
@@ -294,10 +294,13 @@ class KohzuSeqCtl_Monochromator(Device):
     crystal_type = Component(EpicsSignal, "BraggTypeMO")
 
 
+MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
+
+
 class DCM_Feedback(Device):
     """
     monochromator feedback program
-    
+
     TODO: #49
     Add support for set() so that we can implement "on" & "off" values
     and also apply additional checks when turning feedback on.
@@ -307,11 +310,11 @@ class DCM_Feedback(Device):
     drvh = Component(EpicsSignal, ".DRVH")
     drvl = Component(EpicsSignal, ".DRVL")
     oval = Component(EpicsSignal, ".OVAL")
-    
+
     @property
     def is_on(self):
         return self.on.value == 1
-    
+
     def check_position(self):
         diff_hi = self.drvh.value - self.oval.value
         diff_lo = self.oval.value - self.drvl.value
@@ -341,14 +344,14 @@ class UserDataDevice(Device):
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
     user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir")
     user_name = Component(EpicsSignal,          "9idcLAX:UserName")
-    
+
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
-    
+
     def set_state(self, msg):
         """BLOCKING: tell EPICS about what we are doing"""
         self.state.put(trim_string_for_EPICS(msg))
-    
+
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
         yield from bps.mv(self.state, trim_string_for_EPICS(msg))
@@ -368,16 +371,16 @@ class FlyScanParameters(Device):
 
     setpoint_up = Component(Signal, value=6000)     # decrease range
     setpoint_down = Component(Signal, value=850000)    # increase range
-    
+
     def enable_ASRP(self):
         """BLOCKING: """
         if is2DUSAXSscan.value: # return value of 0.0 is "not True"
             self.asrp_calc_SCAN.put(9)
-    
+
     def disable_ASRP(self):
         """BLOCKING: """
         self.asrp_calc_SCAN.put(0)
-    
+
     def increment_order_number(self):
         """BLOCKING: """
         self.order_number.put(self.order_number.value+1)
@@ -451,7 +454,7 @@ class Parameters_USAXS(Device):
     usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
     useMSstage = Component(Signal,                    value=False)
     useSBUSAXS = Component(Signal,                    value=False)
-    
+
     retune_needed = Component(Signal, value=False)     # TODO: could have EPICS PV
 
     # TODO: these are particular to the amplifier
@@ -469,7 +472,7 @@ class Parameters_SBUSAXS(Device):
 class Parameters_transmission(Device):
     # measure transmission in USAXS using pin diode
     measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
-    
+
     # Ay to hit pin diode
     ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
     count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
@@ -518,10 +521,10 @@ class Parameters_SAXS(Device):
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
-	
+
     # this is Io value from gates scalar in LAX for Nexus file
     I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
-    
+
     transmission = Component(Parameters_transmission)
 
 
@@ -580,7 +583,7 @@ class GeneralParameters(Device):
     Radiography = Component(Parameters_Radiography)
     Imaging = Component(Parameters_Imaging)
     OutOfBeam = Component(Parameters_OutOfBeam)
-    
+
     PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:USAXS:PauseBeforeNextScan")
     StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:USAXS:StopBeforeNextScan")
 
@@ -610,15 +613,15 @@ from email.mime.text import MIMEText
 class EmailNotifications(object):
     """
     send email notifications when requested
-    
+
     use default OS mail utility (so no credentials needed)
     """
-    
+
     def __init__(self, sender=None):
         self.addresses = []
         self.notify_on_feedback = True
         self.sender = sender or "nobody@localhost"
-    
+
     def add_addresses(self, *args):
         for address in args:
             self.addresses.append(address)
@@ -637,7 +640,7 @@ class EmailNotifications(object):
 class ApsBssUserInfoDevice(Device):
     """
     get current experiment info for 9-ID-B,C from the APS BSS
-    
+
     compare with UserDataDevice
     """
     proposal_number = Component(EpicsSignal, "proposal_number")

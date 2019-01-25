@@ -12,7 +12,7 @@ logger = logging.getLogger(os.path.split(__file__)[-1])
 
 def DCMfeedbackON():
     """plan: could send email"""
-    yield from bps.mv(monochromator.feedback.on, 1)
+    yield from bps.mv(monochromator.feedback.on, MONO_FEEDBACK_ON)
     monochromator.feedback.check_position()
 
 
@@ -27,9 +27,9 @@ def insertScanFilters():
 def confirm_instrument_mode(mode_name):
     """
     True if instrument is in the named mode
-    
+
     Parameter
-    
+
     mode_name (str) :
         One of the strings defined in ``UsaxsSaxsModes``
     """
@@ -44,7 +44,7 @@ def mode_USAXS():
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
     )
-    yield from DCMfeedbackON() 
+    yield from DCMfeedbackON()
     retune_needed = False
 
     if not confirm_instrument_mode("USAXS in beam"):
@@ -113,7 +113,7 @@ def mode_SAXS():
         yield from move_WAXSOut()
         yield from move_USAXSOut()
         yield from move_SAXSIn()
-        
+
     logger.info("Prepared for SAXS mode")
     #insertScanFilters
     yield from user_data.set_state_plan("SAXS Mode")
