@@ -270,7 +270,7 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                logger.debug(f"preliminaryWriteFile(): {pv_spec.label} = {value}")
+                logger.debug(f"preliminaryWriteFile(name=\"{pv_spec.label}\", data={value})")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 if ds is None:
                     logger.debug(f"Could not create {pv_spec.label}")
@@ -279,10 +279,10 @@ class SaveFlyScan(object):
                 addAttributes(ds, **pv_spec.attrib)
             #except Exception as e:
             except IOError as e:
-                print("preliminaryWriteFile():")
-                print(f"ERROR: pv_spec.label={pv_spec.label}, value={value}")
-                print("MESSAGE: ", e)
-                print("RESOLUTION: writing as error message string")
+                logger.debug("preliminaryWriteFile():")
+                logger.debug(f"ERROR: pv_spec.label={pv_spec.label}, value={value}")
+                logger.debug("MESSAGE: ", e)
+                logger.debug("RESOLUTION: writing as error message string")
                 ds = makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
@@ -310,15 +310,15 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                logger.debug(f"saveFile(): {pv_spec.label} = {value}")
+                logger.debug(f"saveFile(name=\"{pv_spec.label}\", data={value})")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 self._attachEpicsAttributes(ds, pv_spec.pv)
                 addAttributes(ds, **pv_spec.attrib)
             except Exception as e:
-                print("saveFile():")
-                print("ERROR: ", pv_spec.label, value)
-                print("MESSAGE: ", e)
-                print("RESOLUTION: writing as error message string")
+                logger.debug("saveFile():")
+                logger.debug("ERROR: ", pv_spec.label, value)
+                logger.debug("MESSAGE: ", e)
+                logger.debug("RESOLUTION: writing as error message string")
                 ds = makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
                 #raise
 
@@ -466,7 +466,7 @@ def makeDataset(parent, name, data = None, **attr):
         try:
             if len(data) == 1 and isinstance(data[0], str):
                 data = [numpy.string_(data[0])]
-                logger.debug("converting [string] to [numpy.string]")
+                logger.debug("converting [string] to [numpy.string_]")
             logger.debug("makeDataset(name=\"%s\", data=%s)" % (name, str(data)))
             obj = parent.create_dataset(name, data=data)
         except TypeError as _exc:
@@ -529,9 +529,9 @@ def main():
     try:
         sfs.waitForData()
     except TimeoutException as _exception_message:
-        print("exiting because of timeout!!!!!!!")
+        logger.warning("exiting because of timeout!!!!!!!")
         sys.exit(1)     # exit silently with error, 1=TIMEOUT
-    print('wrote file: ' + dataFile)
+    logger.info('wrote file: ' + dataFile)
 
 
 def developer():
