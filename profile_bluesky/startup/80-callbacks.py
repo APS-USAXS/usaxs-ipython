@@ -11,7 +11,10 @@ callback_db['doc_collector'] = RE.subscribe(doc_collector.receiver)
 # write scans to SPEC data file
 specwriter = SpecWriterCallback()
 # make the SPEC file in /tmp (assumes OS is Linux)
-specwriter.newfile(os.path.join("/tmp", specwriter.spec_filename))
+if os.getcwd().startswith("/home/beams/USAXS/.ipython"):
+    specwriter.newfile(os.path.join("/tmp", specwriter.spec_filename))
+else:
+    specwriter.newfile(reset_scan_id=True, RE=RE)
 callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
 print("writing to SPEC file: " + specwriter.spec_filename)
 
@@ -19,4 +22,6 @@ print("writing to SPEC file: " + specwriter.spec_filename)
 EXAMPLE:
 
     specwriter.newfile("01_26_bluesky.dat", reset_scan_id=True, RE=RE)
+    specwriter.newfile()   # gets a default name: yyyymmdd-hhmmss.dat
+    specwriter.newfile(reset_scan_id=True, RE=RE)   # also sets scan_id = 0
 """

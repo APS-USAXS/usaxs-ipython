@@ -87,6 +87,9 @@ def preUSAXStune():
 
 
 def Flyscan(pos_X, pos_Y, thickness, scan_title):
+    """
+    do one USAXS Fly Scan
+    """
     yield from IfRequestedStopBeforeNextScan()
     yield from bps.mv(
         s_stage.x, pos_X,
