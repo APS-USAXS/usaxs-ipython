@@ -25,7 +25,7 @@ def cleanupText(text):
     this is best done with regular expression pattern matching
     """
     import re
-    pattern = "[a-zA-Z0-9._]"
+    pattern = "[a-zA-Z0-9_]"
 
     def mapper(c):
         if re.match(pattern, c) is not None:
