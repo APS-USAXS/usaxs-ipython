@@ -186,10 +186,48 @@ def mode_WAXS():
 
 def mode_radiography():
     pass
+    """
+# /home/beams/USAXS/spec/macros/local/usaxs_commands.mac
+def useModeRadiography '{
+  StopIfPLCEmergencyProtectionOn
+  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to Radiography mode" ))
+  closeCCDshutter
+  closeTiFilterShutter
+  openMonoShutter  
+  if (USAXSSAXSMODE!= 2){
+     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
+    print __tmpstr__
+    print "Moving to proper USAXS mode"
+    move_SAXSOut
+    move_WAXSOut
+    move_USAXSIn
+  }
+ 
+  print "Preparing for Radiography mode ... please wait ..."
+  moveDetector   CCD_DX   CCD_DY
+  openTiFilterShutter
+  insertCCDfilters
+  openCCDshutter
+  comment "Ready for Radiography mode"
+  print "TV should now show Radiography CCD image. If not, check: TV on? Right TV input? Camera on (Blue button)?"
+  print "Beam on? Shutters opened? Sample/holder out of beam? - if all is OK, try running preUSAXStune."
+  print "preUSAXStune worked? Run useModeRadiography. Still not working? Call Jan, Ivan or Matt."
+  print "But before calling - are you REALLY sure the sample is not blocking the beam? Move it out and try preUSAXStune again."
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "Radiography Mode")
+  epics_put ("9idcLAX:USAXS:macroFileTime",      date())
+  epics_put ("9idcLAX:USAXS:scanning",    0)
+}'
+    """
 
 
 def mode_imaging():
     pass
+    """
+# /share1/USAXS_data/2019-02/USAXS_user_macros.mac
+def useModeImaging 'useModeUSAXS'
+    """
+mode_imaging = mode_USAXS
 
 
 def mode_OpenBeamPath():
