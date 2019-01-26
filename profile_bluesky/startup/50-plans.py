@@ -102,7 +102,16 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     scan_title = cleanupText(scan_title)
 
-    # TODO: compute the file name and directory
+    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # use our specwriter to get a pseudo-SPEC file name
+    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+    # directory is pwd + DATAFILE + "_usaxs"
+    flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0], "_usaxs")
+    flyscan_file_name = "%s_%04d.h5" % (scan_title, terms.FlyScan.order_number.value)
+    # flyscan_full_filename = os.path.join(flyscan_path, flyscan_file_name)
+
+    usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
+    usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
 
     ts = str(datetime.datetime.now())
     yield from bps.mv(
@@ -112,8 +121,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
         user_data.user_dir, os.getcwd(),
-        # user_data.spec_file, "-tba-",   # TODO:
-        # user_data.spec_scan, "-tba-",   # TODO:
+        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+        user_data.spec_scan, SCAN_N,
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",
     )
@@ -153,6 +162,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     """
 
     # measure transmission values using pin diode if desired
+
+    usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
+    usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     # TODO: measure_USAXS_PinT
 
     yield from bps.mv(
@@ -201,11 +213,39 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     yield from user_data.set_state_plan("Running Flyscan")
 
-    yield from _flyscan_internal()          # TODO:
-    # TODO set usaxs_flyscan.
-        # usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"
-        # usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
+    sample_title = user_data.sample_title.value
+    # TODO: do something else with sample_title, such as TITLE?  What would SPEC do?
 
+    ### get these flyscan starting values from EPICS PVs
+    yield from bp.mv(
+        a_stage.r, flyscan_trajectories.ar.value[0],
+        a_stage.y, flyscan_trajectories.ay.value[0],
+        d_stage.y, flyscan_trajectories.dy.value[0],
+        ar_start, flyscan_trajectories.ar.value[0],
+        ay_start, flyscan_trajectories.ay.value[0],
+        dy_start, flyscan_trajectories.dy.value[0],
+    )
+
+    yield from bp.mv(
+        terms.FlyScan.order_number, terms.FlyScan.order_number + 1,  # increment it
+        user_data.scanning, 1,          # we are scanning now (or will be very soon)
+    )
+
+    yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
+
+    yield from bp.mv(
+        user_data.scanning, 0,          # for sure, we are not scanning now
+        terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
+    )
+
+    # Check if we had bad number of PSO pulses
+    diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.value
+    if diff > 5:
+        msg = "WARNING: Flyscan finished with %g less points" % diff
+        logger.warning(msg)
+        if NOTIFY_ON_BAD_FLY_SCAN:
+            subject = "!!! bad number of PSO pulses !!!"
+            email_notices.send(subject, msg)
 
     yield from user_data.set_state_plan("Flyscan finished")
 
@@ -239,43 +279,3 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # FS_disableASRP
 
     # measure_USAXS_PD_dark_currents    # used to be here, not now
-
-
-def _flyscan_internal():
-    sample_title = user_data.sample_title.value
-    # TODO: do something else with sample_title, such as TITLE?  What would SPEC do?
-
-    ### get these flyscan starting values from EPICS PVs
-    yield from bp.mv(
-        a_stage.r, flyscan_trajectories.ar.value[0],
-        a_stage.y, flyscan_trajectories.ay.value[0],
-        d_stage.y, flyscan_trajectories.dy.value[0],
-        ar_start, flyscan_trajectories.ar.value[0],
-        ay_start, flyscan_trajectories.ay.value[0],
-        dy_start, flyscan_trajectories.dy.value[0],
-    )
-    # TODO: prepare the file path, create as needed (with terms.FlyScan.order_number.value)
-    """
-       LocalFldrName  = USAXS_CleanupFileName (DATAFILE , "usaxs")
-       _FlyDataFile =sprintf("./%s/%s_%04d.h5", LocalFldrName, _SampleTitle, FS_orderNumber)
-    """
-    yield from bp.mv(
-        terms.FlyScan.order_number, terms.FlyScan.order_number + 1,  # increment it
-        user_data.scanning, 1,          # we are scanning now (or will be very soon)
-    )
-
-    yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
-
-    yield from bp.mv(
-        user_data.scanning, 0,          # for sure, we are not scanning now
-        terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
-    )
-
-    # Check if we had bad number of PSO pulses
-    diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.value
-    if diff > 5:
-        msg = "WARNING: Flyscan finished with %g less points" % diff
-        logger.warning(msg)
-        if NOTIFY_ON_BAD_FLY_SCAN:
-            subject = "!!! bad number of PSO pulses !!!"
-            email_notices.send(subject, msg)

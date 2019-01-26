@@ -14,3 +14,9 @@ specwriter = SpecWriterCallback()
 specwriter.newfile(os.path.join("/tmp", specwriter.spec_filename))
 callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
 print("writing to SPEC file: " + specwriter.spec_filename)
+
+"""
+EXAMPLE:
+
+    specwriter.newfile("01_26_bluesky.dat", reset_scan_id=True, RE=RE)
+"""
