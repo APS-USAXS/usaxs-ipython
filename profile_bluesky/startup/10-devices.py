@@ -547,15 +547,6 @@ class GeneralParameters(Device):
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
 
-# TODO: #48 send email
-# TODO: to be replaced by APS_utils.unix_cmd()
-# https://github.com/BCDA-APS/apstools/issues/60
-def unix_cmd(command_list):
-    process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate()
-    return stdout, stderr
-
-
 # TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
 class ApsBssUserInfoDevice(Device):
     """
