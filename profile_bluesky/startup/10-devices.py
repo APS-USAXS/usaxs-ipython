@@ -545,25 +545,3 @@ class GeneralParameters(Device):
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
-
-
-# TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
-class ApsBssUserInfoDevice(Device):
-    """
-    get current experiment info for 9-ID-B,C from the APS BSS
-
-    compare with UserDataDevice
-    """
-    proposal_number = Component(EpicsSignal, "proposal_number")
-    activity = Component(EpicsSignal, "activity", string=True)
-    badge = Component(EpicsSignal, "badge", string=True)
-    bss_name = Component(EpicsSignal, "bss_name", string=True)
-    contact = Component(EpicsSignal, "contact", string=True)
-    email = Component(EpicsSignal, "email", string=True)
-    institution = Component(EpicsSignal, "institution", string=True)
-    station = Component(EpicsSignal, "station", string=True)
-    team_others = Component(EpicsSignal, "team_others", string=True)
-    time_begin = Component(EpicsSignal, "time_begin", string=True)
-    time_end = Component(EpicsSignal, "time_end", string=True)
-    timestamp = Component(EpicsSignal, "timestamp", string=True)
-    title = Component(EpicsSignal, "title", string=True)
