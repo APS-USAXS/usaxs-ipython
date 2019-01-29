@@ -2,7 +2,7 @@ print(__file__)
 
 """various detectors"""
 
-from APS_devices import SCALER_AUTOCOUNT_MODE
+from apstools.devices import SCALER_AUTOCOUNT_MODE
 
 
 # Struck/SIS 3820 Multi-channel scaler
