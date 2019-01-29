@@ -6,7 +6,7 @@ configure per-axis tuning
 A tunable axis has these attributes::
 
     tuner : obj (function reference)
-        reference to tuning method, such as `APS_BlueSky_tools.plans.TuneAxis()`,
+        reference to tuning method, such as `apstools.plans.TuneAxis()`,
         Default value is `None` -- this *must* be set before axis can be tuned.
 
     pre_tune_method : obj (function reference)
@@ -19,7 +19,7 @@ A tunable axis has these attributes::
         the default prints status.  
         Use this to unstage various components after the tune.
 
-For reference, `APS_BlueSky_tools.plans.TuneAxis().tune()` uses these default attributes::
+For reference, `apstools.plans.TuneAxis().tune()` uses these default attributes::
 
     width : float
         full range that axis will be scanned, default = 1

@@ -98,7 +98,7 @@ class ApsUndulator(Device):
 
     USAGE:  ``undulator = ApsUndulator("ID09ds:", name="undulator")``
     """
-    # TODO: add to APS_BlueSky_tools
+    # TODO: add to apstools
     energy = Component(EpicsSignal, "Energy", write_pv="EnergySet")
     energy_taper = Component(EpicsSignal, "TaperEnergy", write_pv="TaperEnergySet")
     gap = Component(EpicsSignal, "Gap", write_pv="GapSet")
@@ -595,7 +595,7 @@ class GeneralParameters(Device):
 
 # TODO: #48 send email
 # TODO: to be replaced by APS_utils.unix_cmd()
-# https://github.com/BCDA-APS/APS_BlueSky_tools/issues/60
+# https://github.com/BCDA-APS/apstools/issues/60
 def unix_cmd(command_list):
     process = subprocess.Popen(command_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
@@ -603,7 +603,7 @@ def unix_cmd(command_list):
 
 
 # TODO: to be replaced by APS_utils.EmailNotifications()
-# https://github.com/BCDA-APS/APS_BlueSky_tools/issues/61
+# https://github.com/BCDA-APS/apstools/issues/61
 
 # Import smtplib for the actual sending function
 import smtplib

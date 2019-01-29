@@ -1,8 +1,6 @@
 print(__file__)
 
-"""override certain APS_BlueSky_tools.devices"""
-
-# from: https://aps-bluesky-tools.readthedocs.io/en/latest/source/devices.html#APS_BlueSky_tools.devices.AD_EpicsHdf5FileName
+"""override certain apstools.devices"""
 
 # custom support is in AD_EpicsHdf5FileName
 class myHdf5EpicsIterativeWriter(

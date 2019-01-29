@@ -42,18 +42,18 @@ from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from ophyd.areadetector.filestore_mixins import new_short_uid
 
-import APS_BlueSky_tools.callbacks as APS_callbacks
-import APS_BlueSky_tools.devices as APS_devices
-import APS_BlueSky_tools.filewriters as APS_filewriters
-import APS_BlueSky_tools.plans as APS_plans
-import APS_BlueSky_tools.synApps_ophyd as APS_synApps_ophyd
-import APS_BlueSky_tools.suspenders as APS_suspenders
-import APS_BlueSky_tools.utils as APS_utils
+import apstools.callbacks as APS_callbacks
+import apstools.devices as APS_devices
+import apstools.filewriters as APS_filewriters
+import apstools.plans as APS_plans
+import apstools.synApps_ophyd as APS_synApps_ophyd
+import apstools.suspenders as APS_suspenders
+import apstools.utils as APS_utils
 
 # import specific methods by name, we need to customize them sometimes
-from APS_BlueSky_tools.callbacks import DocumentCollectorCallback
-from APS_BlueSky_tools.devices import ApsPssShutterWithStatus
-from APS_BlueSky_tools.devices import EpicsMotorShutter
-from APS_BlueSky_tools.filewriters import SpecWriterCallback
+from apstools.callbacks import DocumentCollectorCallback
+from apstools.devices import ApsPssShutterWithStatus
+from apstools.devices import EpicsMotorShutter
+from apstools.filewriters import SpecWriterCallback
 
 from usaxs_support.saveFlyData import SaveFlyScan

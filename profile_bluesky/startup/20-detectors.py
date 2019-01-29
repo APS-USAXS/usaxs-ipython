@@ -7,7 +7,7 @@ print(__file__)
 struck = Struck3820("9idcLAX:3820:", name="struck")
 
 
-SCALER_AUTOCOUNT_MODE = 1       # TODO: move to APS_BlueSky_tools
+SCALER_AUTOCOUNT_MODE = 1       # TODO: move to apstools
 
 scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
 # scaler1 = ScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
