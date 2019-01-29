@@ -74,7 +74,7 @@ bss_user_info = ApsBssUserInfoDevice("9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
 
 
-email_notices = EmailNotifications("usaxs@aps.anl.gov")
+email_notices = APS_utils.EmailNotifications("usaxs@aps.anl.gov")
 email_notices.add_addresses(
     "ilavsky@aps.anl.gov",
     "kuzmenko@aps.anl.gov",

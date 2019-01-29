@@ -556,42 +556,6 @@ def unix_cmd(command_list):
     return stdout, stderr
 
 
-# TODO: to be replaced by APS_utils.EmailNotifications()
-# https://github.com/BCDA-APS/apstools/issues/61
-
-# Import smtplib for the actual sending function
-import smtplib
-
-# Import the email modules we'll need
-from email.mime.text import MIMEText
-
-class EmailNotifications(object):
-    """
-    send email notifications when requested
-
-    use default OS mail utility (so no credentials needed)
-    """
-
-    def __init__(self, sender=None):
-        self.addresses = []
-        self.notify_on_feedback = True      # trigger an email if mono feedback is too close its limits
-        self.sender = sender or "nobody@localhost"
-
-    def add_addresses(self, *args):
-        for address in args:
-            self.addresses.append(address)
-
-    def send(self, subject, message):
-        """send ``message`` to all addresses"""
-        msg = MIMEText(message)
-        msg['Subject'] = subject
-        msg['From'] = self.sender
-        msg['To'] = ",".join(self.addresses)
-        s = smtplib.SMTP('localhost')
-        s.sendmail(self.sender, self.addresses, msg.as_string())
-        s.quit()
-
-
 # TODO: use APS_devices.ApsBssUserInfoDevice once we have PVs for ESAF info
 class ApsBssUserInfoDevice(Device):
     """
