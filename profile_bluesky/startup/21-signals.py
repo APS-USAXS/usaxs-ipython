@@ -9,7 +9,7 @@ from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/loca
 aps = APS_devices.ApsMachineParametersDevice(name="aps")
 sd.baseline.append(aps)
 
-undulator = ApsUndulatorDual("ID09", name="undulator")
+undulator = APS_devices.ApsUndulatorDual("ID09", name="undulator")
 sd.baseline.append(undulator)
 
 """
