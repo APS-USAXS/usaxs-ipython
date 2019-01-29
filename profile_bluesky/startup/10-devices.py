@@ -259,10 +259,6 @@ MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
 class DCM_Feedback(Device):
     """
     monochromator feedback program
-
-    TODO: #49
-    Add support for set() so that we can implement "on" & "off" values
-    and also apply additional checks when turning feedback on.
     """
     control = Component(EpicsSignal, "")
     on = Component(EpicsSignal, ":on")
