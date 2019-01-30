@@ -107,6 +107,7 @@ def _tune_base_(axis):
     
     satisfies: report of tuning OK/not OK on console
     """
+    yield from IfRequestedStopBeforeNextScan()
     print("tuning axis: ", axis.name)
     axis_start = axis.position
     yield from bps.mv(
