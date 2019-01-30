@@ -166,7 +166,7 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
 
 def tune_m2rp():
-    yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
+    yield from bps.sleep(0.2)   # piezo is fast, give the system time to react
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from _tune_base_(m_stage.r2p)
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
