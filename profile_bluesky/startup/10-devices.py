@@ -349,6 +349,24 @@ class PreUsaxsTuneParameters(Device):
     req_time_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqTimeBetweenTune")
     run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneOnQdo")
     run_tune_next = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneNext")
+    
+    @property
+    def needed(self):
+        """
+        is a tune needed?
+        
+        EXAMPLE::
+        
+            if terms.preUSAXStune.needed():
+                yield from tune_usaxs_optics()
+                # TODO: and then reset terms as approriate
+        
+        """
+        result = self.run_tune_next.value
+        result = result or self.num_scans_last_tune.value  > self.req_num_scans_between_tune.value
+        result = result or time.time() > self.epoch_last_tune.value + self.req_time_between_tune.value
+        self.run_tune_next.put(0)
+        return result
 
 
 class GeneralParametersCCD(Device):
