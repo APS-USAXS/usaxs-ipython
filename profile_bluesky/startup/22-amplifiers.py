@@ -443,8 +443,8 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
     scaler.stage_sigs = stage_sigs["scaler"]
 
     if not complete:        # bailed out early from loop
-        fmt = "FAILED TO FIND CORRECT GAIN IN {} AUTOSCALE ITERATIONS"
-        raise RuntimeError(fmt.format(max_iterations))
+        msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
+        raise RuntimeError(msg)
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=1.0, max_iterations=9):
