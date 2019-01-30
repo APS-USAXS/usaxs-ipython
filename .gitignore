@@ -16,3 +16,6 @@ mViewer.log
 
 # APS IT
 .loglogin
+
+# SPEC data files (default naming convention)
+20*.dat
