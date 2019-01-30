@@ -132,7 +132,10 @@ class UsaxsFlyScanDevice(Device):
         
         yield from bps.open_run()
         specwriter._cmt("start", "start USAXS Fly scan")
-        yield from bps.mv(upd_controls.auto.mode, AutorangeSettings.auto_background)
+        yield from bps.mv(
+            upd_controls.auto.mode, AutorangeSettings.auto_background,
+            ti_filter_shutter, "open",
+        )
 
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
@@ -161,11 +164,14 @@ class UsaxsFlyScanDevice(Device):
             a_stage.y.user_setpoint, self.ay0,
             d_stage.y.user_setpoint, self.dy0,
             upd_controls.auto.mode,  AutorangeSettings.auto_background,
+            ti_filter_shutter, "close",
             )
 
-        # add an event with our MCA data
+        # add an event with our MCA data in the "mca" stream
+        yield from bps.create(name="mca")
         for d in [struck.mca1, struck.mca2, struck.mca3]:
             yield from bps.read(d)
+        yield from bps.save()
 
         logger.debug("after return", time.time() - self.t0)
         yield from user_data.set_state_plan("fly scan finished")
