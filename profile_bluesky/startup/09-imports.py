@@ -54,6 +54,6 @@ import apstools.utils as APS_utils
 from apstools.callbacks import DocumentCollectorCallback
 from apstools.devices import ApsPssShutterWithStatus
 from apstools.devices import EpicsMotorShutter
-from apstools.filewriters import SpecWriterCallback
+from apstools.filewriters import SpecWriterCallback, spec_comment
 
 from usaxs_support.saveFlyData import SaveFlyScan
