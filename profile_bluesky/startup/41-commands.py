@@ -59,7 +59,7 @@ def IfRequestedStopBeforeNextScan():
             terms.StopBeforeNextScan,           0,
             user_data.collection_in_progress,   0,
         )
-        RE.pause_msg = "DEBUG: stopped the scans"
+        RE.pause_msg = "DEBUG: stopped the scans, ignore the (informative) exception trace"
         RE.abort(reason=msg)        # this gonna work?
 
     if open_the_shutter:
