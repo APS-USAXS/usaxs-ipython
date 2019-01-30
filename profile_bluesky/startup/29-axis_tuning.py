@@ -75,7 +75,7 @@ else:
 def mr_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
      
  
 def mr_posttune_hook():
@@ -132,7 +132,7 @@ def _tune_base_(axis):
 
 
 def tune_mr():
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from _tune_base_(m_stage.r)
 
 
@@ -142,7 +142,7 @@ def tune_mr():
 def m2rp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
     
 
@@ -166,8 +166,10 @@ m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
 
 def tune_m2rp():
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from _tune_base_(m_stage.r2p)
+    yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
 
 # -------------------------------------------
@@ -176,7 +178,7 @@ def tune_m2rp():
 def msrp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
      
  
 def msrp_posttune_hook():
@@ -196,7 +198,7 @@ ms_stage.rp.post_tune_method = msrp_posttune_hook
 
 
 def tune_msrp():
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from _tune_base_(ms_stage.rp)
 
 
@@ -206,7 +208,7 @@ def tune_msrp():
 def ar_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(a_stage.r.name, a_stage.r.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
 
 
 def ar_posttune_hook():
@@ -232,7 +234,7 @@ a_stage.r.post_tune_method = ar_posttune_hook
 def tune_ar():
     yield from bps.mv(ti_filter_shutter, "open")
     autoscale_amplifiers([upd_controls])
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
@@ -244,7 +246,7 @@ def tune_ar():
 def asrp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(as_stage.rp.name, as_stage.rp.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
      
  
 def asrp_posttune_hook():
@@ -266,7 +268,7 @@ as_stage.rp.post_tune_method = asrp_posttune_hook
 def tune_asrp():
     yield from bps.mv(ti_filter_shutter, "open")
     autoscale_amplifiers([upd_controls])
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(as_stage.rp)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
@@ -278,7 +280,7 @@ def tune_asrp():
 def a2rp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
 
 
@@ -306,11 +308,13 @@ a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 def tune_a2rp():
     yield from bps.mv(ti_filter_shutter, "open")
+    yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
     autoscale_amplifiers([upd_controls])
-    scaler0.stage_sigs["preset_time"] = 0.1
+    yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(a_stage.r2p)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
+    yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
 
 def tune_usaxs_optics(side=False):
