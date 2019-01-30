@@ -326,6 +326,11 @@ def tune_usaxs_optics(side=False):
         yield from tune_asrp()
     yield from tune_ar()
     yield from tune_a2rp()
+    
+    yield from bps.mv(
+        terms.preUSAXStune.num_scans_last_tune, 0,
+        terms.preUSAXStune.epoch_last_tune, time.time(),
+    )
 
 
 def tune_after_imaging():
