@@ -122,14 +122,17 @@ class UsaxsFlyScanDevice(Device):
             self.saveFlyData = None
 
         ######################################################################
-        # plan starts here, first remember our starting conditions
+        # plan starts here
+        global specwriter
+
+        # remember our starting conditions
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
         
         yield from bps.open_run()
-        spec_comment("start USAXS Fly scan", "start")
-        yield from bps.mv(upd_controls.auto.mode, AutorangeSettings.automatic)
+        specwriter._cmt("start", "start USAXS Fly scan")
+        yield from bps.mv(upd_controls.auto.mode, AutorangeSettings.auto_background)
 
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
@@ -137,9 +140,7 @@ class UsaxsFlyScanDevice(Device):
 
         prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
         path = os.path.abspath(self.saveFlyData_HDF5_dir)
-        spec_comment("HDF5 directory: {path}", "start")
-        spec_comment("HDF5 file: {self._output_HDF5_file_}", "start")
-        spec_comment("HDF5 configuration file: {self.saveFlyData_config}", "start")
+        specwriter._cmt("start", f"HDF5 configuration file: {self.saveFlyData_config}")
 
         g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
@@ -149,11 +150,11 @@ class UsaxsFlyScanDevice(Device):
         yield from bps.wait(group=g)
         yield from bps.abs_set(self.flying, False)
         elapsed = time.time() - self.t0
-        spec_comment("fly scan completed in {elapsed} s")
+        specwriter._cmt("stop", f"fly scan completed in {elapsed} s")
 
         yield from user_data.set_state_plan("writing fly scan HDF5 file")
         finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
-        spec_comment("finished writing fly scan HDF5 file")
+        specwriter._cmt("stop", f"finished writing fly scan HDF5 file: {self._output_HDF5_file_}")
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0,
@@ -161,12 +162,16 @@ class UsaxsFlyScanDevice(Device):
             d_stage.y.user_setpoint, self.dy0,
             upd_controls.auto.mode,  AutorangeSettings.auto_background,
             )
+
+        # add an event with our MCA data
+        for d in [struck.mca1, struck.mca2, struck.mca3]:
+            yield from bps.read(d)
+
         logger.debug("after return", time.time() - self.t0)
         yield from user_data.set_state_plan("fly scan finished")
         yield from bps.close_run()
 
 
-# #21 : w-i-p
 usaxs_flyscan = UsaxsFlyScanDevice(name="usaxs_flyscan")
 # development locations
 usaxs_flyscan.saveFlyData_config = "usaxs_support/saveFlyData.xml"
