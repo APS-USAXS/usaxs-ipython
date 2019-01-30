@@ -97,6 +97,7 @@ def mode_USAXS():
 def mode_SBUSAXS():
     pass
 
+mode_SBUSAXS = mode_USAXS       # really the same thing, at least for now
 
 def mode_SAXS():
     # plc_protect.stop_if_tripped()
