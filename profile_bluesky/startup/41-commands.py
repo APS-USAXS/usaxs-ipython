@@ -37,11 +37,14 @@ def cleanupText(text):
 
 def IfRequestedStopBeforeNextScan():
     """plan: wait if requested"""
+    global RE
     open_the_shutter = False
     t0 = time.time()
+    
+    RE.pause_msg = bluesky.run_engine.PAUSE_MSG     # sloppy
 
     pv_txt = "Pausing for user for %g s"
-    while terms.PauseBeforeNextScan.value > 0.5:
+    while terms.PauseBeforeNextScan.value:
         msg = pv_txt % (time.time() - t0)
         print(msg)
         yield from user_data.set_state_plan(msg)
@@ -49,13 +52,15 @@ def IfRequestedStopBeforeNextScan():
         open_the_shutter = True
 
     if terms.StopBeforeNextScan.value:
-        print("User requested stop data collection before next scan")
+        msg = "User requested stop data collection before next scan"
+        print(msg)
         yield from bps.mv(
             ti_filter_shutter,                  "close",
             terms.StopBeforeNextScan,           0,
             user_data.collection_in_progress,   0,
         )
-        open_the_shutter = False
+        RE.pause_msg = "DEBUG: stopped the scans"
+        RE.abort(reason=msg)        # this gonna work?
 
     if open_the_shutter:
         yield from bps.mv(mono_shutter, "open")     # waits until complete
