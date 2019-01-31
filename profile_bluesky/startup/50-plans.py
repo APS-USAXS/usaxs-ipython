@@ -176,12 +176,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
 
     # we'll reset these after the scan is done
-    old_femto_change_gain_up = upd_controls.femto.change_gain_up.value
-    old_femto_change_gain_down = upd_controls.femto.change_gain_down.value
+    old_femto_change_gain_up = upd_controls.auto.gainU.value
+    old_femto_change_gain_down = upd_controls.auto.gainD.value
 
     yield from bps.mv(
-        upd_controls.femto.change_gain_up, terms.FlyScan.setpoint_up.value,
-        upd_controls.femto.change_gain_down, terms.FlyScan.setpoint_down.value,
+        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.value,
+        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
         ti_filter_shutter, "open",
     )
     APS_plans.run_blocker_in_plan(
@@ -211,7 +211,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     yield from user_data.set_state_plan("Running Flyscan")
 
     ### move the stages to flyscan starting values from EPICS PVs
-    yield from bp.mv(
+    yield from bps.mv(
         a_stage.r, flyscan_trajectories.ar.value[0],
         a_stage.y, flyscan_trajectories.ay.value[0],
         d_stage.y, flyscan_trajectories.dy.value[0],
@@ -220,14 +220,14 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         dy_start, flyscan_trajectories.dy.value[0],
     )
 
-    yield from bp.mv(
-        terms.FlyScan.order_number, terms.FlyScan.order_number + 1,  # increment it
+    yield from bps.mv(
+        terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, 1,          # we are scanning now (or will be very soon)
     )
 
     yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
 
-    yield from bp.mv(
+    yield from bps.mv(
         user_data.scanning, 0,          # for sure, we are not scanning now
         terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
     )
@@ -256,8 +256,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         scaler0.preset_time, 1,
         scaler0.auto_count_time, 1,
 
-        upd_controls.femto.change_gain_up, old_femto_change_gain_up,
-        upd_controls.femto.change_gain_down, old_femto_change_gain_down,
+        upd_controls.auto.gainU, old_femto_change_gain_up,
+        upd_controls.auto.gainD, old_femto_change_gain_down,
         )
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
