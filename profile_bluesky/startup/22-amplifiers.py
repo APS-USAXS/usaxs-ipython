@@ -383,17 +383,19 @@ def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
 
 _last_autorange_gain_ = OrderedDefaultDict(dict)
 
-def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
+def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     """BLOCKING: internal: autoscale amplifiers for signals sharing a common scaler"""
     global _last_autorange_gain_
 
     scaler = controls[0].scaler
-    stage_sigs = {}
-    stage_sigs["scaler"] = scaler.stage_sigs
+    originals = {}
 
-    scaler.stage_sigs["preset_time"] = count_time
-    scaler.stage_sigs["delay"] = 0.02
-    scaler.stage_sigs["count_mode"] = "OneShot"
+    originals["preset_time"] = scaler.preset_time.value
+    originals["delay"] = scaler.delay.value
+    originals["count_mode"] = scaler.count_mode.value
+    scaler.preset_time.put(count_time)
+    scaler.delay.put(0.2)
+    scaler.count_mode.put("OneShot")
 
     last_gain_dict = _last_autorange_gain_[scaler.name]
 
@@ -420,8 +422,12 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
     
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
-        counting = scaler.trigger()    # start counting
-        ophyd.status.wait(counting, timeout=count_time+1.0)
+        # counting = scaler.trigger()    # start counting     # FIXME:
+        # ophyd.status.wait(counting, timeout=count_time+1.0)
+        scaler.count.put(1)
+        while scaler.count.value != 0:
+            time.sleep(0.005)
+        
         # amplifier sequence program (in IOC) will adjust the gain now
         
         for control in controls:
@@ -443,17 +449,24 @@ def _scaler_autoscale_(controls, count_time=1.0, max_iterations=9):
         
         if False not in converged:      # all True?
             complete = True
+            for control in controls:
+                control.auto.mode.put("manual")
             break   # no changes
         logger.debug("converged: {}".format(converged))
 
-    scaler.stage_sigs = stage_sigs["scaler"]
+    # scaler.stage_sigs = stage_sigs["scaler"]
+    # restore starting conditions
+    scaler.preset_time.put(originals["preset_time"])
+    scaler.delay.put(originals["delay"])
+    scaler.count_mode.put(originals["count_mode"])
 
     if not complete:        # bailed out early from loop
+        print(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
         raise RuntimeError(msg)
 
 
-def autoscale_amplifiers(controls, shutter=None, count_time=1.0, max_iterations=9):
+def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations=9):
     """
     interactive function to autoscale detector amplifiers simultaneously
     
