@@ -16,20 +16,38 @@ def DCMfeedbackON():
     monochromator.feedback.check_position()
 
 
+def _insertFilters_(a, b):
+    """plan: insert the EPICS-specified filters"""
+    yield from bps.mv(pf4_AlTi.fPosA, a, pf4_AlTi.fPosB, b)
+
+
 def insertScanFilters():
     """plan: insert the EPICS-specified filters"""
-    yield from bps.mv(
-        pf4_AlTi.fPosA, terms.USAXS.scan_filters.Al.value,    # Bank A: Al
-        pf4_AlTi.fPosB, terms.USAXS.scan_filters.Ti.value,    # Bank B: Ti
+    yield from _insertFilters_(
+        terms.USAXS.scan_filters.Al.value,    # Bank A: Al
+        terms.USAXS.scan_filters.Ti.value,    # Bank B: Ti
     )
 
 
 def insertRadiographyFilters():
     """plan: insert the EPICS-specified filters"""
-    yield from bps.mv(
-        pf4_AlTi.fPosA, terms.USAXS.img_filters.Al.value,    # Bank A: Al
-        pf4_AlTi.fPosB, terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
+    yield from _insertFilters_(
+        terms.USAXS.img_filters.Al.value,    # Bank A: Al
+        terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
     )
+
+
+def insertTransmissionFilters():
+    """
+    set filters to reduce diode damage when measuring tranmission on guard slits etc
+    """
+    if monochromator.dcm.energy.value < 12.1:
+        al_filters = 0
+    elif monochromator.dcm.energy.value < 18.1:
+        al_filters = 3
+    else:
+        al_filters = 8
+    yield from _insertFilters_(al_filters, 0)
 
 
 def confirm_instrument_mode(mode_name):
@@ -302,47 +320,69 @@ def measure_USAXS_Transmission():
     # yield from user_data.set_state_plan("Measuring USAXS transmission")
     yield from user_data.set_state_plan("TODO: measure USAXS transmission")
     yield from bps.null()  # this is a no-op
-    # TODO:
-    
-    """
-# /home/beams/USAXS/spec/macros/local/usaxs_uascan.mac
-def measure_USAXS_PinT '
-  #global USAXS_MEASURE_PIN_TRANS
-  local LocTRPinCts, LocTRI0Cts 
-  StopIfPLCEmergencyProtectionOn
-  epics_put ("9idcLAX:USAXS:state",       "Measuring USAXS transmission")
-  if(USAXS_MEASURE_PIN_TRANS){
-     useModeUSAXS
-     waitmove; get_angles
-     mv ay (USAXSPinT_AyPosition)
-     waitmove; get_angles
-     openTiFilterShutter 
-     set_Filters_For_Transm
-     autorange_I0I00amps
-     ct USAXSPinT_MeasurementTime
-     #check if we did not top the amplifiers, if yes, redo again...
-     LocTRPinCts =  S[trd]
-     LocTRI0Cts  = S[I0]
-     if(((LocTRPinCts/USAXSPinT_MeasurementTime)>980000) || ((LocTRI0Cts/USAXSPinT_MeasurementTime)>980000)){
-        autorange_I0I00amps
-        ct USAXSPinT_MeasurementTime
-     }
-     closeTiFilterShutter
-     mv_Al_filter 0
-     mv ay AY0
-     set_USAXSPinT_pinCounts   S[trd]    ##epics_get("9idcLAX:vsc:c0.S5")        
-     set_USAXSPinT_pinGain    TRDRange   ##epics_get("9idcUSX:fem05:seq01:gain")
-     set_USAXSPinT_I0Counts   S[I0]      ##epics_get("9idcLAX:vsc:c0.S2")   
-     set_USAXSPinT_I0Gain     I0Range    ##epics_get("9idcUSX:fem02:seq01:gain")           
-     printf ("Measured USAXS transmission values pinDiode cts =%f with gain %g and  I0 cts =%f with gain %g\n", USAXSPinT_pinCounts, USAXSPinT_pinGain, USAXSPinT_I0Counts,USAXSPinT_I0Gain);
-     waitmove; get_angles
-   }else{
-     set_USAXSPinT_pinCounts  0        
-     set_USAXSPinT_pinGain    0
-     set_USAXSPinT_I0Counts   0   
-     set_USAXSPinT_I0Gain     0                
-     printf ("Did not measure USAXS transmission \n");
-   }
-'
-    """
-    
+    if terms.USAXS.transmission.measure.value:
+        yield from mode_USAXS()
+        ay_target = terms.USAXS.AY0.value + 8 + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
+        yield from bps.mv(
+            terms.USAXS.transmission.ay, ay_target,
+            a_stage.y, ay_target,
+            ti_filter_shutter, "open",
+        )
+        yield from insertTransmissionFilters()
+
+        APS_plans.run_blocker_in_plan(
+            # must run in thread since this is not a plan
+            autoscale_amplifiers([I0_controls, trd_controls])
+        )
+        yield from bps.mv(
+            scaler0.preset_time, terms.USAXS.transmission.count_time.value
+        )
+        yield from bp.count([scaler0])
+        s = scaler0.read()
+        _tr_diode = s["TR diode"]["value"]
+        _I0 = s["I0_USAXS"]["value"]
+        
+        if _tr_diode > 980000 or _I0 > 980000:
+            APS_plans.run_blocker_in_plan(
+                # must run in thread since this is not a plan
+                autoscale_amplifiers([I0_controls, trd_controls])
+            )
+            
+            yield from bps.mv(
+                scaler0.preset_time, terms.USAXS.transmission.count_time.value
+            )
+            yield from bp.count([scaler0])
+            s = scaler0.read()
+
+        yield from bps.mv(
+            a_stage.y, terms.USAXS.AY0.value,
+            ti_filter_shutter, "close",
+        )
+        yield from insertScanFilters()
+        yield from bps.mv(
+            terms.USAXS.transmission.diode_counts, s["TR diode"]["value"],
+            terms.USAXS.transmission.diode_gain, trd_controls.femto.gain.value,
+            terms.USAXS.transmission.I0_counts, s["I0_USAXS"]["value"],
+            terms.USAXS.transmission.I0_gain, I0_controls.femto.gain.value,
+        )
+        msg = "Measured USAXS transmission values pinDiode cts =%f with gain %g and  I0 cts =%f with gain %g" % (
+            terms.USAXS.transmission.diode_counts.value, 
+            terms.USAXS.transmission.diode_gain.value, 
+            terms.USAXS.transmission.I0_counts.value,
+            terms.USAXS.transmission.I0_gain.value
+            )
+        logger.info(msg)
+        print(msg)
+
+    else:
+        yield from bps.mv(
+            terms.USAXS.transmission.diode_counts, 0,
+            terms.USAXS.transmission.diode_gain, 0,
+            terms.USAXS.transmission.I0_counts, 0,
+            terms.USAXS.transmission.I0_gain, 0,
+        )
+        logger.info("Did not measure USAXS transmission.")
+
+
+def measure_USAXS_dark_currents():
+    pass        # TODO:
