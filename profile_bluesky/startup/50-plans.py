@@ -158,22 +158,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # it's used to cal Finish_in_Angle and START
     # both of which get passed to EPICS
     # That happens outside of this code.  completely.
-    """
-    #Calculate Finish in angle, since now it is in Q units
-    #use en as energy in keV,
-    _USAXS_Lambda = 12.4 / A[en]
-    ########################################################################
-    # decide if we are scaning up or down...
-    if(USAXSScanUp) {
-        # scanning up, new method
-        Finish_in_Angle = AR_VAL_CENTER + (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
-        START = AR_VAL_CENTER + (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
-    } else {
-        # scanning down, old method
-        Finish_in_Angle = AR_VAL_CENTER - (360/PI)*asin( FINISH * _USAXS_Lambda / (4*PI))
-        START = AR_VAL_CENTER - (360/PI)*asin( START_OFFSET * _USAXS_Lambda / (4*PI))
-    }
-    """
 
     # measure transmission values using pin diode if desired
 
