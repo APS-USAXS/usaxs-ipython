@@ -92,8 +92,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     """
     yield from IfRequestedStopBeforeNextScan()
     yield from bps.mv(
-        usaxs_slit.usaxs_v_size, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.usaxs_h_size, terms.SAXS.usaxs_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
@@ -141,7 +141,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # offset the calc from exact zero so can plot log(|Q|)
     q_offset = terms.USAXS.start_offset.value
     angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
-    ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset)
+    ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
 
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
@@ -171,9 +171,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         )
 
     # enable asrp link to ar for 2D USAXS
-    # FS_enableASRP
-#     if terms.USAXS.is2DUSAXSscan.value:
-#         yield from bps.mv(self.asrp_calc_SCAN, 9)
+    if terms.USAXS.is2DUSAXSscan.value:
+        RECORD_SCAN_INDEX_10x_per_second = 9
+        yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
 
     # we'll reset these after the scan is done
     old_femto_change_gain_up = upd_controls.femto.change_gain_up.value
@@ -193,12 +193,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     yield from bps.mv(
         scaler0.update_rate, 0,
         scaler0.auto_count_update_rate, 0,
-        upd_autorange_controls.mode, 2,     # auto+background
+        upd_controls.auto.mode, "auto+background",
         scaler0.preset_time, FlyScanAutoscaleTime,
         scaler0.auto_count_time, FlyScanAutoscaleTime,
         scaler0.auto_count_delay, FlyScanAutoscaleTime,
         scaler0.delay, 0,
-        scaler0.count_mode, 1,      # auto-count
+        scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
         )
 
    # Pause autosave on LAX to prevent delays in PVs processing.
@@ -208,13 +208,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         lax_autosave.max_time, usaxs_flyscan.scan_time.value+9,
         )
 
-
     yield from user_data.set_state_plan("Running Flyscan")
 
-    sample_title = user_data.sample_title.value
-    # TODO: do something else with sample_title, such as TITLE?  What would SPEC do?
-
-    ### get these flyscan starting values from EPICS PVs
+    ### move the stages to flyscan starting values from EPICS PVs
     yield from bp.mv(
         a_stage.r, flyscan_trajectories.ar.value[0],
         a_stage.y, flyscan_trajectories.ay.value[0],
@@ -265,7 +261,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         )
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
-
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         a_stage.y, terms.USAXS.AY0.value,
