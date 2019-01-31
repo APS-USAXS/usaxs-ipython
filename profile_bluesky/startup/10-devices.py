@@ -400,6 +400,19 @@ class Parameters_Al_Ti_Filters_Imaging(Device):
     Ti = Component(EpicsSignal,  "Ti_Filters")
 
 
+class Parameters_transmission(Device):
+    # measure transmission in USAXS using pin diode
+    measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
+
+    # Ay to hit pin diode
+    ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
+    count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
+    diode_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinCounts")
+    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinGain") # I00 amplifier
+    I0_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Counts")
+    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Gain")
+
+
 class Parameters_USAXS(Device):
     """internal values shared with EPICS"""
     AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
@@ -428,11 +441,13 @@ class Parameters_USAXS(Device):
     useMSstage = Component(Signal,                    value=False)
     useSBUSAXS = Component(Signal,                    value=False)
 
-    retune_needed = Component(Signal, value=False)     # TODO: could have EPICS PV
+    retune_needed = Component(Signal, value=False)     # does not *need* an EPICS PV
 
     # TODO: these are particular to the amplifier
     setpoint_up = Component(Signal, value=4000)     # decrease range
     setpoint_down = Component(Signal, value=650000)    # increase range
+
+    transmission = Component(Parameters_transmission)
 
     def UPDRange(self):
         return upd_controls.auto.lurange.value  # TODO: check return value is int
@@ -440,19 +455,6 @@ class Parameters_USAXS(Device):
 
 class Parameters_SBUSAXS(Device):
     pass
-
-
-class Parameters_transmission(Device):
-    # measure transmission in USAXS using pin diode
-    measure = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurePinTrans")
-
-    # Ay to hit pin diode
-    ay = Component(EpicsSignal, "9idcLAX:USAXS:TR_AyPosition")
-    count_time = Component(EpicsSignal, "9idcLAX:USAXS:TR_MeasurementTime")
-    diode_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinCounts")
-    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_pinGain") # I00 amplifier
-    I0_counts = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Counts")
-    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS:TR_I0Gain")
 
 
 class Parameters_SAXS(Device):
@@ -497,8 +499,6 @@ class Parameters_SAXS(Device):
 
     # this is Io value from gates scalar in LAX for Nexus file
     I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
-
-    transmission = Component(Parameters_transmission)
 
 
 class Parameters_WAXS(Device):
