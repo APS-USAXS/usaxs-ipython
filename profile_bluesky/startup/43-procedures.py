@@ -24,6 +24,14 @@ def insertScanFilters():
     )
 
 
+def insertRadiographyFilters():
+    """plan: insert the EPICS-specified filters"""
+    yield from bps.mv(
+        pf4_AlTi.fPosA, terms.USAXS.img_filters.Al.value,    # Bank A: Al
+        pf4_AlTi.fPosB, terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
+    )
+
+
 def confirm_instrument_mode(mode_name):
     """
     True if instrument is in the named mode
@@ -185,30 +193,7 @@ def mode_WAXS():
     )
 
 
-def mode_radiography():
-    pass
     """
-# /home/beams/USAXS/spec/macros/local/usaxs_commands.mac
-def useModeRadiography '{
-  StopIfPLCEmergencyProtectionOn
-  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "Moving USAXS to Radiography mode" ))
-  closeCCDshutter
-  closeTiFilterShutter
-  openMonoShutter  
-  if (USAXSSAXSMODE!= 2){
-     __tmpstr__ = sprintf("Found USAXSSAXSMODE = %s ", USAXSSAXSMODE )
-    print __tmpstr__
-    print "Moving to proper USAXS mode"
-    move_SAXSOut
-    move_WAXSOut
-    move_USAXSIn
-  }
- 
-  print "Preparing for Radiography mode ... please wait ..."
-  moveDetector   CCD_DX   CCD_DY
-  openTiFilterShutter
-  insertCCDfilters
-  openCCDshutter
   comment "Ready for Radiography mode"
   print "TV should now show Radiography CCD image. If not, check: TV on? Right TV input? Camera on (Blue button)?"
   print "Beam on? Shutters opened? Sample/holder out of beam? - if all is OK, try running preUSAXStune."
@@ -220,6 +205,67 @@ def useModeRadiography '{
   epics_put ("9idcLAX:USAXS:scanning",    0)
 }'
     """
+
+
+def mode_Radiography():
+    """
+    put in USAXS Radiography mode
+
+    USAGE:  ``RE(mode_Radiography())``
+    """
+    
+    yield from mode_USAXS()
+    
+    yield from bps.mv(
+        monochromator.feedback.on, MONO_FEEDBACK_ON,
+        mono_shutter, "open",
+        ccd_shutter, "close",
+    )
+  
+    yield from bps.mv(
+        # move to ccd position 
+        d_stage.x, terms.USAXS.ccd.dx.value,
+        d_stage.y, terms.USAXS.ccd.dy.value,
+        # make sure slits are in place
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+    )
+    
+    yield from insertRadiographyFilters()
+    
+    # when all that is complete, then ...
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        ti_filter_shutter, "open",
+        ccd_shutter, "open",
+        user_data.time_stamp, ts,
+        user_data.macro_file_time, ts,
+        user_data.scanning, 0,
+        )
+
+    yield from user_data.set_state_plan("Radiography Mode")
+    msg = """
+    TV should now show Radiography CCD image. 
+    
+    But before calling - are you REALLY sure the sample is not blocking the beam? 
+       Move sample out and try RE(tune_usaxs_optics()) again.
+
+    If still no image on the CCD, check: 
+    
+    * TV on? Right TV input? 
+    * Camera on (Blue button)?
+    * Beam on? 
+    * Shutters opened? 
+    * Sample/holder out of beam? 
+    
+    - if all is OK, try running RE(tune_usaxs_optics()).
+    tune_usaxs_optics worked? Run RE(mode_Radiography()). 
+    
+    Still not working? Call Jan, Ivan or Matt.
+    """
+    print(msg)
 
 
 def mode_imaging():
