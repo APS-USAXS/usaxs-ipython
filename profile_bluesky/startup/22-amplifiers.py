@@ -3,16 +3,28 @@ print(__file__)
 """
 detectors, amplifiers, and related support
 
+#            Define local PD address:
+ if(Use_DLPCA300){
+     PDstring = "pd01:seq02"
+     UPD_PV    =    "9idcUSX:pd01:seq02"    
+  }else{
+     PDstring = "pd01:seq01"
+     UPD_PV    =    "9idcUSX:pd01:seq01"  
+  }
+
 ========  =================  ====================  ===================  ===========
 detector  scaler             amplifier             sequence             Femto model
 ========  =================  ====================  ===================  ===========
 UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem01:seq01:  9idcLAX:pd01:seq01:  DLPCA200
 UPD       9idcLAX:vsc:c0.S4  9idcLAX:fem09:seq02:  9idcLAX:pd01:seq02:  DDPCA300
+UPD       9idcLAX:vsc:c0.S4  9idcUSX:pd01:seq02:   9idcLAX:pd01:seq02:  DDPCA300
 I0        9idcLAX:vsc:c0.S2  9idcRIO:fem02:seq01:  9idcLAX:pd02:seq01:
 I00       9idcLAX:vsc:c0.S3  9idcRIO:fem03:seq01:  9idcLAX:pd03:seq01:
 I000      9idcLAX:vsc:c0.S6  9idcRIO:fem04:seq01:  None
 TRD       9idcLAX:vsc:c0.S5  9idcRIO:fem05:seq01:  9idcLAX:pd05:seq01:
 ========  =================  ====================  ===================  ===========
+
+FIXME: fem09 is a typo, needs to be fixed
 
 A PV (``9idcLAX:femto:model``) tells which UPD amplifier and sequence 
 programs we're using now.  This PV is read-only since it is set when 
@@ -479,7 +491,7 @@ if _amplifier_id_upd == "DLCPA200":
     _upd_femto_prefix = "9idcLAX:fem01:seq01:"
     _upd_auto_prefix  = "9idcLAX:pd01:seq01:"
 elif _amplifier_id_upd == "DDPCA300":
-    _upd_femto_prefix = "9idcLAX:fem09:seq02:"
+    _upd_femto_prefix = "9idcUSX:pd01:seq02:"          # TODO: EBRICK alias for now was "9idcLAX:fem09:seq02:"
     _upd_auto_prefix  = "9idcLAX:pd01:seq02:"
 
 upd_femto_amplifier  = FemtoAmplifierDevice(_upd_femto_prefix, name="upd_femto_amplifier")

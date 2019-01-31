@@ -98,7 +98,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
 
-    if terms.preUSAXStune.needed():
+    if terms.preUSAXStune.needed:
         # tune at previous sample position 
         # don't overexpose the new sample position
         yield from tune_usaxs_optics()
