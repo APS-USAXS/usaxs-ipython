@@ -249,8 +249,9 @@ def mode_OpenBeamPath():
         yield from user_data.set_state_plan("USAXS moved to OpenBeamPath mode")
 
 
-def measure_USAXS_PinT():
+def measure_USAXS_Transmission():
     """
+    measure the transmission in USAXS mode
     """
     # yield from user_data.set_state_plan("Measuring USAXS transmission")
     yeld from bps.null  # this is a no-op
