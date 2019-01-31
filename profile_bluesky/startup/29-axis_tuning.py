@@ -220,7 +220,10 @@ def ar_posttune_hook():
         yield from bps.mv(terms.USAXS.ar_val_center, a_stage.r.position)
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
-        yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
+        yield from bps.mv(
+            usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value,
+            usaxs_q_calc.channels.B, terms.USAXS.ar_val_center.value,
+        )
 
 
 a_stage.r.tuner = APS_plans.TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))

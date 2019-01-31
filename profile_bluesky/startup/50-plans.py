@@ -145,12 +145,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
-        # these two were moved by mode_USAXS()
-        # d_stage.y, terms.USAXS.diode.dy.value,
-        # a_stage.y, terms.USAXS.AY0.value,
+        # these two were moved by mode_USAXS(), belt & suspenders here
+        d_stage.y, terms.USAXS.diode.dy.value,
+        a_stage.y, terms.USAXS.AY0.value,
         # sample stage already moved to pos_X, pos_Y
         user_data.state, "Moving to Q=0 ",
-        usaxs_q_calc.channels.B, ar0_calc_offset,
+        usaxs_q_calc.channels.B, terms.USAXS.ar_val_center.value,
     )
 
     # TODO: what to do with USAXSScanUp?
