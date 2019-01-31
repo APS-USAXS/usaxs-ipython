@@ -92,9 +92,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     """
     yield from IfRequestedStopBeforeNextScan()
     yield from bps.mv(
-        s_stage.x, pos_X,
-        s_stage.y, pos_Y,
-        # move these at same time as sample stage motors
         usaxs_slit.usaxs_v_size, terms.SAXS.usaxs_v_size.value,
         usaxs_slit.usaxs_h_size, terms.SAXS.usaxs_h_size.value,
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
@@ -102,16 +99,25 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     )
 
     if terms.preUSAXStune.needed():
+        # tune at previous sample position 
+        # don't overexpose the new sample position
         yield from tune_usaxs_optics()
 
-    scan_title = cleanupText(scan_title)
+    yield from bps.mv(
+        s_stage.x, pos_X,
+        s_stage.y, pos_Y,
+    )
 
+    scan_title_clean = cleanupText(scan_title)
+
+    # SPEC-compatibility symbols
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+
     # directory is pwd + DATAFILE + "_usaxs"
-    flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0], "_usaxs")
-    flyscan_file_name = "%s_%04d.h5" % (scan_title, terms.FlyScan.order_number.value)
+    flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_usaxs")
+    flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
     # flyscan_full_filename = os.path.join(flyscan_path, flyscan_file_name)
 
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
@@ -120,19 +126,23 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,
+        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
         user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
         user_data.spec_scan, SCAN_N,
+        # or terms.FlyScan.order_number.value
         user_data.time_stamp, ts,
-        user_data.scan_macro, "FlyScan",
+        user_data.scan_macro, "FlyScan",    # note camel-case
     )
 
     # offset the calc from exact zero so can plot log(|Q|)
-    ar0_calc_offset = terms.USAXS.ar_val_center.value - 0.00005
+    q_offset = terms.USAXS.start_offset.value
+    angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
+    ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset)
+
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         # these two were moved by mode_USAXS()
