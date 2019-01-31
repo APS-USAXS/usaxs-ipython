@@ -118,7 +118,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     # directory is pwd + DATAFILE + "_usaxs"
     flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_usaxs")
-    # TODO: must create this directory if not exists
+    if not os.path.exists(flyscan_path):
+        # must create this directory if not exists
+        os.mkdir(flyscan_path)
     flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
     # flyscan_full_filename = os.path.join(flyscan_path, flyscan_file_name)
 
