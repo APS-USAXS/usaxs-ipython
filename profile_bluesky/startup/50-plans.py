@@ -100,8 +100,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
-    if terms.USAXS.retune_needed.value:
-        pass    # TODO: implement run_preUSAXStuneIfNeeded(called_from_where)
+
+    if terms.preUSAXStune.needed():
+        yield from tune_usaxs_optics()
 
     scan_title = cleanupText(scan_title)
 
