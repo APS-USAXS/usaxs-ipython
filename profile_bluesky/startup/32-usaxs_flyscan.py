@@ -179,9 +179,10 @@ class UsaxsFlyScanDevice(Device):
 
 
 usaxs_flyscan = UsaxsFlyScanDevice(name="usaxs_flyscan")
-# development locations
-usaxs_flyscan.saveFlyData_config = "usaxs_support/saveFlyData.xml"
-usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"
+# production locations
+usaxs_flyscan.saveFlyData_config = "/share1/AreaDetectorConfig/FlyScan_config/saveFlyData.xml"
+# Flyscan() will override these and set them in the way the isntrument prefers.
+usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"   # developer
 usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
 
 

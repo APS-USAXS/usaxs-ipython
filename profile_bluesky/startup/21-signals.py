@@ -109,8 +109,8 @@ flyscan_trajectories = Trajectories(name="flyscan_trajectories")
 
 
 ar_start = EpicsSignal("9idcLAX:USAXS:ARstart", name="ar_start")
-ay_start = EpicsSignal("9idcLAX:USAXS:AYstart", name="ar_start")
-dy_start = EpicsSignal("9idcLAX:USAXS:DYstart", name="ar_start")
+# no PV : ay_start = EpicsSignal("9idcLAX:USAXS:AYstart", name="ay_start")
+# no PV : dy_start = EpicsSignal("9idcLAX:USAXS:DYstart", name="dy_start")
 
 
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!

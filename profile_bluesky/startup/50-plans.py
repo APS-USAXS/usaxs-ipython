@@ -26,11 +26,9 @@ def preUSAXStune():
     )
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
-    yield from bps.mv(
-        # TODO:
-        #if not confirm_instrument_mode("USAXS in beam"):
-        #    raise RuntimeError("Must be in USAXS mode to tune")
+    yield from mode_USAXS()
 
+    yield from bps.mv(
         # ensure diode in place (Radiography puts it elsewhere)
         d_stage.x, terms.USAXS.diode.dx.value,
         d_stage.y, terms.USAXS.diode.dy.value,
@@ -91,6 +89,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     do one USAXS Fly Scan
     """
     yield from IfRequestedStopBeforeNextScan()
+
+    yield from mode_USAXS()
+
     yield from bps.mv(
         usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
         usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
@@ -117,6 +118,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     # directory is pwd + DATAFILE + "_usaxs"
     flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_usaxs")
+    # TODO: must create this directory if not exists
     flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
     # flyscan_full_filename = os.path.join(flyscan_path, flyscan_file_name)
 
@@ -130,28 +132,35 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.user_dir, os.getcwd(),
-        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
         user_data.spec_scan, SCAN_N,
         # or terms.FlyScan.order_number.value
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
     )
+    yield from bps.mv(
+        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+   )
 
     # offset the calc from exact zero so can plot log(|Q|)
     q_offset = terms.USAXS.start_offset.value
     angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
     ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
 
+    print("DEBUG: preparing to move AR, AY, & DY")
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         # these two were moved by mode_USAXS(), belt & suspenders here
         d_stage.y, terms.USAXS.diode.dy.value,
         a_stage.y, terms.USAXS.AY0.value,
-        # sample stage already moved to pos_X, pos_Y
-        user_data.state, "Moving to Q=0 ",
-        usaxs_q_calc.channels.B, terms.USAXS.ar_val_center.value,
     )
+    print("DEBUG: setting state")
+    yield from user_data.set_state_plan("Moving to Q=0")
+    print("DEBUG: setting Q calc AR0 (channel B)")
+    yield from bps.mv(
+        usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
+    )
+    print("DEBUG: moved AR, AY & DY")
 
     # TODO: what to do with USAXSScanUp?
     # 2019-01-25, prj+jil: this is probably not used now, only known to SPEC
@@ -164,11 +173,13 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     yield from measure_USAXS_Transmission()
+    print("DEBUG: measure transmission done")
 
     yield from bps.mv(
         mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
+    print("DEBUG: mono shutter opened")
 
     # enable asrp link to ar for 2D USAXS
     if terms.USAXS.is2DUSAXSscan.value:
@@ -184,10 +195,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
         ti_filter_shutter, "open",
     )
+    yield from bps.sleep(0.2)
     APS_plans.run_blocker_in_plan(
         # must run in thread since this is not a plan
         autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
     )
+    print("DEBUG: amplifiers autoscaled")
 
     FlyScanAutoscaleTime = 0.025
     yield from bps.mv(
@@ -200,6 +213,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         scaler0.delay, 0,
         scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
         )
+    print("DEBUG: scalers configured")
 
    # Pause autosave on LAX to prevent delays in PVs processing.
     yield from bps.mv(
@@ -207,6 +221,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         # autosave will restart after this interval (s)
         lax_autosave.max_time, usaxs_flyscan.scan_time.value+9,
         )
+    print("DEBUG: autosave off on LAX")
 
     yield from user_data.set_state_plan("Running Flyscan")
 
@@ -216,16 +231,19 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         a_stage.y, flyscan_trajectories.ay.value[0],
         d_stage.y, flyscan_trajectories.dy.value[0],
         ar_start, flyscan_trajectories.ar.value[0],
-        ay_start, flyscan_trajectories.ay.value[0],
-        dy_start, flyscan_trajectories.dy.value[0],
+        # ay_start, flyscan_trajectories.ay.value[0],
+        # dy_start, flyscan_trajectories.dy.value[0],
     )
+    print("DEBUG: moved motors to start position")
 
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, 1,          # we are scanning now (or will be very soon)
     )
 
+    print("DEBUG: starting fly scan")
     yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
+    print("DEBUG: done with fly scan")
 
     yield from bps.mv(
         user_data.scanning, 0,          # for sure, we are not scanning now
