@@ -292,3 +292,24 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # FS_disableASRP
 
     # measure_USAXS_PD_dark_currents    # used to be here, not now
+
+
+def my_Excel_plan(xl_file):
+    """
+    example of reading a list of samples from Excel spreadsheet
+    
+    TEXT view of spreadsheet (Excel file line numbers shown)::
+    
+        [1] List of sample scans to be run              
+        [2]                 
+        [3]                 
+        [4] scan    sx  sy  thickness   sample name
+        [5] FlyScan 0   0   0   blank
+        [6] FlyScan 5   2   0   blank
+
+    """
+    assert os.path.exists(xl_file)
+    xl = ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
+    for row in xl.db.values():
+        if row["scan"].lower() == "flyscan":
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
