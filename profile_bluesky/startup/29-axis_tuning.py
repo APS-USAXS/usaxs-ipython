@@ -319,6 +319,9 @@ def tune_a2rp():
 
 
 def tune_usaxs_optics(side=False):
+    if not confirm_instrument_mode("USAXS in beam"):
+        yield from mode_USAXS()
+
     yield from tune_mr()
     yield from tune_m2rp()
     if side:
@@ -331,6 +334,10 @@ def tune_usaxs_optics(side=False):
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.epoch_last_tune, time.time(),
     )
+
+
+def tune_saxs_optics(side=False):
+    raise NotImplementedError   # TODO:
 
 
 def tune_after_imaging():
