@@ -247,3 +247,54 @@ def mode_OpenBeamPath():
         yield from move_WAXSOut()
         yield from move_USAXSOut()
         yield from user_data.set_state_plan("USAXS moved to OpenBeamPath mode")
+
+
+def measure_USAXS_PinT():
+    """
+    """
+    # yield from user_data.set_state_plan("Measuring USAXS transmission")
+    yeld from bps.null  # this is a no-op
+    # TODO:
+    
+    """
+# /home/beams/USAXS/spec/macros/local/usaxs_uascan.mac
+def measure_USAXS_PinT '
+  #global USAXS_MEASURE_PIN_TRANS
+  local LocTRPinCts, LocTRI0Cts 
+  StopIfPLCEmergencyProtectionOn
+  epics_put ("9idcLAX:USAXS:state",       "Measuring USAXS transmission")
+  if(USAXS_MEASURE_PIN_TRANS){
+     useModeUSAXS
+     waitmove; get_angles
+     mv ay (USAXSPinT_AyPosition)
+     waitmove; get_angles
+     openTiFilterShutter 
+     set_Filters_For_Transm
+     autorange_I0I00amps
+     ct USAXSPinT_MeasurementTime
+     #check if we did not top the amplifiers, if yes, redo again...
+     LocTRPinCts =  S[trd]
+     LocTRI0Cts  = S[I0]
+     if(((LocTRPinCts/USAXSPinT_MeasurementTime)>980000) || ((LocTRI0Cts/USAXSPinT_MeasurementTime)>980000)){
+        autorange_I0I00amps
+        ct USAXSPinT_MeasurementTime
+     }
+     closeTiFilterShutter
+     mv_Al_filter 0
+     mv ay AY0
+     set_USAXSPinT_pinCounts   S[trd]    ##epics_get("9idcLAX:vsc:c0.S5")        
+     set_USAXSPinT_pinGain    TRDRange   ##epics_get("9idcUSX:fem05:seq01:gain")
+     set_USAXSPinT_I0Counts   S[I0]      ##epics_get("9idcLAX:vsc:c0.S2")   
+     set_USAXSPinT_I0Gain     I0Range    ##epics_get("9idcUSX:fem02:seq01:gain")           
+     printf ("Measured USAXS transmission values pinDiode cts =%f with gain %g and  I0 cts =%f with gain %g\n", USAXSPinT_pinCounts, USAXSPinT_pinGain, USAXSPinT_I0Counts,USAXSPinT_I0Gain);
+     waitmove; get_angles
+   }else{
+     set_USAXSPinT_pinCounts  0        
+     set_USAXSPinT_pinGain    0
+     set_USAXSPinT_I0Counts   0   
+     set_USAXSPinT_I0Gain     0                
+     printf ("Did not measure USAXS transmission \n");
+   }
+'
+    """
+    

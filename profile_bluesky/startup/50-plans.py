@@ -163,7 +163,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
-    # TODO: measure_USAXS_PinT
+    yield from measure_USAXS_Transmission()
 
     yield from bps.mv(
         mono_shutter, "open",
