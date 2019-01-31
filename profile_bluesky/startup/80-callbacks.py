@@ -25,3 +25,26 @@ EXAMPLE:
     specwriter.newfile()   # gets a default name: yyyymmdd-hhmmss.dat
     specwriter.newfile(reset_scan_id=True, RE=RE)   # also sets scan_id = 0
 """
+
+
+def newSpecFile(title, reset_scan_id=True):
+    """
+    user choice of the SPEC file name
+    
+    cleans up title, prepends month and day and appends file extension
+    """
+    mmdd = str(datetime.datetime.now()).split()[0][5:].replace("-", "_")
+    clean = cleanupText(title)
+    fname = "%s_%s.dat" % (mmdd, clean)
+    if os.path.exists(fname):
+        print(f"file already exists: {fname}")
+        user_data.spec_file.put(specwriter.spec_filename)
+        print("Using default file name")
+        print(f"SPEC file name : {specwriter.spec_filename}")
+    else:
+        specwriter.newfile(fname, reset_scan_id=reset_scan_id)
+        msg = f"spec file: {specwriter.spec_filename}"
+        logger.info(msg)
+        print(msg)
+        user_data.spec_file.put(specwriter.spec_filename)
+    print("file will be created when bluesky ends its next scan")
