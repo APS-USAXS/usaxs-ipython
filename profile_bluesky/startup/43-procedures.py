@@ -251,9 +251,10 @@ def mode_OpenBeamPath():
 
 def measure_USAXS_Transmission():
     """
-    measure the transmission in USAXS mode
+    measure the sample transmission in USAXS mode
     """
     # yield from user_data.set_state_plan("Measuring USAXS transmission")
+    yield from user_data.set_state_plan("TODO: measure USAXS transmission")
     yeld from bps.null  # this is a no-op
     # TODO:
     
