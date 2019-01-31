@@ -149,20 +149,16 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
     ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
 
-    print("DEBUG: preparing to move AR, AY, & DY")
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         # these two were moved by mode_USAXS(), belt & suspenders here
         d_stage.y, terms.USAXS.diode.dy.value,
         a_stage.y, terms.USAXS.AY0.value,
     )
-    print("DEBUG: setting state")
     yield from user_data.set_state_plan("Moving to Q=0")
-    print("DEBUG: setting Q calc AR0 (channel B)")
     yield from bps.mv(
         usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
     )
-    print("DEBUG: moved AR, AY & DY")
 
     # TODO: what to do with USAXSScanUp?
     # 2019-01-25, prj+jil: this is probably not used now, only known to SPEC
@@ -171,17 +167,14 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # That happens outside of this code.  completely.
 
     # measure transmission values using pin diode if desired
-
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     yield from measure_USAXS_Transmission()
-    print("DEBUG: measure transmission done")
 
     yield from bps.mv(
         mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
-    print("DEBUG: mono shutter opened")
 
     # enable asrp link to ar for 2D USAXS
     if terms.USAXS.is2DUSAXSscan.value:
@@ -202,7 +195,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         # must run in thread since this is not a plan
         autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
     )
-    print("DEBUG: amplifiers autoscaled")
 
     FlyScanAutoscaleTime = 0.025
     yield from bps.mv(
@@ -215,7 +207,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         scaler0.delay, 0,
         scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
         )
-    print("DEBUG: scalers configured")
 
    # Pause autosave on LAX to prevent delays in PVs processing.
     yield from bps.mv(
@@ -223,7 +214,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         # autosave will restart after this interval (s)
         lax_autosave.max_time, usaxs_flyscan.scan_time.value+9,
         )
-    print("DEBUG: autosave off on LAX")
 
     yield from user_data.set_state_plan("Running Flyscan")
 
@@ -236,16 +226,13 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         # ay_start, flyscan_trajectories.ay.value[0],
         # dy_start, flyscan_trajectories.dy.value[0],
     )
-    print("DEBUG: moved motors to start position")
 
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, 1,          # we are scanning now (or will be very soon)
     )
 
-    print("DEBUG: starting fly scan")
     yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
-    print("DEBUG: done with fly scan")
 
     yield from bps.mv(
         user_data.scanning, 0,          # for sure, we are not scanning now
@@ -309,7 +296,7 @@ def my_Excel_plan(xl_file):
 
     """
     assert os.path.exists(xl_file)
-    xl = ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
+    xl = APS_utils.ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
     for row in xl.db.values():
         if row["scan"].lower() == "flyscan":
             yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
