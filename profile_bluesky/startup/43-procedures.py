@@ -317,9 +317,7 @@ def measure_USAXS_Transmission():
     """
     measure the sample transmission in USAXS mode
     """
-    # yield from user_data.set_state_plan("Measuring USAXS transmission")
-    yield from user_data.set_state_plan("TODO: measure USAXS transmission")
-    yield from bps.null()  # this is a no-op
+    yield from user_data.set_state_plan("Measure USAXS transmission")
     if terms.USAXS.transmission.measure.value:
         yield from mode_USAXS()
         ay_target = terms.USAXS.AY0.value + 8 + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
@@ -339,10 +337,11 @@ def measure_USAXS_Transmission():
         )
         yield from bp.count([scaler0])
         s = scaler0.read()
+        secs = s["scaler0_time"]["value"]
         _tr_diode = s["TR diode"]["value"]
         _I0 = s["I0_USAXS"]["value"]
         
-        if _tr_diode > 980000 or _I0 > 980000:
+        if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"]  or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
             APS_plans.run_blocker_in_plan(
                 # must run in thread since this is not a plan
                 autoscale_amplifiers([I0_controls, trd_controls])
@@ -365,7 +364,7 @@ def measure_USAXS_Transmission():
             terms.USAXS.transmission.I0_counts, s["I0_USAXS"]["value"],
             terms.USAXS.transmission.I0_gain, I0_controls.femto.gain.value,
         )
-        msg = "Measured USAXS transmission values pinDiode cts =%f with gain %g and  I0 cts =%f with gain %g" % (
+        msg = "Measured USAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
             terms.USAXS.transmission.diode_counts.value, 
             terms.USAXS.transmission.diode_gain.value, 
             terms.USAXS.transmission.I0_counts.value,
@@ -385,4 +384,79 @@ def measure_USAXS_Transmission():
 
 
 def measure_USAXS_dark_currents():
+    """
+    measure the sample transmission in SAXS mode
+    """
+    #yield from bps.mv(
+    #    ti_filter_shutter, "close",
+    #)
     pass        # TODO:
+    
+
+
+def measure_SAXS_Transmission():
+    """
+    measure the sample transmission in SAXS mode
+    """
+    # FIXME: this failed when USAXS was already in position
+    yield from user_data.set_state_plan("Measure SAXS transmission")
+    yield from mode_SAXS()
+    yield from insertTransmissionFilters()
+    pinz_target = terms.SAXS.z_in.value + 5
+    piny_target = terms.SAXS.y_in.value + constants["SAXS_TR_PINY_OFFSET"]
+    # z has to move before y can move.
+    yield from bps.mv(saxs_stage.z, pinz_target)
+    #now y can put diode in the beam, open shutter... 
+    yield from bps.mv(
+        saxs_stage.y, piny_target,
+        ti_filter_shutter, "open",
+    )
+ 
+    APS_plans.run_blocker_in_plan(
+        # must run in thread since this is not a plan
+        autoscale_amplifiers([I0_controls, trd_controls])
+    )
+    yield from bps.mv(
+        scaler0.preset_time, constants["SAXS_TR_TIME"],
+    )
+    yield from bp.count([scaler0])
+    s = scaler0.read()
+    secs = s["scaler0_time"]["value"]
+    _tr_diode = s["TR diode"]["value"]
+    _I0 = s["I0_USAXS"]["value"]
+    
+    if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"] or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
+        APS_plans.run_blocker_in_plan(
+            # must run in thread since this is not a plan
+            autoscale_amplifiers([I0_controls, trd_controls])
+        )
+        
+        yield from bps.mv(
+            scaler0.preset_time, constants["SAXS_TR_TIME"],
+        )
+        yield from bp.count([scaler0])
+        s = scaler0.read()
+
+    # y has to move before z, close shutter... 
+    yield from bps.mv(
+        saxs_stage.y, terms.SAXS.y_in.value,
+        ti_filter_shutter, "close",
+    )
+    # z can move.
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.value)
+    
+    yield from insertScanFilters()
+    yield from bps.mv(
+        terms.SAXS.diode_transmission, s["TR diode"]["value"],
+        terms.SAXS.diode_gain, trd_controls.femto.gain.value,
+        terms.SAXS.I0_transmission, s["I0_USAXS"]["value"],
+        terms.SAXS.I0_gain, I0_controls.femto.gain.value,
+    )
+    msg = "Measured SAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
+        terms.USAXS.transmission.diode_counts.value, 
+        terms.USAXS.transmission.diode_gain.value, 
+        terms.USAXS.transmission.I0_counts.value,
+        terms.USAXS.transmission.I0_gain.value
+        )
+    logger.info(msg)
+    print(msg)
