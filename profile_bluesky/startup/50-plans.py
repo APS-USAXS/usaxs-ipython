@@ -228,13 +228,13 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
 
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
-        user_data.scanning, 1,          # we are scanning now (or will be very soon)
+        user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
 
     yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
 
     yield from bps.mv(
-        user_data.scanning, 0,          # for sure, we are not scanning now
+        user_data.scanning, "no",          # for sure, we are not scanning now
         terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
     )
 
@@ -408,13 +408,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
         scaler1.count, 1,
     )
     
-    yield from areaDetectorAcquire([saxs_det])
+    yield from areaDetectorAcquire(saxs_det)
     ts = str(datetime.datetime.now())
 
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
-        terms.SAXS.I0, scaler1.channels.chan02.value, 
+        terms.SAXS.I0, scaler1.channels.chan02.s.value, 
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
         terms.SAXS.end_exposure_time, ts,

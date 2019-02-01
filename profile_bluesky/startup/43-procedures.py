@@ -483,13 +483,14 @@ def areaDetectorAcquire(det):
     """
     acquire image(s) from the named area detector
     """
+    # TODO: somewhere, BS is adding 4-5 seconds of overhead to a 2 second image collection, find that sucker
     t0 = time.time()
     yield from bps.mv(
-        user_data.scanning, 1,          # we are scanning now (or will be very soon)
+        user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
     yield from bp.count([det])          # TODO: SPEC showed users incremental progress (1 Hz updates)
     yield from bps.mv(
-        user_data.scanning, 0,          # we are done
+        user_data.scanning, "no",          # we are done
     )
     elapsed = time.time() - t0
     print(f"Finished SAXS/WAXS data collection in {elapsed} seconds.")
