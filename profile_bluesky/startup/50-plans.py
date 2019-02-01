@@ -334,18 +334,29 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+    
+    # these two templates match each other, sort of
+    ad_file_template = "%s%s_%4.4d.hdf"
+    local_file_template = "%s_%04d.hdf"
 
     # directory is pwd + DATAFILE + "_usaxs"
+    # path on local file system
     SAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_saxs")
+    SAXS_file_name = local_file_template % (scan_title_clean, saxs_det.hdf1.file_number.value)
+    # NFS-mounted path as the Pilatus detector sees it
+    pilatus_path = os.path.join("/mnt/usaxscontrol", *SAXSscan_path.split(os.path.sep)[2:])
     # area detector will create this path if needed ("Create dir. depth" setting)
-    if not SAXSscan_path.endswith("/"):
-        SAXSscan_path += "/"        # area detector needs this
-    SAXS_file_name = "%s_%04d.hdf" % (scan_title_clean, saxs_det.hdf1.file_number.value)
-    
+    if not pilatus_path.endswith("/"):
+        pilatus_path += "/"        # area detector needs this
+    local_name = os.path.join(SAXSscan_path, SAXS_file_name)
+    print(f"Area Detector HDF5 file: {local_name}")
+    pilatus_name = os.path.join(pilatus_path, SAXS_file_name)
+    print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
     
     yield from bps.mv(
         saxs_det.hdf1.file_name, scan_title_clean,
-        saxs_det.hdf1.file_path, SAXSscan_path,
+        saxs_det.hdf1.file_path, pilatus_path,
+        saxs_det.hdf1.file_template, ad_file_template,
     )
 
     ts = str(datetime.datetime.now())
@@ -371,10 +382,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
         mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         ti_filter_shutter, "open",
-        saxs_det.cam.num_images, terms.SAXS.num_images,
+        saxs_det.cam.num_images, terms.SAXS.num_images.value,
         saxs_det.cam.acquire_time, terms.SAXS.acquire_time.value,
         saxs_det.cam.acquire_period, terms.SAXS.acquire_time.value + 0.004,
-        )
+    )
+    saxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
+    saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
+    del saxs_det.hdf1.stage_sigs["capture"]
 
     yield from bps.sleep(0.2)
     APS_plans.run_blocker_in_plan(
@@ -411,6 +425,9 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
     yield from areaDetectorAcquire(saxs_det)
     ts = str(datetime.datetime.now())
 
+    saxs_det.hdf1.stage_sigs["file_write_mode"] = "Capture"     # TODO: needed? not even useful?
+    saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "Yes"
+    saxs_det.hdf1.stage_sigs["capture"] = 1
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
