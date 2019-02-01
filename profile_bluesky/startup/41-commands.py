@@ -233,7 +233,7 @@ def move_USAXSOut():
     yield from a_stage.x.set_lim(
         terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
         a_stage.x.soft_limit_hi.value)
-    yield from da_stage.x.set_lim(
+    yield from d_stage.x.set_lim(
         d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
 
