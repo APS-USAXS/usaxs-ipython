@@ -339,8 +339,13 @@ def tune_usaxs_optics(side=False):
     )
 
 
-def tune_saxs_optics(side=False):
-    raise NotImplementedError   # TODO:
+def tune_saxs_optics():
+    yield from tune_mr()
+    yield from tune_m2rp()
+    yield from bps.mv(
+        #terms.preUSAXStune.num_scans_last_tune, 0,
+        terms.preUSAXStune.epoch_last_tune, time.time(),
+    )
 
 
 def tune_after_imaging():
