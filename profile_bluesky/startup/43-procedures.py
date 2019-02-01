@@ -488,6 +488,7 @@ def areaDetectorAcquire(det):
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
+    # print(f"DEBUG: areaDetectorAcquire(): {det.hdf1.stage_sigs}")
     yield from bp.count([det])          # TODO: SPEC showed users incremental progress (1 Hz updates)
     yield from bps.mv(
         user_data.scanning, "no",          # we are done

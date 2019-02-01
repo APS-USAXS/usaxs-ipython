@@ -386,9 +386,15 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
         saxs_det.cam.acquire_time, terms.SAXS.acquire_time.value,
         saxs_det.cam.acquire_period, terms.SAXS.acquire_time.value + 0.004,
     )
+    # print(f"DEBUG: SAXS(1): {saxs_det.hdf1.stage_sigs}")
+    old_det_stage_sigs = OrderedDict()
+    for k, v in saxs_det.hdf1.stage_sigs.items():
+        old_det_stage_sigs[k] = v
+    del saxs_det.hdf1.stage_sigs["capture"]
+    saxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     saxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
-    del saxs_det.hdf1.stage_sigs["capture"]
+    # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.sleep(0.2)
     APS_plans.run_blocker_in_plan(
@@ -422,12 +428,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
         scaler1.count, 1,
     )
     
+    # print(f"DEBUG: SAXS(3): {saxs_det.hdf1.stage_sigs}")
     yield from areaDetectorAcquire(saxs_det)
     ts = str(datetime.datetime.now())
 
-    saxs_det.hdf1.stage_sigs["file_write_mode"] = "Capture"     # TODO: needed? not even useful?
-    saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "Yes"
-    saxs_det.hdf1.stage_sigs["capture"] = 1
+    saxs_det.hdf1.stage_sigs = old_det_stage_sigs    # TODO: needed? not even useful?
+    # print(f"DEBUG: SAXS(4): {saxs_det.hdf1.stage_sigs}")
+
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
