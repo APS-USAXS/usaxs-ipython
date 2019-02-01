@@ -41,7 +41,8 @@ class PlcProtectionDevice(Device):
         while not self.interlocked:
             yield from bps.sleep(self.SLEEP_POLL_s)
             if verbose:
-                print(msg % time.time()-t0)
+                elapsed = time.time()-t0
+                print(msg % elapsed)
         yield from bps.null()   # always yield at least one Msg
     
     def stop_if_tripped(self, verbose=True):
