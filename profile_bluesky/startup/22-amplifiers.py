@@ -360,7 +360,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
     scaler.stage_sigs = stage_sigs["scaler"]
 
 
-def measure_background(controls, shutter=None, count_time=1.0, num_readings=8):
+def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
     """
     BLOCKING: interactive function to measure detector backgrounds simultaneously
     
