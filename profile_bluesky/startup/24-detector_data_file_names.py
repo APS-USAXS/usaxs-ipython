@@ -37,7 +37,3 @@ area_detector_EPICS_PV_prefix = {
     'Alta' : '9idalta:',
     'SimDetector' : '9idcSIM1:',
 }
-
-
-my_hdf5_file_template = "%s%s_%4.4d.hdf"    # what we normally use
-my_hdf5_file_template = "%s%s_%6.6d.h5" # re-define so we can see this setup happen

@@ -496,6 +496,8 @@ class Parameters_SAXS(Device):
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
+    start_exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:StartExposureTime")
+    end_exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:EndExposureTime")
 
     # this is Io value from gates scalar in LAX for Nexus file
     I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")

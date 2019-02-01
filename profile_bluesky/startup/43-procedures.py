@@ -19,6 +19,23 @@ def DCMfeedbackON():
 def _insertFilters_(a, b):
     """plan: insert the EPICS-specified filters"""
     yield from bps.mv(pf4_AlTi.fPosA, a, pf4_AlTi.fPosB, b)
+    yield from bps.sleep(0.5)       # allow all blades to re-position
+
+
+def insertRadiographyFilters():
+    """plan: insert the EPICS-specified filters"""
+    yield from _insertFilters_(
+        terms.USAXS.img_filters.Al.value,    # Bank A: Al
+        terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
+    )
+
+
+def insertSaxsFilters():
+    """plan: insert the EPICS-specified filters"""
+    yield from _insertFilters_(
+        terms.SAXS.filters.Al.value,    # Bank A: Al
+        terms.SAXS.filters.Ti.value,    # Bank B: Ti
+    )
 
 
 def insertScanFilters():
@@ -29,11 +46,11 @@ def insertScanFilters():
     )
 
 
-def insertRadiographyFilters():
+def insertWaxsFilters():
     """plan: insert the EPICS-specified filters"""
     yield from _insertFilters_(
-        terms.USAXS.img_filters.Al.value,    # Bank A: Al
-        terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
+        terms.WAXS.filters.Al.value,    # Bank A: Al
+        terms.WAXS.filters.Ti.value,    # Bank B: Ti
     )
 
 
@@ -320,7 +337,7 @@ def measure_USAXS_Transmission():
     yield from user_data.set_state_plan("Measure USAXS transmission")
     if terms.USAXS.transmission.measure.value:
         yield from mode_USAXS()
-        ay_target = terms.USAXS.AY0.value + 8 + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
+        ay_target = terms.USAXS.AY0.value + constants["USAXS_AY_OFFSET"] + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
         yield from bps.mv(
             terms.USAXS.transmission.ay, ay_target,
             a_stage.y, ay_target,
@@ -402,7 +419,7 @@ def measure_SAXS_Transmission():
     yield from user_data.set_state_plan("Measure SAXS transmission")
     yield from mode_SAXS()
     yield from insertTransmissionFilters()
-    pinz_target = terms.SAXS.z_in.value + 5
+    pinz_target = terms.SAXS.z_in.value + constants["SAXS_PINZ_OFFSET"]
     piny_target = terms.SAXS.y_in.value + constants["SAXS_TR_PINY_OFFSET"]
     # z has to move before y can move.
     yield from bps.mv(saxs_stage.z, pinz_target)
@@ -460,3 +477,19 @@ def measure_SAXS_Transmission():
         )
     logger.info(msg)
     print(msg)
+
+
+def areaDetectorAcquire(det):
+    """
+    acquire image(s) from the named area detector
+    """
+    t0 = time.time()
+    yield from bps.mv(
+        user_data.scanning, 1,          # we are scanning now (or will be very soon)
+    )
+    yield from bp.count([det])          # TODO: SPEC showed users incremental progress (1 Hz updates)
+    yield from bps.mv(
+        user_data.scanning, 0,          # we are done
+    )
+    elapsed = time.time() - t0
+    print(f"Finished SAXS/WAXS data collection in {elapsed} seconds.")

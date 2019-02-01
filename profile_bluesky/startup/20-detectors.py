@@ -9,8 +9,11 @@ from apstools.devices import SCALER_AUTOCOUNT_MODE
 # used with USAXS fly scans
 struck = Struck3820("9idcLAX:3820:", name="struck")
 
-scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
-# scaler1 = ScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
+class myScalerCH(ScalerCH):
+    display_rate = Component(EpicsSignal, ".RATE")
+
+scaler0 = myScalerCH('9idcLAX:vsc:c0', name='scaler0')
+scaler1 = myScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
 # scaler2 = ScalerCH('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback
 
 #scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
@@ -21,6 +24,7 @@ scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
 # chan05 : trd (TR_diode)
 # chan06 : I000 (I000)
 APS_devices.use_EPICS_scaler_channels(scaler0)
+APS_devices.use_EPICS_scaler_channels(scaler1)
 
 
 # use introspection to identify channel names

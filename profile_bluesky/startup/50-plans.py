@@ -122,7 +122,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         # must create this directory if not exists
         os.mkdir(flyscan_path)
     flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
-    # flyscan_full_filename = os.path.join(flyscan_path, flyscan_file_name)
 
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
@@ -300,3 +299,129 @@ def my_Excel_plan(xl_file):
     for row in xl.db.values():
         if row["scan"].lower() == "flyscan":
             yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
+
+
+def SAXS(pos_X, pos_Y, thickness, scan_title):
+    """
+    collect SAXS data
+     """
+    yield from IfRequestedStopBeforeNextScan()
+
+    yield from mode_SAXS()
+
+    pinz_target = terms.SAXS.z_in.value + constants["SAXS_PINZ_OFFSET"]
+    yield from bps.mv(
+        usaxs_slit.v_size, terms.SAXS.v_size.value,
+        usaxs_slit.h_size, terms.SAXS.h_size.value,
+        guard_slit.v_size, terms.SAXS.guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
+    )
+
+    if terms.preUSAXStune.needed:
+        # tune at previous sample position 
+        # don't overexpose the new sample position
+        yield from tune_saxs_optics()
+
+    yield from bps.mv(
+        s_stage.x, pos_X,
+        s_stage.y, pos_Y,
+    )
+
+    scan_title_clean = cleanupText(scan_title)
+
+    # SPEC-compatibility symbols
+    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # use our specwriter to get a pseudo-SPEC file name
+    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+
+    # directory is pwd + DATAFILE + "_usaxs"
+    SAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_saxs")
+    # area detector will create this path if needed ("Create dir. depth" setting)
+    if not SAXSscan_path.endswith("/"):
+        SAXSscan_path += "/"        # area detector needs this
+    SAXS_file_name = "%s_%04d.hdf" % (scan_title_clean, saxs_det.hdf1.file_number.value)
+    
+    
+    yield from bps.mv(
+        saxs_det.hdf1.file_name, scan_title_clean,
+        saxs_det.hdf1.file_path, SAXSscan_path,
+    )
+
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.sample_title, scan_title,
+        user_data.macro_file_time, ts,      # does not really apply to bluesky
+        user_data.state, "starting SAXS collection",
+        user_data.sample_thickness, thickness,
+        user_data.user_name, USERNAME,
+        user_data.spec_scan, SCAN_N,
+        user_data.time_stamp, ts,
+        user_data.scan_macro, "SAXS",       # match the value in the scan logs
+    )
+    yield from bps.mv(
+        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+   )
+
+    yield from measure_SAXS_Transmission()
+    yield from insertSaxsFilters()
+
+    yield from bps.mv(
+        mono_shutter, "open",
+        monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        ti_filter_shutter, "open",
+        saxs_det.cam.num_images, terms.SAXS.num_images,
+        saxs_det.cam.acquire_time, terms.SAXS.acquire_time.value,
+        saxs_det.cam.acquire_period, terms.SAXS.acquire_time.value + 0.004,
+        )
+
+    yield from bps.sleep(0.2)
+    APS_plans.run_blocker_in_plan(
+        # must run in thread since this is not a plan
+        autoscale_amplifiers([I0_controls])
+    )
+
+    yield from bps.mv(
+        ti_filter_shutter, "close",
+    )
+
+    old_delay = scaler0.delay.value
+    yield from bps.mv(
+        scaler1.preset_time, terms.SAXS.acquire_time.value + 1,
+        scaler0.preset_time, 1.2*terms.SAXS.acquire_time.value + 1,
+        scaler0.count_mode, "OneShot",
+        scaler1.count_mode, "OneShot",
+        
+        # update as fast as hardware will allow
+        # this is needed to make sure we get as up to date I0 number as possible for AD software. 
+        scaler0.display_rate, 60,
+        scaler1.display_rate, 60,
+        
+        scaler0.delay, 0,
+        terms.SAXS.start_exposure_time, ts,
+        user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
+    )
+
+    yield from bps.mv(
+        scaler0.count, 1,
+        scaler1.count, 1,
+    )
+    
+    yield from areaDetectorAcquire([saxs_det])
+    ts = str(datetime.datetime.now())
+
+    yield from bps.mv(
+        scaler0.count, 0,
+        scaler1.count, 0,
+        terms.SAXS.I0, scaler1.channels.chan02.value, 
+        scaler0.display_rate, 5,
+        scaler1.display_rate, 5,
+        terms.SAXS.end_exposure_time, ts,
+        scaler0.delay, old_delay,
+
+        user_data.state, "Done SAXS",
+        user_data.macro_file_time, ts,      # does not really apply to bluesky
+        user_data.time_stamp, ts,
+    )
+    logger.info(f"I0 value: {terms.SAXS.I0.value}")
