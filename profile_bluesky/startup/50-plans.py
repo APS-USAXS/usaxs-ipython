@@ -449,3 +449,156 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
         user_data.time_stamp, ts,
     )
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
+
+
+def WAXS(pos_X, pos_Y, thickness, scan_title):
+    """
+    collect WAXS data
+     """
+    yield from IfRequestedStopBeforeNextScan()
+
+    yield from mode_WAXS()
+
+    yield from bps.mv(
+        usaxs_slit.v_size, terms.SAXS.v_size.value,
+        usaxs_slit.h_size, terms.SAXS.h_size.value,
+        guard_slit.v_size, terms.SAXS.guard_v_size.value,
+        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+    )
+
+    if terms.preUSAXStune.needed:
+        # tune at previous sample position 
+        # don't overexpose the new sample position
+        yield from tune_saxs_optics()
+
+    yield from bps.mv(
+        s_stage.x, pos_X,
+        s_stage.y, pos_Y,
+    )
+
+    scan_title_clean = cleanupText(scan_title)
+
+    # SPEC-compatibility symbols
+    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # use our specwriter to get a pseudo-SPEC file name
+    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+    
+    # these two templates match each other, sort of
+    ad_file_template = "%s%s_%4.4d.hdf"
+    local_file_template = "%s_%04d.hdf"
+
+    # directory is pwd + DATAFILE + "_usaxs"
+    # path on local file system
+    WAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_waxs")
+    WAXS_file_name = local_file_template % (scan_title_clean, waxs_det.hdf1.file_number.value)
+    # NFS-mounted path as the Pilatus detector sees it
+    pilatus_path = os.path.join("/mnt/usaxscontrol", *WAXSscan_path.split(os.path.sep)[2:])
+    # area detector will create this path if needed ("Create dir. depth" setting)
+    if not pilatus_path.endswith("/"):
+        pilatus_path += "/"        # area detector needs this
+    local_name = os.path.join(WAXSscan_path, WAXS_file_name)
+    print(f"Area Detector HDF5 file: {local_name}")
+    pilatus_name = os.path.join(pilatus_path, WAXS_file_name)
+    print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
+    
+    yield from bps.mv(
+        saxs_det.hdf1.file_name, scan_title_clean,
+        saxs_det.hdf1.file_path, pilatus_path,
+        saxs_det.hdf1.file_template, ad_file_template,
+    )
+
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.sample_title, scan_title,
+        user_data.macro_file_time, ts,      # does not really apply to bluesky
+        user_data.state, "starting WAXS collection",
+        user_data.sample_thickness, thickness,
+        user_data.user_name, USERNAME,
+        user_data.spec_scan, SCAN_N,
+        user_data.time_stamp, ts,
+        user_data.scan_macro, "WAXS",       # match the value in the scan logs
+    )
+    yield from bps.mv(
+        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+   )
+
+    #yield from measure_SAXS_Transmission()
+    yield from insertWaxsFilters()
+
+    yield from bps.mv(
+        mono_shutter, "open",
+        monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        ti_filter_shutter, "open",
+        waxs_det.cam.num_images, terms.WAXS.num_images.value,
+        waxs_det.cam.acquire_time, terms.WAXS.acquire_time.value,
+        waxs_det.cam.acquire_period, terms.WAXS.acquire_time.value + 0.004,
+    )
+    # print(f"DEBUG: SAXS(1): {saxs_det.hdf1.stage_sigs}")
+    old_det_stage_sigs = OrderedDict()
+    for k, v in waxs_det.hdf1.stage_sigs.items():
+        old_det_stage_sigs[k] = v
+    del waxs_det.hdf1.stage_sigs["capture"]
+    waxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
+    waxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
+    waxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
+    # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
+
+    yield from bps.sleep(0.2)
+    APS_plans.run_blocker_in_plan(
+        # must run in thread since this is not a plan
+        autoscale_amplifiers([I0_controls, trd_controls])
+    )
+
+    yield from bps.mv(
+        ti_filter_shutter, "close",
+    )
+
+    old_delay = scaler0.delay.value
+    yield from bps.mv(
+        scaler1.preset_time, terms.WAXS.acquire_time.value + 1,
+        scaler0.preset_time, 1.2*terms.WAXS.acquire_time.value + 1,
+        scaler0.count_mode, "OneShot",
+        scaler1.count_mode, "OneShot",
+        
+        # update as fast as hardware will allow
+        # this is needed to make sure we get as up to date I0 number as possible for AD software. 
+        scaler0.display_rate, 60,
+        scaler1.display_rate, 60,
+        
+        scaler0.delay, 0,
+        terms.SAXS.start_exposure_time, ts,
+        user_data.state, f"WAXS collection for {terms.SAXS.acquire_time.value} s",
+    )
+
+    yield from bps.mv(
+        scaler0.count, 1,
+        scaler1.count, 1,
+    )
+    
+    # print(f"DEBUG: SAXS(3): {saxs_det.hdf1.stage_sigs}")
+    yield from areaDetectorAcquire(waxs_det)
+    ts = str(datetime.datetime.now())
+
+    waxs_det.hdf1.stage_sigs = old_det_stage_sigs    # TODO: needed? not even useful?
+    # print(f"DEBUG: SAXS(4): {saxs_det.hdf1.stage_sigs}")
+
+    yield from bps.mv(
+        scaler0.count, 0,
+        scaler1.count, 0,
+        # WAXS uses same PVs for normalization and transmission as SAXS, should we aliased it same to terms.WAXS???
+        terms.SAXS.I0, scaler1.channels.chan02.s.value, 
+        terms.SAXS.diode_transmission, scaler0.channels.chan04.s.value,
+        terms.SAXS.diode_gain, trd_controls.femto.gain.value,
+        terms.SAXS.I0_transmission, scaler0.channels.chan02.s.value,
+        terms.SAXS.I0_gain, I0_controls.femto.gain.value,
+        scaler0.display_rate, 5,
+        scaler1.display_rate, 5,
+        terms.SAXS.end_exposure_time, ts,
+        scaler0.delay, old_delay,
+
+        user_data.state, "Done WAXS",
+        user_data.macro_file_time, ts,      # does not really apply to bluesky
+        user_data.time_stamp, ts,
+    )
+    logger.info(f"I0 value: {terms.SAXS.I0.value}")
