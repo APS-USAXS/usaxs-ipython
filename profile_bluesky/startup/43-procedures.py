@@ -86,6 +86,12 @@ def mode_USAXS():
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        d_stage.x, terms.USAXS.diode.dx.value,
+        d_stage.y, terms.USAXS.diode.dy.value,
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
     )
     yield from DCMfeedbackON()
     retune_needed = False
@@ -106,8 +112,8 @@ def mode_USAXS():
 
         # put detector stage in position
         # TODO: redundant with move_USAXSIn() above?
-        d_stage.x, terms.USAXS.diode.dx.value,
-        d_stage.y, terms.USAXS.diode.dy.value,
+        #d_stage.x, terms.USAXS.diode.dx.value,
+        #d_stage.y, terms.USAXS.diode.dy.value,
     )
     # yield from bps.sleep(0.1)   # TODO: still needed?
 
