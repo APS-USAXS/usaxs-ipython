@@ -288,11 +288,23 @@ def beforePlan():
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "Starting data collection",
         user_data.collection_in_progress, 1,
+        ti_filter_shutter, "close",
     )
     # epics_put ("9idcLAX:collectingSAXS", 0)
     # epics_put ("9idcLAX:collectingWAXS", 0)
     if constants["MEASURE_DARK_CURRENTS"]:
-        yield from measure_background([upd_controls, I0_controls, I00_controls, trd_controls])
+        # yield from measure_background([upd_controls, I0_controls, I00_controls, trd_controls])
+        APS_plans.run_blocker_in_plan(
+            # must run in thread since this is not a plan
+            measure_background(
+                [upd_controls, I0_controls, I00_controls, trd_controls],
+                shutter = ti_filter_shutter,
+            )
+        )
+    
+    yield from compute_tune_ranges()                # 29-axis-tuning.py
+    yield from beforeScanComputeOtherStuff()        # 41-commands.py
+
     if terms.preUSAXStune.run_tune_on_qdo.value:
         logger.info("Runing preUSAXStune as requested at start of measurements")
         yield from tune_usaxs_optics()
@@ -300,12 +312,12 @@ def beforePlan():
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
             terms.FlyScan.order_number.value,
-            saxs_det.cam.file_number.value,
-            waxs_det.cam.file_number.value,
+            # saxs_det.cam.file_number.value,
+            # waxs_det.cam.file_number.value,
         ])
     for det in (saxs_det, waxs_det):
         yield from bps.mv(
-            det.cam.file_number, order_number,
+            # det.cam.file_number, order_number,    # missing from ophyd's PilatusDetectorCam
             det.hdf1.file_number, order_number,
         )
     yield from bps.mv(terms.FlyScan.order_number, order_number)
@@ -319,6 +331,7 @@ def afterPlan():
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "Ended data collection",
         user_data.collection_in_progress, 0,
+        ti_filter_shutter, "close",
     )
 
 
@@ -652,3 +665,5 @@ def WAXS(pos_X, pos_Y, thickness, scan_title):
         user_data.time_stamp, ts,
     )
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
+
+

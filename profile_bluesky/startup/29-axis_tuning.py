@@ -95,7 +95,7 @@ def _getScalerSignalName_(scaler, signal):
 m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
-m_stage.r.tuner.width = -0.003
+m_stage.r.tuner.width = -0.004
 
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
@@ -322,8 +322,7 @@ def tune_a2rp():
 
 
 def tune_usaxs_optics(side=False):
-    if not confirm_instrument_mode("USAXS in beam"):
-        yield from mode_USAXS()
+    yield from mode_USAXS()
 
     yield from tune_mr()
     yield from tune_m2rp()
@@ -354,3 +353,55 @@ def tune_after_imaging():
     a_stage.r.tuner.width = 0.004
     yield from tune_ar()
     yield from tune_a2rp()
+
+
+def compute_tune_ranges():
+    """
+    plan: (re)compute tune ranges for each of the optics axes
+    """
+    yield from bps.null()
+    
+    if monochromator.dcm.energy.value < 10.99:  # ~ 10 keV for Si 220 crystals
+        m_stage.r.tuner.width = 0.003
+        a_stage.r.tuner.width = 0.002
+        m_stage.r2p.tuner.width = 10
+        a_stage.r2p.tuner.width = 7
+        ms_stage.rp.tuner.width = 5
+        as_stage.rp.tuner.width = 3
+        yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000045)
+
+    elif 10.99 <= monochromator.dcm.energy.value < 12.99:   # Si 220 crystals
+        m_stage.r.tuner.width = 0.003
+        a_stage.r.tuner.width = 0.0015
+        m_stage.r2p.tuner.width = 9
+        a_stage.r2p.tuner.width = 5
+        ms_stage.rp.tuner.width = 3
+        as_stage.rp.tuner.width = 3
+        yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000035)
+
+    elif 12.99 <= monochromator.dcm.energy.value < 18.1:   # Si 220 crystals
+        m_stage.r.tuner.width = 0.003
+        a_stage.r.tuner.width = 0.0012
+        m_stage.r2p.tuner.width = 8
+        a_stage.r2p.tuner.width = 5
+        ms_stage.rp.tuner.width = 3
+        as_stage.rp.tuner.width = 3
+        yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
+
+    elif 18.1 <= monochromator.dcm.energy.value < 20.8:   # Si 220 crystals
+        m_stage.r.tuner.width = 0.003
+        a_stage.r.tuner.width = 0.0010
+        m_stage.r2p.tuner.width = 6
+        a_stage.r2p.tuner.width = 5
+        ms_stage.rp.tuner.width = 3
+        as_stage.rp.tuner.width = 3
+        yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
+
+    elif 20.8 <= monochromator.dcm.energy.value:   # Si 220 crystals
+        m_stage.r.tuner.width = 0.003
+        a_stage.r.tuner.width = 0.0007
+        m_stage.r2p.tuner.width = 6
+        a_stage.r2p.tuner.width = 4
+        ms_stage.rp.tuner.width = 3
+        as_stage.rp.tuner.width = 3
+        yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)

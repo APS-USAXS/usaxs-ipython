@@ -68,7 +68,10 @@ def IfRequestedStopBeforeNextScan():
             ti_filter_shutter,                  "close",
             terms.StopBeforeNextScan,           0,
             user_data.collection_in_progress,   0,
-        )
+            user_data.time_stamp, str(datetime.datetime.now()),
+            user_data.state, "Aborted data collection",
+       )
+ 
         RE.pause_msg = "DEBUG: stopped the scans, ignore the (informative) exception trace"
         RE.abort(reason=msg)        # this gonna work?
 
@@ -287,3 +290,10 @@ def set_USAXS_slits():
     usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
     guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
     guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+
+
+def beforeScanComputeOtherStuff():
+    """
+    things to be computed and set before each data collection starts
+    """
+    yield from bps.null()       # TODO: remove this once you add the "other stuff"
