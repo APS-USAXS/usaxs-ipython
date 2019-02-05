@@ -39,7 +39,7 @@ def newSpecFile(title, reset_scan_id=True):
     if os.path.exists(fname):
         print(f"file already exists: {fname}")
         user_data.spec_file.put(specwriter.spec_filename)
-        print("Using default file name")
+        print(">>>>   Using default file name   <<<<")
         print(f"SPEC file name : {specwriter.spec_filename}")
     else:
         specwriter.newfile(fname, reset_scan_id=reset_scan_id)
