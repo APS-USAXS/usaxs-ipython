@@ -470,7 +470,7 @@ class Parameters_SAXS(Device):
     ax_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_out")
     ax_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_limit_offset")
 
-    dx_in = Component(EpicsSignal, "9idcLAX:USAXS:Diode_dx")
+    dx_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_in")
     dx_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_out")
     dx_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_limit_offset")
 

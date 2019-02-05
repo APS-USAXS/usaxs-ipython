@@ -26,8 +26,8 @@ class UsaxsSampleStageDevice(MotorBundle):
 
 class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
-    x = Component(UsaxsMotor, '9idcLAX:m58:c2:m3', labels=("detector",))
-    y = Component(UsaxsMotor, '9idcLAX:aero:c2:m1', labels=("detector",))
+    x = Component(UsaxsMotorTunable, '9idcLAX:m58:c2:m3', labels=("detector", "tunable",))
+    y = Component(UsaxsMotorTunable, '9idcLAX:aero:c2:m1', labels=("detector", "tunable",))
 
 
 class UsaxsSlitDevice(MotorBundle):

@@ -321,6 +321,44 @@ def tune_a2rp():
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
 
+# -------------------------------------------
+
+
+def dx_pretune_hook():
+    msg = "Tuning axis {}, current position is {}"
+    print(msg.format(d_stage.x.name, d_stage.x.position))
+    yield from bps.mv(scaler0.preset_time, 0.1)
+
+
+def dx_posttune_hook():
+    msg = "Tuning axis {}, final position is {}"
+    print(msg.format(d_stage.x.name, d_stage.x.position))
+
+    if d_stage.x.tuner.tune_ok:
+        yield from bps.mv(terms.SAXS.dx_in, d_stage.x.position)
+
+
+d_stage.x.tuner = APS_plans.TuneAxis([scaler0], d_stage.x, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+d_stage.x.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+d_stage.x.tuner.num = 35
+d_stage.x.tuner.width = 10
+
+d_stage.x.pre_tune_method = dx_pretune_hook
+d_stage.x.post_tune_method = dx_posttune_hook
+
+
+def tune_dx():
+    yield from bps.mv(ti_filter_shutter, "open")
+    autoscale_amplifiers([upd_controls])
+    yield from bps.mv(scaler0.preset_time, 0.1)
+    yield from bps.mv(upd_controls.auto.mode, "manual")
+    yield from _tune_base_(d_stage.x)
+    yield from bps.mv(upd_controls.auto.mode, "auto+background")
+
+
+# -------------------------------------------
+
+
 def tune_usaxs_optics(side=False):
     yield from mode_USAXS()
 
@@ -399,9 +437,9 @@ def compute_tune_ranges():
 
     elif 20.8 <= monochromator.dcm.energy.value:   # Si 220 crystals
         m_stage.r.tuner.width = 0.003
-        a_stage.r.tuner.width = 0.0007
+        a_stage.r.tuner.width = 0.0010
         m_stage.r2p.tuner.width = 6
-        a_stage.r2p.tuner.width = 4
+        a_stage.r2p.tuner.width = 5
         ms_stage.rp.tuner.width = 3
         as_stage.rp.tuner.width = 3
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
