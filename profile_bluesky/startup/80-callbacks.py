@@ -16,7 +16,11 @@ if os.getcwd().startswith("/home/beams/USAXS/.ipython"):
 else:
     specwriter.newfile(reset_scan_id=True, RE=RE)
 callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
+print()
 print("writing to SPEC file: " + specwriter.spec_filename)
+print(">>>>   Using default SPEC file name   <<<<")
+print("file will be created when bluesky ends its next scan")
+print("to change SPEC file, use command: newSpecFile('title')")
 
 """
 EXAMPLE:
@@ -39,12 +43,12 @@ def newSpecFile(title, reset_scan_id=True):
     if os.path.exists(fname):
         print(f"file already exists: {fname}")
         user_data.spec_file.put(specwriter.spec_filename)
-        print(">>>>   Using default file name   <<<<")
-        print(f"SPEC file name : {specwriter.spec_filename}")
+        print(">>>>   Using default SPEC file name   <<<<")
+        
     else:
         specwriter.newfile(fname, reset_scan_id=reset_scan_id)
         msg = f"spec file: {specwriter.spec_filename}"
         logger.info(msg)
-        print(msg)
         user_data.spec_file.put(specwriter.spec_filename)
+    print(f"SPEC file name : {specwriter.spec_filename}")
     print("file will be created when bluesky ends its next scan")
