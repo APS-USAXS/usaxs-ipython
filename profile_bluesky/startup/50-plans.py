@@ -280,7 +280,49 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # measure_USAXS_PD_dark_currents    # used to be here, not now
 
 
-def my_Excel_plan(xl_file):
+def beforePlan():
+    """
+    things to be done before every data collection plan
+    """
+    yield from bps.mv(
+        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.state, "Starting data collection",
+        user_data.collection_in_progress, 1,
+    )
+    # epics_put ("9idcLAX:collectingSAXS", 0)
+    # epics_put ("9idcLAX:collectingWAXS", 0)
+    if constants["MEASURE_DARK_CURRENTS"]:
+        yield from measure_background([upd_controls, I0_controls, I00_controls, trd_controls])
+    if terms.preUSAXStune.run_tune_on_qdo.value:
+        logger.info("Runing preUSAXStune as requested at start of measurements")
+        yield from tune_usaxs_optics()
+    
+    if constants["SYNC_ORDER_NUMBERS"]:
+        order_number = max([
+            terms.FlyScan.order_number.value,
+            saxs_det.cam.file_number.value,
+            waxs_det.cam.file_number.value,
+        ])
+    for det in (saxs_det, waxs_det):
+        yield from bps.mv(
+            det.cam.file_number, order_number,
+            det.hdf1.file_number, order_number,
+        )
+    yield from bps.mv(terms.FlyScan.order_number, order_number)
+
+
+def afterPlan():
+    """
+    things to be done after every data collection plan
+    """
+    yield from bps.mv(
+        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.state, "Ended data collection",
+        user_data.collection_in_progress, 0,
+    )
+
+
+def run_Excel_file(xl_file):
     """
     example of reading a list of samples from Excel spreadsheet
     
@@ -296,6 +338,7 @@ def my_Excel_plan(xl_file):
     """
     assert os.path.exists(xl_file)
     xl = APS_utils.ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
+    yield from beforePlan()
     for row in xl.db.values():
         if row["scan"].lower() == "preusaxstune":
             yield from tune_usaxs_optics()
@@ -305,6 +348,7 @@ def my_Excel_plan(xl_file):
             yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
         elif row["scan"].lower() == "waxs":
             yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
+    yield from afterPlan()
 
 
 def SAXS(pos_X, pos_Y, thickness, scan_title):
