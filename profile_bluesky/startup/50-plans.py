@@ -297,8 +297,14 @@ def my_Excel_plan(xl_file):
     assert os.path.exists(xl_file)
     xl = APS_utils.ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
     for row in xl.db.values():
-        if row["scan"].lower() == "flyscan":
+        if row["scan"].lower() == "preusaxstune":
+            yield from tune_usaxs_optics()
+        elif row["scan"].lower() == "flyscan":
             yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
+        elif row["scan"].lower() == "saxs":
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
+        elif row["scan"].lower() == "waxs":
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
 
 
 def SAXS(pos_X, pos_Y, thickness, scan_title):
@@ -502,9 +508,9 @@ def WAXS(pos_X, pos_Y, thickness, scan_title):
     print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
     
     yield from bps.mv(
-        saxs_det.hdf1.file_name, scan_title_clean,
-        saxs_det.hdf1.file_path, pilatus_path,
-        saxs_det.hdf1.file_template, ad_file_template,
+        waxs_det.hdf1.file_name, scan_title_clean,
+        waxs_det.hdf1.file_path, pilatus_path,
+        waxs_det.hdf1.file_template, ad_file_template,
     )
 
     ts = str(datetime.datetime.now())
