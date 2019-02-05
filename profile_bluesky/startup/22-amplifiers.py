@@ -314,41 +314,56 @@ def group_controls_by_scaler(controls):
     return scaler_dict
 
 
-def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8):
+def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8):
     """BLOCKING: internal: measure amplifier backgrounds for signals sharing a common scaler"""
     scaler = control_list[0].scaler
     signals = [c.signal for c in control_list]
     
     stage_sigs = {}
     stage_sigs["scaler"] = scaler.stage_sigs
-    scaler.stage_sigs["preset_time"] = count_time
+    scaler.preset_time.put(count_time)
+    # scaler.stage_sigs["preset_time"] = count_time
 
     for control in control_list:
         control.auto.setManualMode()
 
-    for n in range(NUM_AUTORANGE_GAINS-1, 0, -1):  # reverse order
+    for n in range(NUM_AUTORANGE_GAINS-1, -1, -1):  # reverse order
         # set gains
         settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
         for control in control_list:
             control.auto.setGain(n)
             settling_time = max(settling_time, control.femto.settling_time.value)
         time.sleep(settling_time)
-
-        readings = {s.pvname: [] for s in signals}
+        
+        def getScalerChannelPvname(scaler_channel):
+            try:
+                return scaler_channel.pvname        # EpicsScaler channel
+            except AttributeError:
+                return scaler_channel.chname.value  # ScalerCH channel
+        
+        # readings is a PV-keyed dictionary
+        readings = {getScalerChannelPvname(s): [] for s in signals}
         
         for m in range(num_readings):
             # count and wait to complete
-            counting = scaler.trigger()
-            ophyd.status.wait(counting, timeout=count_time+1.0)
+            scaler.count.put(1)
+            while scaler.count.value != 0:
+                time.sleep(0.005)
             
             for s in signals:
-                readings[s.pvname].append(s.value)
+                pvname = getScalerChannelPvname(s)
+                try:
+                    value = s.value     # EpicsScaler channels
+                except AttributeError:
+                    value = s.s.value     # ScalerCH channels
+                readings[pvname].append(value)
     
         s_range_name = "gain{}".format(n)
         for control in control_list:
             g = control.auto.ranges.__getattr__(s_range_name)
-            g.background.put(np.mean(readings[control.signal.pvname]))
-            g.background_error.put(np.std(readings[control.signal.pvname]))
+            pvname = getScalerChannelPvname(control.signal)
+            g.background.put(np.mean(readings[pvname]))
+            g.background_error.put(np.std(readings[pvname]))
             msg = "{} range={} gain={}  bkg={}  +/- {}".format(
                 control.nickname, 
                 n,
@@ -356,6 +371,7 @@ def _scaler_background_measurement_(control_list, count_time=1.0, num_readings=8
                 g.background.value, 
                 g.background_error.value)
             logger.info(msg)
+            print(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
 
