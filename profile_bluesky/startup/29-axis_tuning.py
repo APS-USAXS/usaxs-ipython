@@ -325,17 +325,17 @@ def tune_a2rp():
 
 
 def dx_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(d_stage.x.name, d_stage.x.position))
+    stage = d_stage.x
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
 
 
 def dx_posttune_hook():
-    msg = "Tuning axis {}, final position is {}"
-    print(msg.format(d_stage.x.name, d_stage.x.position))
+    stage = d_stage.x
+    print(f"Tuning axis {stage.name}, final position is {stage.position}")
 
-    if d_stage.x.tuner.tune_ok:
-        yield from bps.mv(terms.SAXS.dx_in, d_stage.x.position)
+    if stage.tuner.tune_ok:
+        yield from bps.mv(terms.SAXS.dx_in, stage.position)
 
 
 d_stage.x.tuner = APS_plans.TuneAxis([scaler0], d_stage.x, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
@@ -354,6 +354,46 @@ def tune_dx():
     yield from bps.mv(upd_controls.auto.mode, "manual")
     yield from _tune_base_(d_stage.x)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
+
+
+# -------------------------------------------
+
+
+def dy_pretune_hook():
+    stage = d_stage.y
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    yield from bps.mv(scaler0.preset_time, 0.1)
+
+
+def dy_posttune_hook():
+    stage = d_stage.y
+    print(f"Tuning axis {stage.name}, final position is {stage.position}")
+
+    if stage.tuner.tune_ok:
+        yield from bps.mv(terms.USAXS.DY0, stage.position)
+
+
+d_stage.y.tuner = APS_plans.TuneAxis([scaler0], d_stage.y, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+d_stage.y.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
+d_stage.y.tuner.num = 35
+d_stage.y.tuner.width = 10
+
+d_stage.y.pre_tune_method = dy_pretune_hook
+d_stage.y.post_tune_method = dy_posttune_hook
+
+
+def tune_dy():
+    yield from bps.mv(ti_filter_shutter, "open")
+    autoscale_amplifiers([upd_controls])
+    yield from bps.mv(scaler0.preset_time, 0.1)
+    yield from bps.mv(upd_controls.auto.mode, "manual")
+    yield from _tune_base_(d_stage.y)
+    yield from bps.mv(upd_controls.auto.mode, "auto+background")
+
+
+def tune_diode():
+    yield from tune_dx()
+    yield from tune_dy()
 
 
 # -------------------------------------------
