@@ -400,7 +400,7 @@ def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
 _last_autorange_gain_ = OrderedDefaultDict(dict)
 
 def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
-    """BLOCKING: internal: autoscale amplifiers for signals sharing a common scaler"""
+    """plan: internal: autoscale amplifiers for signals sharing a common scaler"""
     global _last_autorange_gain_
 
     scaler = controls[0].scaler
@@ -409,23 +409,25 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     originals["preset_time"] = scaler.preset_time.value
     originals["delay"] = scaler.delay.value
     originals["count_mode"] = scaler.count_mode.value
-    scaler.preset_time.put(count_time)
-    scaler.delay.put(0.2)
-    scaler.count_mode.put("OneShot")
+    yield from bps.mv(
+        scaler.preset_time, count_time,
+        scaler.delay, 0.2,
+        scaler.count_mode, "OneShot",
+    )
 
     last_gain_dict = _last_autorange_gain_[scaler.name]
 
     settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
     for control in controls:
-        control.auto.setBAutoMode()
+        yield from bps.mv(control.auto.mode, AutorangeSettings.auto_background)
         # faster if we start from last known autoscale gain
         gain = last_gain_dict.get(control.auto.gain.name)
         if gain is not None:    # be cautious, might be unknown
-            control.auto.reqrange.put(gain)
+            yield from bps.mv(control.auto.reqrange, gain)
         last_gain_dict[control.auto.gain.name] = control.auto.gain.value
         settling_time = max(settling_time, control.femto.settling_time.value)
     
-    time.sleep(settling_time)
+    yield from bps.sleep(settling_time)
 
     # How many times to let autoscale work?
     # Number of possible gains is one choice - NUM_AUTORANGE_GAINS
@@ -438,11 +440,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
-        # counting = scaler.trigger()    # start counting     # FIXME:
-        # ophyd.status.wait(counting, timeout=count_time+1.0)
-        scaler.count.put(1)
-        while scaler.count.value != 0:
-            time.sleep(0.005)
+        counting = scaler.trigger()    # start counting
+        ophyd.status.wait(counting, timeout=count_time+1.0)
         
         # amplifier sequence program (in IOC) will adjust the gain now
         
@@ -466,25 +465,27 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         if False not in converged:      # all True?
             complete = True
             for control in controls:
-                control.auto.mode.put("manual")
+                yield from bps.mv(control.auto.mode, "manual")
             break   # no changes
         logger.debug("converged: {}".format(converged))
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions
-    scaler.preset_time.put(originals["preset_time"])
-    scaler.delay.put(originals["delay"])
-    scaler.count_mode.put(originals["count_mode"])
+    yield from bps.mv(
+        scaler.preset_time, originals["preset_time"],
+        scaler.delay, originals["delay"],
+        scaler.count_mode, originals["count_mode"],
+    )
 
     if not complete:        # bailed out early from loop
         print(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
-        raise RuntimeError(msg)
+        raise RuntimeError(msg)     # FIXME: may false fail during summarize_plan()
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations=9):
     """
-    interactive function to autoscale detector amplifiers simultaneously
+    bluesky plan: autoscale detector amplifiers simultaneously
     
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
@@ -493,14 +494,14 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
     scaler_dict = group_controls_by_scaler(controls)
     
     if shutter is not None:
-        shutter.open()
+        yield from bps.mv(shutter, "open")
 
     for control_list in scaler_dict.values():
         # do these in sequence, just in case same hardware used multiple times
         if len(control_list) > 0:
             msg = "Autoscaling amplifier for: " + control_list[0].nickname
             logger.info(msg)
-            _scaler_autoscale_(
+            yield from _scaler_autoscale_(
                 control_list, 
                 count_time=count_time, 
                 max_iterations=max_iterations)
