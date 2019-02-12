@@ -351,10 +351,8 @@ def measure_USAXS_Transmission():
         )
         yield from insertTransmissionFilters()
 
-        APS_plans.run_blocker_in_plan(
-            # must run in thread since this is not a plan
-            autoscale_amplifiers([I0_controls, trd_controls])
-        )
+        yield from autoscale_amplifiers([I0_controls, trd_controls])
+
         yield from bps.mv(
             scaler0.preset_time, terms.USAXS.transmission.count_time.value
         )
@@ -365,10 +363,7 @@ def measure_USAXS_Transmission():
         _I0 = s["I0_USAXS"]["value"]
         
         if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"]  or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
-            APS_plans.run_blocker_in_plan(
-                # must run in thread since this is not a plan
-                autoscale_amplifiers([I0_controls, trd_controls])
-            )
+            yield from autoscale_amplifiers([I0_controls, trd_controls])
             
             yield from bps.mv(
                 scaler0.preset_time, terms.USAXS.transmission.count_time.value
@@ -435,10 +430,7 @@ def measure_SAXS_Transmission():
         ti_filter_shutter, "open",
     )
  
-    APS_plans.run_blocker_in_plan(
-        # must run in thread since this is not a plan
-        autoscale_amplifiers([I0_controls, trd_controls])
-    )
+    yield from autoscale_amplifiers([I0_controls, trd_controls])
     yield from bps.mv(
         scaler0.preset_time, constants["SAXS_TR_TIME"],
     )
@@ -449,10 +441,7 @@ def measure_SAXS_Transmission():
     _I0 = s["I0_USAXS"]["value"]
     
     if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"] or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
-        APS_plans.run_blocker_in_plan(
-            # must run in thread since this is not a plan
-            autoscale_amplifiers([I0_controls, trd_controls])
-        )
+        yield from autoscale_amplifiers([I0_controls, trd_controls])
         
         yield from bps.mv(
             scaler0.preset_time, constants["SAXS_TR_TIME"],

@@ -190,10 +190,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         ti_filter_shutter, "open",
     )
     yield from bps.sleep(0.2)
-    APS_plans.run_blocker_in_plan(
-        # must run in thread since this is not a plan
-        autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
-    )
+    yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
 
     FlyScanAutoscaleTime = 0.025
     yield from bps.mv(
@@ -460,10 +457,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
     # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.sleep(0.2)
-    APS_plans.run_blocker_in_plan(
-        # must run in thread since this is not a plan
-        autoscale_amplifiers([I0_controls])
-    )
+    yield from autoscale_amplifiers([I0_controls])
 
     yield from bps.mv(
         ti_filter_shutter, "close",
@@ -608,10 +602,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title):
     # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.sleep(0.2)
-    APS_plans.run_blocker_in_plan(
-        # must run in thread since this is not a plan
-        autoscale_amplifiers([I0_controls, trd_controls])
-    )
+    yield from autoscale_amplifiers([I0_controls, trd_controls])
 
     yield from bps.mv(
         ti_filter_shutter, "close",
