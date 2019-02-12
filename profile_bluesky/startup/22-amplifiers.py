@@ -117,7 +117,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
                 # gain value specified, rewrite as str
                 # assume mantissa is only 1 digit
                 target = _gain_to_str_(target) + self.gain_suffix
-            self.gainindex.put(target)
+            yield from bps.mv(self.gainindex, target)
         else:
             msg = "could not set gain to {}, ".format(target)
             msg += "must be one of these: {}".format(self.acceptable_gain_values)
@@ -202,21 +202,9 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         
         self._gain_info_known = True
 
-    def setAutoMode(self):
-        """BLOCKING: use "automatic" operations mode"""
-        self.mode.put(AutorangeSettings.automatic)
-
-    def setBAutoMode(self):
-        """BLOCKING: use "auto+background" operations mode"""
-        self.mode.put(AutorangeSettings.auto_background)
-
-    def setManualMode(self):
-        """BLOCKING: use "manual" operations mode"""
-        self.mode.put(AutorangeSettings.manual)
-
     def setGain(self, target):
         """
-        BLOCKING: set the gain on the autorange controls
+        plan: set the gain on the autorange controls
         
         Since the gain values are available from EPICS, 
         we use that to provide a method that can request the 
@@ -241,7 +229,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             if isinstance(target, str) and str(target) in self.reqrange.enum_strs:
                 # must set reqrange by index number, rewrite as int
                 target = self.reqrange.enum_strs.index(target)
-            self.reqrange.put(target)
+            yield from bps.mv(self.reqrange, target)
         else:
             msg = "could not set gain to {}, ".format(target)
             msg += "must be one of these: {}".format(self.acceptable_gain_values)
@@ -315,25 +303,25 @@ def group_controls_by_scaler(controls):
 
 
 def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8):
-    """BLOCKING: internal: measure amplifier backgrounds for signals sharing a common scaler"""
+    """plan: internal: measure amplifier backgrounds for signals sharing a common scaler"""
     scaler = control_list[0].scaler
     signals = [c.signal for c in control_list]
     
     stage_sigs = {}
-    stage_sigs["scaler"] = scaler.stage_sigs
-    scaler.preset_time.put(count_time)
-    # scaler.stage_sigs["preset_time"] = count_time
+    stage_sigs["scaler"] = scaler.stage_sigs   # benign
+    original["scaler.preset_time"] = scaler.preset_time.value
+    yield from bps.mv(scaler.preset_time, count_time)
 
     for control in control_list:
-        control.auto.setManualMode()
+        yield from bps.mv(control.auto, AutorangeSettings.manual)
 
     for n in range(NUM_AUTORANGE_GAINS-1, -1, -1):  # reverse order
         # set gains
         settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
         for control in control_list:
-            control.auto.setGain(n)
+            yield from control.auto.setGain(n)
             settling_time = max(settling_time, control.femto.settling_time.value)
-        time.sleep(settling_time)
+        yield from bps.sleep(settling_time)
         
         def getScalerChannelPvname(scaler_channel):
             try:
@@ -346,9 +334,8 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
         
         for m in range(num_readings):
             # count and wait to complete
-            scaler.count.put(1)
-            while scaler.count.value != 0:
-                time.sleep(0.005)
+            yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
+            yield from bps.sleep(1.0)                   # TODO: needed?
             
             for s in signals:
                 pvname = getScalerChannelPvname(s)
@@ -362,8 +349,10 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
         for control in control_list:
             g = control.auto.ranges.__getattr__(s_range_name)
             pvname = getScalerChannelPvname(control.signal)
-            g.background.put(np.mean(readings[pvname]))
-            g.background_error.put(np.std(readings[pvname]))
+            yield from bps.mv(
+                g.background, np.mean(readings[pvname]),
+                g.background_error, np.std(readings[pvname]),
+            )
             msg = "{} range={} gain={}  bkg={}  +/- {}".format(
                 control.nickname, 
                 n,
@@ -374,11 +363,12 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             print(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
+    yield from bps.mv(scaler.preset_time, original["scaler.preset_time"])
 
 
 def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
     """
-    BLOCKING: interactive function to measure detector backgrounds simultaneously
+    plan: measure detector backgrounds simultaneously
     
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
@@ -387,14 +377,14 @@ def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
     scaler_dict = group_controls_by_scaler(controls)
     
     if shutter is not None:
-        shutter.close()
+        yield from bps.mv(shutter, "close")
 
     for control_list in scaler_dict.values():
         # do these in sequence, just in case same hardware used multiple times
         if len(control_list) > 0:
             msg = "Measuring background for: " + control_list[0].nickname
             logger.info(msg)
-            _scaler_background_measurement_(control_list, count_time, num_readings)
+            yield from _scaler_background_measurement_(control_list, count_time, num_readings)
 
 
 _last_autorange_gain_ = OrderedDefaultDict(dict)
@@ -440,8 +430,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
-        counting = scaler.trigger()    # start counting
-        ophyd.status.wait(counting, timeout=count_time+1.0)
+        yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
+        yield from bps.sleep(1.0)                   # TODO: needed?
         
         # amplifier sequence program (in IOC) will adjust the gain now
         
