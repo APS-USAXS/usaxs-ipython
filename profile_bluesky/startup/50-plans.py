@@ -290,13 +290,8 @@ def beforePlan():
     # epics_put ("9idcLAX:collectingSAXS", 0)
     # epics_put ("9idcLAX:collectingWAXS", 0)
     if constants["MEASURE_DARK_CURRENTS"]:
-        # yield from measure_background([upd_controls, I0_controls, I00_controls, trd_controls])
-        APS_plans.run_blocker_in_plan(
-            # must run in thread since this is not a plan
-            measure_background(
-                [upd_controls, I0_controls, I00_controls, trd_controls],
-                shutter = ti_filter_shutter,
-            )
+        yield from measure_background(
+            [upd_controls, I0_controls, I00_controls, trd_controls],
         )
     
     yield from compute_tune_ranges()                # 29-axis-tuning.py
