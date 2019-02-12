@@ -381,9 +381,9 @@ class UserDataDevice(Device):
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
 
-    def set_state(self, msg):
-        """BLOCKING: tell EPICS about what we are doing"""
-        self.state.put(trim_string_for_EPICS(msg))
+    #def set_state(self, msg):
+    #    """BLOCKING: tell EPICS about what we are doing"""
+    #    self.state.put(trim_string_for_EPICS(msg))
 
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
@@ -405,19 +405,6 @@ class FlyScanParameters(Device):
 
     setpoint_up = Component(Signal, value=6000)     # decrease range
     setpoint_down = Component(Signal, value=850000)    # increase range
-
-    def enable_ASRP(self):
-        """BLOCKING: """
-        if is2DUSAXSscan.value: # return value of 0.0 is "not True"
-            self.asrp_calc_SCAN.put(9)
-
-    def disable_ASRP(self):
-        """BLOCKING: """
-        self.asrp_calc_SCAN.put(0)
-
-    def increment_order_number(self):
-        """BLOCKING: """
-        self.order_number.put(self.order_number.value+1)
 
 
 class PreUsaxsTuneParameters(Device):
