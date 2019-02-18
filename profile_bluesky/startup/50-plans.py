@@ -189,7 +189,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
         ti_filter_shutter, "open",
     )
-    yield from bps.sleep(0.2)
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
 
     FlyScanAutoscaleTime = 0.025
