@@ -14,11 +14,11 @@ if aps.inUserOperations:
         name="mono_shutter")
 else:
     print("!"*30)
-    print("Session started when APS operating")
+    print("Session started when APS not operating")
     print("using simulator for FE_shutter and mono_shutter")
-    print("-"*30)
-    FE_shutter = SimulatedApsPssShutterWithStatus(name="FE_shutter")
-    mono_shutter = SimulatedApsPssShutterWithStatus(name="mono_shutter")
+    print("!"*30)
+    FE_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="FE_shutter")
+    mono_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="mono_shutter")
 
 
 #usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
