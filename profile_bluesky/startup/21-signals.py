@@ -6,11 +6,6 @@ signals
 from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 """
 
-aps = APS_devices.ApsMachineParametersDevice(name="aps")
-sd.baseline.append(aps)
-
-undulator = APS_devices.ApsUndulatorDual("ID09", name="undulator")
-sd.baseline.append(undulator)
 
 """
 This EPICS PV calculates *BeamInHutch* boolean.
