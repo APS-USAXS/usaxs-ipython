@@ -117,7 +117,7 @@ def mode_USAXS():
     )
     # yield from bps.sleep(0.1)   # TODO: still needed?
 
-    if not ccd_shutter.is_closed:
+    if not ccd_shutter.isClosed:
         logger.info("!!!CCD shutter failed to close!!!")
         # TODO: logging?
     else:
