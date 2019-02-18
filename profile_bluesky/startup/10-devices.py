@@ -5,18 +5,36 @@ print(__file__)
 
 MAX_EPICS_STRINGOUT_LENGTH = 40
 
+# move to APS_utils
 def pairwise(iterable):
-    "s -> (s0, s1), (s2, s3), (s4, s5), ..."
+    """
+    break a list (or other iterable) into pairs
+    
+    ::
+    
+    s -> (s0, s1), (s2, s3), (s4, s5), ...
+    
+    In [71]: for item in pairwise("a b c d e fg".split()): 
+        ...:     print(item) 
+        ...:                                                                                                                         
+    ('a', 'b')
+    ('c', 'd')
+    ('e', 'fg')
+  
+    """
     a = iter(iterable)
     return zip(a, a)
 
 
+# move to APS_utils
 def trim_string_for_EPICS(msg):
     """string must not be too long for EPICS PV"""
     if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
         msg = msg[:MAX_EPICS_STRINGOUT_LENGTH]
     return msg
 
+
+# superceded by APS_devices.EpicsMotorLimitsMixin
 class EpicsMotorLimitsMixin(Device):
     """
     add motor record HLM & LLM fields & compatibility get_lim() and set_lim()
@@ -56,7 +74,7 @@ class EpicsMotorLimitsMixin(Device):
 class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 
 
-class AxisTunerMixin(EpicsMotor):   # from apstools.devices
+class AxisTunerMixin(EpicsMotor):   # (temporary) from apstools.devices
     """
     Mixin class to provide tuning capabilities for an axis
     
@@ -139,17 +157,20 @@ class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor):
     pass
 
 
-class MyApsPssShutterWithStatus(ApsPssShutterWithStatus):
-    # our shutters use upper case for Open & Close
-    open_bit = Component(EpicsSignal, "Open")
-    close_bit = Component(EpicsSignal, "Close")
+# superceded by APS_devices.ApsPssShutterWithStatus
+#class MyApsPssShutterWithStatus(ApsPssShutterWithStatus):
+#    # our shutters use upper case for Open & Close
+#    open_bit = Component(EpicsSignal, "Open")
+#    close_bit = Component(EpicsSignal, "Close")
 
 
+# move to apstools.synApps_ophyd.busy
 class BusyStatus(str, Enum):
     busy = "Busy"
     done = "Done"
 
 
+# superceded by: apstools.synApps_ophyd.busy.BusyRecord
 class BusyRecord(Device):
     """a busy record sets the fly scan into action"""
     state = Component(EpicsSignal, "")
@@ -171,84 +192,86 @@ class MyWaveform(Device):
     number_read = Component(EpicsSignalRO, ".NORD")
 
 
-class InOutShutter(Device):
-    """
-    In/Out shutter
+# superceded by: APS_devices.EpicsOnOffShutter
+#class InOutShutter(Device):
+#    """
+#    In/Out shutter
+#
+#    * In/Out shutters have the same bit PV for open and close
+#
+#    Otherwise, they should have the same interface as other
+#    shutters such as the `ApsPssShutter`.
+#
+#    USAGE:
+#
+#        shutter = InOutShutter("48bmc:bit12", name="shutter")
+#
+#    """
+#    control_bit = Component(EpicsSignal, "")
+#    delay_s = 0
+#    open_value = 1
+#    close_value = 0
+#    valid_open_values = [open_value, "open"]   # lower-case strings ONLY
+#    valid_close_values = [close_value, "close"]
+#    busy = Component(Signal, value=False)
+#
+#    def open(self):
+#        """request shutter to open, interactive use"""
+#        return self.set(self.open_value)
+#
+#    def close(self):
+#        """request shutter to close, interactive use"""
+#        return self.set(self.close_value)
+#
+#    @property
+#    def is_opened(self):
+#        return self.control_bit.value == self.open_value
+#
+#    @property
+#    def is_closed(self):
+#        return self.control_bit.value == self.close_value
+#
+#    def set(self, value, **kwargs):
+#        """request the shutter to open or close, BlueSky plan use"""
+#        # ensure numerical additions to lists are now strings
+#        def input_filter(v):
+#            return str(v).lower()
+#        self.valid_open_values = list(map(input_filter, self.valid_open_values))
+#        self.valid_close_values = list(map(input_filter, self.valid_close_values))
+#
+#        if self.busy.value:
+#            raise RuntimeError("shutter is operating")
+#
+#        acceptables = self.valid_open_values + self.valid_close_values
+#        if input_filter(value) not in acceptables:
+#            msg = "value should be one of " + " | ".join(acceptables)
+#            msg += " : received " + str(value)
+#            raise ValueError(msg)
+#
+#        status = DeviceStatus(self)
+#
+#        def move_shutter():
+#            """BLOCKING: no need to yield since this is run inside a thread"""
+#            if input_filter(value) in self.valid_open_values:
+#                self.control_bit.put(self.open_value)
+#            elif input_filter(value) in self.valid_close_values:
+#                self.control_bit.put(self.close_value)
+#
+#        @APS_plans.run_in_thread
+#        def run_and_delay():
+#            """BLOCKING: no need to yield since this is run inside a thread"""
+#            self.busy.put(True)
+#            move_shutter()
+#            # sleep, since we don't *know* when the shutter has moved
+#            time.sleep(self.delay_s)
+#            self.busy.put(False)
+#            status._finished(success=True)
+#
+#        run_and_delay()
+#        return status
 
-    * In/Out shutters have the same bit PV for open and close
 
-    Otherwise, they should have the same interface as other
-    shutters such as the `ApsPssShutter`.
-
-    USAGE:
-
-        shutter = InOutShutter("48bmc:bit12", name="shutter")
-
-    """
-    control_bit = Component(EpicsSignal, "")
-    delay_s = 0
-    open_value = 1
-    close_value = 0
-    valid_open_values = [open_value, "open"]   # lower-case strings ONLY
-    valid_close_values = [close_value, "close"]
-    busy = Component(Signal, value=False)
-
-    def open(self):
-        """request shutter to open, interactive use"""
-        return self.set(self.open_value)
-
-    def close(self):
-        """request shutter to close, interactive use"""
-        return self.set(self.close_value)
-
-    @property
-    def is_opened(self):
-        return self.control_bit.value == self.open_value
-
-    @property
-    def is_closed(self):
-        return self.control_bit.value == self.close_value
-
-    def set(self, value, **kwargs):
-        """request the shutter to open or close, BlueSky plan use"""
-        # ensure numerical additions to lists are now strings
-        def input_filter(v):
-            return str(v).lower()
-        self.valid_open_values = list(map(input_filter, self.valid_open_values))
-        self.valid_close_values = list(map(input_filter, self.valid_close_values))
-
-        if self.busy.value:
-            raise RuntimeError("shutter is operating")
-
-        acceptables = self.valid_open_values + self.valid_close_values
-        if input_filter(value) not in acceptables:
-            msg = "value should be one of " + " | ".join(acceptables)
-            msg += " : received " + str(value)
-            raise ValueError(msg)
-
-        status = DeviceStatus(self)
-
-        def move_shutter():
-            """BLOCKING: no need to yield since this is run inside a thread"""
-            if input_filter(value) in self.valid_open_values:
-                self.control_bit.put(self.open_value)
-            elif input_filter(value) in self.valid_close_values:
-                self.control_bit.put(self.close_value)
-
-        @APS_plans.run_in_thread
-        def run_and_delay():
-            """BLOCKING: no need to yield since this is run inside a thread"""
-            self.busy.put(True)
-            move_shutter()
-            # sleep, since we don't *know* when the shutter has moved
-            time.sleep(self.delay_s)
-            self.busy.put(False)
-            status._finished(success=True)
-
-        run_and_delay()
-        return status
-
-
+# superceded by APS_devices.DualPf4FilterBox
 class DualPf4FilterBox(Device):
     """Dual Xia PF4 filter boxes using support from synApps"""
     fPosA = Component(EpicsSignal, "fPosA", put_complete=True)
@@ -269,6 +292,7 @@ class DualPf4FilterBox(Device):
     mode = Component(EpicsSignal, "useMono", string=True)
 
 
+# move to APS_devices
 class Struck3820(Device):
     """Struck/SIS 3820 Multi-Channel Scaler (as used by USAXS)"""
     start_all = Component(EpicsSignal, "StartAll")
@@ -306,6 +330,7 @@ class Struck3820(Device):
     do_readl_all = Component(EpicsSignal, "DoReadAll")
 
 
+# move to APS_devices
 class KohzuSeqCtl_Monochromator(Device):
     """
     synApps Kohzu double-crystal monochromator sequence control program
@@ -335,6 +360,7 @@ class KohzuSeqCtl_Monochromator(Device):
 MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
 
 
+# move to APS_devices
 class DCM_Feedback(Device):
     """
     monochromator feedback program
@@ -430,7 +456,8 @@ class PreUsaxsTuneParameters(Device):
         """
         result = self.run_tune_next.value
         result = result or self.num_scans_last_tune.value  > self.req_num_scans_between_tune.value
-        result = result or time.time() > self.epoch_last_tune.value + self.req_time_between_tune.value
+        time_limit = self.epoch_last_tune.value + self.req_time_between_tune.value
+        result = result or time.time() > time_limit
         self.run_tune_next.put(0)
         return result
 
