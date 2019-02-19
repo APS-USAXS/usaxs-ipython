@@ -21,20 +21,12 @@ else:
     mono_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="mono_shutter")
 
 
-#usaxs_shutter = InOutShutter("9idb:BioEnc2B3", name="usaxs_shutter")
-#ti_filter_shutter = usaxs_shutter       # alias
-
 usaxs_shutter = APS_devices.EpicsOnOffShutter("9idcLAX:userTran3.A", name="usaxs_shutter")
 ti_filter_shutter = usaxs_shutter       # alias
 ti_filter_shutter.delay_s = 0.2         # shutter needs some recovery time
 ## a bit more complex to open ti_filter_shutter: open ALL blades
 
 
-# ccd_shutter = InOutShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
-# also in 43-procedures.py:
-#    if not ccd_shutter.is_closed:
-# is changed to
-#    if not ccd_shutter.isClosed:
 ccd_shutter = APS_devices.EpicsOnOffShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
 
 
