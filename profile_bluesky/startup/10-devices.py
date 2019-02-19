@@ -8,37 +8,7 @@ class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
 
 
-# this makes an enumeration
-MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
-
-
-# move to APS_devices
-class DCM_Feedback(Device):
-    """
-    monochromator feedback program
-    """
-    control = Component(EpicsSignal, "")
-    on = Component(EpicsSignal, ":on")
-    drvh = Component(EpicsSignal, ".DRVH")
-    drvl = Component(EpicsSignal, ".DRVL")
-    oval = Component(EpicsSignal, ".OVAL")
-
-    @property
-    def is_on(self):
-        return self.on.value == 1
-
-    def check_position(self):
-        diff_hi = self.drvh.value - self.oval.value
-        diff_lo = self.oval.value - self.drvl.value
-        if min(diff_hi, diff_lo) < 0.2:
-            if email_notices.notify_on_feedback:
-                subject = "USAXS Feedback problem"
-                message = "Feedback is very close to its limits."
-                # TODO: must call in thread
-                #email_notices.send(subject, message)
-                print("!"*15)
-                print(subject, message)
-                print("!"*15)
+from apstools.devices import MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON
 
 
 class UserDataDevice(Device):
