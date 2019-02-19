@@ -11,7 +11,7 @@ def move_motors(*args):
     move_motors(m2, 0, m3, 0, m4, 0)
     """
     status = []
-    for m, v in pairwise(args):
+    for m, v in APS_utils.pairwise(args):
         status.append(m.move(v, wait=False))
     
     for st in status:
