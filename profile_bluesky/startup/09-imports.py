@@ -55,5 +55,6 @@ from apstools.callbacks import DocumentCollectorCallback
 from apstools.devices import ApsPssShutterWithStatus
 from apstools.devices import EpicsMotorShutter
 from apstools.filewriters import SpecWriterCallback, spec_comment
+from apstools.synApps_ophyd.busy import BusyStatus
 
 from usaxs_support.saveFlyData import SaveFlyScan

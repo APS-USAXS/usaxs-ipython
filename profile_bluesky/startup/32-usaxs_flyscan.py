@@ -16,11 +16,6 @@ sfs.saveFile()
 FALLBACK_DIR = "/share1/USAXS_data"
 
 
-class BusyStatus(str, Enum):
-    busy = "Busy"
-    done = "Done"
-
-
 class UsaxsFlyScanDevice(Device):
     busy = Component(EpicsSignal, '9idcLAX:USAXSfly:Start', string=True, put_complete=True)
     scan_time = Component(EpicsSignal, "9idcLAX:USAXS:FS_ScanTime")

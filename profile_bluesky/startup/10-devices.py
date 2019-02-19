@@ -8,20 +8,6 @@ class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
 
 
-# move to apstools.synApps_ophyd.busy
-class BusyStatus(str, Enum):
-    busy = "Busy"
-    done = "Done"
-
-
-# superceded by: apstools.synApps_ophyd.busy.BusyRecord
-class BusyRecord(Device):
-    """a busy record sets the fly scan into action"""
-    state = Component(EpicsSignal, "")
-    output_link = Component(EpicsSignal, ".OUT")
-    forward_link = Component(EpicsSignal, ".FLNK")
-
-
 class MyCalc(Device):
     """swait record simulates a signal"""
     result = Component(EpicsSignal, "")
