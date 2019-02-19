@@ -22,27 +22,6 @@ class MyWaveform(Device):
     number_read = Component(EpicsSignalRO, ".NORD")
 
 
-# superceded by APS_devices.DualPf4FilterBox
-class DualPf4FilterBox(Device):
-    """Dual Xia PF4 filter boxes using support from synApps"""
-    fPosA = Component(EpicsSignal, "fPosA", put_complete=True)
-    fPosB = Component(EpicsSignal, "fPosB", put_complete=True)
-    bankA = Component(EpicsSignalRO, "bankA")
-    bankB = Component(EpicsSignalRO, "bankB")
-    bitFlagA = Component(EpicsSignalRO, "bitFlagA")
-    bitFlagB = Component(EpicsSignalRO, "bitFlagB")
-    transmission = Component(EpicsSignalRO, "trans")
-    transmission_a = Component(EpicsSignalRO, "transA")
-    transmission_b = Component(EpicsSignalRO, "transB")
-    inverse_transmission = Component(EpicsSignalRO, "invTrans")
-    thickness_Al_mm = Component(EpicsSignalRO, "filterAl")
-    thickness_Ti_mm = Component(EpicsSignalRO, "filterTi")
-    thickness_glass_mm = Component(EpicsSignalRO, "filterGlass")
-    energy_keV_local = Component(EpicsSignal, "E:local")
-    energy_keV_mono = Component(EpicsSignal, "displayEnergy")
-    mode = Component(EpicsSignal, "useMono", string=True)
-
-
 # move to APS_devices
 class Struck3820(Device):
     """Struck/SIS 3820 Multi-Channel Scaler (as used by USAXS)"""
