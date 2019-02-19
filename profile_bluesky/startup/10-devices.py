@@ -3,37 +3,6 @@ print(__file__)
 """Set up custom or complex devices"""
 
 
-MAX_EPICS_STRINGOUT_LENGTH = 40
-
-# move to APS_utils
-def pairwise(iterable):
-    """
-    break a list (or other iterable) into pairs
-    
-    ::
-    
-    s -> (s0, s1), (s2, s3), (s4, s5), ...
-    
-    In [71]: for item in pairwise("a b c d e fg".split()): 
-        ...:     print(item) 
-        ...:                                                                                                                         
-    ('a', 'b')
-    ('c', 'd')
-    ('e', 'fg')
-  
-    """
-    a = iter(iterable)
-    return zip(a, a)
-
-
-# move to APS_utils
-def trim_string_for_EPICS(msg):
-    """string must not be too long for EPICS PV"""
-    if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
-        msg = msg[:MAX_EPICS_STRINGOUT_LENGTH]
-    return msg
-
-
 # superceded by APS_devices.EpicsMotorLimitsMixin
 class EpicsMotorLimitsMixin(Device):
     """
@@ -407,13 +376,9 @@ class UserDataDevice(Device):
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
 
-    #def set_state(self, msg):
-    #    """BLOCKING: tell EPICS about what we are doing"""
-    #    self.state.put(trim_string_for_EPICS(msg))
-
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
-        yield from bps.mv(self.state, trim_string_for_EPICS(msg))
+        yield from bps.mv(self.state, APS_utils.trim_string_for_EPICS(msg))
 
 
 # these are the global settings PVs for various parts of the instrument
