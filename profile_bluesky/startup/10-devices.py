@@ -8,20 +8,6 @@ class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
 
 
-class MyCalc(Device):
-    """swait record simulates a signal"""
-    result = Component(EpicsSignal, "")
-    calc = Component(EpicsSignal, ".CALC")
-    proc = Component(EpicsSignal, ".PROC")
-
-
-class MyWaveform(Device):
-    """waveform records store fly scan data"""
-    wave = Component(EpicsSignalRO, "")
-    number_elements = Component(EpicsSignalRO, ".NELM")
-    number_read = Component(EpicsSignalRO, ".NORD")
-
-
 # move to APS_devices
 class KohzuSeqCtl_Monochromator(Device):
     """
