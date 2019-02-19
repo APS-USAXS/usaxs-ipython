@@ -54,6 +54,7 @@ import apstools.utils as APS_utils
 from apstools.callbacks import DocumentCollectorCallback
 from apstools.devices import ApsPssShutterWithStatus
 from apstools.devices import EpicsMotorShutter
+from apstools.devices import MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON
 from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 

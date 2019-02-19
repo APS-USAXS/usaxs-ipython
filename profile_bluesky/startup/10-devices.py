@@ -8,9 +8,6 @@ class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
 
 
-from apstools.devices import MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON
-
-
 class UserDataDevice(Device):
     GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
