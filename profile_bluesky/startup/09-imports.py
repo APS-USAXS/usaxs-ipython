@@ -53,8 +53,11 @@ import apstools.utils as APS_utils
 # import specific methods by name, we need to customize them sometimes
 from apstools.callbacks import DocumentCollectorCallback
 from apstools.devices import ApsPssShutterWithStatus
+from apstools.devices import AxisTunerMixin
+from apstools.devices import DualPf4FilterBox
+from apstools.devices import EpicsMotorLimitsMixin
 from apstools.devices import EpicsMotorShutter
-from apstools.devices import MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON
+from apstools.devices import Struck3820
 from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 

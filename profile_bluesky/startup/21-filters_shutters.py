@@ -2,7 +2,7 @@ print(__file__)
 
 """filters & shutters"""
 
-if aps.inUserOperations:
+if aps.inUserOperations:    # TODO: ... AND ... only if C station is allowed to control these shutters
     FE_shutter = ApsPssShutterWithStatus(
         "9ida:rShtrA:", 
         "PA:09ID:STA_A_FES_OPEN_PL.VAL", 

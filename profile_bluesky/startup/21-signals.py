@@ -47,7 +47,7 @@ if aps.inUserOperations:
 
 class MyMonochromator(Device):
     dcm = Component(APS_devices.KohzuSeqCtl_Monochromator, "9ida:")
-    feedback = Component(APS_devices.DCM_Feedback, "9idcLAX:fbe:omega")
+    feedback = Component(DCM_Feedback, "9idcLAX:fbe:omega")
     temperature = Component(EpicsSignal, "9ida:DP41:s1:temp")
     cryo_level = Component(EpicsSignal, "9idCRYO:MainLevel:val")
 
