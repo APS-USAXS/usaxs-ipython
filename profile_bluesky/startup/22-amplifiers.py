@@ -438,7 +438,6 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
         yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
-        yield from bps.sleep(1.0)                   # TODO: needed?
         
         # amplifier sequence program (in IOC) will adjust the gain now
         
