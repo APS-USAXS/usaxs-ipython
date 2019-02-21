@@ -18,8 +18,8 @@ else:
     print("Session started when APS not operating.")
     print("Using simulators for FE_shutter and mono_shutter.")
     print("!"*30)
-    FE_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="FE_shutter")
-    mono_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="mono_shutter")
+    FE_shutter = SimulatedApsPssShutterWithStatus(name="FE_shutter")
+    mono_shutter = SimulatedApsPssShutterWithStatus(name="mono_shutter")
 
 
 usaxs_shutter = APS_devices.EpicsOnOffShutter("9idcLAX:userTran3.A", name="usaxs_shutter")

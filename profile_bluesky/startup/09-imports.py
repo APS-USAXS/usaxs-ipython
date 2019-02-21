@@ -53,6 +53,7 @@ import apstools.utils as APS_utils
 # import specific methods by name, we need to customize them sometimes
 from apstools.callbacks import DocumentCollectorCallback
 from apstools.devices import ApsPssShutterWithStatus
+from apstools.devices import SimulatedApsPssShutterWithStatus
 from apstools.devices import AxisTunerMixin
 from apstools.devices import DualPf4FilterBox
 from apstools.devices import EpicsMotorLimitsMixin

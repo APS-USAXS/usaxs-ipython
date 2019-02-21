@@ -49,10 +49,16 @@ class SimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithSta
     """
     temporary override to fix https://github.com/BCDA-APS/apstools/issues/98
     """
-
-    def __init__(self, prefix, state_pv, *args, **kwargs):
-        self.state_pv = state_pv
-        super(APS_devices.ApsPssShutter, self).__init__(prefix, *args, **kwargs)
+    @property
+    def state(self):
+        """is shutter "open", "close", or "unknown"?"""
+        if self.pss_state.value in self.pss_state_open_values:
+            result = self.valid_open_values[0]
+        elif self.pss_state.value in self.pss_state_closed_values:
+            result = self.valid_close_values[0]
+        else:
+            result = self.unknown_state
+        return result
 
 
 class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
