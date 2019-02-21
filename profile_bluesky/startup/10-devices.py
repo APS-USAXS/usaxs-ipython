@@ -37,7 +37,17 @@ class DCM_Feedback(Device):
 
 class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
     """
-    temporary override to fix https://github.com/BCDA-APS/apstools/issues/95
+    temporary override to fix https://github.com/BCDA-APS/apstools/issues/97
+    """
+
+    def __init__(self, prefix, state_pv, *args, **kwargs):
+        self.state_pv = state_pv
+        super(APS_devices.ApsPssShutter, self).__init__(prefix, *args, **kwargs)
+
+
+class SimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithStatus):
+    """
+    temporary override to fix https://github.com/BCDA-APS/apstools/issues/98
     """
 
     def __init__(self, prefix, state_pv, *args, **kwargs):
