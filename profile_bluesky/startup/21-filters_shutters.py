@@ -2,7 +2,7 @@ print(__file__)
 
 """filters & shutters"""
 
-if aps.inUserOperations:    # TODO: ... AND ... only if C station is allowed to control these shutters
+if aps.inUserOperations and operations_in_9idc():
     FE_shutter = ApsPssShutterWithStatus(
         "9ida:rShtrA:", 
         "PA:09ID:STA_A_FES_OPEN_PL.VAL", 
@@ -12,10 +12,11 @@ if aps.inUserOperations:    # TODO: ... AND ... only if C station is allowed to 
         "9ida:rShtrB:", 
         "PA:09ID:STA_B_SBS_OPEN_PL.VAL",
         name="mono_shutter")
+
 else:
     print("!"*30)
-    print("Session started when APS not operating")
-    print("using simulator for FE_shutter and mono_shutter")
+    print("Session started when APS not operating.")
+    print("Using simulators for FE_shutter and mono_shutter.")
     print("!"*30)
     FE_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="FE_shutter")
     mono_shutter = APS_devices.SimulatedApsPssShutterWithStatus(name="mono_shutter")
