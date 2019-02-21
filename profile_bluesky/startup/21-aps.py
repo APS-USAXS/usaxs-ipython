@@ -12,6 +12,8 @@ sd.baseline.append(aps)
 undulator = APS_devices.ApsUndulatorDual("ID09", name="undulator")
 sd.baseline.append(undulator)
 
+bc_station_beam_stop = PSS_Parameters(name="bc_station_beam_stop")
+
 
 def operations_in_9idc():
     """
@@ -26,5 +28,4 @@ def operations_in_9idc():
     :Plug removed:
       Operations in 9-ID-C are allowed
     """
-    v = "9-ID-B"    # TOOD: need some signal from EPICS
-    return v == "9-ID-C"
+    return bc_station_beam_stop.c_station_enabled

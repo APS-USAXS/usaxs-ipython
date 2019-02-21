@@ -89,6 +89,19 @@ class UserDataDevice(Device):
         yield from bps.mv(self.state, APS_utils.trim_string_for_EPICS(msg))
 
 
+class PSS_Parameters(Device):
+    c_shutter_closed_chain_A = Component(EpicsSignalRO, "PA:09ID:SCS_PS_CLSD_LS", string=True)
+    c_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:SCS_PS_CLSD_LS", string=True)
+
+    @property
+    def c_station_enabled(self):
+        """look at the switches: are we allowed to operate?"""
+        enabled = self.c_shutter_closed_chain_A.value == "OFF" or \
+           self.c_shutter_closed_chain_A.value == "OFF"
+        return enabled
+
+
+
 # these are the global settings PVs for various parts of the instrument
 # NOTE: avoid using any PV more than once!
 
