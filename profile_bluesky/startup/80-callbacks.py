@@ -40,15 +40,19 @@ def newSpecFile(title, reset_scan_id=True):
     mmdd = str(datetime.datetime.now()).split()[0][5:].replace("-", "_")
     clean = cleanupText(title)
     fname = "%s_%s.dat" % (mmdd, clean)
+    user_data.user_dir.put(os.path.abspath(os.getcwd()))
     if os.path.exists(fname):
         print(f"file already exists: {fname}")
-        user_data.spec_file.put(specwriter.spec_filename)
-        print(">>>>   Using default SPEC file name   <<<<")
+        user_data.spec_file.put(fname)
+        specwriter.newfile(fname)
+        print(">>>>   Appending to existing file   <<<<")
         
     else:
         specwriter.newfile(fname, reset_scan_id=reset_scan_id)
         msg = f"spec file: {specwriter.spec_filename}"
         logger.info(msg)
         user_data.spec_file.put(specwriter.spec_filename)
+
     print(f"SPEC file name : {specwriter.spec_filename}")
+    print(f"Current working directory : {user_data.user_dir.value}")
     print("file will be created when bluesky ends its next scan")
