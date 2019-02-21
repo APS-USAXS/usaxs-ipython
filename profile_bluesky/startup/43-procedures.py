@@ -399,18 +399,6 @@ def measure_USAXS_Transmission():
             terms.USAXS.transmission.I0_gain, 0,
         )
         logger.info("Did not measure USAXS transmission.")
-
-
-def measure_USAXS_dark_currents():
-    """
-    measure the sample transmission in SAXS mode
-    """
-    yield from bps.mv(
-        ti_filter_shutter, "close",
-    )
-    detectors = [upd_controls, I0_controls, I00_controls, trd_controls]
-    # TODO: anything else?
-    yield from measure_background(detectors)
     
 
 
