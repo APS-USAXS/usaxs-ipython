@@ -309,11 +309,16 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
     
     stage_sigs = {}
     stage_sigs["scaler"] = scaler.stage_sigs   # benign
+    original = {}
     original["scaler.preset_time"] = scaler.preset_time.value
-    yield from bps.mv(scaler.preset_time, count_time)
+    original["scaler.auto_count_delay"] = scaler.auto_count_delay.value
+    yield from bps.mv(
+        scaler.preset_time, count_time,
+        scaler.auto_count_delay, 0
+        )
 
     for control in control_list:
-        yield from bps.mv(control.auto, AutorangeSettings.manual)
+        yield from bps.mv(control.auto.mode, AutorangeSettings.manual)
 
     for n in range(NUM_AUTORANGE_GAINS-1, -1, -1):  # reverse order
         # set gains
@@ -335,7 +340,6 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
         for m in range(num_readings):
             # count and wait to complete
             yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
-            yield from bps.sleep(1.0)                   # TODO: needed?
             
             for s in signals:
                 pvname = getScalerChannelPvname(s)
@@ -363,7 +367,10 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             print(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
-    yield from bps.mv(scaler.preset_time, original["scaler.preset_time"])
+    yield from bps.mv(
+        scaler.preset_time, original["scaler.preset_time"],
+        scaler.auto_count_delay, original["scaler.auto_count_delay"],
+        )
 
 
 def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
