@@ -21,7 +21,7 @@ def operations_in_9idc():
     
     :Plug in place:
       Cannot use beam in 9-ID-C.
-      Should not use FE or mono shutters, monochromator, ...
+      Should not use FE or mono shutters, monochromator, ti_filter_shutter...
 
     :Plug removed:
       Operations in 9-ID-C are allowed
