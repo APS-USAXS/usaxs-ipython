@@ -420,7 +420,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         # faster if we start from last known autoscale gain
         gain = last_gain_dict.get(control.auto.gain.name)
         if gain is not None:    # be cautious, might be unknown
-            yield from bps.mv(control.auto.reqrange, gain)
+            yield from control.auto.setGain(gain)
         last_gain_dict[control.auto.gain.name] = control.auto.gain.value
         settling_time = max(settling_time, control.femto.settling_time.value)
     
