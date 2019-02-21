@@ -44,25 +44,6 @@ class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
         self.state_pv = state_pv
         super(APS_devices.ApsPssShutter, self).__init__(prefix, *args, **kwargs)
 
-    @property
-    def state(self):
-        """is shutter "open", "close", or "unknown"?"""
-        # update the list of acceptable values - very inefficient though
-        for item in self.pss_state.enum_strs[1]:
-            if item not in self.pss_state_open_values:
-                self.pss_state_open_values.append(item)
-        for item in self.pss_state.enum_strs[0]:
-            if item not in self.pss_state_closed_values:
-                self.pss_state_closed_values.append(item)
-
-        if self.pss_state.value in self.pss_state_open_values:
-            result = self.valid_open_values[0]
-        elif self.pss_state.value in self.pss_state_closed_values:
-            result = self.valid_close_values[0]
-        else:
-            result = self.unknown_state
-        return result
-
 
 class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 
