@@ -402,7 +402,7 @@ def measure_USAXS_Transmission():
     
 
 
-def measure_SAXS_Transmission():
+def measure_SAXS_Transmission(md=None):
     """
     measure the sample transmission in SAXS mode
     """

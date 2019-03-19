@@ -37,7 +37,7 @@ class UsaxsFlyScanDevice(Device):
         self.saveFlyData_HDF5_file ="sfs.h5"
         self._output_HDF5_file_ = None
 
-    def plan(self):
+    def plan(self, md=None):
 
         def _report_(t):
             msg = "%.02fs - flying " % t
@@ -125,7 +125,7 @@ class UsaxsFlyScanDevice(Device):
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
         
-        yield from bps.open_run()
+        yield from bps.open_run(md=md)
         specwriter._cmt("start", "start USAXS Fly scan")
         yield from bps.mv(
             upd_controls.auto.mode, AutorangeSettings.auto_background,

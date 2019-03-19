@@ -101,7 +101,7 @@ m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
 
 
-def _tune_base_(axis):
+def _tune_base_(axis, md=None):
     """
     plan for simple tune and report
     
@@ -132,9 +132,9 @@ def _tune_base_(axis):
     print("final position:", axis.position)
 
 
-def tune_mr():
+def tune_mr(md=None):
     yield from bps.mv(scaler0.preset_time, 0.1)
-    yield from _tune_base_(m_stage.r)
+    yield from _tune_base_(m_stage.r, md=md)
 
 
 # -------------------------------------------
@@ -166,10 +166,10 @@ m_stage.r2p.pre_tune_method = m2rp_pretune_hook
 m_stage.r2p.post_tune_method = m2rp_posttune_hook
 
 
-def tune_m2rp():
+def tune_m2rp(md=None):
     yield from bps.sleep(0.2)   # piezo is fast, give the system time to react
     yield from bps.mv(scaler0.preset_time, 0.1)
-    yield from _tune_base_(m_stage.r2p)
+    yield from _tune_base_(m_stage.r2p, md=md)
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
 
@@ -198,9 +198,9 @@ ms_stage.rp.pre_tune_method = msrp_pretune_hook
 ms_stage.rp.post_tune_method = msrp_posttune_hook
 
 
-def tune_msrp():
+def tune_msrp(md=None):
     yield from bps.mv(scaler0.preset_time, 0.1)
-    yield from _tune_base_(ms_stage.rp)
+    yield from _tune_base_(ms_stage.rp, md=md)
 
 
 # -------------------------------------------
@@ -235,12 +235,12 @@ a_stage.r.pre_tune_method = ar_pretune_hook
 a_stage.r.post_tune_method = ar_posttune_hook
 
 
-def tune_ar():
+def tune_ar(md=None):
     yield from bps.mv(ti_filter_shutter, "open")
     yield from autoscale_amplifiers([upd_controls])
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(a_stage.r)
+    yield from _tune_base_(a_stage.r, md=md)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
@@ -269,12 +269,12 @@ as_stage.rp.pre_tune_method = asrp_pretune_hook
 as_stage.rp.post_tune_method = asrp_posttune_hook
 
 
-def tune_asrp():
+def tune_asrp(md=None):
     yield from bps.mv(ti_filter_shutter, "open")
     yield from autoscale_amplifiers([upd_controls])
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(as_stage.rp)
+    yield from _tune_base_(as_stage.rp, md=md)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
@@ -310,13 +310,13 @@ a_stage.r2p.pre_tune_method = a2rp_pretune_hook
 a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
 
-def tune_a2rp():
+def tune_a2rp(md=None):
     yield from bps.mv(ti_filter_shutter, "open")
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
     yield from autoscale_amplifiers([upd_controls])
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(a_stage.r2p)
+    yield from _tune_base_(a_stage.r2p, md=md)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
@@ -347,12 +347,12 @@ d_stage.x.pre_tune_method = dx_pretune_hook
 d_stage.x.post_tune_method = dx_posttune_hook
 
 
-def tune_dx():
+def tune_dx(md=None):
     yield from bps.mv(ti_filter_shutter, "open")
     yield from autoscale_amplifiers([upd_controls])
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(d_stage.x)
+    yield from _tune_base_(d_stage.x, md=md)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
@@ -382,33 +382,33 @@ d_stage.y.pre_tune_method = dy_pretune_hook
 d_stage.y.post_tune_method = dy_posttune_hook
 
 
-def tune_dy():
+def tune_dy(md=None):
     yield from bps.mv(ti_filter_shutter, "open")
     yield from autoscale_amplifiers([upd_controls])
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(upd_controls.auto.mode, "manual")
-    yield from _tune_base_(d_stage.y)
+    yield from _tune_base_(d_stage.y, md=md)
     yield from bps.mv(upd_controls.auto.mode, "auto+background")
 
 
-def tune_diode():
-    yield from tune_dx()
-    yield from tune_dy()
+def tune_diode(md=None):
+    yield from tune_dx(md=md)
+    yield from tune_dy(md=md)
 
 
 # -------------------------------------------
 
 
-def tune_usaxs_optics(side=False):
+def tune_usaxs_optics(side=False, md=None):
     yield from mode_USAXS()
 
-    yield from tune_mr()
-    yield from tune_m2rp()
+    yield from tune_mr(md=md)
+    yield from tune_m2rp(md=md)
     if side:
-        yield from tune_msrp()
-        yield from tune_asrp()
-    yield from tune_ar()
-    yield from tune_a2rp()
+        yield from tune_msrp(md=md)
+        yield from tune_asrp(md=md)
+    yield from tune_ar(md=md)
+    yield from tune_a2rp(md=md)
     
     yield from bps.mv(
         terms.preUSAXStune.num_scans_last_tune, 0,
@@ -416,21 +416,21 @@ def tune_usaxs_optics(side=False):
     )
 
 
-def tune_saxs_optics():
-    yield from tune_mr()
-    yield from tune_m2rp()
+def tune_saxs_optics(md=None):
+    yield from tune_mr(md=md)
+    yield from tune_m2rp(md=md)
     yield from bps.mv(
         #terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.epoch_last_tune, time.time(),
     )
 
 
-def tune_after_imaging():
+def tune_after_imaging(md=None):
     a_stage.r.tuner.width = 0.005
-    yield from tune_ar()
+    yield from tune_ar(md=md)
     a_stage.r.tuner.width = 0.004
-    yield from tune_ar()
-    yield from tune_a2rp()
+    yield from tune_ar(md=md)
+    yield from tune_a2rp(md=md)
 
 
 def compute_tune_ranges():

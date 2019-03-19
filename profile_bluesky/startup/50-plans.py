@@ -13,7 +13,7 @@ def uascan():
     # TODO: needs proper args & kwargs matching SPEC's signature
 
 
-def preUSAXStune():
+def preUSAXStune(md=None):
     """
     tune the USAXS optics *only* if in USAXS mode
 
@@ -62,7 +62,7 @@ def preUSAXStune():
     # now, tune the desired axes, bail out if a tune fails
     for axis, tune in tuners.items():
         yield from bps.mv(ti_filter_shutter, "open")
-        yield from tune()
+        yield from tune(md=md)
         if axis.tuner.tune_ok:
             # If we don't wait, the next tune often fails
             # intensity stays flat, statistically
@@ -84,7 +84,7 @@ def preUSAXStune():
     )
 
 
-def Flyscan(pos_X, pos_Y, thickness, scan_title):
+def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     do one USAXS Fly Scan
     """
@@ -102,7 +102,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     if terms.preUSAXStune.needed:
         # tune at previous sample position 
         # don't overexpose the new sample position
-        yield from tune_usaxs_optics()
+        yield from tune_usaxs_optics(md=md)
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -168,7 +168,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # measure transmission values using pin diode if desired
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
-    yield from measure_USAXS_Transmission()
+    yield from measure_USAXS_Transmission(md=md)
 
     yield from bps.mv(
         mono_shutter, "open",
@@ -227,7 +227,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
 
-    yield from usaxs_flyscan.plan()        # DO THE FLY SCAN
+    yield from usaxs_flyscan.plan(md=md)        # DO THE FLY SCAN
 
     yield from bps.mv(
         user_data.scanning, "no",          # for sure, we are not scanning now
@@ -276,7 +276,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title):
     # measure_USAXS_PD_dark_currents    # used to be here, not now
 
 
-def beforePlan():
+def beforePlan(md=None):
     """
     things to be done before every data collection plan
     """
@@ -298,7 +298,7 @@ def beforePlan():
 
     if terms.preUSAXStune.run_tune_on_qdo.value:
         logger.info("Runing preUSAXStune as requested at start of measurements")
-        yield from tune_usaxs_optics()
+        yield from tune_usaxs_optics(md=md)
     
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
@@ -314,7 +314,7 @@ def beforePlan():
     yield from bps.mv(terms.FlyScan.order_number, order_number)
 
 
-def afterPlan():
+def afterPlan(md=None):
     """
     things to be done after every data collection plan
     """
@@ -340,22 +340,35 @@ def run_Excel_file(xl_file):
         [6] FlyScan 5   2   0   blank
 
     """
-    assert os.path.exists(xl_file)
-    xl = APS_utils.ExcelDatabaseFileGeneric(os.path.abspath(xl_file))
-    yield from beforePlan()
-    for row in xl.db.values():
-        if row["scan"].lower() == "preusaxstune":
-            yield from tune_usaxs_optics()
-        elif row["scan"].lower() == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
-        elif row["scan"].lower() == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
-        elif row["scan"].lower() == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"]) 
-    yield from afterPlan()
+    excel_file = os.path.abspath(xl_file)
+    assert os.path.exists(excel_file)
+    xl = APS_utils.ExcelDatabaseFileGeneric(excel_file)
+    yield from beforePlan(md=md)
+    for i, row in enumerate(xl.db.values()):
+        scan_command = row["scan"].lower()
+        # information from all columns goes into the metadata
+        # columns names are the keys in the metadata dictionary
+        # make sure md keys are "clean"
+        # also provide crossreference to original column names
+        md = {APS_utils.cleanupText(k): v for k, v in row.items()}
+        md["Excel_file"] = excel_file
+        md["xl_file"] = xl_file
+        md["excel_row_number"] = i+1
+        md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
+        if scan_command == "preusaxstune":
+            yield from tune_usaxs_optics(md=md)
+        elif scan_command == "flyscan":
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md) 
+        elif scan_command == "saxs":
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md)
+        elif scan_command == "waxs":
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md)
+        else:
+            print(f"no handling for table row {i+1}: {row}")
+    yield from afterPlan(md=md)
 
 
-def SAXS(pos_X, pos_Y, thickness, scan_title):
+def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect SAXS data
      """
@@ -375,7 +388,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
     if terms.preUSAXStune.needed:
         # tune at previous sample position 
         # don't overexpose the new sample position
-        yield from tune_saxs_optics()
+        yield from tune_saxs_optics(md=md)
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -502,7 +515,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title):
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
 
 
-def WAXS(pos_X, pos_Y, thickness, scan_title):
+def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect WAXS data
      """
@@ -520,7 +533,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title):
     if terms.preUSAXStune.needed:
         # tune at previous sample position 
         # don't overexpose the new sample position
-        yield from tune_saxs_optics()
+        yield from tune_saxs_optics(md=md)
 
     yield from bps.mv(
         s_stage.x, pos_X,
