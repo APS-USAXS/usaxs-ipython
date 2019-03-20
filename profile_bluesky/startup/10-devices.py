@@ -71,14 +71,14 @@ class UserDataDevice(Device):
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
-    sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle")
+    sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile")
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan")
     state = Component(EpicsSignal,              "9idcLAX:USAXS:state")
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
-    user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir")
+    user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir", string=True)
     user_name = Component(EpicsSignal,          "9idcLAX:UserName")
 
     # for GUI to know if user is collecting data: 0="On", 1="Off"
