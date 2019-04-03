@@ -18,7 +18,7 @@ def DCMfeedbackON():
 
 def _insertFilters_(a, b):
     """plan: insert the EPICS-specified filters"""
-    yield from bps.mv(pf4_AlTi.fPosA, a, pf4_AlTi.fPosB, b)
+    yield from bps.mv(pf4_AlTi.fPosA, int(a), pf4_AlTi.fPosB, int(b))
     yield from bps.sleep(0.5)       # allow all blades to re-position
 
 
