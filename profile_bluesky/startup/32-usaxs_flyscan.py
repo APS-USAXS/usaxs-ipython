@@ -40,14 +40,20 @@ class UsaxsFlyScanDevice(Device):
     def plan(self, md=None):
 
         def _report_(t):
+            elapsed = struck.elapsed_real_time.value
+            channel = struck.current_channel.value
+            if elapsed > t:     # looking at previous fly scan
+                elapsed = 0
+                channel = 0
+            terms.FlyScan.elapsed_time.put(elapsed)  # for our GUI display
+
             msg = "%.02fs - flying " % t
             msg += "  ar = %.7f" % a_stage.r.position
             msg += "  ay = %.5f" % a_stage.y.position
             msg += "  dy = %.5f" % d_stage.y.position
-            msg += f"  channel = {struck.current_channel.value}"
-            msg += "  elapsed time = %.2f" % struck.elapsed_real_time.value
+            msg += f"  channel = {channel}"
+            msg += "  elapsed time = %.2f" % elapsed
             # msg += "  flying = {}".format(self.flying.value)
-            terms.FlyScan.elapsed_time.put(struck.elapsed_real_time.value)  # for our GUI display
             return msg
 
         @APS_plans.run_in_thread
