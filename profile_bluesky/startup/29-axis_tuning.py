@@ -296,11 +296,7 @@ def a2rp_posttune_hook():
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
 
     if a_stage.r2p.tuner.tune_ok:
-        # remember the Q calculation needs a new 2theta0
-        # use the current AR encoder position
-        yield from bps.mv(
-            usaxs_q_calc.channels.B.value, usaxs_q_calc.channels.A.value.value,
-        )
+        pass    # TODO: update center per issue 165
     yield from bps.mv(scaler0.delay, 0.05)
 
 
