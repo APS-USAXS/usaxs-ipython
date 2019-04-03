@@ -37,15 +37,51 @@ class DCM_Feedback(Device):
 
 class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
     """
-    temporary override to fix https://github.com/BCDA-APS/apstools/issues/97
+    temporary override to fix https://github.com/BCDA-APS/apstools/issues/113
     """
 
-    def __init__(self, prefix, state_pv, *args, **kwargs):
-        self.state_pv = state_pv
-        super(APS_devices.ApsPssShutter, self).__init__(prefix, *args, **kwargs)
+    def wait_for_state(self, target, timeout=10, poll_s=0.01):
+        """
+        wait for the PSS state to reach a desired target
+        
+        PARAMETERS
+        
+        target : [str]
+            list of strings containing acceptable values
+        
+        timeout : non-negative number
+            maximum amount of time (seconds) to wait for PSS state to reach target
+        
+        poll_s : non-negative number
+            Time to wait (seconds) in first polling cycle.
+            After first poll, this will be increased by ``_poll_factor_``
+            up to a maximum time of ``_poll_s_max_``.
+        """
+        if timeout is not None:
+            expiration = time.time() + max(timeout, 0)  # ensure non-negative timeout
+        else:
+            expiration = None
+        
+        # ensure the poll delay is reasonable
+        if poll_s > self._poll_s_max_:
+            poll_s = self._poll_s_max_
+        elif poll_s < self._poll_s_min_:
+            poll_s = self._poll_s_min_
+
+        t0 = time.time()
+        while self.pss_state.get() not in target:
+            time.sleep(poll_s)
+            elapsed = time.time() - t0
+            # print(f"waiting {elapsed}s : value={self.pss_state.value}")
+            if poll_s < self._poll_s_max_:
+                poll_s *= self._poll_factor_   # progressively longer
+            if expiration is not None and time.time() > expiration:
+                msg = f"Timeout ({timeout} s) waiting for shutter state"
+                msg += f" to reach a value in {target}"
+                raise TimeoutError(msg)
 
 
-class SimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithStatus):
+class xxSimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithStatus):
     """
     temporary override to fix https://github.com/BCDA-APS/apstools/issues/98
     """
