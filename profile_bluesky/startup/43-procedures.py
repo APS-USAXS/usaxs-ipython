@@ -336,7 +336,7 @@ def mode_OpenBeamPath():
         yield from user_data.set_state_plan("USAXS moved to OpenBeamPath mode")
 
 
-def measure_USAXS_Transmission():
+def measure_USAXS_Transmission(md=None):
     """
     measure the sample transmission in USAXS mode
     """
