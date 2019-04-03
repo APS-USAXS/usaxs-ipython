@@ -48,9 +48,10 @@ if aps.inUserOperations:
     print("YIKES! Skipping suspend_mono_shutter due to errors: https://github.com/BCDA-APS/apstools/issues/112")
     # RE.install_suspender(suspend_mono_shutter)
 
-    suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
-    RE.install_suspender(suspend_BeamInHutch)
-    print("BeamInHutch suspender installed")
+    print("YIKES! Skipping suspend_BeamInHutch due to errors: can't open or close shutter if output beam intensity is too low - bad calc?")
+    #suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
+    #RE.install_suspender(suspend_BeamInHutch)
+    #print("BeamInHutch suspender installed")
 
 
 class MyMonochromator(Device):
