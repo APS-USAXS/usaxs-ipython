@@ -14,7 +14,7 @@ specwriter = SpecWriterCallback()
 if os.getcwd().startswith("/home/beams/USAXS/.ipython"):
     specwriter.newfile(os.path.join("/tmp", specwriter.spec_filename))
 else:
-    specwriter.newfile(reset_scan_id=True, RE=RE)
+    specwriter.newfile(scan_id=True, RE=RE)
 callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
 print()
 print("writing to SPEC file: " + specwriter.spec_filename)
@@ -48,7 +48,7 @@ def newSpecFile(title, reset_scan_id=True):
         print(">>>>   Appending to existing file   <<<<")
         
     else:
-        specwriter.newfile(fname, reset_scan_id=reset_scan_id)
+        specwriter.newfile(fname, scan_id=reset_scan_id)
         msg = f"spec file: {specwriter.spec_filename}"
         logger.info(msg)
         user_data.spec_file.put(specwriter.spec_filename)
