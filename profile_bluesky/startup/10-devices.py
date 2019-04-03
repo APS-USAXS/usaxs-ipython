@@ -107,6 +107,7 @@ class UserDataDevice(Device):
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
+    saxs_sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")         # TODO: temporary
     sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
