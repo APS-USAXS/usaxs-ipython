@@ -27,6 +27,11 @@ if False:       # TODO: needs some thought and refactoring
         name="usaxs_CheckBeamSpecial"
     )
 
+connect_delay_s = 1
+while not mono_shutter.pss_state.connected:
+    print(f"Waiting {connect_delay_s}s for mono shutter PV to connect")
+    time.sleep(connect_delay_s)
+
 
 if aps.inUserOperations:
     sd.monitors.append(aps.current)
@@ -38,11 +43,14 @@ if aps.inUserOperations:
     suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
     RE.install_suspender(suspend_FE_shutter)
 
+    print(f"mono shutter connected = {mono_shutter.pss_state.connected}")
     suspend_mono_shutter = bluesky.suspenders.SuspendFloor(mono_shutter.pss_state, 1)
-    RE.install_suspender(suspend_mono_shutter)
+    print("YIKES! Skipping suspend_mono_shutter due to errors: https://github.com/BCDA-APS/apstools/issues/112")
+    # RE.install_suspender(suspend_mono_shutter)
 
     suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
     RE.install_suspender(suspend_BeamInHutch)
+    print("BeamInHutch suspender installed")
 
 
 class MyMonochromator(Device):
