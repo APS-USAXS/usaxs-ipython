@@ -221,8 +221,8 @@ def ar_posttune_hook():
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
         yield from bps.mv(
-            usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value,
-            usaxs_q_calc.channels.B, terms.USAXS.ar_val_center.value,
+            usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
+            a_stage.r, terms.USAXS.ar_val_center.value,
         )
 
 
@@ -298,7 +298,9 @@ def a2rp_posttune_hook():
     if a_stage.r2p.tuner.tune_ok:
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
-        yield from bps.mv(usaxs_q_calc.channels.B, usaxs_q_calc.channels.A.value)
+        yield from bps.mv(
+            usaxs_q_calc.channels.B.value, usaxs_q_calc.channels.A.value.value,
+        )
     yield from bps.mv(scaler0.delay, 0.05)
 
 
