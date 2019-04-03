@@ -351,7 +351,7 @@ def afterPlan(md=None):
     )
 
 
-def run_Excel_file(xl_file):
+def run_Excel_file(xl_file, md={}):
     """
     example of reading a list of samples from Excel spreadsheet
     
@@ -370,11 +370,13 @@ def run_Excel_file(xl_file):
     xl = APS_utils.ExcelDatabaseFileGeneric(excel_file)
     yield from beforePlan(md=md)
     for i, row in enumerate(xl.db.values()):
+        print(f"Excel row {i}: {row}")
         scan_command = row["scan"].lower()
         # information from all columns goes into the metadata
         # columns names are the keys in the metadata dictionary
         # make sure md keys are "clean"
         # also provide crossreference to original column names
+        # FIXME: overwrites kwarg for md dict!
         md = {APS_utils.cleanupText(k): v for k, v in row.items()}
         md["Excel_file"] = excel_file
         md["xl_file"] = xl_file
@@ -408,6 +410,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
+        user_data.saxs_sample_thickness, thickness,
     )
 
     if terms.preUSAXStune.needed:
@@ -553,6 +556,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         usaxs_slit.h_size, terms.SAXS.h_size.value,
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        user_data.saxs_sample_thickness, thickness,
     )
 
     if terms.preUSAXStune.needed:
