@@ -376,22 +376,22 @@ def run_Excel_file(xl_file, md={}):
         # columns names are the keys in the metadata dictionary
         # make sure md keys are "clean"
         # also provide crossreference to original column names
-        # FIXME: overwrites kwarg for md dict!
-        md = {APS_utils.cleanupText(k): v for k, v in row.items()}
-        md["Excel_file"] = excel_file
-        md["xl_file"] = xl_file
-        md["excel_row_number"] = i+1
-        md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
+        _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
+        _md["Excel_file"] = excel_file
+        _md["xl_file"] = xl_file
+        _md["excel_row_number"] = i+1
+        _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
+        _md.update(md)      # overlay with user-supplied metadata
         if scan_command == "preusaxstune":
-            yield from tune_usaxs_optics(md=md)
+            yield from tune_usaxs_optics(md=_md)
         elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md) 
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
         elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md)
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
         elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=md)
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
         else:
-            print(f"no handling for table row {i+1}: {row}")
+            print(f"no handling for table row {i+1}: scan_command={scan_command}")
     yield from afterPlan(md=md)
 
 
