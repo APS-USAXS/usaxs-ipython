@@ -195,10 +195,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     # measure transmission values using pin diode if desired
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
+    yield from bps.install_suspender(suspend_BeamInHutch)
     yield from measure_USAXS_Transmission(md=md)
 
     yield from bps.mv(
-        mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
 
@@ -260,6 +260,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.scanning, "no",          # for sure, we are not scanning now
         terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
     )
+    yield from bps.remove_suspender(suspend_BeamInHutch)
 
     # Check if we had bad number of PSO pulses
     diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.value
