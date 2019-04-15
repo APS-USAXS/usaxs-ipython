@@ -60,6 +60,7 @@ def preUSAXStune(md=None):
     tuners[a_stage.r2p] = tune_a2rp        # make A stage crystals parallel
 
     # now, tune the desired axes, bail out if a tune fails
+    yield from bps.install_suspender(suspend_BeamInHutch)
     for axis, tune in tuners.items():
         yield from bps.mv(ti_filter_shutter, "open")
         yield from tune(md=md)
@@ -71,6 +72,7 @@ def preUSAXStune(md=None):
         else:
             print("!!! tune failed for axis {} !!!".format(axis.name))
             break
+    yield from bps.remove_suspender(suspend_BeamInHutch)
 
     print("USAXS count time: {} second(s)".format(terms.USAXS.usaxs_time.value))
     yield from bps.mv(
