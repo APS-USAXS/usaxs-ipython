@@ -37,17 +37,19 @@ if aps.inUserOperations:
     sd.monitors.append(aps.current)
     # suspend when current < 2 mA
     # resume 100s after current > 10 mA
+    print("Installing suspender for low APS current.")
     suspend_APS_current = bluesky.suspenders.SuspendFloor(aps.current, 2, resume_thresh=10, sleep=100)
     RE.install_suspender(suspend_APS_current)
 
-    suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
-    RE.install_suspender(suspend_FE_shutter)
+    # remove comment if likely to use this suspender (issue #170)
+    # suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
+    # RE.install_suspender(suspend_FE_shutter)
 
     print(f"mono shutter connected = {mono_shutter.pss_state.connected}")
     # remove comment if likely to use this suspender (issue #170)
     # suspend_mono_shutter = bluesky.suspenders.SuspendFloor(mono_shutter.pss_state, 1)
 
-    print("YIKES! Skipping suspend_BeamInHutch due to errors: can't open or close shutter if output beam intensity is too low - bad calc?")
+    print("Defining suspend_BeamInHutch.  Install/remove in scan plans as desired.")
     suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
     # be more judicious when to use this suspender (only within scan plans)
     # RE.install_suspender(suspend_BeamInHutch)
