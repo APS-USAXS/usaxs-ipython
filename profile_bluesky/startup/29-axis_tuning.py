@@ -81,7 +81,9 @@ def mr_pretune_hook():
 def mr_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
+    
+    if m_stage.r.tuner.tune_ok:
+        yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
  
 
 # TODO: #171 EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
@@ -154,6 +156,9 @@ def m2rp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     yield from bps.mv(scaler0.delay, 0.05)
+    
+    if m_stage.r2p.tuner.tune_ok:
+        pass    # #165: update center when/if we get a PV for that
 
 
 # use I00 (if MS stage is used, use I0)
@@ -185,7 +190,9 @@ def msrp_pretune_hook():
 def msrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
-    yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
+    
+    if ms_stage.rp.tuner.tune_ok:
+        yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
  
  
 # use I00 (if MS stage is used, use I0)
@@ -257,6 +264,9 @@ def asrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(as_stage.rp.name, as_stage.rp.position))
     yield from bps.mv(terms.USAXS.asr_val_center, as_stage.rp.position)
+    
+    if as_stage.rp.tuner.tune_ok:
+        pass    # #165: update center when/if we get a PV for that
  
  
 # use I00 (if MS stage is used, use I0)
@@ -294,10 +304,10 @@ def a2rp_posttune_hook():
     #
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
+    yield from bps.mv(scaler0.delay, 0.05)
 
     if a_stage.r2p.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
-    yield from bps.mv(scaler0.delay, 0.05)
 
 
 a_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
