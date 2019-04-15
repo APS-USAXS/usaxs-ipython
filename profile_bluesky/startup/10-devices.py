@@ -274,55 +274,55 @@ class Parameters_SBUSAXS(Device):
 
 
 class Parameters_SAXS(Device):
-    z_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_in")
-    z_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_out")
-    z_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_z_limit_offset")
+    z_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_in")
+    z_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_out")
+    z_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_limit_offset")
 
-    y_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_in")
-    y_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_out")
-    y_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_y_limit_offset")
+    y_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_in")
+    y_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_out")
+    y_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_limit_offset")
 
-    ax_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_in")
-    ax_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_out")
-    ax_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:ax_limit_offset")
+    ax_in = Component(EpicsSignal, "9idcLAX:SAXS:ax_in")
+    ax_out = Component(EpicsSignal, "9idcLAX:SAXS:ax_out")
+    ax_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:ax_limit_offset")
 
-    dx_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_in")
-    dx_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_out")
-    dx_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:dx_limit_offset")
+    dx_in = Component(EpicsSignal, "9idcLAX:SAXS:dx_in")
+    dx_out = Component(EpicsSignal, "9idcLAX:SAXS:dx_out")
+    dx_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:dx_limit_offset")
 
-    usaxs_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_hslit_ap")
-    usaxs_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_vslit_ap")
-    v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_vslit_ap")
-    h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_hslit_ap")
+    usaxs_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hslit_ap")
+    usaxs_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vslit_ap")
+    v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vslit_ap")
+    h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hslit_ap")
 
-    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_hgslit_ap")
-    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXS_vgslit_ap")
-    guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_vgslit_ap")
-    guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_hgslit_ap")
+    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hgslit_ap")
+    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vgslit_ap")
+    guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vgslit_ap")
+    guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hgslit_ap")
 
-    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_Pin:Exp_")
+    filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:SAXS:Exp_")
 
-    diode_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrPD")
-    I0_transmission = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrI0")
-    diode_gain = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrPDgain")
-    I0_gain = Component(EpicsSignal, "9idcLAX:USAXS_Pin:Pin_TrI0gain")
+    diode_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPD")
+    I0_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0")
+    diode_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPDgain")
+    I0_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0gain")
 
-    base_dir = Component(EpicsSignal, "9idcLAX:USAXS_Pin:directory")
+    base_dir = Component(EpicsSignal, "9idcLAX:SAXS:directory")
 
-    UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:USAXS_Pin:USAXSSAXSMode", put_complete=True)
-    num_images = Component(EpicsSignal, "9idcLAX:USAXS_Pin:NumImages")
-    acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:AcquireTime")
-    start_exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:StartExposureTime")
-    end_exposure_time = Component(EpicsSignal, "9idcLAX:USAXS_Pin:EndExposureTime")
+    UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:SAXS:USAXSSAXSMode", put_complete=True)
+    num_images = Component(EpicsSignal, "9idcLAX:SAXS:NumImages")
+    acquire_time = Component(EpicsSignal, "9idcLAX:SAXS:AcquireTime")
+    start_exposure_time = Component(EpicsSignal, "9idcLAX:SAXS:StartExposureTime")
+    end_exposure_time = Component(EpicsSignal, "9idcLAX:SAXS:EndExposureTime")
 
     # this is Io value from gates scalar in LAX for Nexus file
-    I0 = Component(EpicsSignal, "9idcLAX:USAXS_Pin:I0")
+    I0 = Component(EpicsSignal, "9idcLAX:SAXS:I0")
 
 
 class Parameters_WAXS(Device):
-    x_in = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_in")
-    x_out = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_out")
-    x_limit_offset = Component(EpicsSignal, "9idcLAX:USAXS_Pin:waxs_x_limit_offset")
+    x_in = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_in")
+    x_out = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_out")
+    x_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_limit_offset")
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_WAXS:Exp_")
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory")
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
