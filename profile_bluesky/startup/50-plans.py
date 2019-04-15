@@ -473,6 +473,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
    )
 
+    yield from bps.install_suspender(suspend_BeamInHutch)
     yield from measure_SAXS_Transmission()
     yield from insertSaxsFilters()
 
@@ -526,6 +527,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     # print(f"DEBUG: SAXS(3): {saxs_det.hdf1.stage_sigs}")
     yield from areaDetectorAcquire(saxs_det)
     ts = str(datetime.datetime.now())
+    yield from bps.remove_suspender(suspend_BeamInHutch)
 
     saxs_det.hdf1.stage_sigs = old_det_stage_sigs    # TODO: needed? not even useful?
     # print(f"DEBUG: SAXS(4): {saxs_det.hdf1.stage_sigs}")
@@ -630,6 +632,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         waxs_det.cam.acquire_time, terms.WAXS.acquire_time.value,
         waxs_det.cam.acquire_period, terms.WAXS.acquire_time.value + 0.004,
     )
+    yield from bps.install_suspender(suspend_BeamInHutch)
     # print(f"DEBUG: SAXS(1): {saxs_det.hdf1.stage_sigs}")
     old_det_stage_sigs = OrderedDict()
     for k, v in waxs_det.hdf1.stage_sigs.items():
@@ -694,6 +697,5 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.time_stamp, ts,
     )
+    yield from bps.remove_suspender(suspend_BeamInHutch)
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
-
-
