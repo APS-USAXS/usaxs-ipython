@@ -296,7 +296,7 @@ def a2rp_posttune_hook():
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
 
     if a_stage.r2p.tuner.tune_ok:
-        pass    # TODO: update center per issue 165
+        pass    # #165: update center when/if we get a PV for that
     yield from bps.mv(scaler0.delay, 0.05)
 
 
