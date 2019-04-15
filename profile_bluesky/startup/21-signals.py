@@ -45,12 +45,13 @@ if aps.inUserOperations:
 
     print(f"mono shutter connected = {mono_shutter.pss_state.connected}")
     suspend_mono_shutter = bluesky.suspenders.SuspendFloor(mono_shutter.pss_state, 1)
-    print("YIKES! Skipping suspend_mono_shutter due to errors: https://github.com/BCDA-APS/apstools/issues/112")
+    # be more judicious when to use this suspender (only within scan plans)
     # RE.install_suspender(suspend_mono_shutter)
 
     print("YIKES! Skipping suspend_BeamInHutch due to errors: can't open or close shutter if output beam intensity is too low - bad calc?")
-    #suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
-    #RE.install_suspender(suspend_BeamInHutch)
+    suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
+    # TODO: consider installing only within scan plans, as well
+    RE.install_suspender(suspend_BeamInHutch)
     #print("BeamInHutch suspender installed")
 
 
