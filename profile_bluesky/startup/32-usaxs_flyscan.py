@@ -75,7 +75,7 @@ class UsaxsFlyScanDevice(Device):
             msg = _report_(time.time() - self.t0)
             print(msg)
             logger.debug(msg)
-            user_data.set_state("flying: " + msg.split()[0])
+            user_data.state.put(APS_utils.trim_string_for_EPICS(msg.split()[0]))
             if t > timeout:
                 logger.error("{}s - progress_reporting timeout!!".format(time.time()-self.t0))
             else:
@@ -106,7 +106,7 @@ class UsaxsFlyScanDevice(Device):
             print("HDF5 config: {}".format(self.saveFlyData_config))
             print("HDF5 output: {}".format(fname))
             self._output_HDF5_file_ = fname
-            #user_data.set_state("HDF5 file:" + fname)
+            user_data.state.put(APS_utils.trim_string_for_EPICS("HDF5 file:" + fname))
 
             self.saveFlyData = SaveFlyScan(
                 fname,
