@@ -187,11 +187,4 @@ usaxs_flyscan.saveFlyData_config = "/share1/AreaDetectorConfig/FlyScan_config/sa
 usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"   # developer
 usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
 
-
-def fix_faulty():
-    a_stage.r.user_setpoint.set(8.883668382596136)
-    a_stage.y.user_setpoint.set(0)
-    d_stage.y.user_setpoint.set(13.456867)
-
-
 # RE(usaxs_flyscan.plan())
