@@ -67,7 +67,8 @@ def preUSAXStune(md=None):
         if axis.tuner.tune_ok:
             # If we don't wait, the next tune often fails
             # intensity stays flat, statistically
-            # TODO: Why is that?
+            # We need to wait a short bit to allow EPICS database 
+            # to complete processing and report back to us.
             yield from bps.sleep(1)
         else:
             print("!!! tune failed for axis {} !!!".format(axis.name))
