@@ -263,7 +263,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
     # Check if we had bad number of PSO pulses
-    diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.value
+    diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.get()
     if diff > 5:
         msg = "WARNING: Flyscan finished with %g less points" % diff
         logger.warning(msg)
