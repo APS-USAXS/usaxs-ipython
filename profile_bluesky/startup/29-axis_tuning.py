@@ -86,8 +86,6 @@ def mr_posttune_hook():
         yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
  
 
-# TODO: #171 EpicsScaler would not count the detector when detectors=[TUNING_DET_SIGNAL]
-
 def _getScalerSignalName_(scaler, signal):
     if isinstance(scaler, ScalerCH):
         return signal.chname.value
