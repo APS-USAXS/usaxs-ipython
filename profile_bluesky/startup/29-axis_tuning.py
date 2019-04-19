@@ -407,6 +407,10 @@ def tune_diode(md=None):
 
 def tune_usaxs_optics(side=False, md=None):
     yield from mode_USAXS()
+    
+    suspender_preinstalled = suspend_BeamInHutch in RE.suspenders
+    if not suspender_preinstalled:
+        yield from bps.install_suspender(suspend_BeamInHutch)
 
     yield from tune_mr(md=md)
     yield from tune_m2rp(md=md)
@@ -415,6 +419,9 @@ def tune_usaxs_optics(side=False, md=None):
         yield from tune_asrp(md=md)
     yield from tune_ar(md=md)
     yield from tune_a2rp(md=md)
+
+    if not suspender_preinstalled:
+        yield from bps.remove_suspender(suspend_BeamInHutch)
     
     yield from bps.mv(
         terms.preUSAXStune.num_scans_last_tune, 0,
