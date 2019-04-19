@@ -106,7 +106,7 @@ class UsaxsFlyScanDevice(Device):
             print("HDF5 config: {}".format(self.saveFlyData_config))
             print("HDF5 output: {}".format(fname))
             self._output_HDF5_file_ = fname
-            user_data.set_state_blocking("HDF5 file:" + fname)
+            user_data.set_state_blocking("HDF5 file:" + os.path.split(fname)[-1])
 
             self.saveFlyData = SaveFlyScan(
                 fname,
