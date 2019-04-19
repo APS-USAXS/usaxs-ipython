@@ -125,6 +125,10 @@ class UserDataDevice(Device):
         """plan: tell EPICS about what we are doing"""
         yield from bps.mv(self.state, APS_utils.trim_string_for_EPICS(msg))
 
+    def set_state_blocking(self, msg):
+        """plan: tell EPICS about what we are doing"""
+        self.state.put(self.state, APS_utils.trim_string_for_EPICS(msg))
+
 
 class PSS_Parameters(Device):
     c_shutter_closed_chain_A = Component(EpicsSignalRO, "PA:09ID:SCS_PS_CLSD_LS", string=True)
