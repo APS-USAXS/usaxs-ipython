@@ -195,6 +195,7 @@ class PreUsaxsTuneParameters(Device):
         
         """
         result = self.run_tune_next.value
+        # TODO: next test if not in SAXS or WAXS mode
         result = result or self.num_scans_last_tune.value  > self.req_num_scans_between_tune.value
         time_limit = self.epoch_last_tune.value + self.req_time_between_tune.value
         result = result or time.time() > time_limit
