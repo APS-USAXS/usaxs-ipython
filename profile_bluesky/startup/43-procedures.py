@@ -109,17 +109,10 @@ def mode_USAXS():
     yield from bps.mv(
         # set scalar to autocount mode for USAXS
         scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
-
-        # put detector stage in position
-        # TODO: redundant with move_USAXSIn() above?
-        #d_stage.x, terms.USAXS.diode.dx.value,
-        #d_stage.y, terms.USAXS.diode.dy.value,
     )
-    # yield from bps.sleep(0.1)   # TODO: still needed?
 
     if not ccd_shutter.isClosed:
         logger.info("!!!CCD shutter failed to close!!!")
-        # TODO: logging?
     else:
         # mono_shutter.open()
 
