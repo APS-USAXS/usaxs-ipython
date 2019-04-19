@@ -51,7 +51,7 @@ if aps.inUserOperations:
 
     print("Defining suspend_BeamInHutch.  Install/remove in scan plans as desired.")
     suspend_BeamInHutch = bluesky.suspenders.SuspendBoolLow(BeamInHutch)
-    # be more judicious when to use this suspender (only within scan plans)
+    # be more judicious when to use this suspender (only within scan plans) -- see #180
     # RE.install_suspender(suspend_BeamInHutch)
     # print("BeamInHutch suspender installed")
 
