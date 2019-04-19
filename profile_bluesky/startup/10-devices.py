@@ -102,6 +102,15 @@ class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
 
 
+# TODO: override for https://github.com/BCDA-APS/apstools/issues/124
+MAX_EPICS_STRINGOUT_LENGTH = 40
+def trim_string_for_EPICS(msg):
+    """string must not be too long for EPICS PV"""
+    if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
+        msg = msg[:MAX_EPICS_STRINGOUT_LENGTH-1]
+    return msg
+
+
 class UserDataDevice(Device):
     GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
@@ -123,11 +132,15 @@ class UserDataDevice(Device):
 
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
-        yield from bps.mv(self.state, APS_utils.trim_string_for_EPICS(msg))
+        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
+        msg = trim_string_for_EPICS(msg)
+        yield from bps.mv(self.state, msg)
 
     def set_state_blocking(self, msg):
-        """plan: tell EPICS about what we are doing"""
-        self.state.put(self.state, APS_utils.trim_string_for_EPICS(msg))
+        """ophyd: tell EPICS about what we are doing"""
+        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
+        msg = trim_string_for_EPICS(msg)
+        self.state.put(msg)
 
 
 class PSS_Parameters(Device):
