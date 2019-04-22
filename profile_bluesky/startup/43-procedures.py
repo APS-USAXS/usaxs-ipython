@@ -457,7 +457,7 @@ def measure_SAXS_Transmission(md=None):
     print(msg)
 
 
-def areaDetectorAcquire(det):
+def areaDetectorAcquire(det, md={}):
     """
     acquire image(s) from the named area detector
     """
@@ -467,7 +467,7 @@ def areaDetectorAcquire(det):
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
     # print(f"DEBUG: areaDetectorAcquire(): {det.hdf1.stage_sigs}")
-    yield from bp.count([det])          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
+    yield from bp.count([det], md)          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
     yield from bps.mv(
         user_data.scanning, "no",          # we are done
     )
