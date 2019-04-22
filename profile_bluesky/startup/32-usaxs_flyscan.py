@@ -38,6 +38,10 @@ class UsaxsFlyScanDevice(Device):
         self._output_HDF5_file_ = None
 
     def plan(self, md={}):
+        """
+        run the USAXS fly scan
+        """
+        bluesky_runengine_running = RE.state != "idle"
 
         def _report_(t):
             elapsed = struck.elapsed_real_time.get()
@@ -148,13 +152,15 @@ class UsaxsFlyScanDevice(Device):
         self.update_time = self.t0 + self.update_interval_s
         yield from bps.abs_set(self.flying, False)
 
-        prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
+        if bluesky_runengine_running:
+            prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
         path = os.path.abspath(self.saveFlyData_HDF5_dir)
         specwriter._cmt("start", f"HDF5 configuration file: {self.saveFlyData_config}")
 
         g = uuid.uuid4()
         yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
-        progress_reporting()
+        if bluesky_runengine_running:
+            progress_reporting()
         yield from bps.abs_set(self.flying, True)
 
         yield from bps.wait(group=g)
@@ -162,9 +168,10 @@ class UsaxsFlyScanDevice(Device):
         elapsed = time.time() - self.t0
         specwriter._cmt("stop", f"fly scan completed in {elapsed} s")
 
-        yield from user_data.set_state_plan("writing fly scan HDF5 file")
-        finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
-        specwriter._cmt("stop", f"finished writing fly scan HDF5 file: {self._output_HDF5_file_}")
+        if bluesky_runengine_running:
+            yield from user_data.set_state_plan("writing fly scan HDF5 file")
+            finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
+            specwriter._cmt("stop", f"finished writing fly scan HDF5 file: {self._output_HDF5_file_}")
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0,
