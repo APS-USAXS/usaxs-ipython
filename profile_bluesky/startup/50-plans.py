@@ -385,7 +385,7 @@ def run_Excel_file(xl_file, md={}):
         _md["xl_file"] = xl_file
         _md["excel_row_number"] = i+1
         _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
-        _md.update(md)      # overlay with user-supplied metadata
+        _md.update(md or {})      # overlay with user-supplied metadata
         if scan_command == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
         elif scan_command == "flyscan":
@@ -524,7 +524,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     )
     
     _md = OrderedDict()
-    _md.update(md)
+    _md.update(md or {})
     _md["hdf5_file"] = SAXS_file_name
     _md["hdf5_path"] = SAXSscan_path
     
@@ -673,7 +673,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     )
     
     _md = OrderedDict()
-    _md.update(md)
+    _md.update(md or {})
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
     

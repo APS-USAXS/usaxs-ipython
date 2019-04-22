@@ -37,7 +37,7 @@ class UsaxsFlyScanDevice(Device):
         self.saveFlyData_HDF5_file ="sfs.h5"
         self._output_HDF5_file_ = None
 
-    def plan(self, md=None):
+    def plan(self, md={}):
 
         def _report_(t):
             elapsed = struck.elapsed_real_time.get()
@@ -131,8 +131,13 @@ class UsaxsFlyScanDevice(Device):
         self.ar0 = a_stage.r.position
         self.ay0 = a_stage.y.position
         self.dy0 = d_stage.y.position
+
+        _md = OrderedDict()
+        _md.update(md or {})
+        _md["hdf5_file"] = self.saveFlyData_HDF5_file
+        _md["hdf5_path"] = self.saveFlyData_HDF5_dir
         
-        yield from bps.open_run(md=md)
+        yield from bps.open_run(md=_md)
         specwriter._cmt("start", "start USAXS Fly scan")
         yield from bps.mv(
             upd_controls.auto.mode, AutorangeSettings.auto_background,
