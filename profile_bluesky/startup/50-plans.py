@@ -486,7 +486,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         saxs_det.cam.acquire_time, terms.SAXS.acquire_time.value,
         saxs_det.cam.acquire_period, terms.SAXS.acquire_time.value + 0.004,
     )
-    # print(f"DEBUG: SAXS(1): {saxs_det.hdf1.stage_sigs}")
     old_det_stage_sigs = OrderedDict()
     for k, v in saxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
@@ -494,7 +493,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     saxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     saxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
-    # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.sleep(0.2)
     yield from autoscale_amplifiers([I0_controls])
@@ -525,13 +523,16 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         scaler1.count, 1,
     )
     
-    # print(f"DEBUG: SAXS(3): {saxs_det.hdf1.stage_sigs}")
-    yield from areaDetectorAcquire(saxs_det)
+    _md = OrderedDict()
+    _md.update(md)
+    _md["hdf5_file"] = SAXS_file_name
+    _md["hdf5_path"] = SAXSscan_path
+    
+    yield from areaDetectorAcquire(saxs_det, _md)
     ts = str(datetime.datetime.now())
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
     saxs_det.hdf1.stage_sigs = old_det_stage_sigs    # TODO: needed? not even useful?
-    # print(f"DEBUG: SAXS(4): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.mv(
         scaler0.count, 0,
@@ -634,7 +635,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         waxs_det.cam.acquire_period, terms.WAXS.acquire_time.value + 0.004,
     )
     yield from bps.install_suspender(suspend_BeamInHutch)
-    # print(f"DEBUG: SAXS(1): {saxs_det.hdf1.stage_sigs}")
     old_det_stage_sigs = OrderedDict()
     for k, v in waxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
@@ -642,7 +642,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     waxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     waxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     waxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
-    # print(f"DEBUG: SAXS(2): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.sleep(0.2)
     yield from autoscale_amplifiers([I0_controls, trd_controls])
@@ -673,12 +672,15 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         scaler1.count, 1,
     )
     
-    # print(f"DEBUG: SAXS(3): {saxs_det.hdf1.stage_sigs}")
-    yield from areaDetectorAcquire(waxs_det)
+    _md = OrderedDict()
+    _md.update(md)
+    _md["hdf5_file"] = WAXS_file_name
+    _md["hdf5_path"] = WAXSscan_path
+    
+    yield from areaDetectorAcquire(waxs_det, md=_md)
     ts = str(datetime.datetime.now())
 
     waxs_det.hdf1.stage_sigs = old_det_stage_sigs    # TODO: needed? not even useful?
-    # print(f"DEBUG: SAXS(4): {saxs_det.hdf1.stage_sigs}")
 
     yield from bps.mv(
         scaler0.count, 0,
