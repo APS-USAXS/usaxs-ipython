@@ -116,6 +116,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     do one USAXS Fly Scan
     """
+    bluesky_runengine_running = RE.state != "idle"
+    
     yield from IfRequestedStopBeforeNextScan()
 
     yield from mode_USAXS()
@@ -146,7 +148,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     # directory is pwd + DATAFILE + "_usaxs"
     flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_usaxs")
-    if not os.path.exists(flyscan_path):
+    if not os.path.exists(flyscan_path) and bluesky_runengine_running:
         # must create this directory if not exists
         os.mkdir(flyscan_path)
     flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
@@ -265,7 +267,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     # Check if we had bad number of PSO pulses
     diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.get()
-    if diff > 5:
+    if diff > 5 and bluesky_runengine_running:
         msg = "WARNING: Flyscan finished with %g less points" % diff
         logger.warning(msg)
         if NOTIFY_ON_BAD_FLY_SCAN:
