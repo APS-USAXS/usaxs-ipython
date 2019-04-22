@@ -461,7 +461,7 @@ def areaDetectorAcquire(det):
     """
     acquire image(s) from the named area detector
     """
-    # TODO: somewhere, BS is adding 4-5 seconds of overhead to a 2 second image collection, find that sucker
+    # Note: AD's HDF File Writer can use up to 5 seconds to finish writing the file
     t0 = time.time()
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
