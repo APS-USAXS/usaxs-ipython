@@ -37,18 +37,25 @@ def newSpecFile(title, reset_scan_id=True):
     
     cleans up title, prepends month and day and appends file extension
     """
+    global RE
     mmdd = str(datetime.datetime.now()).split()[0][5:].replace("-", "_")
     clean = cleanupText(title)
     fname = "%s_%s.dat" % (mmdd, clean)
     user_data.user_dir.put(os.path.abspath(os.getcwd()))
+
+    if reset_scan_id:
+        reset_scan_id = 0
+
     if os.path.exists(fname):
         print(f"file already exists: {fname}")
         user_data.spec_file.put(fname)
-        specwriter.newfile(fname)
+        specwriter.newfile(fname, scan_id=reset_scan_id, RE=RE)
+        if reset_scan_id == 0:
+            RE.md["scan_id"] = 0
         print(">>>>   Appending to existing file   <<<<")
         
     else:
-        specwriter.newfile(fname, scan_id=reset_scan_id)
+        specwriter.newfile(fname, scan_id=reset_scan_id, RE=RE)
         msg = f"spec file: {specwriter.spec_filename}"
         logger.info(msg)
         user_data.spec_file.put(specwriter.spec_filename)
