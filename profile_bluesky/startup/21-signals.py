@@ -55,6 +55,11 @@ if aps.inUserOperations:
     # RE.install_suspender(suspend_BeamInHutch)
     # print("BeamInHutch suspender installed")
 
+else:
+    # simulators
+    _simulated_beam_in_hutch = Signal(name="_simulated_beam_in_hutch")
+    suspend_BeamInHutch = bluesky.suspenders.SuspendBoolHigh(_simulated_beam_in_hutch)
+
 
 class MyMonochromator(Device):
     dcm = Component(APS_devices.KohzuSeqCtl_Monochromator, "9ida:")
