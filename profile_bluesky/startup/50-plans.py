@@ -542,6 +542,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     
     _md = OrderedDict()
     _md.update(md or {})
+    _md['plan_name'] = 'SAXS'
     _md["hdf5_file"] = SAXS_file_name
     _md["hdf5_path"] = SAXSscan_path
     
@@ -691,6 +692,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     
     _md = OrderedDict()
     _md.update(md or {})
+    _md['plan_name'] = 'WAXS'
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
     
