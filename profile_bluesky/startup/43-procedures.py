@@ -329,7 +329,7 @@ def mode_OpenBeamPath():
         yield from user_data.set_state_plan("USAXS moved to OpenBeamPath mode")
 
 
-def measure_USAXS_Transmission(md=None):
+def measure_USAXS_Transmission(md={}):
     """
     measure the sample transmission in USAXS mode
     """
@@ -349,7 +349,8 @@ def measure_USAXS_Transmission(md=None):
         yield from bps.mv(
             scaler0.preset_time, terms.USAXS.transmission.count_time.value
         )
-        yield from bp.count([scaler0])
+        md["plan_name"] = "measure_USAXS_Transmission"
+        yield from bp.count([scaler0], md=md)
         s = scaler0.read()
         secs = s["scaler0_time"]["value"]
         _tr_diode = s["TR diode"]["value"]
@@ -361,7 +362,7 @@ def measure_USAXS_Transmission(md=None):
             yield from bps.mv(
                 scaler0.preset_time, terms.USAXS.transmission.count_time.value
             )
-            yield from bp.count([scaler0])
+            yield from bp.count([scaler0], md=md)
             s = scaler0.read()
 
         yield from bps.mv(
@@ -395,7 +396,7 @@ def measure_USAXS_Transmission(md=None):
     
 
 
-def measure_SAXS_Transmission(md=None):
+def measure_SAXS_Transmission(md={}):
     """
     measure the sample transmission in SAXS mode
     """
@@ -417,7 +418,8 @@ def measure_SAXS_Transmission(md=None):
     yield from bps.mv(
         scaler0.preset_time, constants["SAXS_TR_TIME"],
     )
-    yield from bp.count([scaler0])
+    md["plan_name"] = "measure_SAXS_Transmission"
+    yield from bp.count([scaler0], md=md)
     s = scaler0.read()
     secs = s["scaler0_time"]["value"]
     _tr_diode = s["TR diode"]["value"]
@@ -429,7 +431,7 @@ def measure_SAXS_Transmission(md=None):
         yield from bps.mv(
             scaler0.preset_time, constants["SAXS_TR_TIME"],
         )
-        yield from bp.count([scaler0])
+        yield from bp.count([scaler0], md=md)
         s = scaler0.read()
 
     # y has to move before z, close shutter... 
@@ -467,7 +469,9 @@ def areaDetectorAcquire(det, md={}):
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
     # print(f"DEBUG: areaDetectorAcquire(): {det.hdf1.stage_sigs}")
-    yield from bp.count([det], md)          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
+    md["method"] = "areaDetectorAcquire"
+    md["area_detector_name"] = det.name
+    yield from bp.count([det], md=md)          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
     yield from bps.mv(
         user_data.scanning, "no",          # we are done
     )
