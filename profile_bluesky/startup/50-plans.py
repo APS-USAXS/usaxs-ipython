@@ -256,8 +256,23 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
+    
+    _md = {}
+    _md.update(md)
+    _md['plan_name'] = 'Flyscan'
+    _md['plan_args'] = dict(
+        pos_X = pos_X,
+        pos_Y = pos_Y,
+        thickness = thickness,
+        scan_title = scan_title,
+        )
+    _md['fly_scan_time'] = usaxs_flyscan.scan_time.value
+        #'detectors': [det.name for det in detectors],
+        #'num_points': num,
+        #'num_intervals': num_intervals,
+        #'hints': {}
 
-    yield from usaxs_flyscan.plan(md=md)        # DO THE FLY SCAN
+    yield from usaxs_flyscan.plan(md=_md)        # DO THE FLY SCAN
 
     yield from bps.mv(
         user_data.scanning, "no",          # for sure, we are not scanning now
