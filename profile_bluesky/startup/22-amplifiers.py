@@ -477,7 +477,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     if not complete and aps.inUserOperations:        # bailed out early from loop
         print(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
-        raise RuntimeError(msg)     # FIXME: may false fail during summarize_plan()
+        if RE.state != "idle":      # don't raise if in summarize_plan()
+            raise RuntimeError(msg)
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations=9):
