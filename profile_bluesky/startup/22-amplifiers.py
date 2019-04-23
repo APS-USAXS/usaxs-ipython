@@ -435,6 +435,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     # Converge if no gains change
     # Also, make sure no detector count rates are stuck at max
     
+    complete = False
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
         yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
