@@ -474,7 +474,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         scaler.count_mode, originals["count_mode"],
     )
 
-    if not complete:        # bailed out early from loop
+    if not complete and aps.inUserOperations:        # bailed out early from loop
         print(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
         raise RuntimeError(msg)     # FIXME: may false fail during summarize_plan()
