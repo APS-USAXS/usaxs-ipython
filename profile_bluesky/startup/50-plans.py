@@ -13,7 +13,7 @@ def uascan():
     # TODO: needs proper args & kwargs matching SPEC's signature
 
 
-def preUSAXStune(md=None):
+def preUSAXStune(md={}):
     """
     tune the USAXS optics *only* if in USAXS mode
 
@@ -112,7 +112,7 @@ def addDeviceStream(devices, label):
     yield from bps.save()
 
 
-def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
+def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     do one USAXS Fly Scan
     """
@@ -322,7 +322,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     # measure_USAXS_PD_dark_currents    # used to be here, not now
 
 
-def beforePlan(md=None):
+def beforePlan(md={}):
     """
     things to be done before every data collection plan
     """
@@ -360,7 +360,7 @@ def beforePlan(md=None):
     yield from bps.mv(terms.FlyScan.order_number, order_number)
 
 
-def afterPlan(md=None):
+def afterPlan(md={}):
     """
     things to be done after every data collection plan
     """
@@ -416,7 +416,7 @@ def run_Excel_file(xl_file, md={}):
     yield from afterPlan(md=md)
 
 
-def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
+def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     collect SAXS data
      """
@@ -568,7 +568,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
 
 
-def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
+def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     collect WAXS data
      """
