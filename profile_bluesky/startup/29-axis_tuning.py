@@ -95,6 +95,7 @@ def plotChannels(*signals_shown):
     Arguments to this function are the actual ophyd signals,
     instances of ScalerChannel, not the names of the signals.
     """
+    # TODO: why not use:  scaler0.select_channels([signal_names])
     scaler0.select_channels(None)       # ALL active channels
     active_signals = getScalerActiveSignals()
     if len(signals_shown) == 0:
