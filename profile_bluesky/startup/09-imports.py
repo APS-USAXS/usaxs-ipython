@@ -24,6 +24,7 @@ from ophyd.mca import EpicsMCARecord
 from ophyd.device import DynamicDeviceComponent
 from ophyd.device import FormattedComponent
 from ophyd.scaler import ScalerCH, ScalerChannel
+from ophyd.signal import Kind
 from ophyd.sim import SynSignal
 from ophyd.utils import OrderedDefaultDict
 from ophyd.utils import set_and_wait
