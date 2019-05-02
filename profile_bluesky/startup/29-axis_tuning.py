@@ -70,50 +70,14 @@ else:
     TUNING_DET_SIGNAL = I0_SIGNAL
 
 
-def getScalerActiveSignals():
-    """
-    find all the scaler channels that are active
-    
-    active: means they have defined names in EPICS
-    """
-    read_attrs = scaler0.read_attrs
-    scaler0.select_channels(None)
-    signals = []
-    for sname in scaler0.read_attrs:
-        s = getattr(scaler0, sname)
-        if isinstance(s, ScalerChannel):
-            signals.append(s)
-    scaler0.read_attrs = read_attrs
-    return signals
-
-
-def plotChannels(*signals_shown):
-    """
-    select a list of scaler channels for plotting
-    
-    Instead of plotting ALL active channels, just the given ones.
-    Arguments to this function are the actual ophyd signals,
-    instances of ScalerChannel, not the names of the signals.
-    """
-    # TODO: why not use:  scaler0.select_channels([signal_names])
-    scaler0.select_channels(None)       # ALL active channels
-    active_signals = getScalerActiveSignals()
-    if len(signals_shown) == 0:
-        signals_shown = active_signals
-    for s in active_signals:
-        if s in signals_shown:
-            s.kind = Kind.hinted
-        else:
-            s.kind = Kind.config
-
-
 # -------------------------------------------
 
 def mr_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(TUNING_DET_SIGNAL)
+    scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
      
  
 def mr_posttune_hook():
@@ -123,7 +87,7 @@ def mr_posttune_hook():
     if m_stage.r.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
     
-    plotChannels()
+    scaler0.select_channels(None)
  
 
 def _getScalerSignalName_(scaler, signal):
@@ -187,7 +151,8 @@ def m2rp_pretune_hook():
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
-    plotChannels(TUNING_DET_SIGNAL)
+    scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
     
 
 def m2rp_posttune_hook():
@@ -201,7 +166,7 @@ def m2rp_posttune_hook():
     if m_stage.r2p.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
     
-    plotChannels()
+    scaler0.select_channels(None)
 
 
 # use I00 (if MS stage is used, use I0)
@@ -229,7 +194,8 @@ def msrp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(TUNING_DET_SIGNAL)
+    scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
     
  
 def msrp_posttune_hook():
@@ -239,7 +205,7 @@ def msrp_posttune_hook():
     if ms_stage.rp.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
 
-    plotChannels()
+    scaler0.select_channels(None)
  
  
 # use I00 (if MS stage is used, use I0)
@@ -265,7 +231,8 @@ def ar_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(a_stage.r.name, a_stage.r.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(UPD_SIGNAL)
+    scaler0.select_channels([UPD_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
 
 
 def ar_posttune_hook():
@@ -280,7 +247,7 @@ def ar_posttune_hook():
             usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
             a_stage.r, terms.USAXS.ar_val_center.value,
         )
-    plotChannels()
+    scaler0.select_channels(None)
 
 
 a_stage.r.tuner = APS_plans.TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
@@ -309,7 +276,8 @@ def asrp_pretune_hook():
     msg = "Tuning axis {}, current position is {}"
     print(msg.format(as_stage.rp.name, as_stage.rp.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(UPD_SIGNAL)
+    scaler0.select_channels([UPD_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
     
  
 def asrp_posttune_hook():
@@ -320,7 +288,7 @@ def asrp_posttune_hook():
     if as_stage.rp.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
 
-    plotChannels()
+    scaler0.select_channels(None)
 
  
 # use I00 (if MS stage is used, use I0)
@@ -351,7 +319,8 @@ def a2rp_pretune_hook():
     print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
-    plotChannels(UPD_SIGNAL)
+    scaler0.select_channels([UPD_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
 
 
 def a2rp_posttune_hook():
@@ -365,7 +334,7 @@ def a2rp_posttune_hook():
     if a_stage.r2p.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
 
-    plotChannels()
+    scaler0.select_channels(None)
 
 
 a_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
@@ -395,7 +364,8 @@ def dx_pretune_hook():
     stage = d_stage.x
     print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(UPD_SIGNAL)
+    scaler0.select_channels([UPD_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
 
 
 def dx_posttune_hook():
@@ -405,7 +375,7 @@ def dx_posttune_hook():
     if stage.tuner.tune_ok:
         yield from bps.mv(terms.SAXS.dx_in, stage.position)
 
-    plotChannels()
+    scaler0.select_channels(None)
 
 
 d_stage.x.tuner = APS_plans.TuneAxis([scaler0], d_stage.x, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
@@ -434,7 +404,8 @@ def dy_pretune_hook():
     stage = d_stage.y
     print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    plotChannels(UPD_SIGNAL)
+    scaler0.select_channels([UPD_SIGNAL.chname.value])
+    scaler0.channels.chan01.kind = Kind.config
 
 
 def dy_posttune_hook():
@@ -444,7 +415,7 @@ def dy_posttune_hook():
     if stage.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.DY0, stage.position)
 
-    plotChannels()
+    scaler0.select_channels(None)
 
 
 d_stage.y.tuner = APS_plans.TuneAxis([scaler0], d_stage.y, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
