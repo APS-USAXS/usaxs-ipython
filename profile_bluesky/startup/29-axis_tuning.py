@@ -87,20 +87,23 @@ def getScalerActiveSignals():
     return signals
 
 
-def plotChannels(*signals):
+def plotChannels(*signals_shown):
     """
     select a list of scaler channels for plotting
     
-    Instead of plotting ALL active channels
+    Instead of plotting ALL active channels, just the given ones.
+    Arguments to this function are the actual ophyd signals,
+    instances of ScalerChannel, not the names of the signals.
     """
-    scaler0.select_channels(None)
-    if len(signals) == 0:
-        signals = getScalerActiveSignals()
-    else:
-        for s in getScalerActiveSignals():
+    scaler0.select_channels(None)       # ALL active channels
+    active_signals = getScalerActiveSignals()
+    if len(signals_shown) == 0:
+        signals_shown = active_signals
+    for s in active_signals:
+        if s in signals_shown:
+            s.kind = Kind.hinted
+        else:
             s.kind = Kind.config
-    for s in signals:
-        s.kind = Kind.hinted
 
 
 # -------------------------------------------
