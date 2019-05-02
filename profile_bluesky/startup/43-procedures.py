@@ -350,7 +350,9 @@ def measure_USAXS_Transmission(md={}):
             scaler0.preset_time, terms.USAXS.transmission.count_time.value
         )
         md["plan_name"] = "measure_USAXS_Transmission"
+        scaler0.select_channels(["I0_USAXS", "TR diode"])
         yield from bp.count([scaler0], md=md)
+        scaler0.select_channels(None)
         s = scaler0.read()
         secs = s["scaler0_time"]["value"]
         _tr_diode = s["TR diode"]["value"]
@@ -362,7 +364,9 @@ def measure_USAXS_Transmission(md={}):
             yield from bps.mv(
                 scaler0.preset_time, terms.USAXS.transmission.count_time.value
             )
+            scaler0.select_channels(["I0_USAXS", "TR diode"])
             yield from bp.count([scaler0], md=md)
+            scaler0.select_channels(None)
             s = scaler0.read()
 
         yield from bps.mv(
