@@ -252,9 +252,11 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         # dy_start, flyscan_trajectories.dy.value[0],
     )
 
+    SCAN_N = RE.md["scan_id"]+1     # update with next number
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
+        user_data.spec_scan, SCAN_N,
     )
     
     _md = {}
