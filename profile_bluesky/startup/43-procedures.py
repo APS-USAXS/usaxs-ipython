@@ -463,11 +463,30 @@ def measure_SAXS_Transmission(md={}):
     print(msg)
 
 
+@APS_plans.run_in_thread
+def remaining_time_reporter(title, duration_s, interval_s=5, poll_s=0.05):
+    if duration_s < interval_s:
+        return
+    t0 = t = time.time()
+    expires = t + duration_s
+    update = t + interval_s
+    print()
+    while time.time() < expires:
+        remaining = expires - t
+        if t > update:
+            update += interval_s
+            print(f"{title}: {remaining:.1f}s remaining")
+        time.sleep(poll_s)
+        t = time.time()
+
+
 def areaDetectorAcquire(det, md={}):
     """
     acquire image(s) from the named area detector
     """
+    acquire_time = det.cam.acquire_time.value
     # Note: AD's HDF File Writer can use up to 5 seconds to finish writing the file
+    
     t0 = time.time()
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
@@ -475,9 +494,14 @@ def areaDetectorAcquire(det, md={}):
     # print(f"DEBUG: areaDetectorAcquire(): {det.hdf1.stage_sigs}")
     md["method"] = "areaDetectorAcquire"
     md["area_detector_name"] = det.name
+    if md.get("plan_name") is None:
+        md["plan_name"] = "image"
+
+    if RE.state != "idle":
+        remaining_time_reporter(md["plan_name"], acquire_time)
+
     yield from bp.count([det], md=md)          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
-    yield from bps.mv(
-        user_data.scanning, "no",          # we are done
-    )
+
+    yield from bps.mv(user_data.scanning, "no",)  # we are done
     elapsed = time.time() - t0
     print(f"Finished SAXS/WAXS data collection in {elapsed} seconds.")
