@@ -163,21 +163,21 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, SCAN_N,
+        user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.value
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
-   )
+    )
 
     # offset the calc from exact zero so can plot log(|Q|)
     q_offset = terms.USAXS.start_offset.value
     angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
     ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
-
+    
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         # these two were moved by mode_USAXS(), belt & suspenders here
@@ -188,7 +188,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
     )
-
+    
     # TODO: what to do with USAXSScanUp?
     # 2019-01-25, prj+jil: this is probably not used now, only known to SPEC
     # it's used to cal Finish_in_Angle and START
@@ -200,7 +200,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     yield from bps.install_suspender(suspend_BeamInHutch)
     yield from measure_USAXS_Transmission(md=md)
-
+    
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
@@ -220,6 +220,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         ti_filter_shutter, "open",
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+    
 
     FlyScanAutoscaleTime = 0.025
     yield from bps.mv(
@@ -241,7 +242,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         )
 
     yield from user_data.set_state_plan("Running Flyscan")
-
+    
     ### move the stages to flyscan starting values from EPICS PVs
     yield from bps.mv(
         a_stage.r, flyscan_trajectories.ar.value[0],
@@ -256,7 +257,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
-        user_data.spec_scan, SCAN_N,
+        user_data.spec_scan, str(SCAN_N),
     )
     
     _md = {}
@@ -484,7 +485,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, SCAN_N,
+        user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
     )
@@ -634,7 +635,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, SCAN_N,
+        user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
     )
