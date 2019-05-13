@@ -120,12 +120,12 @@ class UserDataDevice(Device):
     sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
-    spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile")
-    spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan")
-    state = Component(EpicsSignal,              "9idcLAX:USAXS:state")
+    spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
+    spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan", string=True)
+    state = Component(EpicsSignal,              "9idcLAX:USAXS:state", string=True)
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
     user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir", string=True)
-    user_name = Component(EpicsSignal,          "9idcLAX:UserName")
+    user_name = Component(EpicsSignal,          "9idcLAX:UserName", string=True)
 
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
@@ -325,7 +325,7 @@ class Parameters_SAXS(Device):
     diode_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPDgain")
     I0_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0gain")
 
-    base_dir = Component(EpicsSignal, "9idcLAX:SAXS:directory")
+    base_dir = Component(EpicsSignal, "9idcLAX:SAXS:directory", string=True)
 
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:SAXS:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:SAXS:NumImages")
@@ -342,7 +342,7 @@ class Parameters_WAXS(Device):
     x_out = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_out")
     x_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_limit_offset")
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_WAXS:Exp_")
-    base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory")
+    base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory", string=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")
 
@@ -366,7 +366,7 @@ class Parameters_Imaging(Device):
 
     flat_field = Component(EpicsSignal, "9idcLAX:USAXS_Img:FlatFieldImage")
     dark_field = Component(EpicsSignal, "9idcLAX:USAXS_Img:DarkFieldImage")
-    title = Component(EpicsSignal, "9idcLAX:USAXS_Img:ExperimentTitle")
+    title = Component(EpicsSignal, "9idcLAX:USAXS_Img:ExperimentTitle", string=True)
 
     h_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgHorApperture")
     v_size = Component(EpicsSignal, "9idcLAX:USAXS_Img:ImgVertApperture")
