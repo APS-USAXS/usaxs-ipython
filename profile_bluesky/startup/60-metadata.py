@@ -24,6 +24,12 @@ for key, value in os.environ.items():
     if key.startswith("EPICS") and key not in _skip_these_:
         RE.md[key] = value
 
-print("Metadata dictionary:")
+print("Metadata dictionary (RE.md):")
+_t = pyRestTable.Table()
+_t.addLabel("key")
+_t.addLabel("value")
 for k, v in sorted(RE.md.items()):
-    print("RE.md['%s']" % k, "=", v)
+    # print("RE.md['%s']" % k, "=", v)
+    _t.addRow((k, v))
+print(_t)
+del _t
