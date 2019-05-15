@@ -355,11 +355,15 @@ def beforePlan(md={}):
             # saxs_det.cam.file_number.value,
             # waxs_det.cam.file_number.value,
         ])
-    for det in (saxs_det, waxs_det):
-        yield from bps.mv(
-            # det.cam.file_number, order_number,    # missing from ophyd's PilatusDetectorCam
-            det.hdf1.file_number, order_number,
-        )
+
+    try:
+        yield from bps.mv(saxs_det.hdf1.file_number, order_number)
+    except NameError:
+        pass
+    try:
+        yield from bps.mv(waxs_det.hdf1.file_number, order_number)
+    except NameError:
+        pass
     yield from bps.mv(terms.FlyScan.order_number, order_number)
 
 
