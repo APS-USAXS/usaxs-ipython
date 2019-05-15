@@ -21,6 +21,7 @@ class UsaxsFlyScanDevice(Device):
     scan_time = Component(EpicsSignal, "9idcLAX:USAXS:FS_ScanTime")
     num_points = Component(EpicsSignal, "9idcLAX:USAXS:FS_NumberOfPoints")
     flying = Component(Signal, value=False)
+    timeout_s = 120
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -65,7 +66,7 @@ class UsaxsFlyScanDevice(Device):
         def progress_reporting():
             logger.debug("progress_reporting has arrived")
             t = time.time()
-            timeout = t + self.scan_time.value + 20 # extra padded time
+            timeout = t + self.scan_time.value + self.timeout_s # extra padded time
             startup = t + self.update_interval_s/2
             while t < startup and not  self.flying.value:    # wait for flyscan to start
                 time.sleep(0.01)
