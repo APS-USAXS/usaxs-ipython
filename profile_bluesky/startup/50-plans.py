@@ -392,6 +392,17 @@ def run_Excel_file(xl_file, md={}):
     excel_file = os.path.abspath(xl_file)
     assert os.path.exists(excel_file)
     xl = APS_utils.ExcelDatabaseFileGeneric(excel_file)
+
+    if len(xl.db) > 0:
+        # print the table of actions
+        print(f"run_Excel_file('{xl_file}')")
+        tbl = pyRestTable.Table()
+        tbl.labels = ["#",]
+        tbl.labels += list(xl.db[list(xl.db.keys())[0]].keys())
+        for i, row in enumerate(xl.db.values()):
+            tbl.addRow([i+1,] + list(row.values()))
+        print(tbl)
+
     yield from beforePlan(md=md)
     for i, row in enumerate(xl.db.values()):
         print(f"Excel row {i}: {row}")
@@ -405,6 +416,7 @@ def run_Excel_file(xl_file, md={}):
         _md["xl_file"] = xl_file
         _md["excel_row_number"] = i+1
         _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
+        _md["table_of_actions"] = str(tbl)
         _md.update(md or {})      # overlay with user-supplied metadata
         if scan_command == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
