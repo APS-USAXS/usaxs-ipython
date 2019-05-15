@@ -409,7 +409,7 @@ def run_Excel_file(xl_file, md={}):
 
     yield from beforePlan(md=md)
     for i, row in enumerate(xl.db.values()):
-        print(f"Excel row {i}: {row}")
+        print(f"Excel row {i+1}: {row}")
         scan_command = row["scan"].lower()
         # information from all columns goes into the metadata
         # columns names are the keys in the metadata dictionary
@@ -420,7 +420,7 @@ def run_Excel_file(xl_file, md={}):
         _md["xl_file"] = xl_file
         _md["excel_row_number"] = i+1
         _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
-        _md["table_of_actions"] = str(tbl)
+        # _md["table_of_actions"] = str(tbl)
         _md.update(md or {})      # overlay with user-supplied metadata
         if scan_command == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
@@ -537,6 +537,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         ti_filter_shutter, "close",
     )
 
+    SCAN_N = RE.md["scan_id"]+1     # update with next number
     old_delay = scaler0.delay.value
     yield from bps.mv(
         scaler1.preset_time, terms.SAXS.acquire_time.value + 1,
@@ -552,6 +553,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, 0,
         terms.SAXS.start_exposure_time, ts,
         user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
+        user_data.spec_scan, str(SCAN_N),
     )
 
     yield from bps.mv(
