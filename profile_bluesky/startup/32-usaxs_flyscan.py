@@ -52,14 +52,14 @@ class UsaxsFlyScanDevice(Device):
                     channel = 0
                 terms.FlyScan.elapsed_time.put(elapsed)  # for our GUI display
 
-            msg = "%.02fs - flying " % t
-            msg += "  ar = %.7f" % a_stage.r.position
-            msg += "  ay = %.5f" % a_stage.y.position
-            msg += "  dy = %.5f" % d_stage.y.position
-            msg += f"  channel = {channel}"
+            values = [f"{t:.2f}",]
+            values.append(f"{a_stage.r.position:.7f}")
+            values.append(f"{a_stage.y.position:.5f}")
+            values.append(f"{d_stage.y.position:.5f}")
+            values.append(f"{channel}")
             if elapsed is not None:
-                msg += "  elapsed time = %.2f" % elapsed
-            return msg
+                values.append(f"{elapsed:.2f}")
+            return "  ".join([f"{s:11}" for s in values])
 
         @APS_plans.run_in_thread
         def progress_reporting():
@@ -69,6 +69,8 @@ class UsaxsFlyScanDevice(Device):
             startup = t + self.update_interval_s/2
             while t < startup and not  self.flying.value:    # wait for flyscan to start
                 time.sleep(0.01)
+            labels = ("flying, s", "ar, deg", "ay, mm", "dy, mm", "channel", "elapsed, s")
+            print("  ".join([f"{s:11}" for s in labels]))
             while t < timeout and self.flying.value:
                 if t > self.update_time:
                     self.update_time = t + self.update_interval_s
