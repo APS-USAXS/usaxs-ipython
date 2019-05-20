@@ -68,7 +68,7 @@ class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
         elif poll_s < self._poll_s_min_:
             poll_s = self._poll_s_min_
 
-        t0 = time.time()
+        # t0 = time.time()
         while self.pss_state.get() not in target:
             time.sleep(poll_s)
             # elapsed = time.time() - t0

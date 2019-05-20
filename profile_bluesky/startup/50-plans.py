@@ -173,8 +173,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     # offset the calc from exact zero so can plot log(|Q|)
-    q_offset = terms.USAXS.start_offset.value
-    angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
+    # q_offset = terms.USAXS.start_offset.value
+    # angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
     # ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
     
     yield from bps.mv(
