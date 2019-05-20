@@ -89,7 +89,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
         for i, s in enumerate(acceptable[:num_gains]):
             # verify all gains use same suffix text
             msg = "gainindex[{}] = {}, expected ending '{}'".format(i, s, self.gain_suffix)
-            assert s[s.find(" "):] == self.gain_suffix
+            assert s[s.find(" "):] == self.gain_suffix, msg
         
         self._gain_info_known = True
 
@@ -198,7 +198,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         for i, s in enumerate(acceptable[:num_gains]):
             # verify all gains use same suffix text
             msg = "reqrange[{}] = {}, expected ending: '{}'".format(i, s, self.gain_suffix)
-            assert s[s.find(" "):] == self.gain_suffix
+            assert s[s.find(" "):] == self.gain_suffix, msg
         
         self._gain_info_known = True
 

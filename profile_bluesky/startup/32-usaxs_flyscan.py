@@ -157,7 +157,7 @@ class UsaxsFlyScanDevice(Device):
 
         if bluesky_runengine_running:
             prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
-        path = os.path.abspath(self.saveFlyData_HDF5_dir)
+        # path = os.path.abspath(self.saveFlyData_HDF5_dir)
         specwriter._cmt("start", f"HDF5 configuration file: {self.saveFlyData_config}")
 
         g = uuid.uuid4()

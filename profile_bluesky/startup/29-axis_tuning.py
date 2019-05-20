@@ -61,13 +61,7 @@ These attributes, set internally, are results of the tune scan::
 TUNE_METHOD_PEAK_CHOICE = "com"
 
 USING_MS_STAGE = False
-
-
-# use I00 (if MS stage is used, use I0)
-if USING_MS_STAGE:
-    TUNING_DET_SIGNAL = I00_SIGNAL
-else:
-    TUNING_DET_SIGNAL = I0_SIGNAL
+TUNING_DET_SIGNAL = {True: I00_SIGNAL, False: I0_SIGNAL}[USING_MS_STAGE]
 
 
 # -------------------------------------------

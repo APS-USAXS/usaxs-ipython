@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from ophyd import EpicsSignal
-import pyRestTable
 import tester_100
 
 

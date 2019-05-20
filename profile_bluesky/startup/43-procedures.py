@@ -136,10 +136,9 @@ def mode_USAXS():
         yield from bps.mv(terms.USAXS.retune_needed, True)
 
 
-def mode_SBUSAXS():
-    pass
+# def mode_SBUSAXS():  # TODO:
+mode_SBUSAXS = mode_USAXS       # for now
 
-mode_SBUSAXS = mode_USAXS       # really the same thing, at least for now
 
 def mode_SAXS():
     # plc_protect.stop_if_tripped()
@@ -302,13 +301,8 @@ def mode_Radiography():
     print(msg)
 
 
-def mode_imaging():
-    pass
-    """
-# /share1/USAXS_data/2019-02/USAXS_user_macros.mac
-def useModeImaging 'useModeUSAXS'
-    """
-mode_imaging = mode_USAXS
+# def mode_imaging():       # TODO: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
+mode_imaging = mode_USAXS   # for now
 
 
 def mode_OpenBeamPath():
@@ -467,7 +461,7 @@ def measure_SAXS_Transmission(md={}):
 def remaining_time_reporter(title, duration_s, interval_s=5, poll_s=0.05):
     if duration_s < interval_s:
         return
-    t0 = t = time.time()
+    t = time.time()
     expires = t + duration_s
     update = t + interval_s
     print()
