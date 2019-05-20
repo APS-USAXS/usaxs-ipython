@@ -19,13 +19,13 @@ BeamInHutch = EpicsSignal(
 )
 
 
-if False:       # TODO: needs some thought and refactoring
-      # this is used to set the check beam PV to use many PVs and conditions to decide,
-      # if there is chance to have beam. Uses also userCalc on lax
-    usaxs_CheckBeamSpecial = EpicsSignal(
-        "9idcLAX:blCalc:userCalc2",
-        name="usaxs_CheckBeamSpecial"
-    )
+# TODO: needs some thought and refactoring
+# this is used to set the check beam PV to use many PVs and conditions to decide,
+# if there is chance to have beam. Uses also userCalc on lax
+usaxs_CheckBeamSpecial = EpicsSignal(
+	"9idcLAX:blCalc:userCalc2",
+	name="usaxs_CheckBeamSpecial"
+	)
 
 connect_delay_s = 1
 while not mono_shutter.pss_state.connected:
