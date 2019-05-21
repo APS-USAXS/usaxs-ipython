@@ -399,3 +399,121 @@ class GeneralParameters(Device):
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
+
+
+class Linkam_Base(Device):
+    """
+    Base class for Linkam temperature controller support
+    """
+
+    temperature = Component(Signal)     # override in subclass
+    temperature2 = Component(Signal)    # override in subclass
+    
+    def record_temperature(self, writer):
+        """
+        write temperatures as comment
+        
+        PARAMETERS
+        
+        writer : obj
+            instance of apstools.filewriters.SpecWriterCallback
+
+        """
+        writer._cmt("start", f"Linkam Temperature: {self.temperature} C")
+        writer._cmt("start", f"Linkam Temperature 2: {self.temperature2} C")
+
+class Linkam_CI94(Linkam_Base):
+    """
+    Linkam model CI94 temperature controller
+    
+    EXAMPLE::
+    
+        linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
+
+    """
+    set_rate = Component(EpicsSignal, "setRate")                    # ao
+    set_limit = Component(EpicsSignal, "setLimit")                  # ao
+    set_speed = Component(EpicsSignal, "setSpeed")                  # longout
+    end_after_profile = Component(EpicsSignal, "endAfterProfile")   # bo
+    end_on_stop = Component(EpicsSignal, "endOnStop")               # bo
+    start_control = Component(EpicsSignal, "start")                 # bo
+    stop_control = Component(EpicsSignal, "stop")                   # bo
+    hold_control = Component(EpicsSignal, "hold")                   # bo
+    pump_mode = Component(EpicsSignal, "pumpMode")                  # bo
+
+    error_byte = Component(EpicsSignalRO, "errorByte")              # mbbi
+    status = Component(EpicsSignalRO, "status")                     # mbbi
+    status_in = Component(EpicsSignalRO, "statusIn")                # longin
+    gen_stat = Component(EpicsSignalRO, "genStat")                  # mbbi
+    pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn")         # longin
+    dsc_in = Component(EpicsSignalRO, "dscIn")                      # ai
+    temperature_in = Component(EpicsSignalRO, "tempIn")             # ai
+    temperature2_in = Component(EpicsSignalRO, "temp2In")           # ai
+
+    pump_speed = Component(EpicsSignalRO, "pumpSpeed")              # calc
+    temperature = Component(EpicsSignalRO, "temp")                  # calc
+    temperature2 = Component(EpicsSignalRO, "temp2")                # calc
+
+    # clear_buffer = Component(EpicsSignal, "clearBuffer")          # bo
+    # scan_dis = Component(EpicsSignal, "scanDis")                  # bo
+    # test = Component(EpicsSignal, "test")                         # longout
+    # d_cmd = Component(EpicsSignalRO, "DCmd")                      # ai
+    # t_cmd = Component(EpicsSignalRO, "TCmd")                      # ai
+    # dsc = Component(EpicsSignalRO, "dsc")                         # calc
+
+    def set_temperature(self, set_point):
+        yield from bps.mv(self.set_limit, set_point)
+        print()
+#def set_LinkamTemp '{
+#    local LA_settemp
+#    LA_settemp = ($1)
+#    epics_put("EPlinkam3:ci94:setLimit", LA_settemp)
+#    TEMPLINK = sprintf ("Linkam Set Temperature changed to %g deg C\n", epics_get("EPlinkam3:ci94:setLimit"))
+#    comment "%s" TEMPLINK
+#}'
+
+
+class Linkam_T96(Linkam_Base):
+    """
+    Linkam model T96 temperature controller
+    
+    EXAMPLE::
+    
+        linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
+
+    """
+    vacuum_limit_readback = Component(EpicsSignalRO, "vacuumLimit_RBV")
+    vacuum_status_readback = Component(EpicsSignalRO, "vacuumStatus_RBV")
+    status_error_readback = Component(EpicsSignalRO, "statusError_RBV")
+    ramp_limit_readback = Component(EpicsSignalRO, "rampLimit_RBV")
+    lnp_status_readback = Component(EpicsSignalRO, "lnpStatus_RBV")
+    rampRate_readback = Component(EpicsSignalRO, "rampRate_RBV")
+    heating = Component(EpicsSignal, "heating")
+    temperature_readback = Component(EpicsSignalRO, "temperature_RBV")
+    """
+    record(ai, "$(P)$(T):temperature_RBV")
+    record(ao, "$(P)$(T):rampLimit")
+    record(ai, "$(P)$(T):rampLimit_RBV")
+    record(ao, "$(P)$(T):rampRate")
+    record(ai, "$(P)$(T):rampRate_RBV")
+    record(ai, "$(P)$(T):heaterPower_RBV")
+    record(bo, "$(P)$(T):heating")
+    record(bo, "$(P)$(T):lnpMode")
+    record(longout, "$(P)$(T):lnpSpeed")
+    record(ai, "$(P)$(T):lnpSpeed_RBV")
+    record(bo, "$(P)$(T):vacuum")
+    record(ao, "$(P)$(T):vacuumLimit")
+    record(ai, "$(P)$(T):vacuumLimit_RBV")
+    record(ai, "$(P)$(T):pressure_RBV")
+    record(longin, "$(P)$(T):controllerConfig_RBV")
+    record(longin, "$(P)$(T):controllerError_RBV")
+    record(longin, "$(P)$(T):controllerStatus_RBV")
+    record(longin, "$(P)$(T):stageConfig_RBV")
+    record(bi, "$(P)$(T):statusError_RBV")
+    record(bi, "$(P)$(T):rampAtLimit_RBV")
+    record(bi, "$(P)$(T):heating_RBV")
+    record(bi, "$(P)$(T):vacuumAtLimit_RBV")
+    record(bi, "$(P)$(T):vacuumStatus_RBV")
+    record(bi, "$(P)$(T):lnpStatus_RBV")
+    record(bi, "$(P)$(T):lnpMode_RBV")
+    """
