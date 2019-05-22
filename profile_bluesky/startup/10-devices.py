@@ -422,6 +422,7 @@ class Linkam_Base(Device):
         writer._cmt("start", f"Linkam Temperature: {self.temperature} C")
         writer._cmt("start", f"Linkam Temperature 2: {self.temperature2} C")
 
+
 class Linkam_CI94(Linkam_Base):
     """
     Linkam model CI94 temperature controller
@@ -431,46 +432,41 @@ class Linkam_CI94(Linkam_Base):
         linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
 
     """
-    set_rate = Component(EpicsSignal, "setRate")                    # ao
-    set_limit = Component(EpicsSignal, "setLimit")                  # ao
-    set_speed = Component(EpicsSignal, "setSpeed")                  # longout
-    end_after_profile = Component(EpicsSignal, "endAfterProfile")   # bo
-    end_on_stop = Component(EpicsSignal, "endOnStop")               # bo
-    start_control = Component(EpicsSignal, "start")                 # bo
-    stop_control = Component(EpicsSignal, "stop")                   # bo
-    hold_control = Component(EpicsSignal, "hold")                   # bo
-    pump_mode = Component(EpicsSignal, "pumpMode")                  # bo
-
-    error_byte = Component(EpicsSignalRO, "errorByte")              # mbbi
-    status = Component(EpicsSignalRO, "status")                     # mbbi
-    status_in = Component(EpicsSignalRO, "statusIn")                # longin
-    gen_stat = Component(EpicsSignalRO, "genStat")                  # mbbi
-    pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn")         # longin
-    dsc_in = Component(EpicsSignalRO, "dscIn")                      # ai
-    temperature_in = Component(EpicsSignalRO, "tempIn")             # ai
-    temperature2_in = Component(EpicsSignalRO, "temp2In")           # ai
-
-    pump_speed = Component(EpicsSignalRO, "pumpSpeed")              # calc
     temperature = Component(EpicsSignalRO, "temp")                  # calc
     temperature2 = Component(EpicsSignalRO, "temp2")                # calc
+    pump_speed = Component(EpicsSignalRO, "pumpSpeed")              # calc
 
-    # clear_buffer = Component(EpicsSignal, "clearBuffer")          # bo
-    # scan_dis = Component(EpicsSignal, "scanDis")                  # bo
-    # test = Component(EpicsSignal, "test")                         # longout
-    # d_cmd = Component(EpicsSignalRO, "DCmd")                      # ai
-    # t_cmd = Component(EpicsSignalRO, "TCmd")                      # ai
-    # dsc = Component(EpicsSignalRO, "dsc")                         # calc
+    set_rate = Component(EpicsSignal, "setRate", kind="omitted")                    # ao
+    set_limit = Component(EpicsSignal, "setLimit", kind="omitted")                  # ao
+    set_speed = Component(EpicsSignal, "setSpeed", kind="omitted")                  # longout
+    end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")   # bo
+    end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")               # bo
+    start_control = Component(EpicsSignal, "start", kind="omitted")                 # bo
+    stop_control = Component(EpicsSignal, "stop", kind="omitted")                   # bo
+    hold_control = Component(EpicsSignal, "hold", kind="omitted")                   # bo
+    pump_mode = Component(EpicsSignal, "pumpMode", kind="omitted")                  # bo
+
+    error_byte = Component(EpicsSignalRO, "errorByte", kind="omitted")              # mbbi
+    status = Component(EpicsSignalRO, "status", kind="omitted")                     # mbbi
+    status_in = Component(EpicsSignalRO, "statusIn", kind="omitted")                # longin
+    gen_stat = Component(EpicsSignalRO, "genStat", kind="omitted")                  # mbbi
+    pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn", kind="omitted")         # longin
+    dsc_in = Component(EpicsSignalRO, "dscIn", kind="omitted")                      # ai
+    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")             # ai
+    temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")           # ai
+
+    # clear_buffer = Component(EpicsSignal, "clearBuffer", kind="omitted")          # bo
+    # scan_dis = Component(EpicsSignal, "scanDis", kind="omitted")                  # bo
+    # test = Component(EpicsSignal, "test", kind="omitted")                         # longout
+    # d_cmd = Component(EpicsSignalRO, "DCmd", kind="omitted")                      # ai
+    # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
+    # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
     def set_temperature(self, set_point):
         yield from bps.mv(self.set_limit, set_point)
-        print()
-#def set_LinkamTemp '{
-#    local LA_settemp
-#    LA_settemp = ($1)
-#    epics_put("EPlinkam3:ci94:setLimit", LA_settemp)
-#    TEMPLINK = sprintf ("Linkam Set Temperature changed to %g deg C\n", epics_get("EPlinkam3:ci94:setLimit"))
-#    comment "%s" TEMPLINK
-#}'
+        msg = f"Linkam Set Temperature changed to {set_point} C"
+        print(msg)
+        writer._cmt("start", msg)
 
 
 class Linkam_T96(Linkam_Base):
