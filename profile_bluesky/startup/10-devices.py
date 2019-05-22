@@ -401,29 +401,7 @@ class GeneralParameters(Device):
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
 
-class Linkam_Base(Device):
-    """
-    Base class for Linkam temperature controller support
-    """
-
-    temperature = Component(Signal)     # override in subclass
-    temperature2 = Component(Signal)    # override in subclass
-    
-    def record_temperature(self, writer):
-        """
-        write temperatures as comment
-        
-        PARAMETERS
-        
-        writer : obj
-            instance of apstools.filewriters.SpecWriterCallback
-
-        """
-        writer._cmt("start", f"Linkam Temperature: {self.temperature} C")
-        writer._cmt("start", f"Linkam Temperature 2: {self.temperature2} C")
-
-
-class Linkam_CI94(Linkam_Base):
+class Linkam_CI94(Device):
     """
     Linkam model CI94 temperature controller
     
@@ -463,13 +441,23 @@ class Linkam_CI94(Linkam_Base):
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
     def set_temperature(self, set_point):
+        """set the controller to a new set point"""
         yield from bps.mv(self.set_limit, set_point)
         msg = f"Linkam Set Temperature changed to {set_point} C"
         print(msg)
         writer._cmt("start", msg)
 
+    def record_temperature(self, writer=None):
+        """
+        write temperatures as comment
+        """
+        global specwriter
+        writer = writer or specwriter
+        writer._cmt("start", f"Linkam Temperature: {self.temperature.value} C")
+        writer._cmt("start", f"Linkam Temperature 2: {self.temperature2.value} C")
 
-class Linkam_T96(Linkam_Base):
+
+class Linkam_T96(Device):
     """
     Linkam model T96 temperature controller
     
@@ -478,6 +466,8 @@ class Linkam_T96(Linkam_Base):
         linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
 
     """
+    temperature = Component(EpicsSignalRO, "temperature_RBV")  # ai
+
     vacuum_limit_readback = Component(EpicsSignalRO, "vacuumLimit_RBV")
     vacuum_status_readback = Component(EpicsSignalRO, "vacuumStatus_RBV")
     status_error_readback = Component(EpicsSignalRO, "statusError_RBV")
@@ -485,9 +475,7 @@ class Linkam_T96(Linkam_Base):
     lnp_status_readback = Component(EpicsSignalRO, "lnpStatus_RBV")
     rampRate_readback = Component(EpicsSignalRO, "rampRate_RBV")
     heating = Component(EpicsSignal, "heating")
-    temperature_readback = Component(EpicsSignalRO, "temperature_RBV")
     """
-    record(ai, "$(P)$(T):temperature_RBV")
     record(ao, "$(P)$(T):rampLimit")
     record(ai, "$(P)$(T):rampLimit_RBV")
     record(ao, "$(P)$(T):rampRate")
@@ -513,3 +501,18 @@ class Linkam_T96(Linkam_Base):
     record(bi, "$(P)$(T):lnpStatus_RBV")
     record(bi, "$(P)$(T):lnpMode_RBV")
     """
+
+    def set_temperature(self, set_point):
+        pass    # TODO:
+        # yield from bps.mv(self.set_limit, set_point)
+        # msg = f"Linkam Set Temperature changed to {set_point} C"
+        # print(msg)
+        # writer._cmt("start", msg)
+
+    def record_temperature(self, writer=None):
+        """
+        write temperature as comment
+        """
+        global specwriter
+        writer = writer or specwriter
+        writer._cmt("start", f"Linkam Temperature: {self.temperature.value} C")
