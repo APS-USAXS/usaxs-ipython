@@ -1,7 +1,6 @@
 print(__file__)
 
-
-# Set up default metadata
+"""Set up default metadata"""
 
 RE.md['beamline_id'] = 'APS USAXS 9-ID-C'
 RE.md['proposal_id'] = 'testing Bluesky installation'
@@ -19,18 +18,11 @@ RE.md['versions']['ophyd'] = ophyd.__version__
 from apstools import __version__ as apstools_version
 RE.md['versions']['apstools'] = apstools_version
 del apstools_version
+RE.md['versions']['epics'] = epics.__version__
 
 _skip_these_ = "EPICS_BASE EPICS_BASE_PVT EPICS_DISPLAY_PATH EPICS_EXTENSIONS".split()
 for key, value in os.environ.items():
     if key.startswith("EPICS") and key not in _skip_these_:
         RE.md[key] = value
 
-print("Metadata dictionary (RE.md):")
-_t = pyRestTable.Table()
-_t.addLabel("key")
-_t.addLabel("value")
-for k, v in sorted(RE.md.items()):
-    # print("RE.md['%s']" % k, "=", v)
-    _t.addRow((k, v))
-print(_t)
-del _t
+print_RE_md()
