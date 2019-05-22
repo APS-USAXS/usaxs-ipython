@@ -401,37 +401,72 @@ class GeneralParameters(Device):
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
 
-class Linkam_CI94(Device):
+class Linkam_Base(Device):
+    """common parts of Linkam controller support"""
+    
+    at_temperature_range  = 1       # T must be this close to set point, degree C
+    wait_poll_interval_s  = 5       # time to wait during loop
+    
+    def at_temperature(self, target):
+        return abs(self.temperature.get() - target) <= self.at_temperature_range
+
+    def wait_temperature(self, target, timeout=None):
+        """
+        wait for controller to reach target temperature
+        """
+        # TODO: needs improvement (this is first translation from SPEC)
+        # needs to be blocking method, called in thread
+        # uses a DeviceStatus object
+        t0 = time.time()
+        while not self.at_temperature(target):
+            time.sleep(self.wait_poll_interval_s)
+            elapsed = time.time() - t0
+            msg = f"Waiting {elapsed:.2}s to reach {target}C"
+            msg += f", now at {self.temperature.value}"
+            # TODO: handle timeout
+            print(msg)
+
+
+class Linkam_CI94(Linkam_Base):
     """
     Linkam model CI94 temperature controller
     
     EXAMPLE::
     
-        linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
+        In [1]: linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
+
+        In [2]: linkam_ci94.at_temperature(25)                                                                                                                                         
+        Out[2]: False
+
+        In [3]: linkam_ci94.at_temperature(35)                                                                                                                                         
+        Out[3]: True
+        
+        linkam_ci94.record_temperature()
+        yield from (linkam_ci94.set_temperature(50))
 
     """
-    temperature = Component(EpicsSignalRO, "temp")                  # calc
-    temperature2 = Component(EpicsSignalRO, "temp2")                # calc
-    pump_speed = Component(EpicsSignalRO, "pumpSpeed")              # calc
+    temperature = Component(EpicsSignalRO, "temp")
+    temperature2 = Component(EpicsSignalRO, "temp2")
+    pump_speed = Component(EpicsSignalRO, "pumpSpeed")
 
-    set_rate = Component(EpicsSignal, "setRate", kind="omitted")                    # ao
-    set_limit = Component(EpicsSignal, "setLimit", kind="omitted")                  # ao
-    set_speed = Component(EpicsSignal, "setSpeed", kind="omitted")                  # longout
-    end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")   # bo
-    end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")               # bo
-    start_control = Component(EpicsSignal, "start", kind="omitted")                 # bo
-    stop_control = Component(EpicsSignal, "stop", kind="omitted")                   # bo
-    hold_control = Component(EpicsSignal, "hold", kind="omitted")                   # bo
-    pump_mode = Component(EpicsSignal, "pumpMode", kind="omitted")                  # bo
+    set_rate = Component(EpicsSignal, "setRate", kind="omitted")
+    set_limit = Component(EpicsSignal, "setLimit", kind="omitted")
+    set_speed = Component(EpicsSignal, "setSpeed", kind="omitted")
+    end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")
+    end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")
+    start_control = Component(EpicsSignal, "start", kind="omitted")
+    stop_control = Component(EpicsSignal, "stop", kind="omitted")
+    hold_control = Component(EpicsSignal, "hold", kind="omitted")
+    pump_mode = Component(EpicsSignal, "pumpMode", kind="omitted")
 
-    error_byte = Component(EpicsSignalRO, "errorByte", kind="omitted")              # mbbi
-    status = Component(EpicsSignalRO, "status", kind="omitted")                     # mbbi
-    status_in = Component(EpicsSignalRO, "statusIn", kind="omitted")                # longin
-    gen_stat = Component(EpicsSignalRO, "genStat", kind="omitted")                  # mbbi
-    pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn", kind="omitted")         # longin
-    dsc_in = Component(EpicsSignalRO, "dscIn", kind="omitted")                      # ai
-    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")             # ai
-    temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")           # ai
+    error_byte = Component(EpicsSignalRO, "errorByte", kind="omitted")
+    status = Component(EpicsSignalRO, "status", kind="omitted")
+    status_in = Component(EpicsSignalRO, "statusIn", kind="omitted")
+    gen_stat = Component(EpicsSignalRO, "genStat", kind="omitted")
+    pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn", kind="omitted")
+    dsc_in = Component(EpicsSignalRO, "dscIn", kind="omitted")
+    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
+    temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
 
     # clear_buffer = Component(EpicsSignal, "clearBuffer", kind="omitted")          # bo
     # scan_dis = Component(EpicsSignal, "scanDis", kind="omitted")                  # bo
@@ -440,24 +475,33 @@ class Linkam_CI94(Device):
     # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
-    def set_temperature(self, set_point):
-        """set the controller to a new set point"""
-        yield from bps.mv(self.set_limit, set_point)
-        msg = f"Linkam Set Temperature changed to {set_point} C"
-        print(msg)
-        writer._cmt("start", msg)
-
     def record_temperature(self, writer=None):
-        """
-        write temperatures as comment
-        """
+        """write temperatures as comment"""
         global specwriter
         writer = writer or specwriter
-        writer._cmt("start", f"Linkam Temperature: {self.temperature.value} C")
-        writer._cmt("start", f"Linkam Temperature 2: {self.temperature2.value} C")
+        # TODO: why start document here?
+        msg = f"Linkam Temperature: {self.temperature.value} C"
+        writer._cmt("start", msg)
+        print(msg)
+        
+        msg = f"Linkam Temperature 2: {self.temperature2.value} C"
+        writer._cmt("start", msg)
+        print(msg)
+
+    def set_temperature(self, set_point, writer=None):
+        """change controller to new temperature set point"""
+        global specwriter
+        writer = writer or specwriter
+
+        yield from bps.mv(self.set_limit, set_point)
+        yield from bps.sleep(0.1)   # delay for slow IOC
+        msg = f"Linkam CI94 Set Temperature changed to {set_point} C"
+        print(msg)
+        # TODO: why start document here?
+        writer._cmt("start", msg)
 
 
-class Linkam_T96(Device):
+class Linkam_T96(Linkam_Base):
     """
     Linkam model T96 temperature controller
     
@@ -468,51 +512,50 @@ class Linkam_T96(Device):
     """
     temperature = Component(EpicsSignalRO, "temperature_RBV")  # ai
 
-    vacuum_limit_readback = Component(EpicsSignalRO, "vacuumLimit_RBV")
-    vacuum_status_readback = Component(EpicsSignalRO, "vacuumStatus_RBV")
-    status_error_readback = Component(EpicsSignalRO, "statusError_RBV")
-    ramp_limit_readback = Component(EpicsSignalRO, "rampLimit_RBV")
-    lnp_status_readback = Component(EpicsSignalRO, "lnpStatus_RBV")
-    rampRate_readback = Component(EpicsSignalRO, "rampRate_RBV")
-    heating = Component(EpicsSignal, "heating")
-    """
-    record(ao, "$(P)$(T):rampLimit")
-    record(ai, "$(P)$(T):rampLimit_RBV")
-    record(ao, "$(P)$(T):rampRate")
-    record(ai, "$(P)$(T):rampRate_RBV")
-    record(ai, "$(P)$(T):heaterPower_RBV")
-    record(bo, "$(P)$(T):heating")
-    record(bo, "$(P)$(T):lnpMode")
-    record(longout, "$(P)$(T):lnpSpeed")
-    record(ai, "$(P)$(T):lnpSpeed_RBV")
-    record(bo, "$(P)$(T):vacuum")
-    record(ao, "$(P)$(T):vacuumLimit")
-    record(ai, "$(P)$(T):vacuumLimit_RBV")
-    record(ai, "$(P)$(T):pressure_RBV")
-    record(longin, "$(P)$(T):controllerConfig_RBV")
-    record(longin, "$(P)$(T):controllerError_RBV")
-    record(longin, "$(P)$(T):controllerStatus_RBV")
-    record(longin, "$(P)$(T):stageConfig_RBV")
-    record(bi, "$(P)$(T):statusError_RBV")
-    record(bi, "$(P)$(T):rampAtLimit_RBV")
-    record(bi, "$(P)$(T):heating_RBV")
-    record(bi, "$(P)$(T):vacuumAtLimit_RBV")
-    record(bi, "$(P)$(T):vacuumStatus_RBV")
-    record(bi, "$(P)$(T):lnpStatus_RBV")
-    record(bi, "$(P)$(T):lnpMode_RBV")
-    """
+    vacuum = Component(EpicsSignal, "vacuum", kind="omitted")
 
-    def set_temperature(self, set_point):
-        pass    # TODO:
-        # yield from bps.mv(self.set_limit, set_point)
-        # msg = f"Linkam Set Temperature changed to {set_point} C"
-        # print(msg)
-        # writer._cmt("start", msg)
+    heating = Component(EpicsSignalWithRBV, "heating", kind="omitted")
+    lnp_mode = Component(EpicsSignalWithRBV, "lnpMode", kind="omitted")
+    lnp_speed = Component(EpicsSignalWithRBV, "lnpSpeed", kind="omitted")
+    ramp_limit = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
+    ramp_rate = Component(EpicsSignalWithRBV, "rampRate", kind="omitted")
+    vacuum_limit_readback = Component(EpicsSignalWithRBV, "vacuumLimit", kind="omitted")
 
+    controller_config = Component(EpicsSignalRO, "controllerConfig_RBV", kind="omitted")
+    controller_error = Component(EpicsSignalRO, "controllerError_RBV", kind="omitted")
+    controller_status = Component(EpicsSignalRO, "controllerStatus_RBV", kind="omitted")
+    heater_power = Component(EpicsSignalRO, "heaterPower_RBV", kind="omitted")
+    lnp_status = Component(EpicsSignalRO, "lnpStatus_RBV", kind="omitted")
+    pressure = Component(EpicsSignalRO, "pressure_RBV", kind="omitted")
+    ramp_at_limit = Component(EpicsSignalRO, "rampAtLimit_RBV", kind="omitted")
+    stage_config = Component(EpicsSignalRO, "stageConfig_RBV", kind="omitted")
+    status_error = Component(EpicsSignalRO, "statusError_RBV", kind="omitted")
+    vacuum_at_limit = Component(EpicsSignalRO, "vacuumAtLimit_RBV", kind="omitted")
+    vacuum_status = Component(EpicsSignalRO, "vacuumStatus_RBV", kind="omitted")
+        
     def record_temperature(self, writer=None):
-        """
-        write temperature as comment
-        """
+        """write temperatures as comment"""
         global specwriter
         writer = writer or specwriter
-        writer._cmt("start", f"Linkam Temperature: {self.temperature.value} C")
+        # TODO: why start document here?
+        msg = f"Linkam Temperature: {self.temperature.value} C"
+        writer._cmt("start", msg)
+        print(msg)
+
+    def set_temperature(self, set_point, writer=None):
+        """change controller to new temperature set point"""
+        global specwriter
+        writer = writer or specwriter
+
+        yield from bps.mv(self.ramp_limit, set_point)
+        yield from bps.sleep(0.1)   # delay for slow IOC
+        yield from bps.mv(self.heating, 1)
+        # TODO: why start document here?
+        msg = f"Linkam T96 Set Temperature changed to {set_point} C"
+        writer._cmt("start", msg)
+        print(msg)
+
+
+# TODO: move to 21-signals.py for operations
+linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
+linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
