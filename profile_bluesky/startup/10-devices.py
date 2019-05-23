@@ -415,7 +415,7 @@ class Linkam_Base(Device):
         return abs(self.temperature.get() - target) <= close_enough
 
     @APS_plans.run_in_thread
-    def wait_temperature(
+    def wait_temperature_reporter(
             self, 
             target,                 # desired temperature, C
             timeout=None,           # must reach temperature +/- close_enough in this time, s
@@ -497,30 +497,28 @@ class Linkam_CI94(Linkam_Base):
     # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
-    def record_temperature(self, writer=None):
+    def record_temperature(self):
         """write temperatures as comment"""
-        global specwriter
-        writer = writer or specwriter
-        # TODO: why start document here?
         msg = f"Linkam Temperature: {self.temperature.value} C"
-        writer._cmt("start", msg)
+        spec_comment(msg)
         print(msg)
         
         msg = f"Linkam Temperature 2: {self.temperature2.value} C"
-        writer._cmt("start", msg)
+        spec_comment(msg)
         print(msg)
 
-    def set_temperature(self, set_point, writer=None):
+    def set_temperature(self, set_point, wait=True):
         """change controller to new temperature set point"""
-        global specwriter
-        writer = writer or specwriter
-
         yield from bps.mv(self.set_limit, set_point)
         yield from bps.sleep(0.1)   # delay for slow IOC
+
         msg = f"Linkam CI94 Set Temperature changed to {set_point} C"
         print(msg)
-        # TODO: why start document here?
-        writer._cmt("start", msg)
+        spec_comment(msg)
+        
+        if wait:
+            # TODO:
+            pass
 
 
 class Linkam_T96(Linkam_Base):
@@ -555,27 +553,25 @@ class Linkam_T96(Linkam_Base):
     vacuum_at_limit = Component(EpicsSignalRO, "vacuumAtLimit_RBV", kind="omitted")
     vacuum_status = Component(EpicsSignalRO, "vacuumStatus_RBV", kind="omitted")
         
-    def record_temperature(self, writer=None):
+    def record_temperature(self):
         """write temperatures as comment"""
-        global specwriter
-        writer = writer or specwriter
-        # TODO: why start document here?
         msg = f"Linkam Temperature: {self.temperature.value} C"
-        writer._cmt("start", msg)
+        spec_comment(msg)
         print(msg)
 
-    def set_temperature(self, set_point, writer=None):
+    def set_temperature(self, set_point, wait=True):
         """change controller to new temperature set point"""
-        global specwriter
-        writer = writer or specwriter
-
         yield from bps.mv(self.ramp_limit, set_point)
         yield from bps.sleep(0.1)   # delay for slow IOC
         yield from bps.mv(self.heating, 1)
-        # TODO: why start document here?
+
         msg = f"Linkam T96 Set Temperature changed to {set_point} C"
-        writer._cmt("start", msg)
+        spec_comment(msg)
         print(msg)
+        
+        if wait:
+            # TODO:
+            pass
 
 
 # TODO: move to 21-signals.py for operations
