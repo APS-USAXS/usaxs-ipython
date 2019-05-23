@@ -518,13 +518,11 @@ class Linkam_CI94(Linkam_Base):
         spec_comment(msg)
         
         if wait:
-            if timeout is None:
-                expires = None
-            else:
-                expires = time.time() + max(timeout, 0)  # ensure non-negative timeout
+            if timeout is not None:
+                timeout = float(max(timeout, 0))  # ensure non-negative timeout
 
-            _st = DeviceStatus(self.temperature)
-            _st_timeout = Status()
+            _st = DeviceStatus(self.temperature, timeout=timeout)
+            # TODO: _st.watch() ? How to use?
             started = False
 
             def changing_cb(value, timestamp, **kwargs):
