@@ -404,28 +404,49 @@ class GeneralParameters(Device):
 class Linkam_Base(Device):
     """common parts of Linkam controller support"""
     
-    at_temperature_range  = 1       # T must be this close to set point, degree C
-    wait_poll_interval_s  = 5       # time to wait during loop
+    close_enough  = 1       # requirement: |T - target| must be <= this, degree C
+    report_interval  = 5    # time between reports during loop, s
+    poll_delay = 0.02       # time to wait during polling loop, s
     
-    def at_temperature(self, target):
-        return abs(self.temperature.get() - target) <= self.at_temperature_range
+    wait_time = Component(Signal, kind="omitted", value=0)
+    
+    def at_temperature(self, target, close_enough=None):
+        close_enough = close_enough or self.close_enough
+        return abs(self.temperature.get() - target) <= close_enough
 
     @APS_plans.run_in_thread
-    def wait_temperature(self, target, timeout=None):
+    def wait_temperature(
+            self, 
+            target,                 # desired temperature, C
+            timeout=None,           # must reach temperature +/- close_enough in this time, s
+            close_enough=None,      # acceptable temperature range
+            report_interval=None,   # printed updates at this time interval, s
+            poll_delay=None):       # internal poll loop sleep period, s
         """
         wait for controller to reach target temperature
         """
-        # TODO: needs improvement (this is first translation from SPEC)
-        # needs to be blocking method, called in thread
-        # uses a DeviceStatus object
         t0 = time.time()
-        while not self.at_temperature(target):
-            time.sleep(self.wait_poll_interval_s)
-            elapsed = time.time() - t0
-            msg = f"Waiting {elapsed:.2}s to reach {target}C"
-            msg += f", now at {self.temperature.value}"
-            # TODO: handle timeout
-            print(msg)
+        
+        self.wait_time.put(time.time() - t0)
+        report_interval = report_interval or self.report_interval
+        poll_delay = poll_delay or self.poll_delay
+        if timeout is None:
+            expires = None
+        else:
+            expires = time.time() + max(timeout, 0)  # ensure non-negative timeout
+
+        report = self.wait_time.value + report_interval
+        while not self.at_temperature(target, close_enough=close_enough):
+            time.sleep(poll_delay)
+            self.wait_time.put(time.time() - t0)
+            if self.wait_time.value >= report:
+                report += report_interval
+                msg = f"Waiting {self.wait_time.value:.2}s to reach {target}C"
+                msg += f", now at {self.temperature.value}"
+                print(msg)
+            if expires is not None and self.wait_time.value > expires:
+                msg = f"Timeout ({timeout}s) waiting to reach {target}C"
+                raise TimeoutError(msg)
 
 
 class Linkam_CI94(Linkam_Base):
