@@ -2,6 +2,5 @@ extraction:
   python:
     python_setup:
       version: 3
-    setup_py: false
 queries:
   - exclude: py/unused-import
