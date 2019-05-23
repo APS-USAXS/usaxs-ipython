@@ -3,15 +3,15 @@ extraction:
     python_setup:
       version: 3
     requirements:
-      - bluesky
-      - databroker
-      - event-model
-      - h5py
-      - matplotlib
-      - numpy
-      - ophyd
-      - pyRestTable
-      - spec2nexus
+      bluesky
+      databroker
+      event-model
+      h5py
+      matplotlib
+      numpy
+      ophyd
+      pyRestTable
+      spec2nexus
     setup_py: false
 queries:
   - exclude: py/unused-import
