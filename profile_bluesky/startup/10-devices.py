@@ -410,7 +410,8 @@ class Linkam_Base(Device):
     
     wait_time = Component(Signal, kind="omitted", value=0)
     
-    def at_temperature(self, target, close_enough=None):
+    def settled(self, target, close_enough=None):
+        """Is temperature close enough to target?"""
         close_enough = close_enough or self.close_enough
         return abs(self.temperature.get() - target) <= close_enough
 
@@ -436,7 +437,7 @@ class Linkam_Base(Device):
             expires = time.time() + max(timeout, 0)  # ensure non-negative timeout
 
         report = self.wait_time.value + report_interval
-        while not self.at_temperature(target, close_enough=close_enough):
+        while not self.settled(target, close_enough=close_enough):
             time.sleep(poll_s)
             self.wait_time.put(time.time() - t0)
             if self.wait_time.value >= report:
@@ -457,10 +458,10 @@ class Linkam_CI94(Linkam_Base):
     
         In [1]: linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
 
-        In [2]: linkam_ci94.at_temperature(25)                                                                                                                                         
+        In [2]: linkam_ci94.settled(25)                                                                                                                                         
         Out[2]: False
 
-        In [3]: linkam_ci94.at_temperature(35)                                                                                                                                         
+        In [3]: linkam_ci94.settled(35)                                                                                                                                         
         Out[3]: True
         
         linkam_ci94.record_temperature()
@@ -507,7 +508,7 @@ class Linkam_CI94(Linkam_Base):
         spec_comment(msg)
         print(msg)
 
-    def set_temperature(self, set_point, wait=True):
+    def set_temperature(self, set_point, wait=True, timeout=None):
         """change controller to new temperature set point"""
         yield from bps.mv(self.set_limit, set_point)
         yield from bps.sleep(0.1)   # delay for slow IOC
@@ -517,8 +518,22 @@ class Linkam_CI94(Linkam_Base):
         spec_comment(msg)
         
         if wait:
-            # TODO:
-            pass
+            if timeout is None:
+                expires = None
+            else:
+                expires = time.time() + max(timeout, 0)  # ensure non-negative timeout
+
+            _st = DeviceStatus(self.temperature)
+            _st_timeout = Status()
+            started = False
+
+            def changing_cb(value, timestamp, **kwargs):
+                if started and self.settled(set_point):
+                    _st._finished()
+
+            self.temperature.subscribe(changing_cb)
+            started = True
+            return _st
 
 
 class Linkam_T96(Linkam_Base):
