@@ -410,6 +410,7 @@ class Linkam_Base(Device):
     def at_temperature(self, target):
         return abs(self.temperature.get() - target) <= self.at_temperature_range
 
+    @APS_plans.run_in_thread
     def wait_temperature(self, target, timeout=None):
         """
         wait for controller to reach target temperature
