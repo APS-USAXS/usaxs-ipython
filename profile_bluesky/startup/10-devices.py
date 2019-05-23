@@ -406,7 +406,7 @@ class Linkam_Base(Device):
     
     close_enough  = 1       # requirement: |T - target| must be <= this, degree C
     report_interval  = 5    # time between reports during loop, s
-    poll_delay = 0.02       # time to wait during polling loop, s
+    poll_s = 0.02           # time to wait during polling loop, s
     
     wait_time = Component(Signal, kind="omitted", value=0)
     
@@ -421,7 +421,7 @@ class Linkam_Base(Device):
             timeout=None,           # must reach temperature +/- close_enough in this time, s
             close_enough=None,      # acceptable temperature range
             report_interval=None,   # printed updates at this time interval, s
-            poll_delay=None):       # internal poll loop sleep period, s
+            poll_s=None):           # internal poll loop sleep period, s
         """
         wait for controller to reach target temperature
         """
@@ -429,7 +429,7 @@ class Linkam_Base(Device):
         
         self.wait_time.put(time.time() - t0)
         report_interval = report_interval or self.report_interval
-        poll_delay = poll_delay or self.poll_delay
+        poll_s = poll_s or self.poll_s
         if timeout is None:
             expires = None
         else:
@@ -437,7 +437,7 @@ class Linkam_Base(Device):
 
         report = self.wait_time.value + report_interval
         while not self.at_temperature(target, close_enough=close_enough):
-            time.sleep(poll_delay)
+            time.sleep(poll_s)
             self.wait_time.put(time.time() - t0)
             if self.wait_time.value >= report:
                 report += report_interval
