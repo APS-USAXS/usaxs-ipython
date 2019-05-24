@@ -401,33 +401,126 @@ class GeneralParameters(Device):
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
 
-class Linkam_Base(Device):
-    """common parts of Linkam controller support"""
+class TemperatureController_Base(Device):
+    """
+    common parts of temperature controller support
     
-    at_temperature_range  = 1       # T must be this close to set point, degree C
-    wait_poll_interval_s  = 5       # time to wait during loop
+    EXAMPLE::
     
-    def at_temperature(self, target):
-        return abs(self.temperature.get() - target) <= self.at_temperature_range
+        class MyLinkam(TemperatureController_Base):
+            controller_name = "MyLinkam"
+            temperature = Component(EpicsSignalRO, "temp")
+            set_point = Component(EpicsSignal, "setLimit", kind="omitted")
+        
+        controller = MyLinkam("my:linkam:", name="controller")
+        RE(controller.wait_until_settled(timeout=10))
+    
+        controller.record_temperature()
+        print(f"{controller.controller_name} controller settled? {controller.settled}")
+    
+        def rampUp_rampDown():
+            '''ramp temperature up, then back down'''
+            yield from controller.set_temperature(25, timeout=180)
+            controller.report_interval = 10    # change report interval to 10s
+            for i in range(10, 0, -1):
+                print(f"hold at (self.value:.2f)C, time remaining: {i}s")
+                yield from bps.sleep(1)
+            yield from controller.set_temperature(0, timeout=180)
+        
+        RE(test_plan())
 
-    def wait_temperature(self, target, timeout=None):
+    """
+    
+    controller_name = "TemperatureController_Base"
+    temperature = Component(Signal)                 # override in subclass
+    set_point = Component(Signal, kind="omitted")   # override in subclass
+
+    controller_name = "Linkam_Base"
+    tolerance  = 1          # requirement: |T - target| must be <= this, degree C
+    report_interval  = 5    # time between reports during loop, s
+    poll_s = 0.02           # time to wait during polling loop, s
+
+    def record_temperature(self):
+        """write temperatures as comment"""
+        global specwriter
+        msg = f"{self.controller_name} Temperature: {self.value:.2f} C"
+        specwriter._cmt("event", msg)
+        print(msg)
+
+    def set_temperature(self, set_point, wait=True, timeout=None, timeout_fail=False):
+        """change controller to new temperature set point"""
+        global specwriter
+
+        yield from bps.mv(self.set_point, set_point)
+
+        msg = f"Set {self.controller_name} Temperature to {set_point:.2f} C"
+        print(msg)
+        specwriter._cmt("event", msg)
+        
+        if wait:
+            yield from self.wait_until_settled(
+                timeout=timeout, 
+                timeout_fail=timeout_fail)
+    
+    @property
+    def value(self):
+        """shortcut to self.temperature.value"""
+        return self.temperature.value
+
+    @property
+    def settled(self):
+        """Is temperature close enough to target?"""
+        diff = abs(self.temperature.get() - self.set_point.value)
+        return diff <= self.tolerance
+
+    def wait_until_settled(self, timeout=None, timeout_fail=False):
         """
         wait for controller to reach target temperature
         """
-        # TODO: needs improvement (this is first translation from SPEC)
-        # needs to be blocking method, called in thread
-        # uses a DeviceStatus object
+        # see: https://stackoverflow.com/questions/2829329/catch-a-threads-exception-in-the-caller-thread-in-python
         t0 = time.time()
-        while not self.at_temperature(target):
-            time.sleep(self.wait_poll_interval_s)
+        _st = DeviceStatus(self.temperature)
+        started = False
+
+        def changing_cb(value, timestamp, **kwargs):
+            if started and self.settled:
+                _st._finished(success=True)
+
+        token = self.temperature.subscribe(changing_cb)
+        started = True
+        
+        report = 0
+        while not _st.done and not self.settled:
             elapsed = time.time() - t0
-            msg = f"Waiting {elapsed:.2}s to reach {target}C"
-            msg += f", now at {self.temperature.value}"
-            # TODO: handle timeout
-            print(msg)
+            if timeout is not None and elapsed > timeout:
+                _st._finished(success=self.settled)
+                msg = f"Temperature Controller Timeout after {elapsed:.2f}s"
+                msg += f", target {self.set_point.value:.2f}C"
+                msg += f", now {self.temperature.get():.2f}C"
+                # msg += f", status={_st}"
+                print(msg)
+                if timeout_fail:
+                    raise TimeoutError(msg)
+                continue
+            if elapsed >= report:
+                report += self.report_interval
+                msg = f"Waiting {elapsed:.1f}s"
+                msg += f" to reach {self.set_point.value:.2f}C"
+                msg += f", now {self.temperature.get():.2f}C"
+                print(msg)
+            yield from bps.sleep(self.poll_s)
+
+        if not _st.done and self.settled:
+            # just in case self.temperature already at temperature
+            _st._finished(success=True)
+
+        self.temperature.unsubscribe(token)
+        self.record_temperature()
+        elapsed = time.time() - t0
+        print(f"Total time: {elapsed:.3f}s, settled:{_st.success}")
 
 
-class Linkam_CI94(Linkam_Base):
+class Linkam_CI94(TemperatureController_Base):
     """
     Linkam model CI94 temperature controller
     
@@ -435,22 +528,26 @@ class Linkam_CI94(Linkam_Base):
     
         In [1]: linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
 
-        In [2]: linkam_ci94.at_temperature(25)                                                                                                                                         
+        In [2]: linkam_ci94.settled                                                                                                                                         
         Out[2]: False
 
-        In [3]: linkam_ci94.at_temperature(35)                                                                                                                                         
+        In [3]: linkam_ci94.settled                                                                                                                                         
         Out[3]: True
         
         linkam_ci94.record_temperature()
         yield from (linkam_ci94.set_temperature(50))
 
     """
+    controller_name = "Linkam CI94"
     temperature = Component(EpicsSignalRO, "temp")
-    temperature2 = Component(EpicsSignalRO, "temp2")
-    pump_speed = Component(EpicsSignalRO, "pumpSpeed")
+    set_point = Component(EpicsSignal, "setLimit", kind="omitted")
+
+    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
+    # DO NOT USE: temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
+    # DO NOT USE: temperature2 = Component(EpicsSignalRO, "temp2")
+    pump_speed = Component(EpicsSignalRO, "pumpSpeed", kind="omitted")
 
     set_rate = Component(EpicsSignal, "setRate", kind="omitted")
-    set_limit = Component(EpicsSignal, "setLimit", kind="omitted")
     set_speed = Component(EpicsSignal, "setSpeed", kind="omitted")
     end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")
     end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")
@@ -465,8 +562,6 @@ class Linkam_CI94(Linkam_Base):
     gen_stat = Component(EpicsSignalRO, "genStat", kind="omitted")
     pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn", kind="omitted")
     dsc_in = Component(EpicsSignalRO, "dscIn", kind="omitted")
-    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
-    temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
 
     # clear_buffer = Component(EpicsSignal, "clearBuffer", kind="omitted")          # bo
     # scan_dis = Component(EpicsSignal, "scanDis", kind="omitted")                  # bo
@@ -475,33 +570,8 @@ class Linkam_CI94(Linkam_Base):
     # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
-    def record_temperature(self, writer=None):
-        """write temperatures as comment"""
-        global specwriter
-        writer = writer or specwriter
-        # TODO: why start document here?
-        msg = f"Linkam Temperature: {self.temperature.value} C"
-        writer._cmt("start", msg)
-        print(msg)
-        
-        msg = f"Linkam Temperature 2: {self.temperature2.value} C"
-        writer._cmt("start", msg)
-        print(msg)
 
-    def set_temperature(self, set_point, writer=None):
-        """change controller to new temperature set point"""
-        global specwriter
-        writer = writer or specwriter
-
-        yield from bps.mv(self.set_limit, set_point)
-        yield from bps.sleep(0.1)   # delay for slow IOC
-        msg = f"Linkam CI94 Set Temperature changed to {set_point} C"
-        print(msg)
-        # TODO: why start document here?
-        writer._cmt("start", msg)
-
-
-class Linkam_T96(Linkam_Base):
+class Linkam_T96(TemperatureController_Base):
     """
     Linkam model T96 temperature controller
     
@@ -510,14 +580,15 @@ class Linkam_T96(Linkam_Base):
         linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
 
     """
+    controller_name = "Linkam T96"
     temperature = Component(EpicsSignalRO, "temperature_RBV")  # ai
+    set_point = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
 
     vacuum = Component(EpicsSignal, "vacuum", kind="omitted")
 
     heating = Component(EpicsSignalWithRBV, "heating", kind="omitted")
     lnp_mode = Component(EpicsSignalWithRBV, "lnpMode", kind="omitted")
     lnp_speed = Component(EpicsSignalWithRBV, "lnpSpeed", kind="omitted")
-    ramp_limit = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
     ramp_rate = Component(EpicsSignalWithRBV, "rampRate", kind="omitted")
     vacuum_limit_readback = Component(EpicsSignalWithRBV, "vacuumLimit", kind="omitted")
 
@@ -532,30 +603,20 @@ class Linkam_T96(Linkam_Base):
     status_error = Component(EpicsSignalRO, "statusError_RBV", kind="omitted")
     vacuum_at_limit = Component(EpicsSignalRO, "vacuumAtLimit_RBV", kind="omitted")
     vacuum_status = Component(EpicsSignalRO, "vacuumStatus_RBV", kind="omitted")
-        
-    def record_temperature(self, writer=None):
-        """write temperatures as comment"""
-        global specwriter
-        writer = writer or specwriter
-        # TODO: why start document here?
-        msg = f"Linkam Temperature: {self.temperature.value} C"
-        writer._cmt("start", msg)
-        print(msg)
 
-    def set_temperature(self, set_point, writer=None):
+    def set_temperature(self, set_point, wait=True, timeout=None, timeout_fail=False):
         """change controller to new temperature set point"""
         global specwriter
-        writer = writer or specwriter
-
-        yield from bps.mv(self.ramp_limit, set_point)
-        yield from bps.sleep(0.1)   # delay for slow IOC
+        
+        yield from bps.mv(self.set_point, set_point)
+        yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
-        # TODO: why start document here?
-        msg = f"Linkam T96 Set Temperature changed to {set_point} C"
-        writer._cmt("start", msg)
+
+        msg = f"Set {self.controller_name} Temperature to {set_point:.2f} C"
+        specwriter._cmt("event", msg)
         print(msg)
-
-
-# TODO: move to 21-signals.py for operations
-linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
-linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
+        
+        if wait:
+            yield from self.wait_until_settled(
+                timeout=timeout, 
+                timeout_fail=timeout_fail)

@@ -124,6 +124,10 @@ ar_start = EpicsSignal("9idcLAX:USAXS:ARstart", name="ar_start")
 # no PV : dy_start = EpicsSignal("9idcLAX:USAXS:DYstart", name="dy_start")
 
 
+linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
+linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
+
+
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!
 terms = GeneralParameters(name="terms")
 sd.baseline.append(terms)
