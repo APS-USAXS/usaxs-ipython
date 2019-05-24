@@ -418,8 +418,8 @@ class Linkam_Base(Device):
         controller.record_temperature()
         print(f"{self.controller_name} controller settled? {controller.settled()}")
     
-        def test_plan():
-            '''ramp up, then down'''
+        def rampUp_rampDown():
+            '''ramp temperature up, then back down'''
             yield from controller.set_temperature(25, timeout=180)
             controller.report_interval = 10    # change report interval to 10s
             for i in range(10, 0, -1):
