@@ -401,13 +401,13 @@ class GeneralParameters(Device):
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
 
-class Linkam_Base(Device):
+class TemperatureController_Base(Device):
     """
-    common parts of Linkam controller support
+    common parts of temperature controller support
     
     EXAMPLE::
     
-        class MyLinkam(Linkam_Base):
+        class MyLinkam(TemperatureController_Base):
             controller_name = "MyLinkam"
             temperature = Component(EpicsSignalRO, "temp")
             set_point = Component(EpicsSignal, "setLimit", kind="omitted")
@@ -416,7 +416,7 @@ class Linkam_Base(Device):
         RE(controller.wait_until_settled(timeout=10))
     
         controller.record_temperature()
-        print(f"{self.controller_name} controller settled? {controller.settled()}")
+        print(f"{controller.controller_name} controller settled? {controller.settled}")
     
         def rampUp_rampDown():
             '''ramp temperature up, then back down'''
@@ -431,6 +431,10 @@ class Linkam_Base(Device):
 
     """
     
+    controller_name = "TemperatureController_Base"
+    temperature = Component(Signal)                 # override in subclass
+    set_point = Component(Signal, kind="omitted")   # override in subclass
+
     controller_name = "Linkam_Base"
     tolerance  = 1          # requirement: |T - target| must be <= this, degree C
     report_interval  = 5    # time between reports during loop, s
@@ -505,16 +509,18 @@ class Linkam_Base(Device):
                 msg += f", now {self.temperature.get():.2f}C"
                 print(msg)
             yield from bps.sleep(self.poll_s)
+
         if not _st.done and self.settled:
             # just in case self.temperature already at temperature
             _st._finished(success=True)
+
+        self.temperature.unsubscribe(token)
         self.record_temperature()
         elapsed = time.time() - t0
         print(f"Total time: {elapsed:.3f}s, settled:{_st.success}")
-        self.temperature.unsubscribe(token)
 
 
-class Linkam_CI94(Linkam_Base):
+class Linkam_CI94(TemperatureController_Base):
     """
     Linkam model CI94 temperature controller
     
@@ -536,7 +542,9 @@ class Linkam_CI94(Linkam_Base):
     temperature = Component(EpicsSignalRO, "temp")
     set_point = Component(EpicsSignal, "setLimit", kind="omitted")
 
-    temperature2 = Component(EpicsSignalRO, "temp2")
+    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
+    # DO NOT USE: temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
+    # DO NOT USE: temperature2 = Component(EpicsSignalRO, "temp2")
     pump_speed = Component(EpicsSignalRO, "pumpSpeed", kind="omitted")
 
     set_rate = Component(EpicsSignal, "setRate", kind="omitted")
@@ -554,8 +562,6 @@ class Linkam_CI94(Linkam_Base):
     gen_stat = Component(EpicsSignalRO, "genStat", kind="omitted")
     pump_speed_in = Component(EpicsSignalRO, "pumpSpeedIn", kind="omitted")
     dsc_in = Component(EpicsSignalRO, "dscIn", kind="omitted")
-    temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
-    temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
 
     # clear_buffer = Component(EpicsSignal, "clearBuffer", kind="omitted")          # bo
     # scan_dis = Component(EpicsSignal, "scanDis", kind="omitted")                  # bo
@@ -564,17 +570,8 @@ class Linkam_CI94(Linkam_Base):
     # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
-    def record_temperature(self):
-        """write temperatures as comment"""
-        global specwriter
-        super().record_temperature()
-        
-        msg = f"{self.controller_name} Temperature 2: {self.temperature2.value:.2f} C"
-        specwriter._cmt("event", msg)
-        print(msg)
 
-
-class Linkam_T96(Linkam_Base):
+class Linkam_T96(TemperatureController_Base):
     """
     Linkam model T96 temperature controller
     
@@ -615,7 +612,7 @@ class Linkam_T96(Linkam_Base):
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
 
-        msg = f"Set Linkam T96 Temperature to {set_point:.2f} C"
+        msg = f"Set {self.controller_name} Temperature to {set_point:.2f} C"
         specwriter._cmt("event", msg)
         print(msg)
         
@@ -623,8 +620,3 @@ class Linkam_T96(Linkam_Base):
             yield from self.wait_until_settled(
                 timeout=timeout, 
                 timeout_fail=timeout_fail)
-
-
-# TODO: move to 21-signals.py for operations
-linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
-linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
