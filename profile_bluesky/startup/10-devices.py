@@ -435,7 +435,6 @@ class TemperatureController_Base(Device):
     temperature = Component(Signal)                 # override in subclass
     set_point = Component(Signal, kind="omitted")   # override in subclass
 
-    controller_name = "Linkam_Base"
     tolerance  = 1          # requirement: |T - target| must be <= this, degree C
     report_interval  = 5    # time between reports during loop, s
     poll_s = 0.02           # time to wait during polling loop, s
