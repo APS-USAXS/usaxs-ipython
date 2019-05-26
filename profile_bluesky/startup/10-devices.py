@@ -519,7 +519,7 @@ class TemperatureController_Base(Device):
         print(f"Total time: {elapsed:.3f}s, settled:{_st.success}")
 
 
-class Linkam_CI94(TemperatureController_Base):
+class Linkam_CI94(APS_devices.ProcessController):
     """
     Linkam model CI94 temperature controller
     
@@ -533,13 +533,14 @@ class Linkam_CI94(TemperatureController_Base):
         In [3]: linkam_ci94.settled                                                                                                                                         
         Out[3]: True
         
-        linkam_ci94.record_temperature()
-        yield from (linkam_ci94.set_temperature(50))
+        linkam_ci94.record_signal()
+        yield from (linkam_ci94.set_target(50))
 
     """
     controller_name = "Linkam CI94"
-    temperature = Component(EpicsSignalRO, "temp")
-    set_point = Component(EpicsSignal, "setLimit", kind="omitted")
+    signal = Component(EpicsSignalRO, "temp")
+    target = Component(EpicsSignal, "setLimit", kind="omitted")
+    units = Component(Signal, kind="omitted", value="C")
 
     temperature_in = Component(EpicsSignalRO, "tempIn", kind="omitted")
     # DO NOT USE: temperature2_in = Component(EpicsSignalRO, "temp2In", kind="omitted")
@@ -569,8 +570,16 @@ class Linkam_CI94(TemperatureController_Base):
     # t_cmd = Component(EpicsSignalRO, "TCmd", kind="omitted")                      # ai
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
+    def record_signal(self):
+        """write signal to the console AND SPEC file"""
+        global specwriter
+        msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
+        print(msg)
+        specwriter._cmt("event", msg)
+        return msg
 
-class Linkam_T96(TemperatureController_Base):
+
+class Linkam_T96(APS_devices.ProcessController):
     """
     Linkam model T96 temperature controller
     
@@ -580,8 +589,9 @@ class Linkam_T96(TemperatureController_Base):
 
     """
     controller_name = "Linkam T96"
-    temperature = Component(EpicsSignalRO, "temperature_RBV")  # ai
-    set_point = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
+    signal = Component(EpicsSignalRO, "temperature_RBV")  # ai
+    target = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
+    units = Component(Signal, kind="omitted", value="C")
 
     vacuum = Component(EpicsSignal, "vacuum", kind="omitted")
 
@@ -603,15 +613,23 @@ class Linkam_T96(TemperatureController_Base):
     vacuum_at_limit = Component(EpicsSignalRO, "vacuumAtLimit_RBV", kind="omitted")
     vacuum_status = Component(EpicsSignalRO, "vacuumStatus_RBV", kind="omitted")
 
-    def set_temperature(self, set_point, wait=True, timeout=None, timeout_fail=False):
+    def record_signal(self):
+        """write signal to the console AND SPEC file"""
+        global specwriter
+        msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
+        print(msg)
+        specwriter._cmt("event", msg)
+        return msg
+
+    def set_target(self, target, wait=True, timeout=None, timeout_fail=False):
         """change controller to new temperature set point"""
         global specwriter
         
-        yield from bps.mv(self.set_point, set_point)
+        yield from bps.mv(self.target, target)
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
 
-        msg = f"Set {self.controller_name} Temperature to {set_point:.2f} C"
+        msg = f"Set {self.controller_name} to {set_point:.2f}{self.units.value}"
         specwriter._cmt("event", msg)
         print(msg)
         
