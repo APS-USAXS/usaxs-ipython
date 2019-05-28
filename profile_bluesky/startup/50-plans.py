@@ -434,6 +434,58 @@ def run_Excel_file(xl_file, md={}):
     yield from afterPlan(md=md)
 
 
+def run_text_file(filename, md={}):
+    """
+    example of reading a list of samples from a text file
+    
+    view of text file (line numbers shown)::
+    
+        [1] #List of sample scans to be run              
+        [2]                 
+        [3]                 
+        [4] #labels: scan    sx  sy  thickness   sample name
+        [5] FlyScan 0   0   0   blank
+        [6] FlyScan 5   2   0   blank
+
+    """
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    with open(full_filename, "r") as fp:
+		buf = fp.readlines()
+
+    if len(buf) == 0:
+		# TODO: yield from no-op
+		return
+
+    yield from beforePlan(md=md)
+    for i, row in enumerate(buf):
+		# TODO: skip blank & comment lines, rstrip any EOL
+        print(f"file line {i+1}: {row}")
+        scan_command = row["scan"].lower()
+        # information from all columns goes into the metadata
+        # columns names are the keys in the metadata dictionary
+        # make sure md keys are "clean"
+        # also provide crossreference to original column names
+        _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
+        _md["full_filename"] = full_filename
+        _md["filename"] = filename
+        _md["line_number"] = i+1
+        # _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
+        # _md["table_of_actions"] = str(tbl)
+        _md.update(md or {})      # overlay with user-supplied metadata
+        if scan_command == "preusaxstune":
+            yield from tune_usaxs_optics(md=_md)
+        elif scan_command == "flyscan":
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
+        elif scan_command == "saxs":
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+        elif scan_command == "waxs":
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+        else:
+            print(f"no handling for table row {i+1}: scan_command={scan_command}")
+    yield from afterPlan(md=md)
+
+
 def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     collect SAXS data
