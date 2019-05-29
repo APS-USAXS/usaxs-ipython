@@ -418,6 +418,8 @@ def parse_Excel_command_file(filename):
     
     FileNotFoundError
         if file cannot be found
+    ValueError
+        as raised from ``makeOrderedDictFromTwoLists()``
 
     """
     full_filename = os.path.abspath(filename)
