@@ -558,7 +558,7 @@ def run_command_file(filename, md={}):
     yield from execute_command_list(filename, commands)
 
 
-def execute_command_list(filename, commands):
+def execute_command_list(filename, commands, md={}):
     """
     plan: execute the command list
     
