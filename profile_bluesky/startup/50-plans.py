@@ -324,6 +324,17 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     # measure_USAXS_PD_dark_currents    # used to be here, not now
 
 
+def makeOrderedDictFromTwoLists(labels, values):
+	"""return an OrderedDict"""
+	if len(values) > len(labels):
+		msg = "Too many values for known labels."
+		msg += f"  labels={labels}"
+		msg += f"  values={values}"
+		raise ValueError(msg)
+	# only the first len(values) labels will be used!
+	return OrderedDict(zip(labels, values))
+
+
 def beforePlan(md={}):
     """
     things to be done before every data collection plan
@@ -428,7 +439,7 @@ def parse_Excel_command_file(filename):
             commands.append(
                 (
                     action, 
-                    OrderedDict(zip(labels, values)),
+                    makeOrderedDictFromTwoLists(labels, values),
                     i+1,
                     list(row.values())
                 )
@@ -516,7 +527,7 @@ def parse_text_command_file(filename):
                 raise ValueError(msg)
             
             # only the first len(values) labels will be used!
-            parameters = OrderedDict(zip(labels, values))
+            parameters = makeOrderedDictFromTwoLists(labels, values)
             commands.append((action, parameters, i+1, raw_line.rstrip()))
 
     return commands
