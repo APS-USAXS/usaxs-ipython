@@ -417,12 +417,19 @@ def parse_Excel_command_file(filename):
 
     if len(xl.db) > 0:
         labels = list(xl.db[list(xl.db.keys())[0]].keys())
+        labels = labels[1:]      # trim off action from front
         for i, row in enumerate(xl.db.values()):
-            action, *parameters = list(row.values())
+            action, *values = list(row.values())
+            # trim off any None values from end
+            while len(values) > 0:
+                if values[-1] is not None:
+                    break
+                values = values[:-1]
+            
             commands.append(
                 (
                     action, 
-                    parameters,
+                    OrderedDict(zip(labels, values)),
                     i+1,
                     list(row.values())
                 )
@@ -509,7 +516,7 @@ def parse_text_command_file(filename):
                 msg += f"  values={values}"
                 raise ValueError(msg)
             
-            # only the first len(value) labels will be used!
+            # only the first len(values) labels will be used!
             parameters = OrderedDict(zip(labels, values))
             commands.append((action, parameters, i+1, raw_line.rstrip()))
 
@@ -523,13 +530,14 @@ def command_list_as_table(commands):
     tbl = pyRestTable.Table()
     tbl.addLabel("line #")
     tbl.addLabel("action")
-    # tbl.addLabel("parameters (as dict)")
-    tbl.addLabel("# parameters")
-    tbl.addLabel("raw command")
+    tbl.addLabel("parameters")
+    # tbl.addLabel("# parameters")
+    # tbl.addLabel("raw command")
     for command in commands:
         action, args, line_number, raw_line = command
-        # row = [line_number, action, args, len(args), raw_line]
-        row = [line_number, action, len(args), raw_line]
+        parms = ", ".join([f"{k}={v}" for k, v in args.items()])
+        row = [line_number, action, parms]
+        # row += [len(args), raw_line]
         tbl.addRow(row)
     return tbl
 
