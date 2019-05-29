@@ -523,10 +523,12 @@ def command_list_as_table(commands):
     tbl = pyRestTable.Table()
     tbl.addLabel("line #")
     tbl.addLabel("action")
+    # tbl.addLabel("parameters (as dict)")
     tbl.addLabel("# parameters")
     tbl.addLabel("raw command")
     for command in commands:
         action, args, line_number, raw_line = command
+        # row = [line_number, action, args, len(args), raw_line]
         row = [line_number, action, len(args), raw_line]
         tbl.addRow(row)
     return tbl
