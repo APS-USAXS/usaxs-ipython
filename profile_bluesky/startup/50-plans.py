@@ -441,7 +441,7 @@ def parse_Excel_command_file(filename):
             try:
                 parameters = makeOrderedDictFromTwoLists(labels, values)
             except ValueError as exc:
-                raise ValueError(f"(file:{filename}, line:{i+1}) {exc}")
+                raise ValueError(f"(file: {filename}, line: {i+1}) : {exc}")
             
             commands.append((action, parameters, i+1, list(row.values())))
 
