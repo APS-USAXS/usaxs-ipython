@@ -418,8 +418,6 @@ def parse_Excel_command_file(filename):
     
     FileNotFoundError
         if file cannot be found
-    ValueError
-        as raised from ``makeOrderedDictFromTwoLists()``
 
     """
     full_filename = os.path.abspath(filename)
@@ -429,21 +427,16 @@ def parse_Excel_command_file(filename):
     commands = []
 
     if len(xl.db) > 0:
-        labels = list(xl.db[list(xl.db.keys())[0]].keys())[1:]  # trim action
         for i, row in enumerate(xl.db.values()):
             action, *values = list(row.values())
+
             # trim off any None values from end
             while len(values) > 0:
                 if values[-1] is not None:
                     break
                 values = values[:-1]
             
-            try:
-                parameters = makeOrderedDictFromTwoLists(labels, values)
-            except ValueError as exc:
-                raise ValueError(f"(file: {filename}, line: {i+1}) : {exc}")
-            
-            commands.append((action, parameters, i+1, list(row.values())))
+            commands.append((action, values, i+1, list(row.values())))
 
     return commands
 
@@ -455,10 +448,6 @@ def parse_text_command_file(filename):
     * The text file is interpreted line-by-line.
     * Blank lines are ignored.
     * A pound sign (#) marks the rest of that line as a comment.
-    * An exclamation mark (!) defines the labels to be used with 
-      the next command line(s).  Additional label lines are used
-      to redefine the labels for subsequent commands.  
-      See example below.
     * All remaining lines are interpreted as commands with arguments.
     
     Example of text file (no line numbers shown)::
@@ -466,20 +455,20 @@ def parse_text_command_file(filename):
         #List of sample scans to be run              
         # pound sign starts a comment (through end of line)
 
-        ! action  value
+        # action  value
         mono_shutter open
 
-        ! action  x y width height
+        # action  x y width height
         uslits 0 0 0.4 1.2
 
-        ! action  sx  sy  thickness   sample name
+        # action  sx  sy  thickness   sample name
         FlyScan 0   0   0   blank
         FlyScan 5   2   0   blank
 
-        ! action  sx  sy  thickness   sample name
+        # action  sx  sy  thickness   sample name
         SAXS 0 0 0 blank
 
-        ! action  value
+        # action  value
         mono_shutter close
 
     PARAMETERS
@@ -498,8 +487,6 @@ def parse_text_command_file(filename):
     
     FileNotFoundError
         if file cannot be found
-    ValueError
-        if more values are found than defined labels
     """
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
@@ -507,22 +494,14 @@ def parse_text_command_file(filename):
         buf = fp.readlines()
 
     commands = []
-    labels = []
-    for i, raw_line in enumerate(buf):
-        row = raw_line.strip()
+    for i, raw_command in enumerate(buf):
+        row = raw_command.strip()
         if row == "" or row.startswith("#"):
             continue                    # comment or blank
 
-        elif row.startswith("!"):
-            _, *labels = row[1:].strip().split() # defines labels
-
         else:                           # command line
             action, *values = row.split()
-            try:
-                parameters = makeOrderedDictFromTwoLists(labels, values)
-            except ValueError as exc:
-                raise ValueError(f"(file:{filename}, line:{i+1}) {exc}")
-            commands.append((action, parameters, i+1, raw_line.rstrip()))
+            commands.append((action, values, i+1, raw_command.rstrip()))
 
     return commands
 
@@ -535,13 +514,9 @@ def command_list_as_table(commands):
     tbl.addLabel("line #")
     tbl.addLabel("action")
     tbl.addLabel("parameters")
-    # tbl.addLabel("# parameters")
-    # tbl.addLabel("raw command")
     for command in commands:
-        action, args, line_number, raw_line = command
-        parms = ", ".join([f"{k}={v}" for k, v in args.items()])
-        row = [line_number, action, parms]
-        # row += [len(args), raw_line]
+        action, args, line_number, raw_command = command
+        row = [line_number, action, ", ".join(map(str, args))]
         tbl.addRow(row)
     return tbl
 
@@ -601,11 +576,9 @@ def execute_command_list(filename, commands, md={}):
         (action, OrderedDict, line_number, raw_command)
     action: str
         names a known action to be handled
-    parameters: OrderedDict
-        Dictionary of parameters for the action.
-        The keys of the dictionary are ordered by the preceding labels.
-        The dictionary is empty of there are no values
-        provided for the parameters.
+    parameters: list
+        List of parameters for the action.
+        The list is empty of there are no values
     line_number: int
         line number (1-based) from the input text file
     raw_command: obj (str or list(str)
@@ -623,8 +596,8 @@ def execute_command_list(filename, commands, md={}):
     
     yield from beforePlan(md=md)
     for command in commands:
-        action, args, i, raw_line = command
-        print(f"file line {i}: {raw_line}")
+        action, args, i, raw_command = command
+        print(f"file line {i}: {raw_command}")
 
         _md = {APS_utils.cleanupText(k): v for k, v in args.items()}
         _md["full_filename"] = full_filename
@@ -638,14 +611,31 @@ def execute_command_list(filename, commands, md={}):
         action = action.lower()
         if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
+            
         elif action == "flyscan":
-            yield from Flyscan(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md) 
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from Flyscan(sx, sy, sth, snm, md=_md)
+            
         elif action == "saxs":
-            yield from SAXS(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md)
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from SAXS(sx, sy, sth, snm, md=_md)
+            
         elif action == "waxs":
-            yield from WAXS(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md)
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from WAXS(sx, sy, sth, snm, md=_md)
+            
         else:
-            print(f"no handling for line {i}: {raw_line}")
+            print(f"no handling for line {i}: {raw_command}")
+
     yield from afterPlan(md=md)
 
 
