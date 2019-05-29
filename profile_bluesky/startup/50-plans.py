@@ -542,6 +542,26 @@ def command_list_as_table(commands):
     return tbl
 
 
+def get_command_list(filename):
+    """return command list from either text or Excel file"""
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    try:
+        commands = parse_Excel_command_file(filename)
+    except Exception:          # TODO: XLRDError
+        commands = parse_text_command_file(filename)
+    return commands
+
+
+def summarize_command_file(filename):
+    """
+    print the command list from a text or Excel file
+    """
+    commands = get_command_list(filename)
+    print(f"Command file: {filename}")
+    print(command_list_as_table(commands))
+
+
 def run_command_file(filename, md={}):
     """
     plan: execute a list of commands from a text or Excel file
@@ -549,12 +569,7 @@ def run_command_file(filename, md={}):
     * Parse the file into a command list
     * yield the command list to the RunEngine (or other)
     """
-    full_filename = os.path.abspath(filename)
-    assert os.path.exists(full_filename)
-    try:
-        commands = parse_Excel_command_file(filename)
-    except Exception:          # TODO: XLRDError
-        commands = parse_text_command_file(filename)
+    commands = get_command_list(filename)
     yield from execute_command_list(filename, commands)
 
 
