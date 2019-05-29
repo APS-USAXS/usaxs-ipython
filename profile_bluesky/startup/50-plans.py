@@ -522,7 +522,9 @@ def command_list_as_table(commands):
 
 
 def get_command_list(filename):
-    """return command list from either text or Excel file"""
+    """
+    return command list from either text or Excel file
+    """
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
     try:
