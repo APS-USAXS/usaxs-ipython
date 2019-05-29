@@ -378,9 +378,9 @@ def afterPlan(md={}):
     )
 
 
-def run_Excel_file(xl_file, md={}):
+def parse_Excel_command_file(filename):
     """
-    example of reading a list of samples from Excel spreadsheet
+    parse an Excel spreadsheet with commands, return as command list
     
     TEXT view of spreadsheet (Excel file line numbers shown)::
     
@@ -391,52 +391,49 @@ def run_Excel_file(xl_file, md={}):
         [5] FlyScan 0   0   0   blank
         [6] FlyScan 5   2   0   blank
 
+    PARAMETERS
+    
+    filename : str
+        Name of input Excel spreadsheet file.  Can be relative or absolute path,
+        such as "actions.xslx", "../sample.xslx", or 
+        "/path/to/overnight.xslx".
+
+    RETURNS
+    
+    list of commands : list[command]
+        List of command tuples for use in ``execute_command_list()``
+
+    RAISES
+    
+    FileNotFoundError
+        if file cannot be found
+
     """
-    excel_file = os.path.abspath(xl_file)
-    assert os.path.exists(excel_file)
-    xl = APS_utils.ExcelDatabaseFileGeneric(excel_file)
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    xl = APS_utils.ExcelDatabaseFileGeneric(full_filename)
+
+    commands = []
 
     if len(xl.db) > 0:
-        # print the table of actions
-        print(f"run_Excel_file('{xl_file}')")
-        tbl = pyRestTable.Table()
-        tbl.labels = ["#",]
-        tbl.labels += list(xl.db[list(xl.db.keys())[0]].keys())
+        labels = list(xl.db[list(xl.db.keys())[0]].keys())
         for i, row in enumerate(xl.db.values()):
-            tbl.addRow([i+1,] + list(row.values()))
-        print(tbl)
+            action, *parameters = list(row.values())
+            commands.append(
+                (
+                    action, 
+                    parameters,
+                    i+1,
+                    list(row.values())
+                )
+            )
 
-    yield from beforePlan(md=md)
-    for i, row in enumerate(xl.db.values()):
-        print(f"Excel row {i+1}: {row}")
-        scan_command = row["scan"].lower()
-        # information from all columns goes into the metadata
-        # columns names are the keys in the metadata dictionary
-        # make sure md keys are "clean"
-        # also provide crossreference to original column names
-        _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
-        _md["Excel_file"] = excel_file
-        _md["xl_file"] = xl_file
-        _md["excel_row_number"] = i+1
-        _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
-        # _md["table_of_actions"] = str(tbl)
-        _md.update(md or {})      # overlay with user-supplied metadata
-        if scan_command == "preusaxstune":
-            yield from tune_usaxs_optics(md=_md)
-        elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
-        elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
-        elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
-        else:
-            print(f"no handling for table row {i+1}: scan_command={scan_command}")
-    yield from afterPlan(md=md)
+    return commands
 
 
-def _text_commands_file_parser(filename):
+def parse_text_command_file(filename):
     """
-    read a text file with commands, return as command list
+    parse a text file with commands, return as command list
     
     * The text file is interpreted line-by-line.
     * Blank lines are ignored.
@@ -478,23 +475,7 @@ def _text_commands_file_parser(filename):
     RETURNS
     
     list of commands : list[command]
-        List of command tuples
-    
-    where
-    
-    command : tuple
-        (action, OrderedDict, line_number, raw_input_line)
-    action: str
-        names a known action to be handled
-    parameters: OrderedDict
-        Dictionary of parameters for the action.
-        The keys of the dictionary are ordered by the preceding labels.
-        The dictionary is empty of there are no values
-        provided for the parameters.
-    line_number: int
-        line number (1-based) from the input text file
-    raw_input_line: str
-        contents from text file
+        List of command tuples for use in ``execute_command_list()``
 
     RAISES
     
@@ -535,22 +516,82 @@ def _text_commands_file_parser(filename):
     return commands
 
 
-def run_text_file(filename, md={}):
+def command_list_as_table(commands):
     """
-    execute a list of commands from a text file
+    format a command list as a pyRestTable.Table object
+    """
+    tbl = pyRestTable.Table()
+    tbl.addLabel("line #")
+    tbl.addLabel("action")
+    tbl.addLabel("# parameters")
+    tbl.addLabel("raw command")
+    for command in commands:
+        action, args, line_number, raw_line = command
+        row = [line_number, action, len(args), raw_line]
+        tbl.addRow(row)
+    return tbl
+
+
+def run_command_file(filename, md={}):
+    """
+    plan: execute a list of commands from a text or Excel file
 
     * Parse the file into a command list
-    * Only recognized commands will be executed.
-    * Unrecognized commands will be reported as comments.
+    * yield the command list to the RunEngine (or other)
     """
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
-    commands = _text_commands_file_parser(filename)
+    try:
+        commands = parse_Excel_command_file(filename)
+    except Exception:          # TODO: XLRDError
+        commands = parse_text_command_file(filename)
+    yield from execute_command_list(filename, commands)
+
+
+def execute_command_list(filename, commands):
+    """
+    plan: execute the command list
+    
+    The command list is a tuple described below.
+
+    * Only recognized commands will be executed.
+    * Unrecognized commands will be reported as comments.
+
+    PARAMETERS
+    
+    filename : str
+        Name of input text file.  Can be relative or absolute path,
+        such as "actions.txt", "../sample.txt", or 
+        "/path/to/overnight.txt".
+    commands : list[command]
+        List of command tuples for use in ``execute_command_list()``
+    
+    where
+    
+    command : tuple
+        (action, OrderedDict, line_number, raw_command)
+    action: str
+        names a known action to be handled
+    parameters: OrderedDict
+        Dictionary of parameters for the action.
+        The keys of the dictionary are ordered by the preceding labels.
+        The dictionary is empty of there are no values
+        provided for the parameters.
+    line_number: int
+        line number (1-based) from the input text file
+    raw_command: obj (str or list(str)
+        contents from input file, such as:
+        ``SAXS 0 0 0 blank``
+    """
+    full_filename = os.path.abspath(filename)
 
     if len(commands) == 0:
         yield from bps.null()
         return
 
+    print(f"Command file: {filename}")
+    print(command_list_as_table(commands))
+    
     yield from beforePlan(md=md)
     for command in commands:
         action, args, i, raw_line = command
