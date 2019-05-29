@@ -416,8 +416,7 @@ def parse_Excel_command_file(filename):
     commands = []
 
     if len(xl.db) > 0:
-        labels = list(xl.db[list(xl.db.keys())[0]].keys())
-        labels = labels[1:]      # trim off action from front
+        labels = list(xl.db[list(xl.db.keys())[0]].keys())[1:]  # trim action
         for i, row in enumerate(xl.db.values()):
             action, *values = list(row.values())
             # trim off any None values from end
