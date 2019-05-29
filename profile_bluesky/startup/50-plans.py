@@ -424,63 +424,156 @@ def run_Excel_file(xl_file, md={}):
         if scan_command == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
         elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md) 
         elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md)
         elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md)
         else:
             print(f"no handling for table row {i+1}: scan_command={scan_command}")
     yield from afterPlan(md=md)
 
 
-def run_text_file(filename, md={}):
+def _text_commands_file_parser(filename):
     """
-    example of reading a list of samples from a text file
+    read a text file with commands, return as command list
     
-    view of text file (line numbers shown)::
+    * The text file is interpreted line-by-line.
+    * Blank lines are ignored.
+    * A pound sign (#) marks the rest of that line as a comment.
+    * An exclamation mark (!) defines the labels to be used with 
+      the next command line(s).  Additional label lines are used
+      to redefine the labels for subsequent commands.  
+      See example below.
+    * All remaining lines are interpreted as commands with arguments.
     
-        [1] #List of sample scans to be run              
-        [2]                 
-        [3]                 
-        [4] #labels: scan    sx  sy  thickness   sample name
-        [5] FlyScan 0   0   0   blank
-        [6] FlyScan 5   2   0   blank
+    Example of text file (no line numbers shown)::
+    
+        #List of sample scans to be run              
+        # pound sign starts a comment (through end of line)
 
+        ! action  value
+        mono_shutter open
+
+        ! action  x y width height
+        uslits 0 0 0.4 1.2
+
+        ! action  sx  sy  thickness   sample name
+        FlyScan 0   0   0   blank
+        FlyScan 5   2   0   blank
+
+        ! action  sx  sy  thickness   sample name
+        SAXS 0 0 0 blank
+
+        ! action  value
+        mono_shutter close
+
+    PARAMETERS
+    
+    filename : str
+        Name of input text file.  Can be relative or absolute path,
+        such as "actions.txt", "../sample.txt", or 
+        "/path/to/overnight.txt".
+
+    RETURNS
+    
+    list of commands : list[command]
+        List of command tuples
+    
+    where
+    
+    command : tuple
+        (action, OrderedDict, line_number, raw_input_line)
+    action: str
+        names a known action to be handled
+    parameters: OrderedDict
+        Dictionary of parameters for the action.
+        The keys of the dictionary are ordered by the preceding labels.
+        The dictionary is empty of there are no values
+        provided for the parameters.
+    line_number: int
+        line number (1-based) from the input text file
+    raw_input_line: str
+        contents from text file
+
+    RAISES
+    
+    FileNotFoundError
+        if file cannot be found
+    ValueError
+        if more values are found than defined labels
     """
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
     with open(full_filename, "r") as fp:
-		buf = fp.readlines()
+        buf = fp.readlines()
 
-    if len(buf) == 0:
-		# TODO: yield from no-op
-		return
+    commands = []
+    labels = []
+    for i, raw_line in enumerate(buf):
+        row = raw_line.strip()
+        if row == "" or row.startswith("#"):
+            continue                    # comment or blank
+
+        elif row.startswith("!"):
+            _, *labels = row[1:].strip().split() # defines labels
+
+        else:                           # command line
+            action, *values = row.split()
+            
+            if len(values) > len(labels):
+                msg = f"(file:{filename}, line:{i+1})"
+                msg += " Too many values for known labels."
+                msg += f"  labels={labels}"
+                msg += f"  values={values}"
+                raise ValueError(msg)
+            
+            # only the first len(value) labels will be used!
+            parameters = OrderedDict(zip(labels, values))
+            commands.append((action, parameters, i+1, raw_line.rstrip()))
+
+    return commands
+
+
+def run_text_file(filename, md={}):
+    """
+    execute a list of commands from a text file
+
+    * Parse the file into a command list
+    * Only recognized commands will be executed.
+    * Unrecognized commands will be reported as comments.
+    """
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    commands = _text_commands_file_parser(filename)
+
+    if len(commands) == 0:
+        yield from bps.null()
+        return
 
     yield from beforePlan(md=md)
-    for i, row in enumerate(buf):
-		# TODO: skip blank & comment lines, rstrip any EOL
-        print(f"file line {i+1}: {row}")
-        scan_command = row["scan"].lower()
-        # information from all columns goes into the metadata
-        # columns names are the keys in the metadata dictionary
-        # make sure md keys are "clean"
-        # also provide crossreference to original column names
+    for command in commands:
+        action, args, i, raw_line
+        print(f"file line {i}: {raw_line}")
+
         _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
         _md["full_filename"] = full_filename
         _md["filename"] = filename
-        _md["line_number"] = i+1
-        # _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
-        # _md["table_of_actions"] = str(tbl)
+        _md["line_number"] = i
+        _md["action"] = action
+        _md["parameters"] = args
+
         _md.update(md or {})      # overlay with user-supplied metadata
-        if scan_command == "preusaxstune":
+
+        action = action.lower()
+        if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
-        elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
-        elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
-        elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+        elif action == "flyscan":
+            yield from Flyscan(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md) 
+        elif action == "saxs":
+            yield from SAXS(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md)
+        elif action == "waxs":
+            yield from WAXS(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md)
         else:
             print(f"no handling for table row {i+1}: scan_command={scan_command}")
     yield from afterPlan(md=md)
