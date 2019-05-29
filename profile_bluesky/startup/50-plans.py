@@ -325,14 +325,14 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
 
 
 def makeOrderedDictFromTwoLists(labels, values):
-	"""return an OrderedDict"""
-	if len(values) > len(labels):
-		msg = "Too many values for known labels."
-		msg += f"  labels={labels}"
-		msg += f"  values={values}"
-		raise ValueError(msg)
-	# only the first len(values) labels will be used!
-	return OrderedDict(zip(labels, values))
+    """return an OrderedDict"""
+    if len(values) > len(labels):
+        msg = "Too many values for known labels."
+        msg += f"  labels={labels}"
+        msg += f"  values={values}"
+        raise ValueError(msg)
+    # only the first len(values) labels will be used!
+    return OrderedDict(zip(labels, values))
 
 
 def beforePlan(md={}):
@@ -436,14 +436,12 @@ def parse_Excel_command_file(filename):
                     break
                 values = values[:-1]
             
-            commands.append(
-                (
-                    action, 
-                    makeOrderedDictFromTwoLists(labels, values),
-                    i+1,
-                    list(row.values())
-                )
-            )
+            try:
+                parameters = makeOrderedDictFromTwoLists(labels, values)
+            except ValueError as exc:
+                raise ValueError(f"(file:{filename}, line:{i+1}) {exc}")
+            
+            commands.append((action, parameters, i+1, list(row.values())))
 
     return commands
 
@@ -518,16 +516,10 @@ def parse_text_command_file(filename):
 
         else:                           # command line
             action, *values = row.split()
-            
-            if len(values) > len(labels):
-                msg = f"(file:{filename}, line:{i+1})"
-                msg += " Too many values for known labels."
-                msg += f"  labels={labels}"
-                msg += f"  values={values}"
-                raise ValueError(msg)
-            
-            # only the first len(values) labels will be used!
-            parameters = makeOrderedDictFromTwoLists(labels, values)
+            try:
+                parameters = makeOrderedDictFromTwoLists(labels, values)
+            except ValueError as exc:
+                raise ValueError(f"(file:{filename}, line:{i+1}) {exc}")
             commands.append((action, parameters, i+1, raw_line.rstrip()))
 
     return commands
