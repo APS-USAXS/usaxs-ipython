@@ -424,11 +424,11 @@ def run_Excel_file(xl_file, md={}):
         if scan_command == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
         elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md) 
+            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
         elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md)
+            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
         elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample_name"], md=_md)
+            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
         else:
             print(f"no handling for table row {i+1}: scan_command={scan_command}")
     yield from afterPlan(md=md)
@@ -561,7 +561,7 @@ def run_text_file(filename, md={}):
         _md["filename"] = filename
         _md["line_number"] = i
         _md["action"] = action
-        _md["parameters"] = args
+        _md["parameters"] = args    # args is shorter than parameters, means the same thing here
 
         _md.update(md or {})      # overlay with user-supplied metadata
 
@@ -569,13 +569,13 @@ def run_text_file(filename, md={}):
         if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
         elif action == "flyscan":
-            yield from Flyscan(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md) 
+            yield from Flyscan(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md) 
         elif action == "saxs":
-            yield from SAXS(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md)
+            yield from SAXS(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md)
         elif action == "waxs":
-            yield from WAXS(args["sx"], args["sy"], args["thickness"], args["sample name"], md=_md)
+            yield from WAXS(args["sx"], args["sy"], args["thickness"], args["sample_name"], md=_md)
         else:
-            print(f"no handling for table row {i+1}: scan_command={scan_command}")
+            print(f"no handling for line {i}: {raw_line}")
     yield from afterPlan(md=md)
 
 
