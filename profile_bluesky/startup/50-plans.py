@@ -553,7 +553,7 @@ def run_text_file(filename, md={}):
 
     yield from beforePlan(md=md)
     for command in commands:
-        action, args, i, raw_line
+        action, args, i, raw_line = command
         print(f"file line {i}: {raw_line}")
 
         _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
