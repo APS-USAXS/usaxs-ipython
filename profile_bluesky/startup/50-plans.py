@@ -720,6 +720,11 @@ def execute_command_list(filename, commands, md={}):
             snm = args[3]
             yield from WAXS(sx, sy, sth, snm, md=_md)
             
+        elif action == "current_experiment_name":
+            nm = args[0]
+            # FIXME: check this!
+            yield from bps.mv(user_data.user_name, nm)
+            
         else:
             print(f"no handling for line {i}: {raw_command}")
 
