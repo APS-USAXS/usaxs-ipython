@@ -683,7 +683,6 @@ def execute_command_list(filename, commands, md={}):
         action, args, i, raw_command = command
         print(f"file line {i}: {raw_command}")
 
-        # _md = {APS_utils.cleanupText(k): v for k, v in args.items()}
         _md = {}
         _md["full_filename"] = full_filename
         _md["filename"] = filename
