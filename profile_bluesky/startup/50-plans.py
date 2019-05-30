@@ -674,10 +674,11 @@ def execute_command_list(filename, commands, md={}):
         yield from bps.null()
         return
 
-    yield from bps.mv(
-        user_data.macro_file, filename,
-        user_data.macro_file_time, str(datetime.datetime.now()),
-    )
+    # remove since this also happens in beforePlan()
+    # yield from bps.mv(
+    #     user_data.macro_file, filename,
+    #     user_data.macro_file_time, str(datetime.datetime.now()),
+    # )
     print(f"Command file: {filename}")
     print(command_list_as_table(commands))
     
