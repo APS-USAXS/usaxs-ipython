@@ -335,7 +335,7 @@ def makeOrderedDictFromTwoLists(labels, values):
     return OrderedDict(zip(labels, values))
 
 
-def beforePlan(md={}):
+def beforePlan(md={}, commands=None):
     """
     things to be done before every data collection plan
     """
@@ -375,6 +375,16 @@ def beforePlan(md={}):
     except NameError:
         pass
     yield from bps.mv(terms.FlyScan.order_number, order_number)
+    
+    if commands is not None:
+        tbl_file = "/tmp/command_table.txt"
+        with open(tbl_file, "w") as fp:
+            tbl = command_list_as_table(commands)
+            fp.write(fp.reST())
+        # TODO: #219
+        #   epics_put ("9idcLAX:USAXS:macroFile",      os.path.split(tbl_file)[-1])
+        #   epics_put ("9idcLAX:USAXS:macroFileTime",  date())
+        # TODO: archive every tbl_file
 
 
 def afterPlan(md={}):
@@ -596,7 +606,7 @@ def execute_command_list(filename, commands, md={}):
     print(f"Command file: {filename}")
     print(command_list_as_table(commands))
     
-    yield from beforePlan(md=md)
+    yield from beforePlan(md=md, commands=commands)
     for command in commands:
         action, args, i, raw_command = command
         print(f"file line {i}: {raw_command}")
