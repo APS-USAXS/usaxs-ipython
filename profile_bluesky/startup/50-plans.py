@@ -815,7 +815,8 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     old_det_stage_sigs = OrderedDict()
     for k, v in saxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
-    del saxs_det.hdf1.stage_sigs["capture"]
+    if saxs_det.hdf1.stage_sigs.get("capture") is not None:
+        del saxs_det.hdf1.stage_sigs["capture"]
     saxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     saxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
@@ -965,7 +966,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     old_det_stage_sigs = OrderedDict()
     for k, v in waxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
-    del waxs_det.hdf1.stage_sigs["capture"]
+    if waxs_det.hdf1.stage_sigs.get("capture") is not None:
+        del waxs_det.hdf1.stage_sigs["capture"]
     waxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     waxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     waxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
