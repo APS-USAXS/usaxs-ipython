@@ -335,6 +335,37 @@ def makeOrderedDictFromTwoLists(labels, values):
     return OrderedDict(zip(labels, values))
 
 
+def postCommandsListfile2WWW(commands):
+    """
+    post list of commands to WWW and archive the list for posterity
+    """
+    tbl_file = "/tmp/command_table.txt"
+    tbl = command_list_as_table(commands)
+    timestamp = datetime.datetime.now().isoformat().replace("T", " ")
+    contents = f"written: {timestamp}\n"
+    contents += str(tbl.reST())
+    
+    def write_commands(fp):
+        fp.write(contents)
+    
+    # post for livedata page
+    path = "/tmp"
+    with open(os.path.join(path, tbl_file), "w") as fp:
+        write_commands(fp)
+    
+    # post to EPICS
+    yield from bp.mv(
+        user_data.macro_file, os.path.split(tbl_file)[-1],
+        user_data.macro_file_time, timestamp,
+        )
+
+    # keep this list for posterity
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    path = "/share1/log/macros"
+    with open(os.path.join(path, timestamp), "w") as fp:
+        write_commands(fp)
+
+
 def beforePlan(md={}, commands=None):
     """
     things to be done before every data collection plan
@@ -377,14 +408,7 @@ def beforePlan(md={}, commands=None):
     yield from bps.mv(terms.FlyScan.order_number, order_number)
     
     if commands is not None:
-        tbl_file = "/tmp/command_table.txt"
-        with open(tbl_file, "w") as fp:
-            tbl = command_list_as_table(commands)
-            fp.write(fp.reST())
-        # TODO: #219
-        #   epics_put ("9idcLAX:USAXS:macroFile",      os.path.split(tbl_file)[-1])
-        #   epics_put ("9idcLAX:USAXS:macroFileTime",  date())
-        # TODO: archive every tbl_file
+        postCommandsListfile2WWW(commands)
 
 
 def afterPlan(md={}):

@@ -10,6 +10,7 @@ import getpass
 import itertools
 import os
 from pathlib import PurePath
+import shutil
 import socket 
 import subprocess
 import threading
