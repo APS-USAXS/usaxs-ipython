@@ -158,7 +158,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -675,6 +674,10 @@ def execute_command_list(filename, commands, md={}):
         yield from bps.null()
         return
 
+    yield from bps.mv(
+        user_data.macro_file, filename,
+        user_data.macro_file_time, str(datetime.datetime.now()),
+    )
     print(f"Command file: {filename}")
     print(command_list_as_table(commands))
     
@@ -785,7 +788,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -871,7 +873,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, old_delay,
 
         user_data.state, "Done SAXS",
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.time_stamp, ts,
     )
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
@@ -937,7 +938,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -1025,7 +1025,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, old_delay,
 
         user_data.state, "Done WAXS",
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.time_stamp, ts,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
