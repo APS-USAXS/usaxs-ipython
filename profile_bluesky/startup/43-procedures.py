@@ -327,12 +327,13 @@ def measure_USAXS_Transmission(md={}):
     """
     measure the sample transmission in USAXS mode
     """
+    trmssn = terms.USAXS.transmission   # for convenience
     yield from user_data.set_state_plan("Measure USAXS transmission")
-    if terms.USAXS.transmission.measure.value:
+    if trmssn.measure.value:
         yield from mode_USAXS()
         ay_target = terms.USAXS.AY0.value + constants["USAXS_AY_OFFSET"] + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
         yield from bps.mv(
-            terms.USAXS.transmission.ay, ay_target,
+            trmssn.ay, ay_target,
             a_stage.y, ay_target,
             ti_filter_shutter, "open",
         )
@@ -341,7 +342,7 @@ def measure_USAXS_Transmission(md={}):
         yield from autoscale_amplifiers([I0_controls, trd_controls])
 
         yield from bps.mv(
-            scaler0.preset_time, terms.USAXS.transmission.count_time.value
+            scaler0.preset_time, trmssn.count_time.value
         )
         md["plan_name"] = "measure_USAXS_Transmission"
         scaler0.select_channels(["I0_USAXS", "TR diode"])
@@ -356,7 +357,7 @@ def measure_USAXS_Transmission(md={}):
             yield from autoscale_amplifiers([I0_controls, trd_controls])
             
             yield from bps.mv(
-                scaler0.preset_time, terms.USAXS.transmission.count_time.value
+                scaler0.preset_time, trmssn.count_time.value
             )
             scaler0.select_channels(["I0_USAXS", "TR diode"])
             yield from bp.count([scaler0], md=md)
@@ -369,27 +370,28 @@ def measure_USAXS_Transmission(md={}):
         )
         yield from insertScanFilters()
         yield from bps.mv(
-            terms.USAXS.transmission.diode_counts, s["TR diode"]["value"],
-            terms.USAXS.transmission.diode_gain, trd_controls.femto.gain.value,
-            terms.USAXS.transmission.I0_counts, s["I0_USAXS"]["value"],
-            terms.USAXS.transmission.I0_gain, I0_controls.femto.gain.value,
+            trmssn.diode_counts, s["TR diode"]["value"],
+            trmssn.diode_gain, trd_controls.femto.gain.value,
+            trmssn.I0_counts, s["I0_USAXS"]["value"],
+            trmssn.I0_gain, I0_controls.femto.gain.value,
         )
-        # TODO: looks prettier as a table
-        msg = "Measured USAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
-            terms.USAXS.transmission.diode_counts.value, 
-            terms.USAXS.transmission.diode_gain.value, 
-            terms.USAXS.transmission.I0_counts.value,
-            terms.USAXS.transmission.I0_gain.value
-            )
+        tbl = pyRestTable.Table()
+        tbl.addLabel("detector")
+        tbl.addLabel("counts")
+        tbl.addLabel("gain")
+        tbl.addRow(("pinDiode", f"{trmssn.diode_counts.value:f}", f"{trmssn.diode_gain.value}"))
+        tbl.addRow(("I0", f"{trmssn.I0_counts.value:f}", f"{trmssn.I0_gain.value}"))
+        msg = "Measured USAXS transmission values:\n"
+        msg += str(tbl.reST())
         logger.info(msg)
         print(msg)
 
     else:
         yield from bps.mv(
-            terms.USAXS.transmission.diode_counts, 0,
-            terms.USAXS.transmission.diode_gain, 0,
-            terms.USAXS.transmission.I0_counts, 0,
-            terms.USAXS.transmission.I0_gain, 0,
+            trmssn.diode_counts, 0,
+            trmssn.diode_gain, 0,
+            trmssn.I0_counts, 0,
+            trmssn.I0_gain, 0,
         )
         logger.info("Did not measure USAXS transmission.")
     
