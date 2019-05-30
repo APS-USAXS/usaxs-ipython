@@ -699,21 +699,21 @@ def execute_command_list(filename, commands, md={}):
         if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
             
-        elif action == "flyscan":
+        elif action in ("flyscan", "usaxsscan"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
             yield from Flyscan(sx, sy, sth, snm, md=_md)
             
-        elif action == "saxs":
+        elif action in ("saxs", "saxsexp"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
             yield from SAXS(sx, sy, sth, snm, md=_md)
             
-        elif action == "waxs":
+        elif action in ("waxs", "waxsexp"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
