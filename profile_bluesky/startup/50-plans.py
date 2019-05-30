@@ -339,19 +339,18 @@ def postCommandsListfile2WWW(commands):
     """
     post list of commands to WWW and archive the list for posterity
     """
-    tbl_file = "/tmp/command_table.txt"
+    tbl_file = "commands.txt"
     tbl = command_list_as_table(commands)
     timestamp = datetime.datetime.now().isoformat().replace("T", " ")
-    contents = f"written: {timestamp}\n"
-    contents += str(tbl.reST())
-    
-    def write_commands(fp):
-        fp.write(contents)
+    file_contents = "bluesky command sequence\n"
+    file_contents += f"written: {timestamp}\n"
+    file_contents += str(tbl.reST())
     
     # post for livedata page
-    path = "/tmp"
+    # path = "/tmp"
+    path = "/share1/local_livedata"
     with open(os.path.join(path, tbl_file), "w") as fp:
-        write_commands(fp)
+        fp.write(file_contents)
     
     # post to EPICS
     yield from bp.mv(
@@ -362,8 +361,9 @@ def postCommandsListfile2WWW(commands):
     # keep this list for posterity
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     path = "/share1/log/macros"
-    with open(os.path.join(path, timestamp), "w") as fp:
-        write_commands(fp)
+    posterity_file = f"{timestamp}-{tbl_file}"
+    with open(os.path.join(path, posterity_file), "w") as fp:
+        fp.write(file_contents)
 
 
 def beforePlan(md={}, commands=None):
