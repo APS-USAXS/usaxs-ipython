@@ -88,7 +88,7 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
         self.gain_suffix = s[s.find(" "):]
         for i, s in enumerate(acceptable[:num_gains]):
             # verify all gains use same suffix text
-            msg = "gainindex[{}] = {}, expected ending '{}'".format(i, s, self.gain_suffix)
+            msg = f"gainindex[{i}] = {s}, expected ending '{self.gain_suffix}'"
             assert s[s.find(" "):] == self.gain_suffix, msg
         
         self._gain_info_known = True
@@ -119,8 +119,8 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
                 target = _gain_to_str_(target) + self.gain_suffix
             yield from bps.mv(self.gainindex, target)
         else:
-            msg = "could not set gain to {}, ".format(target)
-            msg += "must be one of these: {}".format(self.acceptable_gain_values)
+            msg = f"could not set gain to {target}, "
+            msg += f"must be one of these: {self.acceptable_gain_values}"
             raise ValueError(msg)
 
 
@@ -197,7 +197,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         self.gain_suffix = s[s.find(" "):]
         for i, s in enumerate(acceptable[:num_gains]):
             # verify all gains use same suffix text
-            msg = "reqrange[{}] = {}, expected ending: '{}'".format(i, s, self.gain_suffix)
+            msg = f"reqrange[{i}] = {s}, expected ending: '{self.gain_suffix}'"
             assert s[s.find(" "):] == self.gain_suffix, msg
         
         self._gain_info_known = True
@@ -231,8 +231,8 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
                 target = self.reqrange.enum_strs.index(target)
             yield from bps.mv(self.reqrange, target)
         else:
-            msg = "could not set gain to {}, ".format(target)
-            msg += "must be one of these: {}".format(self.acceptable_gain_values)
+            msg = f"could not set gain to {target}, "
+            msg += f"must be one of these: {self.acceptable_gain_values}"
             raise ValueError(msg)
 
     @property
@@ -292,9 +292,9 @@ def group_controls_by_scaler(controls):
     scaler_dict = OrderedDefaultDict(list)    # sort the list of controls by scaler
     for i, control in enumerate(controls):
         # each item in list MUST be instance of DetectorAmplifierAutorangeDevice
-        msg = "controls[{}] must be".format(i)
+        msg = f"controls[{i}] must be"
         msg += " instance of 'DetectorAmplifierAutorangeDevice'"
-        msg += ", provided: {}".format(control)
+        msg += f", provided: {control}"
         assert isinstance(control, DetectorAmplifierAutorangeDevice), msg
 
         k = control.scaler.name       # key by scaler's ophyd device name
