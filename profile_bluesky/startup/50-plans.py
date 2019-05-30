@@ -158,7 +158,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -324,7 +323,49 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     # measure_USAXS_PD_dark_currents    # used to be here, not now
 
 
-def beforePlan(md={}):
+def makeOrderedDictFromTwoLists(labels, values):
+    """return an OrderedDict"""
+    if len(values) > len(labels):
+        msg = "Too many values for known labels."
+        msg += f"  labels={labels}"
+        msg += f"  values={values}"
+        raise ValueError(msg)
+    # only the first len(values) labels will be used!
+    return OrderedDict(zip(labels, values))
+
+
+def postCommandsListfile2WWW(commands):
+    """
+    post list of commands to WWW and archive the list for posterity
+    """
+    tbl_file = "commands.txt"
+    tbl = command_list_as_table(commands)
+    timestamp = datetime.datetime.now().isoformat().replace("T", " ")
+    file_contents = "bluesky command sequence\n"
+    file_contents += f"written: {timestamp}\n"
+    file_contents += str(tbl.reST())
+    
+    # post for livedata page
+    # path = "/tmp"
+    path = "/share1/local_livedata"
+    with open(os.path.join(path, tbl_file), "w") as fp:
+        fp.write(file_contents)
+    
+    # post to EPICS
+    yield from bp.mv(
+        user_data.macro_file, os.path.split(tbl_file)[-1],
+        user_data.macro_file_time, timestamp,
+        )
+
+    # keep this list for posterity
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    path = "/share1/log/macros"
+    posterity_file = f"{timestamp}-{tbl_file}"
+    with open(os.path.join(path, posterity_file), "w") as fp:
+        fp.write(file_contents)
+
+
+def beforePlan(md={}, commands=None):
     """
     things to be done before every data collection plan
     """
@@ -364,6 +405,9 @@ def beforePlan(md={}):
     except NameError:
         pass
     yield from bps.mv(terms.FlyScan.order_number, order_number)
+    
+    if commands is not None:
+        postCommandsListfile2WWW(commands)
 
 
 def afterPlan(md={}):
@@ -378,9 +422,9 @@ def afterPlan(md={}):
     )
 
 
-def run_Excel_file(xl_file, md={}):
+def parse_Excel_command_file(filename):
     """
-    example of reading a list of samples from Excel spreadsheet
+    parse an Excel spreadsheet with commands, return as command list
     
     TEXT view of spreadsheet (Excel file line numbers shown)::
     
@@ -391,46 +435,294 @@ def run_Excel_file(xl_file, md={}):
         [5] FlyScan 0   0   0   blank
         [6] FlyScan 5   2   0   blank
 
+    PARAMETERS
+    
+    filename : str
+        Name of input Excel spreadsheet file.  Can be relative or absolute path,
+        such as "actions.xslx", "../sample.xslx", or 
+        "/path/to/overnight.xslx".
+
+    RETURNS
+    
+    list of commands : list[command]
+        List of command tuples for use in ``execute_command_list()``
+
+    RAISES
+    
+    FileNotFoundError
+        if file cannot be found
+
     """
-    excel_file = os.path.abspath(xl_file)
-    assert os.path.exists(excel_file)
-    xl = APS_utils.ExcelDatabaseFileGeneric(excel_file)
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    xl = APS_utils.ExcelDatabaseFileGeneric(full_filename)
+
+    commands = []
 
     if len(xl.db) > 0:
-        # print the table of actions
-        print(f"run_Excel_file('{xl_file}')")
-        tbl = pyRestTable.Table()
-        tbl.labels = ["#",]
-        tbl.labels += list(xl.db[list(xl.db.keys())[0]].keys())
         for i, row in enumerate(xl.db.values()):
-            tbl.addRow([i+1,] + list(row.values()))
-        print(tbl)
+            action, *values = list(row.values())
 
-    yield from beforePlan(md=md)
-    for i, row in enumerate(xl.db.values()):
-        print(f"Excel row {i+1}: {row}")
-        scan_command = row["scan"].lower()
-        # information from all columns goes into the metadata
-        # columns names are the keys in the metadata dictionary
-        # make sure md keys are "clean"
-        # also provide crossreference to original column names
-        _md = {APS_utils.cleanupText(k): v for k, v in row.items()}
-        _md["Excel_file"] = excel_file
-        _md["xl_file"] = xl_file
-        _md["excel_row_number"] = i+1
-        _md["original_keys"] = {APS_utils.cleanupText(k): k for k in row.keys()}
-        # _md["table_of_actions"] = str(tbl)
+            # trim off any None values from end
+            while len(values) > 0:
+                if values[-1] is not None:
+                    break
+                values = values[:-1]
+            
+            commands.append((action, values, i+1, list(row.values())))
+
+    return commands
+
+
+def split_quoted_line(line):
+    """
+    splits a line into words some of which might be quoted
+    
+    TESTS::
+
+        FlyScan 0   0   0   blank
+        FlyScan 5   2   0   "empty container"
+        FlyScan 5   12   0   "even longer name"
+        SAXS 0 0 0 blank
+        SAXS 0 0 0 "blank"
+    
+    RESULTS::
+
+        ['FlyScan', '0', '0', '0', 'blank']
+        ['FlyScan', '5', '2', '0', 'empty container']
+        ['FlyScan', '5', '12', '0', 'even longer name']
+        ['SAXS', '0', '0', '0', 'blank']
+        ['SAXS', '0', '0', '0', 'blank']
+
+    """
+    parts = []
+
+    # look for open and close quoted parts and combine them
+    quoted = False
+    multi = None
+    for p in line.split():
+        if not quoted and p.startswith('"'):   # begin quoted text
+            quoted = True
+            multi = ""
+
+        if quoted:
+            if len(multi) > 0:
+                multi += " "
+            multi += p
+            if p.endswith('"'):     # end quoted text
+                quoted = False
+
+        if not quoted:
+            if multi is not None:
+                parts.append(multi[1:-1])   # remove enclosing quotes
+                multi = None
+            else:
+                parts.append(p)
+
+    return parts
+
+
+def parse_text_command_file(filename):
+    """
+    parse a text file with commands, return as command list
+    
+    * The text file is interpreted line-by-line.
+    * Blank lines are ignored.
+    * A pound sign (#) marks the rest of that line as a comment.
+    * All remaining lines are interpreted as commands with arguments.
+    
+    Example of text file (no line numbers shown)::
+    
+        #List of sample scans to be run              
+        # pound sign starts a comment (through end of line)
+
+        # action  value
+        mono_shutter open
+
+        # action  x y width height
+        uslits 0 0 0.4 1.2
+
+        # action  sx  sy  thickness   sample name
+        FlyScan 0   0   0   blank
+        FlyScan 5   2   0   "empty container"
+
+        # action  sx  sy  thickness   sample name
+        SAXS 0 0 0 blank
+
+        # action  value
+        mono_shutter close
+
+    PARAMETERS
+    
+    filename : str
+        Name of input text file.  Can be relative or absolute path,
+        such as "actions.txt", "../sample.txt", or 
+        "/path/to/overnight.txt".
+
+    RETURNS
+    
+    list of commands : list[command]
+        List of command tuples for use in ``execute_command_list()``
+
+    RAISES
+    
+    FileNotFoundError
+        if file cannot be found
+    """
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    with open(full_filename, "r") as fp:
+        buf = fp.readlines()
+
+    commands = []
+    for i, raw_command in enumerate(buf):
+        row = raw_command.strip()
+        if row == "" or row.startswith("#"):
+            continue                    # comment or blank
+
+        else:                           # command line
+            action, *values = split_quoted_line(row)
+            commands.append((action, values, i+1, raw_command.rstrip()))
+
+    return commands
+
+
+def command_list_as_table(commands):
+    """
+    format a command list as a pyRestTable.Table object
+    """
+    tbl = pyRestTable.Table()
+    tbl.addLabel("line #")
+    tbl.addLabel("action")
+    tbl.addLabel("parameters")
+    for command in commands:
+        action, args, line_number, raw_command = command
+        row = [line_number, action, ", ".join(map(str, args))]
+        tbl.addRow(row)
+    return tbl
+
+
+def get_command_list(filename):
+    """
+    return command list from either text or Excel file
+    """
+    full_filename = os.path.abspath(filename)
+    assert os.path.exists(full_filename)
+    try:
+        commands = parse_Excel_command_file(filename)
+    except Exception:          # TODO: XLRDError
+        commands = parse_text_command_file(filename)
+    return commands
+
+
+def summarize_command_file(filename):
+    """
+    print the command list from a text or Excel file
+    """
+    commands = get_command_list(filename)
+    print(f"Command file: {filename}")
+    print(command_list_as_table(commands))
+
+
+def run_command_file(filename, md={}):
+    """
+    plan: execute a list of commands from a text or Excel file
+
+    * Parse the file into a command list
+    * yield the command list to the RunEngine (or other)
+    """
+    commands = get_command_list(filename)
+    yield from execute_command_list(filename, commands)
+
+
+def execute_command_list(filename, commands, md={}):
+    """
+    plan: execute the command list
+    
+    The command list is a tuple described below.
+
+    * Only recognized commands will be executed.
+    * Unrecognized commands will be reported as comments.
+
+    PARAMETERS
+    
+    filename : str
+        Name of input text file.  Can be relative or absolute path,
+        such as "actions.txt", "../sample.txt", or 
+        "/path/to/overnight.txt".
+    commands : list[command]
+        List of command tuples for use in ``execute_command_list()``
+    
+    where
+    
+    command : tuple
+        (action, OrderedDict, line_number, raw_command)
+    action: str
+        names a known action to be handled
+    parameters: list
+        List of parameters for the action.
+        The list is empty of there are no values
+    line_number: int
+        line number (1-based) from the input text file
+    raw_command: obj (str or list(str)
+        contents from input file, such as:
+        ``SAXS 0 0 0 blank``
+    """
+    full_filename = os.path.abspath(filename)
+
+    if len(commands) == 0:
+        yield from bps.null()
+        return
+
+    yield from bps.mv(
+        user_data.macro_file, filename,
+        user_data.macro_file_time, str(datetime.datetime.now()),
+    )
+    print(f"Command file: {filename}")
+    print(command_list_as_table(commands))
+    
+    yield from beforePlan(md=md, commands=commands)
+    for command in commands:
+        action, args, i, raw_command = command
+        print(f"file line {i}: {raw_command}")
+
+        _md = {}
+        _md["full_filename"] = full_filename
+        _md["filename"] = filename
+        _md["line_number"] = i
+        _md["action"] = action
+        _md["parameters"] = args    # args is shorter than parameters, means the same thing here
+
         _md.update(md or {})      # overlay with user-supplied metadata
-        if scan_command == "preusaxstune":
+
+        action = action.lower()
+        if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
-        elif scan_command == "flyscan":
-            yield from Flyscan(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md) 
-        elif scan_command == "saxs":
-            yield from SAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
-        elif scan_command == "waxs":
-            yield from WAXS(row["sx"], row["sy"], row["thickness"], row["sample name"], md=_md)
+            
+        elif action == "flyscan":
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from Flyscan(sx, sy, sth, snm, md=_md)
+            
+        elif action == "saxs":
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from SAXS(sx, sy, sth, snm, md=_md)
+            
+        elif action == "waxs":
+            sx = float(args[0])
+            sy = float(args[1])
+            sth = float(args[2])
+            snm = args[3]
+            yield from WAXS(sx, sy, sth, snm, md=_md)
+            
         else:
-            print(f"no handling for table row {i+1}: scan_command={scan_command}")
+            print(f"no handling for line {i}: {raw_command}")
+
     yield from afterPlan(md=md)
 
 
@@ -496,7 +788,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -524,7 +815,8 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     old_det_stage_sigs = OrderedDict()
     for k, v in saxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
-    del saxs_det.hdf1.stage_sigs["capture"]
+    if saxs_det.hdf1.stage_sigs.get("capture") is not None:
+        del saxs_det.hdf1.stage_sigs["capture"]
     saxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     saxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     saxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
@@ -582,7 +874,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, old_delay,
 
         user_data.state, "Done SAXS",
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.time_stamp, ts,
     )
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
@@ -648,7 +939,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
@@ -676,7 +966,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     old_det_stage_sigs = OrderedDict()
     for k, v in waxs_det.hdf1.stage_sigs.items():
         old_det_stage_sigs[k] = v
-    del waxs_det.hdf1.stage_sigs["capture"]
+    if waxs_det.hdf1.stage_sigs.get("capture") is not None:
+        del waxs_det.hdf1.stage_sigs["capture"]
     waxs_det.hdf1.stage_sigs["file_template"] = ad_file_template
     waxs_det.hdf1.stage_sigs["file_write_mode"] = "Single"
     waxs_det.hdf1.stage_sigs["blocking_callbacks"] = "No"
@@ -736,7 +1027,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, old_delay,
 
         user_data.state, "Done WAXS",
-        user_data.macro_file_time, ts,      # does not really apply to bluesky
         user_data.time_stamp, ts,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)

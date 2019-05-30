@@ -113,6 +113,7 @@ def trim_string_for_EPICS(msg):
 
 class UserDataDevice(Device):
     GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
+    macro_file = Component(EpicsSignal,         "9idcLAX:USAXS:macroFile")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")

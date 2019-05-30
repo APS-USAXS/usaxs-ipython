@@ -374,6 +374,7 @@ def measure_USAXS_Transmission(md={}):
             terms.USAXS.transmission.I0_counts, s["I0_USAXS"]["value"],
             terms.USAXS.transmission.I0_gain, I0_controls.femto.gain.value,
         )
+        # TODO: looks prettier as a table
         msg = "Measured USAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
             terms.USAXS.transmission.diode_counts.value, 
             terms.USAXS.transmission.diode_gain.value, 
