@@ -19,7 +19,10 @@ if aps.inUserOperations and operations_in_9idc():
 
 else:
     print("!"*30)
-    print("Session started when APS not operating.")
+    if operations_in_9idc():
+        print("Session started when APS not operating.")
+    else:
+        print("Session started when 9ID-C is not operating.")
     print("Using simulators for FE_shutter and mono_shutter.")
     print("!"*30)
     FE_shutter = SimulatedApsPssShutterWithStatus(name="FE_shutter")
