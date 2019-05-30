@@ -426,13 +426,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     
     yield from bps.sleep(settling_time)
 
-    # How many times to let autoscale work?
-    # Number of possible gains is one choice - NUM_AUTORANGE_GAINS
-    # consider: could start on one extreme, end on the other
-    max_iterations = min(max_iterations, NUM_AUTORANGE_GAINS)
-
-    # Better to let caller set a higher possible number
-    # Converge if no gains change
+    # Autoscale has converged if no gains change
     # Also, make sure no detector count rates are stuck at max
     
     complete = False
