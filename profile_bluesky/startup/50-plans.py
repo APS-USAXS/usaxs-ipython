@@ -497,7 +497,7 @@ def parse_text_command_file(filename):
 
         # action  sx  sy  thickness   sample name
         FlyScan 0   0   0   blank
-        FlyScan 5   2   0   blank
+        FlyScan 5   2   0   "empty container"
 
         # action  sx  sy  thickness   sample name
         SAXS 0 0 0 blank
@@ -534,7 +534,7 @@ def parse_text_command_file(filename):
             continue                    # comment or blank
 
         else:                           # command line
-            action, *values = row.split()
+            action, *values = row.split()  # FIXME:
             commands.append((action, values, i+1, raw_command.rstrip()))
 
     return commands

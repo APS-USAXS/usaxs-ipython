@@ -11,7 +11,7 @@ preusaxstune
 
 # action  sx  sy  thickness   sample_name
 FlyScan 0   0   0   blank
-FlyScan 5   2   0   blank
+FlyScan 5   2   0   "empty container"
 SAXS 0 0 0 blank
 
 # action  value
