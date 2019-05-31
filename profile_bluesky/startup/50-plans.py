@@ -743,7 +743,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
-        user_data.saxs_sample_thickness, thickness,
+        user_data.sample_thickness, thickness,
     )
 
     if terms.preUSAXStune.needed:
@@ -894,7 +894,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         usaxs_slit.h_size, terms.SAXS.h_size.value,
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
-        user_data.saxs_sample_thickness, thickness,
+        user_data.sample_thickness, thickness,
     )
 
     if terms.preUSAXStune.needed:
