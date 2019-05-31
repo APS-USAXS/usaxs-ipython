@@ -122,9 +122,9 @@ class UserDataDevice(Device):
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan", string=True)
-    state = Component(EpicsSignal,              "9idcLAX:USAXS:state", string=True)
+    state = Component(EpicsSignal,              "9idcLAX:state", string=True)
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
-    user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir", string=True)
+    user_dir = Component(EpicsSignal,           "9idcLAX:userDir", string=True)
     user_name = Component(EpicsSignal,          "9idcLAX:UserName", string=True)
 
     # for GUI to know if user is collecting data: 0="On", 1="Off"
@@ -181,6 +181,9 @@ class PreUsaxsTuneParameters(Device):
     req_time_between_tune = Component(EpicsSignal, "9idcLAX:ReqTimeBetweenTune")
     run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneOnQdo")
     run_tune_next = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneNext")
+    sx = Component(EpicsSignal, "9idcLAX:preUSAXStuneSX")
+    sy = Component(EpicsSignal, "9idcLAX:preUSAXStuneSY")
+    use_specific_location = Component(EpicsSignal, "9idcLAX:UseSpecificTuneLocation")
     
     @property
     def needed(self):
@@ -393,8 +396,8 @@ class GeneralParameters(Device):
     Imaging = Component(Parameters_Imaging)
     OutOfBeam = Component(Parameters_OutOfBeam)
 
-    PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:USAXS:PauseBeforeNextScan")
-    StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:USAXS:StopBeforeNextScan")
+    PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:PauseBeforeNextScan")
+    StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:StopBeforeNextScan")
 
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
