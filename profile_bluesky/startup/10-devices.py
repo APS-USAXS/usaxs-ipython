@@ -125,7 +125,7 @@ class UserDataDevice(Device):
     state = Component(EpicsSignal,              "9idcLAX:state", string=True)
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
     user_dir = Component(EpicsSignal,           "9idcLAX:userDir", string=True)
-    user_name = Component(EpicsSignal,          "9idcLAX:UserName", string=True)
+    user_name = Component(EpicsSignal,          "9idcLAX:userName", string=True)
 
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
