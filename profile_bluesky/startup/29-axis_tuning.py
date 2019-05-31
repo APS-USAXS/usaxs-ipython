@@ -64,13 +64,21 @@ USING_MS_STAGE = False
 TUNING_DET_SIGNAL = {True: I00_SIGNAL, False: I0_SIGNAL}[USING_MS_STAGE]
 
 
-# TODO: add new PVs
-#     9idcLAX:USAXS:tune_mr_range
-#     9idcLAX:USAXS:tune_m2rp_range
-#     9idcLAX:USAXS:tune_msrp_range
-#     9idcLAX:USAXS:tune_ar_range
-#     9idcLAX:USAXS:tune_a2rp_range
-#     9idcLAX:USAXS:tune_asrp_range
+class TuneRanges(Device):
+    """
+    width of tuning for each axis
+    
+    TODO: placeholder until #232 is resolved
+    see: https://github.com/APS-USAXS/ipython-usaxs/issues/232
+    """
+    ar   = Component(EpicsSignal, "9idcLAX:USAXS:tune_ar_range")
+    a2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_a2rp_range")
+    asrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_asrp_range")
+    mr   = Component(EpicsSignal, "9idcLAX:USAXS:tune_mr_range")
+    m2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_m2rp_range")
+    msrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_msrp_range")
+
+tune_range = TuneRanges(name="tune_range")
 
 
 # -------------------------------------------
@@ -98,11 +106,11 @@ def _getScalerSignalName_(scaler, signal):
         return signal.chname.value
     elif isinstance(scaler, EpicsScaler):
         return signal.name    
-        
+
 m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
-m_stage.r.tuner.width = -0.004
+m_stage.r.tuner.width = tune_range.mr.value     # -0.004
 
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
