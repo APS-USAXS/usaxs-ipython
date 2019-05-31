@@ -140,8 +140,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
-    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # SPEC-compatibility symbol
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
 
@@ -161,7 +160,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, str(SCAN_N),
+        user_data.spec_scan, str(RE.md["scan_id"]+1),
         # or terms.FlyScan.order_number.value
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
@@ -251,11 +250,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         # dy_start, flyscan_trajectories.dy.value[0],
     )
 
-    SCAN_N = RE.md["scan_id"]+1     # update with next number
     yield from bps.mv(
         terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
-        user_data.spec_scan, str(SCAN_N),
+        user_data.spec_scan, str(RE.md["scan_id"]+1),
     )
     
     _md = {}
@@ -758,8 +756,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
-    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # SPEC-compatibility symbol
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
     
@@ -793,7 +790,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, str(SCAN_N),
+        user_data.spec_scan, str(RE.md["scan_id"]+1),
         user_data.time_stamp, ts,
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
     )
@@ -830,7 +827,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         ti_filter_shutter, "close",
     )
 
-    SCAN_N = RE.md["scan_id"]+1     # update with next number
     old_delay = scaler0.delay.value
     yield from bps.mv(
         scaler1.preset_time, terms.SAXS.acquire_time.value + 1,
@@ -846,7 +842,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.delay, 0,
         terms.SAXS.start_exposure_time, ts,
         user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
-        user_data.spec_scan, str(SCAN_N),
+        user_data.spec_scan, str(RE.md["scan_id"]+1),
     )
 
     yield from bps.mv(
@@ -909,8 +905,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
-    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # SPEC-compatibility symbol
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
     
@@ -944,7 +939,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
-        user_data.spec_scan, str(SCAN_N),
+        user_data.spec_scan, str(RE.md["scan_id"]+1),
         user_data.time_stamp, ts,
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
     )
@@ -1033,3 +1028,36 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
     logger.info(f"I0 value: {terms.SAXS.I0.value}")
+
+
+def USAXS_Q_Image(Q, pos_X, pos_Y, thickness, scan_title, md={}):
+    """
+    collect a USAXS Image at a specific Q
+    
+    At each q, we decide the number of filters that is required and the
+    image acquisition time, and acquire 4 images. Immediately after
+    tuning of the instrument, we acquire
+
+    1. USAXS image (sample in the beam, with filter, beam on).
+    2. Optics (sample not in the beam, with filter, beam on).
+    3. Dark field (beam off).
+    4. Flat field image
+       - sample not in the beam
+       - q = 0
+       - with filte
+       - beam on
+       - image acquisition time may need to be shortened to prevent saturation
+
+    """
+    # TODO: need to specify the filters?
+    logger.info(f"USAXS_Q_Image(Q={Q}, pos_X={pos_X}, pos_Y={pos_Y}, thickness={thickness}, scan_title={scan_title})")
+    yield from IfRequestedStopBeforeNextScan()
+
+    yield from mode_imaging()
+
+    # TODO: more boilerplate code from SAXS()?
+    
+    # TODO: USAXS image (sample in the beam, with filter, beam on).
+    # TODO: Optics image (sample not in the beam, with filter, beam on).
+    # TODO: Dark field image (beam off).
+    # TODO: Flat field image
