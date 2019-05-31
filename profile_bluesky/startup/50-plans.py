@@ -86,31 +86,6 @@ def preUSAXStune(md={}):
     )
 
 
-def addDeviceStream(devices, label):
-    """
-    add an ophyd Device as an addtional document stream
-    
-    Use this within a custom plan, such as this example::
-
-        yield from bps.open_run()
-        # ...
-        yield from addDeviceStream(prescanDeviceList, "metadata_prescan")
-        # ...
-        yield from custom_scan_procedure()
-        # ...
-        yield from addDeviceStream(postscanDeviceList, "metadata_postscan")
-        # ...
-        yield from bps.close_run()
-
-    """
-    yield from bps.create(name=label)
-    if isinstance(devices, Device):     # just in case...
-        devices = [devices]
-    for d in devices:
-        yield from bps.read(d)
-    yield from bps.save()
-
-
 def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     do one USAXS Fly Scan
