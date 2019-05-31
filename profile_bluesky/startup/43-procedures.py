@@ -301,8 +301,12 @@ def mode_Radiography():
     print(msg)
 
 
-# def mode_imaging():       # TODO: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
-mode_imaging = mode_USAXS   # for now
+def mode_imaging():
+    """
+    prepare the instrument for USAXS imaging
+    """
+    # TODO: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
+    yield from mode_USAXS()   # FIXME:
 
 
 def mode_OpenBeamPath():
