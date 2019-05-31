@@ -117,8 +117,8 @@ class UserDataDevice(Device):
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
-    saxs_sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")         # TODO: temporary
-    sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle", string=True)
+    saxs_sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")
+    sample_title = Component(EpicsSignal,       "9idcLAX:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
@@ -176,12 +176,12 @@ class FlyScanParameters(Device):
 
 class PreUsaxsTuneParameters(Device):
     """preUSAXStune handling"""
-    num_scans_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:NumScansFromLastTune")
-    epoch_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:EPOCHTimeOfLastTune")
-    req_num_scans_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqNumScansBetweenTune")
-    req_time_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqTimeBetweenTune")
-    run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneOnQdo")
-    run_tune_next = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneNext")
+    num_scans_last_tune = Component(EpicsSignal, "9idcLAX:NumScansFromLastTune")
+    epoch_last_tune = Component(EpicsSignal, "9idcLAX:EPOCHTimeOfLastTune")
+    req_num_scans_between_tune = Component(EpicsSignal, "9idcLAX:ReqNumScansBetweenTune")
+    req_time_between_tune = Component(EpicsSignal, "9idcLAX:ReqTimeBetweenTune")
+    run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneOnQdo")
+    run_tune_next = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneNext")
     
     @property
     def needed(self):
