@@ -77,6 +77,20 @@ class GSlitDevice(MotorBundle):
             raise ValueError("must define vertical size")
         move_motors(self.h_size, h, self.v_size, v)
     
+    @property
+    def h_gap_in_position(self):
+        gap = self.outb.position - self.inb.position
+        return abs(gap - terms.SAXS.guard_h_size.value) <= self.gap_tolerance
+    
+    @property
+    def v_gap_in_position(self):
+        gap = self.top.position - self.bot.position
+        return abs(gap - terms.SAXS.guard_v_size.value) <= self.gap_tolerance
+    
+    @property
+    def in_position(self):
+        return self.h_gap_in_position and self.v_gap_in_position
+    
 
 class UsaxsCollimatorStageDevice(MotorBundle):
     """USAXS Collimator (Monochromator) stage"""
