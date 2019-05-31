@@ -295,31 +295,31 @@ class Parameters_SBUSAXS(Device):
 
 
 class Parameters_SAXS(Device):
-    z_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_in")
-    z_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_out")
-    z_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_limit_offset")
+    z_in = Component(EpicsSignal, "9idcLAX:SAXS_z_in")
+    z_out = Component(EpicsSignal, "9idcLAX:SAXS_z_out")
+    z_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS_z_limit_offset")
 
-    y_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_in")
-    y_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_out")
-    y_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_limit_offset")
+    y_in = Component(EpicsSignal, "9idcLAX:SAXS_y_in")
+    y_out = Component(EpicsSignal, "9idcLAX:SAXS_y_out")
+    y_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS_y_limit_offset")
 
-    ax_in = Component(EpicsSignal, "9idcLAX:SAXS:ax_in")
-    ax_out = Component(EpicsSignal, "9idcLAX:SAXS:ax_out")
-    ax_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:ax_limit_offset")
+    ax_in = Component(EpicsSignal, "9idcLAX:ax_in")
+    ax_out = Component(EpicsSignal, "9idcLAX:ax_out")
+    ax_limit_offset = Component(EpicsSignal, "9idcLAX:ax_limit_offset")
 
-    dx_in = Component(EpicsSignal, "9idcLAX:SAXS:dx_in")
-    dx_out = Component(EpicsSignal, "9idcLAX:SAXS:dx_out")
-    dx_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:dx_limit_offset")
+    dx_in = Component(EpicsSignal, "9idcLAX:dx_in")
+    dx_out = Component(EpicsSignal, "9idcLAX:dx_out")
+    dx_limit_offset = Component(EpicsSignal, "9idcLAX:dx_limit_offset")
 
-    usaxs_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hslit_ap")
-    usaxs_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vslit_ap")
-    v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vslit_ap")
-    h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hslit_ap")
+    usaxs_h_size = Component(EpicsSignal, "9idcLAX:USAXS_hslit_ap")
+    usaxs_v_size = Component(EpicsSignal, "9idcLAX:USAXS_vslit_ap")
+    v_size = Component(EpicsSignal, "9idcLAX:SAXS_vslit_ap")
+    h_size = Component(EpicsSignal, "9idcLAX:SAXS_hslit_ap")
 
-    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hgslit_ap")
-    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vgslit_ap")
-    guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vgslit_ap")
-    guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hgslit_ap")
+    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_hgslit_ap")
+    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_vgslit_ap")
+    guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS_vgslit_ap")
+    guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS_hgslit_ap")
 
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:SAXS:Exp_")
 
@@ -341,9 +341,9 @@ class Parameters_SAXS(Device):
 
 
 class Parameters_WAXS(Device):
-    x_in = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_in")
-    x_out = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_out")
-    x_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_limit_offset")
+    x_in = Component(EpicsSignal, "9idcLAX:WAXS_x_in")
+    x_out = Component(EpicsSignal, "9idcLAX:WAXS_x_out")
+    x_limit_offset = Component(EpicsSignal, "9idcLAX:WAXS_x_limit_offset")
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_WAXS:Exp_")
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory", string=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
