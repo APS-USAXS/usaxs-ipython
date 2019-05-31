@@ -305,8 +305,10 @@ def mode_imaging():
     """
     prepare the instrument for USAXS imaging
     """
-    # TODO: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
-    yield from mode_USAXS()   # FIXME:
+    # see: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
+    # there it calls useModeUSAXS so that's what we'll do here
+    yield from user_data.set_state_plan("Moving USAXS to Imaging mode (same as USAXS mode now)")
+    yield from mode_USAXS()
 
 
 def mode_OpenBeamPath():
