@@ -492,7 +492,7 @@ def tune_saxs_optics(md={}):
 def tune_after_imaging(md={}):
     a_stage.r.tuner.width = 0.005
     yield from tune_ar(md=md)
-    a_stage.r.tuner.width = 0.004
+    a_stage.r.tuner.width = axis_tune_range.ar.value        # 0.004
     yield from tune_ar(md=md)
     yield from tune_a2rp(md=md)
 
