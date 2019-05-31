@@ -78,7 +78,7 @@ class TuneRanges(Device):
     m2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_m2rp_range")
     msrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_msrp_range")
 
-tune_range = TuneRanges(name="tune_range")
+axis_tune_range = TuneRanges(name="axis_tune_range")
 
 
 # -------------------------------------------
@@ -110,7 +110,7 @@ def _getScalerSignalName_(scaler, signal):
 m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
-m_stage.r.tuner.width = tune_range.mr.value     # -0.004
+m_stage.r.tuner.width = axis_tune_range.mr.value     # -0.004
 
 m_stage.r.pre_tune_method = mr_pretune_hook
 m_stage.r.post_tune_method = mr_posttune_hook
@@ -184,7 +184,7 @@ def m2rp_posttune_hook():
 m_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r2p.tuner.num = 21
-m_stage.r2p.tuner.width = -8
+m_stage.r2p.tuner.width = axis_tune_range.mr2p.value     -8
 
 m_stage.r2p.pre_tune_method = m2rp_pretune_hook
 m_stage.r2p.post_tune_method = m2rp_posttune_hook
@@ -223,7 +223,7 @@ def msrp_posttune_hook():
 ms_stage.rp.tuner = APS_plans.TuneAxis([scaler0], ms_stage.rp, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 ms_stage.rp.tuner.num = 21
-ms_stage.rp.tuner.width = 6
+ms_stage.rp.tuner.width = axis_tune_range.msrp.value     # 6
 
 ms_stage.rp.pre_tune_method = msrp_pretune_hook
 ms_stage.rp.post_tune_method = msrp_posttune_hook
@@ -264,7 +264,7 @@ def ar_posttune_hook():
 a_stage.r.tuner = APS_plans.TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
-a_stage.r.tuner.width = -0.004
+a_stage.r.tuner.width = axis_tune_range.ar.value     # -0.004
 
 a_stage.r.pre_tune_method = ar_pretune_hook
 a_stage.r.post_tune_method = ar_posttune_hook
@@ -306,7 +306,7 @@ def asrp_posttune_hook():
 as_stage.rp.tuner = APS_plans.TuneAxis([scaler0], as_stage.rp, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 as_stage.rp.tuner.num = 21
-as_stage.rp.tuner.width = 6
+as_stage.rp.tuner.width = axis_tune_range.asrp.value     # 6
 
 as_stage.rp.pre_tune_method = asrp_pretune_hook
 as_stage.rp.post_tune_method = asrp_posttune_hook
@@ -351,7 +351,7 @@ def a2rp_posttune_hook():
 a_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
-a_stage.r2p.tuner.width = -8
+a_stage.r2p.tuner.width = axis_tune_range.a2rp.value     # -8
 a_stage.r2p.pre_tune_method = a2rp_pretune_hook
 a_stage.r2p.post_tune_method = a2rp_posttune_hook
 
