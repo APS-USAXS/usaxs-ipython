@@ -319,7 +319,7 @@ def mode_OpenBeamPath():
 
     if not confirm_instrument_mode("out of beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info(f"Found UsaxsSaxsMode = {mode_now}")
         logger.info("Opening the beam path, moving all components out")
         yield from move_SAXSOut()
         yield from move_WAXSOut()
