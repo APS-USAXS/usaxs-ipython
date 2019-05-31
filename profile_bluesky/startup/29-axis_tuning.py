@@ -64,6 +64,15 @@ USING_MS_STAGE = False
 TUNING_DET_SIGNAL = {True: I00_SIGNAL, False: I0_SIGNAL}[USING_MS_STAGE]
 
 
+# TODO: add new PVs
+#     9idcLAX:USAXS:tune_mr_range
+#     9idcLAX:USAXS:tune_m2rp_range
+#     9idcLAX:USAXS:tune_msrp_range
+#     9idcLAX:USAXS:tune_ar_range
+#     9idcLAX:USAXS:tune_a2rp_range
+#     9idcLAX:USAXS:tune_asrp_range
+
+
 # -------------------------------------------
 
 def mr_pretune_hook():
