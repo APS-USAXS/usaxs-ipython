@@ -701,6 +701,7 @@ def execute_command_list(filename, commands, md={}):
             yield from tune_usaxs_optics(md=_md)
             
         elif action in ("flyscan", "usaxsscan"):
+            # TODO: watch for PV which indicates, if USAXS should run step scan or flyscan
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
@@ -720,11 +721,6 @@ def execute_command_list(filename, commands, md={}):
             sth = float(args[2])
             snm = args[3]
             yield from WAXS(sx, sy, sth, snm, md=_md)
-            
-        elif action == "current_experiment_name":
-            nm = args[0]
-            # FIXME: check this!
-            yield from bps.mv(user_data.user_name, nm)
             
         else:
             print(f"no handling for line {i}: {raw_command}")
