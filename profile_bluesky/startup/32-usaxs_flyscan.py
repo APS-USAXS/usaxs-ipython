@@ -185,10 +185,7 @@ class UsaxsFlyScanDevice(Device):
             )
 
         # add an event with our MCA data in the "mca" stream
-        yield from bps.create(name="mca")
-        for d in [struck.mca1, struck.mca2, struck.mca3]:
-            yield from bps.read(d)
-        yield from bps.save()
+        yield from addDeviceDataAsStream([struck.mca1, struck.mca2, struck.mca3], "mca")
 
         logger.debug("after return", time.time() - self.t0)
         yield from user_data.set_state_plan("fly scan finished")
