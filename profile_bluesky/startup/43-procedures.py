@@ -301,8 +301,14 @@ def mode_Radiography():
     print(msg)
 
 
-# def mode_imaging():       # TODO: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
-mode_imaging = mode_USAXS   # for now
+def mode_imaging():
+    """
+    prepare the instrument for USAXS imaging
+    """
+    # see: /share1/USAXS_data/2019-02/USAXS_user_macros.mac
+    # there it calls useModeUSAXS so that's what we'll do here
+    yield from user_data.set_state_plan("Moving USAXS to Imaging mode (same as USAXS mode now)")
+    yield from mode_USAXS()
 
 
 def mode_OpenBeamPath():
@@ -315,7 +321,7 @@ def mode_OpenBeamPath():
 
     if not confirm_instrument_mode("out of beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info(f"Found UsaxsSaxsMode = {mode_now}")
         logger.info("Opening the beam path, moving all components out")
         yield from move_SAXSOut()
         yield from move_WAXSOut()
