@@ -25,7 +25,10 @@ EXAMPLE::
 from collections import OrderedDict
 import datetime
 import inspect
+import logging
 import os
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
 def _write_archive_dict_(archive_dict):
@@ -49,6 +52,7 @@ def _write_archive_dict_(archive_dict):
             else:
                 fp.write(f"{v}\n")
             fp.write("\n")
+        logger.debug(f"Archive: {archive_file}")
     return archive_dict
 
 
@@ -65,7 +69,9 @@ def _create_archive_dict_(frame, text):
         if os.path.exists(frame.filename):
             with open(frame.filename, "r") as fp:
                 archive["source_contents"] = fp.readlines()
+            logger.debug(f"source code file: {frame.filename}")
         else:
+            logger.debug(f"FileNotFound: {frame.filename}")
             archive["source_contents"] = "source not found"
     return archive
 
@@ -77,6 +83,7 @@ def make_archive(text=None):
     Any text supplied by the caller will be written at the start of the archive.
     """
     frameinfo = inspect.getouterframes(inspect.currentframe(), 2)
+    logger.debug(f"make_archive() called from: {frameinfo[1].filename}")
     archive = _create_archive_dict_(frameinfo[1], text or "")
     return _write_archive_dict_(archive)
 
