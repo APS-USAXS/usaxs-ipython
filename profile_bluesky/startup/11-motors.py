@@ -67,6 +67,8 @@ class GSlitDevice(MotorBundle):
     h_size = Component(EpicsSignal, '9idcLAX:GSlit1H:size')
     v_size = Component(EpicsSignal, '9idcLAX:GSlit1V:size')
     
+    gap_tolerance = 0.02        # actual must be this close to desired
+    
     def set_size(self, *args, h=None, v=None):
         """move the slits to the specified size"""
         if h is None:
@@ -74,6 +76,20 @@ class GSlitDevice(MotorBundle):
         if v is None:
             raise ValueError("must define vertical size")
         move_motors(self.h_size, h, self.v_size, v)
+    
+    @property
+    def h_gap_ok(self):
+        gap = self.outb.position - self.inb.position
+        return abs(gap - terms.SAXS.guard_h_size.value) <= self.gap_tolerance
+    
+    @property
+    def v_h_gap_ok(self):
+        gap = self.top.position - self.bot.position
+        return abs(gap - terms.SAXS.guard_v_size.value) <= self.gap_tolerance
+    
+    @property
+    def gap_ok(self):
+        return self.h_gap_ok and self.v_h_gap_ok
     
 
 class UsaxsCollimatorStageDevice(MotorBundle):
