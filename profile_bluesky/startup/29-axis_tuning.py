@@ -184,7 +184,7 @@ def m2rp_posttune_hook():
 m_stage.r2p.tuner = APS_plans.TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r2p.tuner.num = 21
-m_stage.r2p.tuner.width = axis_tune_range.mr2p.value     -8
+m_stage.r2p.tuner.width = axis_tune_range.m2rp.value     -8
 
 m_stage.r2p.pre_tune_method = m2rp_pretune_hook
 m_stage.r2p.post_tune_method = m2rp_posttune_hook
