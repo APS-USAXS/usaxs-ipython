@@ -499,11 +499,14 @@ def tune_after_imaging(md={}):
     yield from tune_a2rp(md=md)
 
 
-def compute_tune_ranges():
+def instrument_default_tune_ranges():
     """
     plan: (re)compute tune ranges for each of the optics axes
     """
     yield from bps.null()
+
+    d_stage.x.tuner.width = 10
+    d_stage.x.tuner.width = 10
 
     if monochromator.dcm.energy.value < 10.99:  # ~ 10 keV for Si 220 crystals
         m_stage.r.tuner.width = 0.003
@@ -549,3 +552,47 @@ def compute_tune_ranges():
         ms_stage.rp.tuner.width = 3
         as_stage.rp.tuner.width = 3
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
+
+
+def update_EPICS_tuning_widths():
+    """
+    plan: update the tuning widths in EPICS PVs from local settings
+    """
+    yield from bps.mv(
+        axis_tune_range.mr,     m_stage.r.tuner.width,
+        axis_tune_range.ar,     a_stage.r.tuner.width,
+        axis_tune_range.m2rp,   m_stage.r2p.tuner.width,
+        axis_tune_range.a2rp,   a_stage.r2p.tuner.width,
+        axis_tune_range.msrp,   ms_stage.rp.tuner.width,
+        axis_tune_range.asrp,   as_stage.rp.tuner.width,
+        axis_tune_range.dx,     d_stage.x.tuner.width,
+        axis_tune_range.dy,     d_stage.y.tuner.width,
+        )
+
+
+def user_defined_settings():
+    """
+    plan: users can redefine this function to override any instrument defaults
+
+    This is called from beforePlan() (in 50-plans.py) at the start of
+    every batch set of measurements.  Among the many things a user might
+    override could be the default ranges for tuning various optical axes.
+    Such as::
+
+        a_stage.r.tuner.width = 0.01
+
+    NOTE:  Don't use blocking calls here
+
+        It is important that the user not use any blocking calls
+        such as setting or getting PVs in EPICS.  Blocking calls
+        will *block* the python interpreter for long periods
+        (such as ``time.sleep()``) or make direct calls
+        for EPICS or file I/O that interrupt how the Bluesky
+        RunEngine operates.
+
+        It is OK to set local python variables since these do not block.
+
+        Write this routine like any other bluesky plan code,
+        using ``yield from bps.mv(...)``,  ``yield from bps.sleep(...)``, ...
+    """
+    yield from bps.null()
