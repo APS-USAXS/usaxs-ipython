@@ -38,13 +38,13 @@ class SpecDeviceBase(object):
             )
 
 
-class SpecMotorBase(object):
+class ItemNameBase(object):
     def item_name_value(self, item):
         if hasattr(self, item):
             return f"{item}={self.__getattribute__(item)}"
 
 
-class SpecMotor(SpecMotorBase):
+class SpecMotor(ItemNameBase):
     """
     SPEC configuration of a motor channel
     """
@@ -99,7 +99,7 @@ class SpecMotor(SpecMotorBase):
                 self.pvname = "{}m{}".format(self.device.prefix, chan)
 
 
-class SpecCounter(SpecMotorBase):
+class SpecCounter(ItemNameBase):
     """
     SPEC configuration of a counter channel
     """
