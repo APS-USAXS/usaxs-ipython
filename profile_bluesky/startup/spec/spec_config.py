@@ -38,7 +38,13 @@ class SpecDeviceBase(object):
             )
 
 
-class SpecMotor(object):
+class ItemNameBase(object):
+    def item_name_value(self, item):
+        if hasattr(self, item):
+            return f"{item}={self.__getattribute__(item)}"
+
+
+class SpecMotor(ItemNameBase):
     """
     SPEC configuration of a motor channel
     """
@@ -72,18 +78,12 @@ class SpecMotor(object):
         self.pvname = None
     
     def __str__(self):
-        def item_name_value(item):
-            if hasattr(self, item):
-                return "{}={}".format(item, self.__getattribute__(item))
-        items = []
-        items.append(item_name_value("index"))
-        items.append(item_name_value("mne"))
-        items.append(item_name_value("name"))
-        txt = item_name_value("pvname")
+        items = [self.item_name_value(k) for k in "index mne name".split()]
+        txt = self.item_name_value("pvname")
         if txt is not None:
             items.append(txt)
         else:
-            items.append(item_name_value("cntrl"))
+            items.append(self.item_name_value("cntrl"))
         return "SpecMotor({})".format(", ".join(items))
     
     def setDevice(self, devices):
@@ -96,7 +96,7 @@ class SpecMotor(object):
                 self.pvname = "{}m{}".format(self.device.prefix, chan)
 
 
-class SpecCounter(object):
+class SpecCounter(ItemNameBase):
     """
     SPEC configuration of a counter channel
     """
@@ -127,18 +127,12 @@ class SpecCounter(object):
         self.pvname = None
 
     def __str__(self):
-        def item_name_value(item):
-            if hasattr(self, item):
-                return "{}={}".format(item, self.__getattribute__(item))
-        items = []
-        items.append(item_name_value("index"))
-        items.append(item_name_value("mne"))
-        items.append(item_name_value("name"))
-        txt = item_name_value("pvname")
+        items = [self.item_name_value(k) for k in "index mne name".split()]
+        txt = self.item_name_value("pvname")
         if txt is not None:
             items.append(txt)
         else:
-            items.append(item_name_value("ctrl"))
+            items.append(self.item_name_value("ctrl"))
         return "SpecCounter({})".format(", ".join(items))
     
     def setDevice(self, devices):
