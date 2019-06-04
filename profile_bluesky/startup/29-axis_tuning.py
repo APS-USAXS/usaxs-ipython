@@ -10,13 +10,13 @@ A tunable axis has these attributes::
         Default value is `None` -- this *must* be set before axis can be tuned.
 
     pre_tune_method : obj (function reference)
-        function to be called before tuning starts, 
-        the default prints status.  
+        function to be called before tuning starts,
+        the default prints status.
         Use this to stage various components for the tune.
 
     pre_tune_method : obj (function reference)
-        function to be called after tuning ends, 
-        the default prints status.  
+        function to be called after tuning ends,
+        the default prints status.
         Use this to unstage various components after the tune.
 
 For reference, `apstools.plans.TuneAxis().tune()` uses these default attributes::
@@ -24,7 +24,7 @@ For reference, `apstools.plans.TuneAxis().tune()` uses these default attributes:
     width : float
         full range that axis will be scanned, default = 1
 
-    num : int 
+    num : int
         full range that axis will be scanned, default = 10
 
     peak_choice : str
@@ -38,12 +38,12 @@ These attributes, set internally, are available for reference::
     signals : list of instances of `ScalerCH`, `EpicsScaler`, or similar
         list of detectors to be used
 
-    signal_name : str 
+    signal_name : str
         name of specific detector signal (must be in `signals`) to use for tuning
 
 These attributes, set internally, are results of the tune scan::
 
-    tune_ok : bool 
+    tune_ok : bool
         status of most recent tune
 
     peaks : instance of `bluesky.callbacks.fitting.PeakStats`
@@ -53,7 +53,7 @@ These attributes, set internally, are results of the tune scan::
         list of peak summary statistics from all previous tune scans
 
     center : float
-        value of tune result: `if tune_ok: axis.move(center)` 
+        value of tune result: `if tune_ok: axis.move(center)`
 
 """
 
@@ -67,7 +67,7 @@ TUNING_DET_SIGNAL = {True: I00_SIGNAL, False: I0_SIGNAL}[USING_MS_STAGE]
 class TuneRanges(Device):
     """
     width of tuning for each axis
-    
+
     TODO: placeholder until #232 is resolved
     see: https://github.com/APS-USAXS/ipython-usaxs/issues/232
     """
@@ -77,6 +77,8 @@ class TuneRanges(Device):
     mr   = Component(EpicsSignal, "9idcLAX:USAXS:tune_mr_range")
     m2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_m2rp_range")
     msrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_msrp_range")
+    dx = Component(EpicsSignal, "9idcLAX:USAXS:tune_dx_range")
+    dy = Component(EpicsSignal, "9idcLAX:USAXS:tune_dy_range")
 
 axis_tune_range = TuneRanges(name="axis_tune_range")
 
@@ -89,23 +91,23 @@ def mr_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
-     
- 
+
+
 def mr_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r.name, m_stage.r.position))
-    
+
     if m_stage.r.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
-    
+
     scaler0.select_channels(None)
- 
+
 
 def _getScalerSignalName_(scaler, signal):
     if isinstance(scaler, ScalerCH):
         return signal.chname.value
     elif isinstance(scaler, EpicsScaler):
-        return signal.name    
+        return signal.name
 
 m_stage.r.tuner = APS_plans.TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
@@ -119,7 +121,7 @@ m_stage.r.post_tune_method = mr_posttune_hook
 def _tune_base_(axis, md={}):
     """
     plan for simple tune and report
-    
+
     satisfies: report of tuning OK/not OK on console
     """
     yield from IfRequestedStopBeforeNextScan()
@@ -164,7 +166,7 @@ def m2rp_pretune_hook():
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
-    
+
 
 def m2rp_posttune_hook():
     #
@@ -173,10 +175,10 @@ def m2rp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     yield from bps.mv(scaler0.delay, 0.05)
-    
+
     if m_stage.r2p.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
-    
+
     scaler0.select_channels(None)
 
 
@@ -207,18 +209,18 @@ def msrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
-    
- 
+
+
 def msrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
-    
+
     if ms_stage.rp.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
 
     scaler0.select_channels(None)
- 
- 
+
+
 # use I00 (if MS stage is used, use I0)
 ms_stage.rp.tuner = APS_plans.TuneAxis([scaler0], ms_stage.rp, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
 ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
@@ -289,19 +291,19 @@ def asrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
-    
- 
+
+
 def asrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
     print(msg.format(as_stage.rp.name, as_stage.rp.position))
     yield from bps.mv(terms.USAXS.asr_val_center, as_stage.rp.position)
-    
+
     if as_stage.rp.tuner.tune_ok:
         pass    # #165: update center when/if we get a PV for that
 
     scaler0.select_channels(None)
 
- 
+
 # use I00 (if MS stage is used, use I0)
 as_stage.rp.tuner = APS_plans.TuneAxis([scaler0], as_stage.rp, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
@@ -392,7 +394,7 @@ def dx_posttune_hook():
 d_stage.x.tuner = APS_plans.TuneAxis([scaler0], d_stage.x, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 d_stage.x.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 d_stage.x.tuner.num = 35
-d_stage.x.tuner.width = 10
+d_stage.x.tuner.width = axis_tune_range.dx.value     # 10
 
 d_stage.x.pre_tune_method = dx_pretune_hook
 d_stage.x.post_tune_method = dx_posttune_hook
@@ -432,7 +434,7 @@ def dy_posttune_hook():
 d_stage.y.tuner = APS_plans.TuneAxis([scaler0], d_stage.y, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
 d_stage.y.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 d_stage.y.tuner.num = 35
-d_stage.y.tuner.width = 10
+d_stage.y.tuner.width = axis_tune_range.dx.value     # 10
 
 d_stage.y.pre_tune_method = dy_pretune_hook
 d_stage.y.post_tune_method = dy_posttune_hook
@@ -458,7 +460,7 @@ def tune_diode(md={}):
 
 def tune_usaxs_optics(side=False, md={}):
     yield from mode_USAXS()
-    
+
     suspender_preinstalled = suspend_BeamInHutch in RE.suspenders
     if not suspender_preinstalled:
         yield from bps.install_suspender(suspend_BeamInHutch)
@@ -473,7 +475,7 @@ def tune_usaxs_optics(side=False, md={}):
 
     if not suspender_preinstalled:
         yield from bps.remove_suspender(suspend_BeamInHutch)
-    
+
     yield from bps.mv(
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.epoch_last_tune, time.time(),
@@ -502,7 +504,7 @@ def compute_tune_ranges():
     plan: (re)compute tune ranges for each of the optics axes
     """
     yield from bps.null()
-    
+
     if monochromator.dcm.energy.value < 10.99:  # ~ 10 keV for Si 220 crystals
         m_stage.r.tuner.width = 0.003
         a_stage.r.tuner.width = 0.002
