@@ -141,17 +141,16 @@ class UserDataDevice(Device):
     macro_file = Component(EpicsSignal,         "9idcLAX:USAXS:macroFile")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
-    sample_thickness = Component(EpicsSignal,   "9idcLAX:USAXS:SampleThickness")
-    saxs_sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")         # TODO: temporary
-    sample_title = Component(EpicsSignal,       "9idcLAX:USAXS:sampleTitle", string=True)
+    sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")
+    sample_title = Component(EpicsSignal,       "9idcLAX:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan", string=True)
-    state = Component(EpicsSignal,              "9idcLAX:USAXS:state", string=True)
+    state = Component(EpicsSignal,              "9idcLAX:state", string=True)
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
-    user_dir = Component(EpicsSignal,           "9idcLAX:USAXS:userDir", string=True)
-    user_name = Component(EpicsSignal,          "9idcLAX:UserName", string=True)
+    user_dir = Component(EpicsSignal,           "9idcLAX:userDir", string=True)
+    user_name = Component(EpicsSignal,          "9idcLAX:userName", string=True)
 
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
@@ -201,12 +200,15 @@ class FlyScanParameters(Device):
 
 class PreUsaxsTuneParameters(Device):
     """preUSAXStune handling"""
-    num_scans_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:NumScansFromLastTune")
-    epoch_last_tune = Component(EpicsSignal, "9idcLAX:USAXS:EPOCHTimeOfLastTune")
-    req_num_scans_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqNumScansBetweenTune")
-    req_time_between_tune = Component(EpicsSignal, "9idcLAX:USAXS:ReqTimeBetweenTune")
-    run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneOnQdo")
-    run_tune_next = Component(EpicsSignal, "9idcLAX:USAXS:RunPreUSAXStuneNext")
+    num_scans_last_tune = Component(EpicsSignal, "9idcLAX:NumScansFromLastTune")
+    epoch_last_tune = Component(EpicsSignal, "9idcLAX:EPOCHTimeOfLastTune")
+    req_num_scans_between_tune = Component(EpicsSignal, "9idcLAX:ReqNumScansBetweenTune")
+    req_time_between_tune = Component(EpicsSignal, "9idcLAX:ReqTimeBetweenTune")
+    run_tune_on_qdo = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneOnQdo")
+    run_tune_next = Component(EpicsSignal, "9idcLAX:RunPreUSAXStuneNext")
+    sx = Component(EpicsSignal, "9idcLAX:preUSAXStuneSX")
+    sy = Component(EpicsSignal, "9idcLAX:preUSAXStuneSY")
+    use_specific_location = Component(EpicsSignal, "9idcLAX:UseSpecificTuneLocation")
     
     @property
     def needed(self):
@@ -318,31 +320,31 @@ class Parameters_SBUSAXS(Device):
 
 
 class Parameters_SAXS(Device):
-    z_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_in")
-    z_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_out")
-    z_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_z_limit_offset")
+    z_in = Component(EpicsSignal, "9idcLAX:SAXS_z_in")
+    z_out = Component(EpicsSignal, "9idcLAX:SAXS_z_out")
+    z_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS_z_limit_offset")
 
-    y_in = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_in")
-    y_out = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_out")
-    y_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_y_limit_offset")
+    y_in = Component(EpicsSignal, "9idcLAX:SAXS_y_in")
+    y_out = Component(EpicsSignal, "9idcLAX:SAXS_y_out")
+    y_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS_y_limit_offset")
 
-    ax_in = Component(EpicsSignal, "9idcLAX:SAXS:ax_in")
-    ax_out = Component(EpicsSignal, "9idcLAX:SAXS:ax_out")
-    ax_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:ax_limit_offset")
+    ax_in = Component(EpicsSignal, "9idcLAX:ax_in")
+    ax_out = Component(EpicsSignal, "9idcLAX:ax_out")
+    ax_limit_offset = Component(EpicsSignal, "9idcLAX:ax_limit_offset")
 
-    dx_in = Component(EpicsSignal, "9idcLAX:SAXS:dx_in")
-    dx_out = Component(EpicsSignal, "9idcLAX:SAXS:dx_out")
-    dx_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:dx_limit_offset")
+    dx_in = Component(EpicsSignal, "9idcLAX:dx_in")
+    dx_out = Component(EpicsSignal, "9idcLAX:dx_out")
+    dx_limit_offset = Component(EpicsSignal, "9idcLAX:dx_limit_offset")
 
-    usaxs_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hslit_ap")
-    usaxs_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vslit_ap")
-    v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vslit_ap")
-    h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hslit_ap")
+    usaxs_h_size = Component(EpicsSignal, "9idcLAX:USAXS_hslit_ap")
+    usaxs_v_size = Component(EpicsSignal, "9idcLAX:USAXS_vslit_ap")
+    v_size = Component(EpicsSignal, "9idcLAX:SAXS_vslit_ap")
+    h_size = Component(EpicsSignal, "9idcLAX:SAXS_hslit_ap")
 
-    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_hgslit_ap")
-    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:USAXS_vgslit_ap")
-    guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_vgslit_ap")
-    guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_hgslit_ap")
+    usaxs_guard_h_size = Component(EpicsSignal, "9idcLAX:USAXS_hgslit_ap")
+    usaxs_guard_v_size = Component(EpicsSignal, "9idcLAX:USAXS_vgslit_ap")
+    guard_v_size = Component(EpicsSignal, "9idcLAX:SAXS_vgslit_ap")
+    guard_h_size = Component(EpicsSignal, "9idcLAX:SAXS_hgslit_ap")
 
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:SAXS:Exp_")
 
@@ -364,9 +366,9 @@ class Parameters_SAXS(Device):
 
 
 class Parameters_WAXS(Device):
-    x_in = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_in")
-    x_out = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_out")
-    x_limit_offset = Component(EpicsSignal, "9idcLAX:SAXS:WAXS_x_limit_offset")
+    x_in = Component(EpicsSignal, "9idcLAX:WAXS_x_in")
+    x_out = Component(EpicsSignal, "9idcLAX:WAXS_x_out")
+    x_limit_offset = Component(EpicsSignal, "9idcLAX:WAXS_x_limit_offset")
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS_WAXS:Exp_")
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory", string=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
@@ -419,8 +421,8 @@ class GeneralParameters(Device):
     Imaging = Component(Parameters_Imaging)
     OutOfBeam = Component(Parameters_OutOfBeam)
 
-    PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:USAXS:PauseBeforeNextScan")
-    StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:USAXS:StopBeforeNextScan")
+    PauseBeforeNextScan = Component(EpicsSignal, "9idcLAX:PauseBeforeNextScan")
+    StopBeforeNextScan = Component(EpicsSignal,  "9idcLAX:StopBeforeNextScan")
 
     # consider refactoring
     FlyScan = Component(FlyScanParameters)

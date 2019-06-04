@@ -132,7 +132,7 @@ class SaxsDetectorStageDevice(MotorBundle):
     x = Component(UsaxsMotor, '9idcLAX:mxv:c0:m1', labels=("saxs",))
     y = Component(UsaxsMotor, '9idcLAX:mxv:c0:m8', labels=("saxs",))
     z = Component(UsaxsMotor, '9idcLAX:mxv:c0:m2', labels=("saxs",))
-    
+
 
 guard_slit = GSlitDevice('', name='guard_slit')
 usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
