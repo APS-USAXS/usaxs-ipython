@@ -27,6 +27,12 @@ def preUSAXStune(md={}):
 
     yield from mode_USAXS()
 
+    if terms.preUSAXStune.use_specific_location.value:
+        yield from bps.mv(
+            s_stage.x, terms.preUSAXStune.sx.value,
+            s_stage.y, terms.preUSAXStune.sy.value,
+            )
+
     yield from bps.mv(
         # ensure diode in place (Radiography puts it elsewhere)
         d_stage.x, terms.USAXS.diode.dx.value,
