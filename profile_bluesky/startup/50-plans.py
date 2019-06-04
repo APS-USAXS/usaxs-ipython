@@ -66,7 +66,7 @@ def preUSAXStune(md={}):
         if axis.tuner.tune_ok:
             # If we don't wait, the next tune often fails
             # intensity stays flat, statistically
-            # We need to wait a short bit to allow EPICS database 
+            # We need to wait a short bit to allow EPICS database
             # to complete processing and report back to us.
             yield from bps.sleep(1)
         else:
@@ -91,7 +91,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     do one USAXS Fly Scan
     """
     bluesky_runengine_running = RE.state != "idle"
-    
+
     yield from IfRequestedStopBeforeNextScan()
 
     yield from mode_USAXS()
@@ -104,7 +104,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     if terms.preUSAXStune.needed:
-        # tune at previous sample position 
+        # tune at previous sample position
         # don't overexpose the new sample position
         yield from tune_usaxs_optics(md=md)
 
@@ -150,7 +150,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     # q_offset = terms.USAXS.start_offset.value
     # angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
     # ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
-    
+
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.value,
         # these two were moved by mode_USAXS(), belt & suspenders here
@@ -161,7 +161,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
     )
-    
+
     # TODO: what to do with USAXSScanUp?
     # 2019-01-25, prj+jil: this is probably not used now, only known to SPEC
     # it's used to cal Finish_in_Angle and START
@@ -173,7 +173,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     yield from bps.install_suspender(suspend_BeamInHutch)
     yield from measure_USAXS_Transmission(md=md)
-    
+
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
@@ -193,7 +193,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         ti_filter_shutter, "open",
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
-    
+
 
     FlyScanAutoscaleTime = 0.025
     yield from bps.mv(
@@ -215,7 +215,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         )
 
     yield from user_data.set_state_plan("Running Flyscan")
-    
+
     ### move the stages to flyscan starting values from EPICS PVs
     yield from bps.mv(
         a_stage.r, flyscan_trajectories.ar.value[0],
@@ -232,7 +232,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
     )
-    
+
     _md = {}
     _md.update(md)
     _md['plan_name'] = "Flyscan"
@@ -319,13 +319,13 @@ def postCommandsListfile2WWW(commands):
     file_contents = "bluesky command sequence\n"
     file_contents += f"written: {timestamp}\n"
     file_contents += str(tbl.reST())
-    
+
     # post for livedata page
     # path = "/tmp"
     path = "/share1/local_livedata"
     with open(os.path.join(path, tbl_file), "w") as fp:
         fp.write(file_contents)
-    
+
     # post to EPICS
     yield from bp.mv(
         user_data.macro_file, os.path.split(tbl_file)[-1],
@@ -356,14 +356,14 @@ def beforePlan(md={}, commands=None):
         yield from measure_background(
             [upd_controls, I0_controls, I00_controls, trd_controls],
         )
-    
+
     yield from compute_tune_ranges()                # 29-axis-tuning.py
     yield from beforeScanComputeOtherStuff()        # 41-commands.py
 
     if terms.preUSAXStune.run_tune_on_qdo.value:
         logger.info("Runing preUSAXStune as requested at start of measurements")
         yield from tune_usaxs_optics(md=md)
-    
+
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
             terms.FlyScan.order_number.value,
@@ -380,7 +380,7 @@ def beforePlan(md={}, commands=None):
     except NameError:
         pass
     yield from bps.mv(terms.FlyScan.order_number, order_number)
-    
+
     if commands is not None:
         postCommandsListfile2WWW(commands)
 
@@ -400,30 +400,30 @@ def afterPlan(md={}):
 def parse_Excel_command_file(filename):
     """
     parse an Excel spreadsheet with commands, return as command list
-    
+
     TEXT view of spreadsheet (Excel file line numbers shown)::
-    
-        [1] List of sample scans to be run              
-        [2]                 
-        [3]                 
+
+        [1] List of sample scans to be run
+        [2]
+        [3]
         [4] scan    sx  sy  thickness   sample name
         [5] FlyScan 0   0   0   blank
         [6] FlyScan 5   2   0   blank
 
     PARAMETERS
-    
+
     filename : str
         Name of input Excel spreadsheet file.  Can be relative or absolute path,
-        such as "actions.xslx", "../sample.xslx", or 
+        such as "actions.xslx", "../sample.xslx", or
         "/path/to/overnight.xslx".
 
     RETURNS
-    
+
     list of commands : list[command]
         List of command tuples for use in ``execute_command_list()``
 
     RAISES
-    
+
     FileNotFoundError
         if file cannot be found
 
@@ -443,7 +443,7 @@ def parse_Excel_command_file(filename):
                 if values[-1] is not None:
                     break
                 values = values[:-1]
-            
+
             commands.append((action, values, i+1, list(row.values())))
 
     return commands
@@ -452,7 +452,7 @@ def parse_Excel_command_file(filename):
 def split_quoted_line(line):
     """
     splits a line into words some of which might be quoted
-    
+
     TESTS::
 
         FlyScan 0   0   0   blank
@@ -460,7 +460,7 @@ def split_quoted_line(line):
         FlyScan 5   12   0   "even longer name"
         SAXS 0 0 0 blank
         SAXS 0 0 0 "blank"
-    
+
     RESULTS::
 
         ['FlyScan', '0', '0', '0', 'blank']
@@ -500,15 +500,15 @@ def split_quoted_line(line):
 def parse_text_command_file(filename):
     """
     parse a text file with commands, return as command list
-    
+
     * The text file is interpreted line-by-line.
     * Blank lines are ignored.
     * A pound sign (#) marks the rest of that line as a comment.
     * All remaining lines are interpreted as commands with arguments.
-    
+
     Example of text file (no line numbers shown)::
-    
-        #List of sample scans to be run              
+
+        #List of sample scans to be run
         # pound sign starts a comment (through end of line)
 
         # action  value
@@ -528,19 +528,19 @@ def parse_text_command_file(filename):
         mono_shutter close
 
     PARAMETERS
-    
+
     filename : str
         Name of input text file.  Can be relative or absolute path,
-        such as "actions.txt", "../sample.txt", or 
+        such as "actions.txt", "../sample.txt", or
         "/path/to/overnight.txt".
 
     RETURNS
-    
+
     list of commands : list[command]
         List of command tuples for use in ``execute_command_list()``
 
     RAISES
-    
+
     FileNotFoundError
         if file cannot be found
     """
@@ -613,23 +613,23 @@ def run_command_file(filename, md={}):
 def execute_command_list(filename, commands, md={}):
     """
     plan: execute the command list
-    
+
     The command list is a tuple described below.
 
     * Only recognized commands will be executed.
     * Unrecognized commands will be reported as comments.
 
     PARAMETERS
-    
+
     filename : str
         Name of input text file.  Can be relative or absolute path,
-        such as "actions.txt", "../sample.txt", or 
+        such as "actions.txt", "../sample.txt", or
         "/path/to/overnight.txt".
     commands : list[command]
         List of command tuples for use in ``execute_command_list()``
-    
+
     where
-    
+
     command : tuple
         (action, OrderedDict, line_number, raw_command)
     action: str
@@ -649,14 +649,11 @@ def execute_command_list(filename, commands, md={}):
         yield from bps.null()
         return
 
-    # remove since this also happens in beforePlan()
-    # yield from bps.mv(
-    #     user_data.macro_file, filename,
-    #     user_data.macro_file_time, str(datetime.datetime.now()),
-    # )
-    print(f"Command file: {filename}")
-    print(command_list_as_table(commands))
-    
+    text = f"Command file: {filename}\n"
+    text += str(command_list_as_table(commands))
+    print(text)
+    usaxs_support.surveillance.make_archive(text)
+
     yield from beforePlan(md=md, commands=commands)
     for command in commands:
         action, args, i, raw_command = command
@@ -674,7 +671,7 @@ def execute_command_list(filename, commands, md={}):
         action = action.lower()
         if action == "preusaxstune":
             yield from tune_usaxs_optics(md=_md)
-            
+
         elif action in ("flyscan", "usaxsscan"):
             # TODO: watch for PV which indicates, if USAXS should run step scan or flyscan
             sx = float(args[0])
@@ -682,21 +679,21 @@ def execute_command_list(filename, commands, md={}):
             sth = float(args[2])
             snm = args[3]
             yield from Flyscan(sx, sy, sth, snm, md=_md)
-            
+
         elif action in ("saxs", "saxsexp"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
             yield from SAXS(sx, sy, sth, snm, md=_md)
-            
+
         elif action in ("waxs", "waxsexp"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
             yield from WAXS(sx, sy, sth, snm, md=_md)
-            
+
         else:
             print(f"no handling for line {i}: {raw_command}")
 
@@ -722,7 +719,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     if terms.preUSAXStune.needed:
-        # tune at previous sample position 
+        # tune at previous sample position
         # don't overexpose the new sample position
         yield from tune_saxs_optics(md=md)
 
@@ -737,7 +734,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
-    
+
     # these two templates match each other, sort of
     ad_file_template = "%s%s_%4.4d.hdf"
     local_file_template = "%s_%04d.hdf"
@@ -755,7 +752,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     print(f"Area Detector HDF5 file: {local_name}")
     pilatus_name = os.path.join(pilatus_path, SAXS_file_name)
     print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
-    
+
     yield from bps.mv(
         saxs_det.hdf1.file_name, scan_title_clean,
         saxs_det.hdf1.file_path, pilatus_path,
@@ -812,12 +809,12 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.preset_time, 1.2*terms.SAXS.acquire_time.value + 1,
         scaler0.count_mode, "OneShot",
         scaler1.count_mode, "OneShot",
-        
+
         # update as fast as hardware will allow
-        # this is needed to make sure we get as up to date I0 number as possible for AD software. 
+        # this is needed to make sure we get as up to date I0 number as possible for AD software.
         scaler0.display_rate, 60,
         scaler1.display_rate, 60,
-        
+
         scaler0.delay, 0,
         terms.SAXS.start_exposure_time, ts,
         user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
@@ -828,13 +825,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.count, 1,
         scaler1.count, 1,
     )
-    
+
     _md = OrderedDict()
     _md.update(md or {})
     _md['plan_name'] = "SAXS"
     _md["hdf5_file"] = SAXS_file_name
     _md["hdf5_path"] = SAXSscan_path
-    
+
     yield from areaDetectorAcquire(saxs_det, _md)
     ts = str(datetime.datetime.now())
     yield from bps.remove_suspender(suspend_BeamInHutch)
@@ -844,7 +841,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
-        terms.SAXS.I0, scaler1.channels.chan02.s.value, 
+        terms.SAXS.I0, scaler1.channels.chan02.s.value,
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
         terms.SAXS.end_exposure_time, ts,
@@ -873,7 +870,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     if terms.preUSAXStune.needed:
-        # tune at previous sample position 
+        # tune at previous sample position
         # don't overexpose the new sample position
         yield from tune_saxs_optics(md=md)
 
@@ -888,7 +885,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
     # use our specwriter to get a pseudo-SPEC file name
     DATAFILE = os.path.split(specwriter.spec_filename)[-1]
-    
+
     # these two templates match each other, sort of
     ad_file_template = "%s%s_%4.4d.hdf"
     local_file_template = "%s_%04d.hdf"
@@ -906,7 +903,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     print(f"Area Detector HDF5 file: {local_name}")
     pilatus_name = os.path.join(pilatus_path, WAXS_file_name)
     print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
-    
+
     yield from bps.mv(
         waxs_det.hdf1.file_name, scan_title_clean,
         waxs_det.hdf1.file_path, pilatus_path,
@@ -962,12 +959,12 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.preset_time, 1.2*terms.WAXS.acquire_time.value + 1,
         scaler0.count_mode, "OneShot",
         scaler1.count_mode, "OneShot",
-        
+
         # update as fast as hardware will allow
-        # this is needed to make sure we get as up to date I0 number as possible for AD software. 
+        # this is needed to make sure we get as up to date I0 number as possible for AD software.
         scaler0.display_rate, 60,
         scaler1.display_rate, 60,
-        
+
         scaler0.delay, 0,
         terms.SAXS.start_exposure_time, ts,
         user_data.state, f"WAXS collection for {terms.SAXS.acquire_time.value} s",
@@ -977,13 +974,13 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.count, 1,
         scaler1.count, 1,
     )
-    
+
     _md = OrderedDict()
     _md.update(md or {})
     _md['plan_name'] = "WAXS"
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
-    
+
     yield from areaDetectorAcquire(waxs_det, md=_md)
     ts = str(datetime.datetime.now())
 
@@ -993,7 +990,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.count, 0,
         scaler1.count, 0,
         # WAXS uses same PVs for normalization and transmission as SAXS, should we aliased it same to terms.WAXS???
-        terms.SAXS.I0, scaler1.channels.chan02.s.value, 
+        terms.SAXS.I0, scaler1.channels.chan02.s.value,
         terms.SAXS.diode_transmission, scaler0.channels.chan04.s.value,
         terms.SAXS.diode_gain, trd_controls.femto.gain.value,
         terms.SAXS.I0_transmission, scaler0.channels.chan02.s.value,

@@ -11,7 +11,7 @@ from importlib import reload
 import itertools
 import os
 from pathlib import PurePath
-import socket 
+import socket
 import subprocess
 import threading
 import time
@@ -65,5 +65,6 @@ from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 
 from usaxs_support.saveFlyData import SaveFlyScan
+import usaxs_support
 
 import pyRestTable
