@@ -27,7 +27,7 @@ def preUSAXStune(md={}):
 
     yield from mode_USAXS()
 
-    if terms.preUSAXStune.use_specific_location.value:
+    if terms.preUSAXStune.use_specific_location.value in (1, "yes"):
         yield from bps.mv(
             s_stage.x, terms.preUSAXStune.sx.value,
             s_stage.y, terms.preUSAXStune.sy.value,
