@@ -78,10 +78,7 @@ class SpecMotor(ItemNameBase):
         self.pvname = None
     
     def __str__(self):
-        items = []
-        items.append(self.item_name_value("index"))
-        items.append(self.item_name_value("mne"))
-        items.append(self.item_name_value("name"))
+        items = [self.item_name_value(k) for k in "index mne name".split()]
         txt = self.item_name_value("pvname")
         if txt is not None:
             items.append(txt)
@@ -130,10 +127,7 @@ class SpecCounter(ItemNameBase):
         self.pvname = None
 
     def __str__(self):
-        items = []
-        items.append(self.item_name_value("index"))
-        items.append(self.item_name_value("mne"))
-        items.append(self.item_name_value("name"))
+        items = [self.item_name_value(k) for k in "index mne name".split()]
         txt = self.item_name_value("pvname")
         if txt is not None:
             items.append(txt)
