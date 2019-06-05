@@ -12,7 +12,7 @@ are not available.)
 
 ## Text Command File
 
-A text command file contains a list of scans/actions.  
+A text command file contains a list of scans/actions.  [Example](actions.txt)
 
 Each line of the file is either a comment, a blank line, or a scan/action and 
 its parameters.  Any unrecognized commands will be ignored (reported 
