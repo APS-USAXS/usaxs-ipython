@@ -18,8 +18,19 @@ by name in that file.
 ## Basic Controls
 
 The basic controls (derived from 
-[`apstools.devices.ProcessController`](https://apstools.readthedocs.io/en/latest/source/devices.html#apstools.devices.ProcessController) 
-are described in this table:
+[`apstools.devices.ProcessController`](https://apstools.readthedocs.io/en/latest/source/devices.html#apstools.devices.ProcessController))
+are described in the table below.  Keep these terms in mind:
+
+<dl>
+  <dt>signal</dt>
+  <dd>the measured value (temperature, degrees C)</dd>
+  
+  <dt>target</dt>
+  <dd>the desired value (the set point, degrees C)</dd>
+  
+  <dt>tolerance</dt>
+  <dd>the maximum acceptable mismatch between signal and target (degrees C)</dd>
+</dl>
 
 control | description
 --- | ---
@@ -27,7 +38,7 @@ control | description
 `.value` | controller's current temperature
 `.settled` | controller at the desired temperature?
 `.target.value` | controller's desired temperature
-`.tolerance.value` | controller is *settled* if `|signal - target| <= tolerance`
+`.tolerance.value` | controller is not *settled* if `abs(signal - target) > tolerance`
 
 ### `.target.value` : What temperature is the controller set to? 
 
@@ -36,6 +47,8 @@ control | description
 ### `.set_target()` : Set the controller to a specific temperature
 
     controller.set_target(new_temperature)
+
+By default, this will wait until the controller is *settled* before it returns.
 
 ### `.value` : What is the controller actual temperature now?
 
