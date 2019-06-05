@@ -78,3 +78,68 @@ From the command line: `linkam_tc1.tolerance.put(2)` (sets it to 2 degrees)
 
 From a plan: `yield from bps.mv(linkam_tc1.tolerance, 2)`
 
+## Example plan
+
+This example defines a (bluesky) plan to measure USAXS/SAXS/WAXS 
+at a sequence of temperatures.  Place this example code in a python 
+file named `tseq.py` in your current working directory.
+
+```
+"""Temperature sequence"""
+
+import usaxs_support.surveillance
+
+def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_step, md={}):
+    summary = "USAXS/SAXS/WAXS temperature sequence"
+    archive = usaxs_support.surveillance.make_archive(summary)
+
+    md = {
+    	"summary": summary, 
+    	"archive": archive,
+    	"temperature_start": t_start,
+    	"temperature_end": t_end,
+    	"temperature_step": t_step,
+    }
+    yield from bps.mv(linkam_tc1.set_rate, 100)			# degrees C/minute
+
+    sign = 1			# assume ascending temperature
+    if t_end < t_start:
+        sign = -1		# Aha! Descending temperature
+    t_lo = min(t_start, t_end)
+    t_hi = max(t_start, t_end)
+    temperature = t_start
+
+    while t_lo <= temperature <= t_hi:
+    	t0 = time.time()
+        md["temperature_set_point"] = temperature
+    	yield from linkam_tc1.set_target(temperature, wait=True)	# degrees C
+        print(f"Reached {temperature:.1f}C in {time.time() - t0:.3f}s")
+        md["temperature_settling_time"] = time.time() - t0
+
+        md["temperature_actual"] = linkam_tc1.value
+	    yield from FlyScan(sx, sy, thickness, sample_name, md=md)
+
+        md["temperature_actual"] = linkam_tc1.value
+	    yield from SAXS(sx, sy, thickness, sample_name, md=md)
+
+        md["temperature_actual"] = linkam_tc1.value
+	    yield from WAXS(sx, sy, thickness, sample_name, md=md)
+
+        print(f"All scans complete at {temperature:.1f}C in {time.time() - t0:.3f}s")
+	    temperature += sign * abs(t_step)
+	    
+```
+
+### Import
+
+Import this file into your session with: `import tseq`
+
+### Test
+
+Test this plan with: `summarize_plan(tseq.my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`
+
+Note:  Use your own values for sample and temperature values.
+
+### Run
+
+Run this plan with: `RE(tseq.my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`

@@ -48,7 +48,7 @@ def _measure_all_three(sx, sy, thickness, sample_name, md={}):
 
 
 def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md={}):
-    usaxs_support.surveillance.make_archive("summarize this plan")
+    usaxs_support.surveillance.make_archive("custom plan example")
     t0 = time.time()
     md = {
         "user_procedure": "USAXS SAXS WAXS scans",
