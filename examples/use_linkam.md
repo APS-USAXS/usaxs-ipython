@@ -94,39 +94,39 @@ def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_st
     archive = usaxs_support.surveillance.make_archive(summary)
 
     md = {
-    	"summary": summary, 
-    	"archive": archive,
-    	"temperature_start": t_start,
-    	"temperature_end": t_end,
-    	"temperature_step": t_step,
+        "summary": summary, 
+        "archive": archive,
+        "temperature_start": t_start,
+        "temperature_end": t_end,
+        "temperature_step": t_step,
     }
-    yield from bps.mv(linkam_tc1.set_rate, 100)			# degrees C/minute
+    yield from bps.mv(linkam_tc1.set_rate, 100)            # degrees C/minute
 
-    sign = 1			# assume ascending temperature
+    sign = 1            # assume ascending temperature
     if t_end < t_start:
-        sign = -1		# Aha! Descending temperature
+        sign = -1        # Aha! Descending temperature
     t_lo = min(t_start, t_end)
     t_hi = max(t_start, t_end)
     temperature = t_start
 
     while t_lo <= temperature <= t_hi:
-    	t0 = time.time()
+        t0 = time.time()
         md["temperature_set_point"] = temperature
-    	yield from linkam_tc1.set_target(temperature, wait=True)	# degrees C
+        yield from linkam_tc1.set_target(temperature, wait=True)    # degrees C
         print(f"Reached {temperature:.1f}C in {time.time() - t0:.3f}s")
         md["temperature_settling_time"] = time.time() - t0
-
+        
         md["temperature_actual"] = linkam_tc1.value
-	    yield from FlyScan(sx, sy, thickness, sample_name, md=md)
-
+        yield from FlyScan(sx, sy, thickness, sample_name, md=md)
+        
         md["temperature_actual"] = linkam_tc1.value
-	    yield from SAXS(sx, sy, thickness, sample_name, md=md)
-
+        yield from SAXS(sx, sy, thickness, sample_name, md=md)
+        
         md["temperature_actual"] = linkam_tc1.value
-	    yield from WAXS(sx, sy, thickness, sample_name, md=md)
-
+        yield from WAXS(sx, sy, thickness, sample_name, md=md)
+        
         print(f"All scans complete at {temperature:.1f}C in {time.time() - t0:.3f}s")
-	    temperature += sign * abs(t_step)
+        temperature += sign * abs(t_step)
 	    
 ```
 
