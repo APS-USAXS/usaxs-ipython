@@ -7,7 +7,8 @@ you need to write your own plan.  These are the basic steps:
    such as `/share1/USAXS_data/2019-06/`)
 1. Among the other `import` statements, add: `import usaxs_support.surveillance`
 1. Any commands you execute at the outer level of this file will be run
-   each time the file is imported or reloaded.  
+   each time the file is imported or reloaded.  (Only write functions or
+   define constants.)
    
    Do not execute anything at the outer level.
 1. In that file, create a function that will be your new bluesky plan.
@@ -38,7 +39,8 @@ and run using:
 `RE(my_custom_plan(...))` (where `...` represents the required arguments).
 
 ```
-def MeasureAllThree(sx, sy, thickness, sample_name, md={}):
+def _measure_all_three(sx, sy, thickness, sample_name, md={}):
+    """this is used internally, not called on the command line"""
     print("USAXS SAXS WAXS scan")
     yield from FlyScan(sx, sy, thickness, sample_name, md=md)
     yield from SAXS(sx, sy, thickness, sample_name, md=md)
@@ -53,7 +55,7 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
         "iteration": 0,
         "total_iteration": iterations,
         }
-    yield from MeasureAllThree(sx, sy, thickness, sample_name, md=md)
+    yield from _measure_all_three(sx, sy, thickness, sample_name, md=md)
     yield from bps.mv(linkam.set_rate, 100)			# degrees C/minute
     yield from linkam.set_target(temperature, wait=True)	# degrees C
     for i in range(iterations):
