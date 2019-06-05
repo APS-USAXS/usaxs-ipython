@@ -134,6 +134,8 @@ def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_st
 
 Import this file into your session with: `import tseq`
 
+If you must edit this file later, then re-import with: `reload(tseq)`
+
 ### Test
 
 Test this plan with: `summarize_plan(tseq.my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`
