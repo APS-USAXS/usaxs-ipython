@@ -21,7 +21,7 @@ as comments) when `run_command_file()` is executed.
 Parameters should be separated on a line by white 
 space and **no comma**.  **ALL** of the parameters provided will be given to
 the scan/action.  The sample name should be given in "quoted text" 
-(using double-quotes).  Here is an example command:
+(using double-quotes) unless it is only one word.  Here is an example command:
 
     FlyScan 0   0   0   blank
 
