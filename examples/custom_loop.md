@@ -73,7 +73,17 @@ from the bluesky (ipython) command line:
 
 If you have already imported this file once, then
 
-    reload("my_python_file_name.py")	# TODO: confirm this is correct
+    reload(my_python_file_name)
+
+Note in both cases, you use the module name without quotes.
+The module name is the python file name without the `.py` part.
+
+Note also that [`reload()`](https://docs.python.org/3.6/library/importlib.html#importlib.reload) 
+is from the python 
+[importlib](https://docs.python.org/3.6/library/importlib.html)
+package.  The USAXS instrument configuration has already imported 
+this function for you via: 
+[`from importlib import reload`](https://github.com/APS-USAXS/ipython-usaxs/blob/master/profile_bluesky/startup/09-imports.py)
 
 ## Test your custom plan first!
 
@@ -81,7 +91,7 @@ To test that your custom plan does not have any obvious errors,
 enter this command at the bluesky (ipython) prompt (supply any
 arguments that your plan requires):
 
-    summarize_plan(my_custom_plan())
+    summarize_plan(my_python_file_name.my_custom_plan())
 
 The `summarize_plan()` function will do a dry run through your command file,
 as if the experiment was actually running.  It will print a list of 
@@ -94,5 +104,5 @@ Revise your python file (and `reload`) until `summarize_plan()` runs to completi
 To run your custom plan,
 enter this command at the bluesky (ipython) prompt:
 
-    RE(my_custom_plan())
+    RE(my_python_file_name.my_custom_plan())
 
