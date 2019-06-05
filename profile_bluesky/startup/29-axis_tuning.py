@@ -86,11 +86,12 @@ axis_tune_range = TuneRanges(name="axis_tune_range")
 # -------------------------------------------
 
 def mr_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(m_stage.r.name, m_stage.r.position))
+    stage = m_stage.r
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.mr.value
 
 
 def mr_posttune_hook():
@@ -160,12 +161,13 @@ def tune_mr(md={}):
 
 
 def m2rp_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
+    stage = m_stage.r2p
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.m2rp.value
 
 
 def m2rp_posttune_hook():
@@ -204,11 +206,12 @@ def tune_m2rp(md={}):
 
 
 def msrp_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
+    stage = ms_stage.rp
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.msrp.value
 
 
 def msrp_posttune_hook():
@@ -241,11 +244,12 @@ def tune_msrp(md={}):
 
 
 def ar_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(a_stage.r.name, a_stage.r.position))
+    stage = a_stage.r
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.ar.value
 
 
 def ar_posttune_hook():
@@ -286,11 +290,12 @@ def tune_ar(md={}):
 
 
 def asrp_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(as_stage.rp.name, as_stage.rp.position))
+    stage = as_stage.rp
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.asrp.value
 
 
 def asrp_posttune_hook():
@@ -328,12 +333,13 @@ def tune_asrp(md={}):
 
 
 def a2rp_pretune_hook():
-    msg = "Tuning axis {}, current position is {}"
-    print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
+    stage = a_stage.r2p
+    print(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.a2rp.value
 
 
 def a2rp_posttune_hook():
@@ -379,6 +385,7 @@ def dx_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.dx.value
 
 
 def dx_posttune_hook():
@@ -419,6 +426,7 @@ def dy_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
+    stage.tuner.width = axis_tune_range.dy.value
 
 
 def dy_posttune_hook():
@@ -492,18 +500,28 @@ def tune_saxs_optics(md={}):
 
 
 def tune_after_imaging(md={}):
-    a_stage.r.tuner.width = 0.005
-    yield from tune_ar(md=md)
-    a_stage.r.tuner.width = axis_tune_range.ar.value        # 0.004
+    epics_ar_tune_range = axis_tune_range.ar.value  # remember
+
+    # tune_ar with custom tune range if that is larger
+    custom_range = 0.005
+    if epics_ar_tune_range > custom_range:
+        yield from bps.mv(axis_tune_range.ar, custom_range)
+        yield from tune_ar(md=md)
+
+    # finally, tune_ar with standard tune range
+    yield from bps.mv(axis_tune_range.ar, epics_ar_tune_range)
     yield from tune_ar(md=md)
     yield from tune_a2rp(md=md)
 
 
-def compute_tune_ranges():
+def instrument_default_tune_ranges():
     """
-    plan: (re)compute tune ranges for each of the optics axes
+    plan: (re)compute tune ranges for each of the tunable axes
     """
     yield from bps.null()
+
+    d_stage.x.tuner.width = 10
+    d_stage.x.tuner.width = 10
 
     if monochromator.dcm.energy.value < 10.99:  # ~ 10 keV for Si 220 crystals
         m_stage.r.tuner.width = 0.003
@@ -549,3 +567,47 @@ def compute_tune_ranges():
         ms_stage.rp.tuner.width = 3
         as_stage.rp.tuner.width = 3
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
+
+
+def update_EPICS_tuning_widths():
+    """
+    plan: update the tuning widths in EPICS PVs from local settings
+    """
+    yield from bps.mv(
+        axis_tune_range.mr,     m_stage.r.tuner.width,
+        axis_tune_range.ar,     a_stage.r.tuner.width,
+        axis_tune_range.m2rp,   m_stage.r2p.tuner.width,
+        axis_tune_range.a2rp,   a_stage.r2p.tuner.width,
+        axis_tune_range.msrp,   ms_stage.rp.tuner.width,
+        axis_tune_range.asrp,   as_stage.rp.tuner.width,
+        axis_tune_range.dx,     d_stage.x.tuner.width,
+        axis_tune_range.dy,     d_stage.y.tuner.width,
+        )
+
+
+def user_defined_settings():
+    """
+    plan: users may redefine this function to override any instrument defaults
+
+    This is called from beforePlan() (in 50-plans.py) at the start of
+    every batch set of measurements.  Among the many things a user might
+    override could be the default ranges for tuning various optical axes.
+    Such as::
+
+        a_stage.r.tuner.width = 0.01
+
+    NOTE:  Don't use blocking calls here
+
+        It is important that the user not use any blocking calls
+        such as setting or getting PVs in EPICS.  Blocking calls
+        will *block* the python interpreter for long periods
+        (such as ``time.sleep()``) or make direct calls
+        for EPICS or file I/O that interrupt how the Bluesky
+        RunEngine operates.
+
+        It is OK to set local python variables since these do not block.
+
+        Write this routine like any other bluesky plan code,
+        using ``yield from bps.mv(...)``,  ``yield from bps.sleep(...)``, ...
+    """
+    yield from bps.null()

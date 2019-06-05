@@ -357,7 +357,12 @@ def beforePlan(md={}, commands=None):
             [upd_controls, I0_controls, I00_controls, trd_controls],
         )
 
-    yield from compute_tune_ranges()                # 29-axis-tuning.py
+    # reset the ranges to be used when tuning optical axes (issue #129)
+    # These routines are defined in file: 29-axis-tuning.py
+    yield from instrument_default_tune_ranges()
+    yield from user_defined_settings()
+    yield from update_EPICS_tuning_widths()
+
     yield from beforeScanComputeOtherStuff()        # 41-commands.py
 
     if terms.preUSAXStune.run_tune_on_qdo.value:
