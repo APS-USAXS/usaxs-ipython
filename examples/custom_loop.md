@@ -65,18 +65,21 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
 ```
 
 
-## Load your python code
+## Import or Reload your python code
+
+In both cases, you use the module name without quotes.
+The module name is the python file name without the `.py` part.
+
+### Import
 If you have not already imported this file, then do this
 from the bluesky (ipython) command line:
 
     import my_python_file_name
 
+### Reload
 If you have already imported this file once, then
 
     reload(my_python_file_name)
-
-Note in both cases, you use the module name without quotes.
-The module name is the python file name without the `.py` part.
 
 Note also that [`reload()`](https://docs.python.org/3.6/library/importlib.html#importlib.reload) 
 is from the python 
