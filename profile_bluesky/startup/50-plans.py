@@ -663,7 +663,7 @@ def execute_command_list(filename, commands, md={}):
     text = f"Command file: {filename}\n"
     text += str(command_list_as_table(commands))
     print(text)
-    usaxs_support.surveillance.make_archive(text)
+    archive = instrument_archive(text)
 
     yield from beforePlan(md=md, commands=commands)
     for command in commands:
@@ -676,6 +676,7 @@ def execute_command_list(filename, commands, md={}):
         _md["line_number"] = i
         _md["action"] = action
         _md["parameters"] = args    # args is shorter than parameters, means the same thing here
+        _md["archive"] = archive
 
         _md.update(md or {})      # overlay with user-supplied metadata
 

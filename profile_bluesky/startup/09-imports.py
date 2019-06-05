@@ -65,6 +65,6 @@ from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 
 from usaxs_support.saveFlyData import SaveFlyScan
-import usaxs_support
+from usaxs_support.surveillance import instrument_archive
 
 import pyRestTable

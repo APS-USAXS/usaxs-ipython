@@ -12,7 +12,7 @@ EXAMPLE::
 
     def myPlan(t_start, t_end, t_steps):
         text = f"measure from {t_start} to {t_end} in {t_steps} steps"
-        usaxs_support.surveillance.make_archive(text)   # <---- ADD HERE
+        usaxs_support.surveillance.instrument_archive(text)   # <---- ADD HERE
 
         t = t_start
         while t < t_end:
@@ -76,16 +76,17 @@ def _create_archive_dict_(frame, text):
     return archive
 
 
-def make_archive(text=None):
+def instrument_archive(text=None):
     """
     copies caller function (and its source file) to permanent archive, returns dict
 
     Any text supplied by the caller will be written at the start of the archive.
     """
     frameinfo = inspect.getouterframes(inspect.currentframe(), 2)
-    logger.debug(f"make_archive() called from: {frameinfo[1].filename}")
+    logger.debug(f"instrument_archive() called from: {frameinfo[1].filename}")
     archive = _create_archive_dict_(frameinfo[1], text or "")
-    return _write_archive_dict_(archive)
+    archive = _write_archive_dict_(archive)
+    return archive
 
 
 def looky():
@@ -95,7 +96,7 @@ def looky():
 
     This is just a demonstration.
     """
-    print(make_archive(text))
+    print(instrument_archive(text))
 
 
 if __name__ == "__main__":
