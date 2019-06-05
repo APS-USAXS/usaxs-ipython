@@ -18,11 +18,48 @@ you need to write your own plan.  These are the basic steps:
 
        usaxs_support.surveillance.make_archive("summarize this plan")
 
-1. TODO: write your looping activities.
+1. Write your loop setup and activities.  Make sure you do not write
+   any code that will block the `RE()` loop for a significant 
+   (ca. millisecond or longer) time.  Use `yield from bps.sleep(0.1)`
+   instead of `time.sleep(0.1)` to wait a short bit.  Use 
+   `yield from bps.mv(signal, new_value)` instead of 
+   `signal.put(new_value)`.
+   
+   Your plan **must** *yield* at least one bluesky `Msg` object!
+   This is easy if you follow the examples.
 
 ## Example
 
-TODO:
+In this example, a sample is measured in USAXS/SAXS/WAXS, then that 
+sequence is repeated.  Also, before the sequence, the sample heater 
+is set to temperature.  The whole sequence is test using
+`summarize_plan(my_custom_plan(...))
+and run using:
+`RE(my_custom_plan(...))` (where `...` represents the required arguments).
+
+```
+def MeasureAllThree(sx, sy, thickness, sample_name, md={}):
+    print("USAXS SAXS WAXS scan")
+    yield from FlyScan(sx, sy, thickness, sample_name, md=md)
+    yield from SAXS(sx, sy, thickness, sample_name, md=md)
+    yield from WAXS(sx, sy, thickness, sample_name, md=md)
+
+
+def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md={}):
+    usaxs_support.surveillance.make_archive("summarize this plan")
+    t0 = time.time()
+    md = {
+        "user_procedure": "USAXS SAXS WAXS scans",
+        "iteration": 0,
+        "total_iteration": iterations,
+        }
+    yield from MeasureAllThree(sx, sy, thickness, sample_name, md=md)
+    yield from bps.mv(linkam.set_rate, 100)			# degrees C/minute
+    yield from linkam.set_target(temperature, wait=True)	# degrees C
+    for i in range(iterations):
+        print(f"Iteration {i+1} of {iterations}, elapsed time = {time.time() - t0:.3f}s")
+        md["iteration"] = i+1
+        yield from MeasureAllThree(sx, sy, thickness, sample_name, md=md)```
 
 
 ## Load your python code
