@@ -28,7 +28,7 @@ the scan/action.  The sample name should be given in "quoted text"
 ## Excel Spreadsheet Command File
 
 A spreadsheet command file contains a table with the list of 
-scans/actions.  Follow the example given.  
+scans/actions.  Follow the [example given](actions.xslx).  
 
 Each line of the table is either a comment, a blank line, or a scan/action and 
 its parameters.  Any unrecognized commands will be ignored (reported 
