@@ -81,8 +81,8 @@ The module name is the python file name without the `.py` part.
 Note also that [`reload()`](https://docs.python.org/3.6/library/importlib.html#importlib.reload) 
 is from the python 
 [importlib](https://docs.python.org/3.6/library/importlib.html)
-package.  The USAXS instrument configuration has already imported 
-this function for you via: 
+package.  The [USAXS instrument bluesky configuration](/profile_bluesky/startup) 
+has already imported this function for you via: 
 [`from importlib import reload`](https://github.com/APS-USAXS/ipython-usaxs/blob/master/profile_bluesky/startup/09-imports.py)
 
 ## Test your custom plan first!
