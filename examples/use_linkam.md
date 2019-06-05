@@ -127,7 +127,6 @@ def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_st
         
         print(f"All scans complete at {temperature:.1f}C in {time.time() - t0:.3f}s")
         temperature += sign * abs(t_step)
-	    
 ```
 
 ### Import
