@@ -61,7 +61,8 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
     for i in range(iterations):
         print(f"Iteration {i+1} of {iterations}, elapsed time = {time.time() - t0:.3f}s")
         md["iteration"] = i+1
-        yield from _measure_all_three(sx, sy, thickness, sample_name, md=md)```
+        yield from _measure_all_three(sx, sy, thickness, sample_name, md=md)
+```
 
 
 ## Load your python code
