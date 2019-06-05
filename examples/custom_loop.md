@@ -31,11 +31,11 @@ you need to write your own plan.  These are the basic steps:
 
 ## Example
 
-In this example, a sample is measured in USAXS/SAXS/WAXS, then that 
-sequence is repeated.  Also, before the sequence, the sample heater 
-is set to temperature.  The whole sequence is test using
+In this example, a sample is measured in USAXS/SAXS/WAX at ambient temperature.
+Then, the sample heater is set to some temperature provided, and the
+sequence is repeated a number of times.  The whole sequence is tested using
 `summarize_plan(my_custom_plan(...))
-and run using:
+and then run using:
 `RE(my_custom_plan(...))` (where `...` represents the required arguments).
 
 ```
@@ -61,7 +61,7 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
     for i in range(iterations):
         print(f"Iteration {i+1} of {iterations}, elapsed time = {time.time() - t0:.3f}s")
         md["iteration"] = i+1
-        yield from MeasureAllThree(sx, sy, thickness, sample_name, md=md)```
+        yield from _measure_all_three(sx, sy, thickness, sample_name, md=md)```
 
 
 ## Load your python code
