@@ -26,7 +26,7 @@ are described in the table below.  Keep these terms in mind:
   <dd>the measured value (temperature, degrees C)</dd>
   
   <dt>target</dt>
-  <dd>the desired value (the set point, degrees C)</dd>
+  <dd>the desired value (the temperature set point, degrees C)</dd>
   
   <dt>tolerance</dt>
   <dd>the maximum acceptable mismatch between signal and target (degrees C)</dd>
@@ -40,36 +40,41 @@ control | description
 `.target.value` | controller's desired temperature
 `.tolerance.value` | controller is not *settled* if `abs(signal - target) > tolerance`
 
-### `.target.value` : What temperature is the controller set to? 
+### Basic Controls examples
 
-    controller.target.value
+In the examples below, replace `linkam_tc1` with the name of your temperature controller if it is different.
 
-### `.set_target()` : Set the controller to a specific temperature
+### `.target.value` : What temperature is `linkam_tc1` set to? 
 
-    controller.set_target(new_temperature)
+    linkam_tc1.target.value
 
-By default, this will wait until the controller is *settled* before it returns.
+### `.set_target()` : Set `linkam_tc1` to a specific temperature
 
-### `.value` : What is the controller actual temperature now?
+    linkam_tc1.set_target(new_temperature)
 
-    print(controller.value)
+By default, this will wait until `linkam_tc1` is *settled* before it returns.
+
+### `.value` : What is the `linkam_tc1` actual temperature now?
+
+    print(linkam_tc1.value)
 
 (note: this is a shortcut to the actual location)
 
-    print(controller.signal.value)
+    print(linkam_tc1.signal.value)
 
-### `.settled` : Has the controller reached the desired temperature?
+### `.settled` : Has `linkam_tc1` reached the desired temperature?
 
-    print(controller.settled)
+    print(linkam_tc1.settled)
 
-### `.tolerance.value` : How close must the actual temperature (signal) 
-    be to the target temperature for the controller to indicate it is *settled*?
+### `.tolerance.value` : How close is *settled*?
 
-    print(controller.settled)
+How close must the actual temperature (signal) be to the target temperature for `linkam_tc1` to indicate it is *settled*?
+
+    print(linkam_tc1.settled)
 
 ### `.tolerance.value` : How to set the `tolerance`*?
 
-From the command line: `controller.tolerance.put(2)` (sets it to 2 degrees)
+From the command line: `linkam_tc1.tolerance.put(2)` (sets it to 2 degrees)
 
-From a plan: `yield from bps.mv(controller.tolerance, 2)`
+From a plan: `yield from bps.mv(linkam_tc1.tolerance, 2)`
 
