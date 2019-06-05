@@ -16,9 +16,7 @@ you need to write your own plan.  These are the basic steps:
 1. Add this as first line in your plan function (it will activate the 
    standard activity logging of the USAXS instrument):
 
-   '''
-   usaxs_support.surveillance.make_archive("summarize this plan")
-   '''
+       usaxs_support.surveillance.make_archive("summarize this plan")
 
 1. TODO: write your looping activities.
 
