@@ -17,7 +17,9 @@ by name in that file.
 
 ## Basic Controls
 
-The basic controls are described in this table:
+The basic controls (derived from 
+[`apstools.devices.ProcessController`](https://apstools.readthedocs.io/en/latest/source/devices.html#apstools.devices.ProcessController) 
+are described in this table:
 
 control | description
 --- | ---
