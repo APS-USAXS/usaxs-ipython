@@ -3,16 +3,21 @@ print(__file__)
 """
 tune the guard slits
 
-**User scan**: `tune_Gslits()`
 
-Instead of using tunable axes, implement as device-based tuning plans.
-Add hook procedures so users can insert additional procedures.
+public
 
-- prescan
-- loop
-- postscan
+    tune_Gslits()
+    TuneError()
 
+internal
+
+    _USAXS_tune_guardSlits()
+    tune_GslitsCenter()
+    tune_GslitsSize()
 """
+
+
+class TuneError(ValueError): ...
 
 
 def _USAXS_tune_guardSlits():
@@ -21,7 +26,8 @@ def _USAXS_tune_guardSlits():
     """
     yield from bps.null()   # FIXME:
 
-def tune_GslitsCenter(text=""):
+
+def tune_GslitsCenter():
     """
     plan: optimize the guard slits' position
     
@@ -29,7 +35,7 @@ def tune_GslitsCenter(text=""):
     so it says: *uses start and finish in a "epics_ascan"*
     """
     yield from IfRequestedStopBeforeNextScan()
-    title = f"tuning USAXS Gslit center {text}"
+    title = "tuning USAXS Gslit center"
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, title,
@@ -40,8 +46,6 @@ def tune_GslitsCenter(text=""):
         user_data.time_stamp, ts,
         user_data.scan_macro, "tune_GslitCenter",
         )
- 
-    NO_BEAM_THRESHOLD = 1000
  
     yield from mode_USAXS()
     yield from bps.mv(
@@ -60,13 +64,63 @@ def tune_GslitsCenter(text=""):
     old_preset_time = scaler0.preset_time.value
     yield from bps.mv(scaler0.preset_time, 0.2)
 
-    tuner_gy = APS_plans.TuneAxis([scaler0], guard_slit.y)
-    yield from tuner_gy.tune(width=2, num=50)
-    # TODO: what to do with the tune results?         <-------------- !!!
+    def tune_guard_slit_motor(motor, width, n):
+        if n < 10:
+            raise TuneError(f"Not enough points ({n}) to tune guard slits.")
 
-    tuner_gx = APS_plans.TuneAxis([scaler0], guard_slit.x)
-    yield from tuner_gx.tune(width=4, num=20)
-    # TODO: what to do with the tune results?         <-------------- !!!
+        x_c = motor.position
+        x_0 = x_c - abs(width)/2
+        x_n = x_c + abs(width)/2
+
+        tuner = APS_plans.TuneAxis([scaler0], motor)
+        yield from tuner.tune(width=2, num=50)
+
+        NO_BEAM_THRESHOLD = 1000
+        bluesky_runengine_running = RE.state != "idle"
+        
+        if bluesky_runengine_running:
+            found = tuner.peak_detected()
+            center = tuner.peaks.com    # center of mass
+
+            table = pyRestTable.Table()
+            table.addLabel("tune parameter")
+            table.addLabel("fitted value")
+            table.addRow(("peak detected?", found))
+            table.addRow(("center of mass", center))
+            table.addRow(("center from half max", tuner.peaks.cen))
+            table.addRow(("peak max (x,y)", tuner.peaks.max))
+            table.addRow(("FWHM", tuner.peaks.fwhm))
+            print(table)
+
+            def reset_and_fail(msg):
+                print(f"{motor.name}: move to {x_c} (initial position)")
+                yield from bps.mv(
+                    motor, x_c,
+                    scaler0.preset_time, old_preset_time,
+                    ti_filter_shutter, "close"
+                    )
+                raise TuneError(msg)
+
+            if not found:
+                yield from reset_and_fail(f"{motor.name} Peak not found.")
+            if center < x_0:      # sanity check that start <= COM
+                msg = f"{motor.name}: Computed center too low: {center} < {x_0}"
+                yield from reset_and_fail(msg)
+            if center > x_n:      # sanity check that COM  <= end
+                msg = f"{motor.name}: Computed center too high: {center} > {x_n}"
+                yield from reset_and_fail(msg)
+            if max(tuner.peaks.y) <= NO_BEAM_THRESHOLD:
+                msg = f"{motor.name}: Peak intensity not strong enough to tune."
+                yield from reset_and_fail(msg)
+
+            # TODO: Any other checks?
+            
+            print(f"{motor.name}: move to {center} (center of mass)")
+            yield from bps.mv(motor, center)
+
+    # Here is the MAIN EVENT
+    yield from tune_guard_slit_motor(guard_slit.y, 2, 50)
+    yield from tune_guard_slit_motor(guard_slit.x, 4, 20)
     
     yield from bps.mv(scaler0.preset_time, old_preset_time)
     
@@ -77,7 +131,6 @@ def tune_GslitsSize():
     """
     plan: optimize the guard slits' gap
     """
-    bluesky_runengine_running = RE.state != "idle"
     yield from IfRequestedStopBeforeNextScan()
     yield from mode_USAXS()
     yield from bps.mv(
@@ -114,43 +167,9 @@ def tune_Gslits():
 """
 SPEC code from usaxs_gslit.mac:
 
-
-def tune_GslitsCenter '{
-
-
-#------------------------------------------------------------------------------
-# turn on/off user defined macros inside standard scan macros for gslit tuning
-#------------------------------------------------------------------------------
-def gslit_tune_on '{
-    cdef("user_prescan_head","_user_prescan_head_gst","gst","0x10")
-    cdef("user_scan_loop","_user_scan_loop_gst","gst","0x10")
-    cdef("user_scan_tail","_user_scan_tail_gst","gst","0x10")
-}'
-
-def gslit_tune_off '{
-    cdef("user_prescan_head","","gst","delete")
-    cdef("user_scan_loop","","gst","delete")
-    cdef("user_scan_tail","","gst","delete")
-}' 
-
-
 #------------------------------------------------------------------------------
 # Internal macros 
 #------------------------------------------------------------------------------
-def _user_prescan_head_gst '{
-    # Setup storage array for gslit beam intensity and position data
-    GSLIT_CURR_PNT = 0
-    GSLIT_I = 0  
-    GSLIT_X = 0
-}'
-
-def _user_scan_loop_gst '{
-    # Collect gslit data for analysis later
-    GSLIT_I[GSLIT_CURR_PNT] = S[DET]
-    waitmove
-    get_angles
-    GSLIT_X[GSLIT_CURR_PNT++] = A[GSLIT_MOTOR]
-}'
 
 def _user_scan_tail_gst '{
     # Examine data points accumulated, find centroid and variance
