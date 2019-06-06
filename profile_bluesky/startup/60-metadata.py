@@ -16,8 +16,11 @@ RE.md['versions'] = {}
 RE.md['versions']['bluesky'] = bluesky.__version__
 RE.md['versions']['ophyd'] = ophyd.__version__
 from apstools import __version__ as apstools_version
+from databroker import __version__ as db_version
+RE.md['versions']['databroker'] = db_version
 RE.md['versions']['apstools'] = apstools_version
 del apstools_version
+del db_version
 RE.md['versions']['epics'] = epics.__version__
 
 _skip_these_ = "EPICS_BASE EPICS_BASE_PVT EPICS_DISPLAY_PATH EPICS_EXTENSIONS".split()
