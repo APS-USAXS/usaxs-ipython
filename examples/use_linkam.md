@@ -87,11 +87,9 @@ file named `tseq.py` in your current working directory.
 ```
 """Temperature sequence"""
 
-import usaxs_support.surveillance
-
 def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_step, md={}):
     summary = "USAXS/SAXS/WAXS temperature sequence"
-    archive = usaxs_support.surveillance.make_archive(summary)
+    archive = instrument_archive(summary)
 
     md = {
         "summary": summary, 
@@ -129,18 +127,23 @@ def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_st
         temperature += sign * abs(t_step)
 ```
 
-### Import
+## Load your python code
 
-Import this file into your session with: `import tseq`
+Load your code into the bluesky (ipython) session 
+with: `%run -i tseq.py`
 
-If you must edit this file later, then re-import with: `reload(tseq)`
+Be sure to use the percent sign and the `-i` terms as they are 
+important to your code working with the other instrument components.
+
+TIP: Any time you edit your python file, you can reload it 
+using the same command:  `%run -i tseq.py`
 
 ### Test
 
-Test this plan with: `summarize_plan(tseq.my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`
+Test this plan with: `summarize_plan(my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`
 
 Note:  Use your own values for sample and temperature values.
 
 ### Run
 
-Run this plan with: `RE(tseq.my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`
+Run this plan with: `RE(my_temperature_sequence(10, 20, 0.85, "PS bar", 50, 80, 5))`

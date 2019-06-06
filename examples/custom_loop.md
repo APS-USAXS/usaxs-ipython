@@ -3,11 +3,12 @@
 If you need to loop, such as scanning over a sequence of other parameters,
 you need to write your own plan.  These are the basic steps:
 
-1. create a new python file in the *user area* (the working data directory 
-   such as `/share1/USAXS_data/2019-06/`)
-1. Among the other `import` statements, add: `import usaxs_support.surveillance`
-1. Any commands you execute at the outer level of this file will be run
-   each time the file is imported or reloaded.  (Only write functions or
+1. Create a new python file in the *user area* (the working data directory 
+   such as `/share1/USAXS_data/2019-06/`).  This file will be executed
+   within the ipython shell and should have access to all that is 
+   defined in that session.
+1. Any commands you execute at the outer level of this file will execute
+   each time the file is run.  (Only write functions or
    define constants.)
    
    Do not execute anything at the outer level.
@@ -17,7 +18,7 @@ you need to write your own plan.  These are the basic steps:
 1. Add this as first line in your plan function (it will activate the 
    standard activity logging of the USAXS instrument):
 
-       usaxs_support.surveillance.make_archive("summarize this plan")
+       instrument_archive("summarize this plan")
 
 1. Write your loop setup and activities.  Make sure you do not write
    any code that will block the `RE()` loop for a significant 
@@ -48,7 +49,7 @@ def _measure_all_three(sx, sy, thickness, sample_name, md={}):
 
 
 def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md={}):
-    usaxs_support.surveillance.make_archive("custom plan example")
+    instrument_archive("custom plan example")
     t0 = time.time()
     md = {
         "user_procedure": "USAXS SAXS WAXS scans",
@@ -65,28 +66,16 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
 ```
 
 
-## Import or Reload your python code
+## Load your python code
 
-In both cases, you use the module name without quotes.
-The module name is the python file name without the `.py` part.
+Load your code with: `%run -i my_python_file_name.py`
 
-### Import
-If you have not already imported this file, then do this
-from the bluesky (ipython) command line:
+Be sure to use the percent sign and the `-i` terms as they are 
+important to your code working with the other instrument components.
 
-    import my_python_file_name
+TIP: Any time you edit your python file, you can reload it 
+using the same command:  `%run -i my_python_file_name.py`
 
-### Reload
-If you have already imported this file once, then
-
-    reload(my_python_file_name)
-
-Note also that [`reload()`](https://docs.python.org/3.6/library/importlib.html#importlib.reload) 
-is from the python 
-[importlib](https://docs.python.org/3.6/library/importlib.html)
-package.  The [USAXS instrument bluesky configuration](/profile_bluesky/startup) 
-has already imported this function for you via: 
-[`from importlib import reload`](https://github.com/APS-USAXS/ipython-usaxs/blob/master/profile_bluesky/startup/09-imports.py)
 
 ## Test your custom plan first!
 
