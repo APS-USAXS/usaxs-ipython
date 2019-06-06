@@ -30,9 +30,6 @@ def _USAXS_tune_guardSlits():
 def tune_GslitsCenter():
     """
     plan: optimize the guard slits' position
-    
-    Q: What is `text`?  (SPEC's $1)
-    so it says: *uses start and finish in a "epics_ascan"*
     """
     yield from IfRequestedStopBeforeNextScan()
     title = "tuning USAXS Gslit center"
