@@ -3,6 +3,8 @@ print(__file__)
 """
 tune the guard slits
 
+**User scan**: `tune_Gslits()`
+
 Instead of using tunable axes, implement as device-based tuning plans.
 Add hook procedures so users can insert additional procedures.
 
@@ -13,123 +15,107 @@ Add hook procedures so users can insert additional procedures.
 """
 
 
-def tune_GslitsCenter():
+def _USAXS_tune_guardSlits():
+    """
+    plan: (internal) this performs the guard slit scan
+    """
     yield from bps.null()   # FIXME:
+
+def tune_GslitsCenter(text=""):
+    """
+    plan: optimize the guard slits' position
+    
+    Q: What is `text`?  (SPEC's $1)
+    so it says: *uses start and finish in a "epics_ascan"*
+    """
+    yield from IfRequestedStopBeforeNextScan()
+    title = f"tuning USAXS Gslit center {text}"
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.sample_title, title,
+        user_data.state, "tune Guard slits center",
+        user_data.user_name, USERNAME,
+        # user_data.user_dir, ZZZZZZZZZZZ,
+        user_data.spec_scan, str(RE.md["scan_id"]+1+1),     # TODO: Why SCAN_N+1?
+        user_data.time_stamp, ts,
+        user_data.scan_macro, "tune_GslitCenter",
+        )
+ 
+    NO_BEAM_THRESHOLD = 1000
+ 
+    yield from mode_USAXS()
+    yield from bps.mv(
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
+        )
+    yield from bps.mv(ti_filter_shutter, "open")
+    yield from insertTransmissionFilters()
+    yield from bps.sleep(0.1)
+    yield from bps.mv(
+        user_data.state, "autoranging the PD",
+        )
+    yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+    yield from bps.mv(user_data.state, title)
+    
+    old_preset_time = scaler0.preset_time.value
+    yield from bps.mv(scaler0.preset_time, 0.2)
+
+    tuner_gy = APS_plans.TuneAxis([scaler0], guard_slit.y)
+    yield from tuner_gy.tune(width=2, num=50)
+    # TODO: what to do with the tune results?         <-------------- !!!
+
+    tuner_gx = APS_plans.TuneAxis([scaler0], guard_slit.x)
+    yield from tuner_gx.tune(width=4, num=20)
+    # TODO: what to do with the tune results?         <-------------- !!!
+    
+    yield from bps.mv(scaler0.preset_time, old_preset_time)
+    
+    yield from bps.mv(ti_filter_shutter, "close")
 
 
 def tune_GslitsSize():
-    yield from bps.null()   # FIXME:
+    """
+    plan: optimize the guard slits' gap
+    """
+    bluesky_runengine_running = RE.state != "idle"
+    yield from IfRequestedStopBeforeNextScan()
+    yield from mode_USAXS()
+    yield from bps.mv(
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
+        monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        )
+    yield from bps.mv(
+        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.value,
+        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
+        ti_filter_shutter, "open",
+    )
+    # insertCCDfilters
+    yield from insertTransmissionFilters()
+    yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+    yield from _USAXS_tune_guardSlits()
+    yield from bps.mv(
+        ti_filter_shutter, "close",
+        terms.SAXS.guard_h_size, tune_Gslits.h_size.value,
+        terms.SAXS.guard_v_size, tune_Gslits.v_size.value,
+        monochromator.feedback.on, MONO_FEEDBACK_ON,
+    )
+    printf(f"Set V Slit={tune_Gslits.v_size.value} and H SLit={tune_Gslits.h_size.value}")
 
 
 def tune_Gslits():
+    """
+    plan: scan and find optimal guard slit positions
+    """
     yield from tune_GslitsCenter()
     yield from tune_GslitsSize()
+
 
 """
 SPEC code from usaxs_gslit.mac:
 
-#
-# file gslit.mac
-# J Kirchman 2012-03-28
-#
-# Guard Slit SPEC macros
-#
-# Decription: to optimize the location of the guard slits 
-#
-# User Macros: 
-#    gslit_scan: scan and find optimal guard slit positions
-# Internal Macros:
-#
-# Modification History:
-# 2012-03-28 JAK -> created
-# 2012-06-25 JIL, modified and added some global parameters for easier tuning. 
-# 2013-04-11 JIL, added custom USAXS tuning procedure. Parameters are in the USAXS_conf.mac 
-# 2013-04-18 JIL, modified to set also values of motors in real mm units not to confuse users. 
-# 2015-02-25 JIL, added tune_GslitCenter needed for energy changes
-# 2016-07-08 JIL, Jeff's changes to tune rectangular beam. 
-
-
-# Guard slits tuning procedure for USAXS instrument...
-
-def tune_Gslits '
-    tune_GslitsCenter
-    tune_GslitsSize
-'
-
-def tune_GslitsSize '
-     useModeUSAXS
-     waitmove; get_angles
-     set_SAXS_Slits 
-     waitmove
-     openTiFilterShutter 
-#     insertCCDfilters
-     set_Filters_For_Transm
-     DCMfeedbackOFF
-     autorange_UPDI0I00
-     USAXS_tune_guardSlits 
-     closeTiFilterShutter
-     local HslitVal
-     local VslitVal
-     HslitVal=epics_get("9idcLAX:GSlit1H:size.VAL")
-     VslitVal=epics_get("9idcLAX:GSlit1V:size.VAL")
-     epics_put("9idcLAX:SAXS:SAXS_hgslit_ap",HslitVal)
-     epics_put("9idcLAX:SAXS:SAXS_vgslit_ap",VslitVal)
-     printf ("Set V Slit=%f and  H SLit =%f\n", VslitVal, HslitVal);
-     DCMfeedbackON
-'
-
 
 def tune_GslitsCenter '{
-  #
-  # tune_GslitCenter uses start and finish in a "epics_ascan"
-  #
- 
-  oldtitle = TITLE
-  TITLE = sprintf("tuning USAXS Gslit center %s", \'$1\')
-  epics_put ("9idcLAX:sampleTitle", TITLE)
-  comment "%s" TITLE
-
-  NO_BEAM_THRESHOLD = 1000
-
-  epics_put ("9idcLAX:userName",    USER)
-  epics_put ("9idcLAX:userDir",     CWD)
-  epics_put ("9idcLAX:USAXS:specFile",    DATAFILE)
-  epics_put ("9idcLAX:USAXS:specScan",    SCAN_N+1)
-  epics_put ("9idcLAX:USAXS:scanMacro",   "tune_GslitCenter")
-  epics_put ("9idcLAX:USAXS:timeStamp",   date())
-
-     useModeUSAXS
-     waitmove; get_angles
-     set_SAXS_Slits 
-     waitmove
-     openTiFilterShutter 
-     set_Filters_For_Transm
-     sleep(0.1)
-     epics_put ("9idcLAX:USAXS:state", sprintf("%s", "autoranging the PD"))
-     autorange_UPDI0I00                      ; # after this the I0, I00 and UPD are in manual mode...
-     get_angles      # spec seems to be loosing track of motor positions when moved from css/python
-     epics_put ("9idcLAX:USAXS:state", TITLE)
-    
-    tune_usaxs_motor gslity -1 1 50 0.2
-
-    tune_usaxs_motor gslitx -2 2 20 0.2     
-     
-    #epics_dscan "9idcLAX:GSlit1V:center.VAL" "9idcLAX:GSlit1V:center.VAL" -1 1 40 0.3
-    #if (pl_MAX > 4 * pl_MIN) {
-    #  epics_put ("9idcLAX:GSlit1V:center.VAL", pl_COM)
-    # sbMessage = sprintf("setting Gslits center to %g", pl_COM)
-    #  comment "%s" sbMessage
-    #  tune_ok = 1
-    #} else {
-    #  sbMessage = sprintf("Could not tune motor %s, no clear peak resolved", motor_mne($1))
-    #  comment "%s" sbMessage
-    #  tune_ok = 0
-    #}
-    epics_put (sprintf("9idcUSX:%s:mode",PDstring), "2")
-  TITLE = oldtitle
-  closeTiFilterShutter
-  #ct 0.1
-}'
 
 
 #------------------------------------------------------------------------------
