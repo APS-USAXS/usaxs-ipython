@@ -12,7 +12,7 @@ EXAMPLE::
 
     def myPlan(t_start, t_end, t_steps):
         text = f"measure from {t_start} to {t_end} in {t_steps} steps"
-        usaxs_support.surveillance.instrument_archive(text)   # <---- ADD HERE
+        instrument_archive(text)   # <---- ADD HERE
 
         t = t_start
         while t < t_end:
