@@ -3,8 +3,29 @@ print(__file__)
 """
 tune the guard slits
 
-Instead of using tunable axes, implement as device-based tuning plans
+Instead of using tunable axes, implement as device-based tuning plans.
+Add hook procedures so users can insert additional procedures.
 
+- prescan
+- loop
+- postscan
+
+"""
+
+
+def tune_GslitsCenter():
+    yield from bps.null()   # FIXME:
+
+
+def tune_GslitsSize():
+    yield from bps.null()   # FIXME:
+
+
+def tune_Gslits():
+    yield from tune_GslitsCenter()
+    yield from tune_GslitsSize()
+
+"""
 SPEC code from usaxs_gslit.mac:
 
 #
