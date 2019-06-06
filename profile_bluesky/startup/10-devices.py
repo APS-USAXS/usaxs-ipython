@@ -32,6 +32,25 @@ def addDeviceDataAsStream(devices, label):
     yield from bps.save()
 
 
+def device_read2table(device, show_ancient=True, fmt="simple"):
+    """
+    read an ophyd device and print the output in a table
+    
+    Include an option to suppress ancient values identified
+    by timestamp from 1989.  These are values only defined in 
+    the original .db file.
+    """
+    table = pyRestTable.Table()
+    table.labels = "name value datetime".split()
+    ANCIENT_YEAR = 1989
+    for k, rec in device.read().items():
+        value = rec["value"]
+        dt = datetime.datetime.fromtimestamp(rec["timestamp"])
+        if dt.year > ANCIENT_YEAR or show_ancient:
+            table.addRow((k, value, dt))
+    print(table.reST(fmt=fmt))
+
+
 class DCM_Feedback(Device):
     """
     monochromator EPID-record-based feedback program: fb_epid
