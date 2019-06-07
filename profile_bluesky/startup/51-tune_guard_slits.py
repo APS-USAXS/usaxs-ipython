@@ -7,6 +7,8 @@ tune the guard slits
 public
 
     tune_Gslits()
+    tune_GslitsCenter()
+    tune_GslitsSize()
     GuardSlitTuneError()
     numerical_derivative()
     peak_center()
@@ -14,8 +16,6 @@ public
 internal
 
     _USAXS_tune_guardSlits()
-    tune_GslitsCenter()
-    tune_GslitsSize()
 """
 
 
@@ -157,8 +157,6 @@ def tune_GslitsCenter():
                 msg += f" {max(tuner.peaks.y_data)} < {guard_slit.tuning_intensity_threshold}"
                 yield from cleanup_then_GuardSlitTuneError(msg)
 
-            # TODO: Any other checks?
-            
             print(f"{motor.name}: move to {center} (center of mass)")
             yield from bps.mv(motor, center)
 
@@ -219,7 +217,7 @@ def _USAXS_tune_guardSlits():
             )
         raise GuardSlitTuneError(msg)
 
-    print("And now we can tune all of the guard slits")
+    print("And now we can tune all of the guard slits, blade-by-blade")
 
     def tune_blade_edge(axis, start, end, steps, ct_time, results):
         print(f"{axis.name}: scan from {start} to {end}")
