@@ -7,7 +7,9 @@ tune the guard slits
 public
 
     tune_Gslits()
-    TuneError()
+    GuardSlitTuneError()
+    numerical_derivative()
+    peak_center()
 
 internal
 
@@ -17,14 +19,64 @@ internal
 """
 
 
-class TuneError(ValueError): ...
+class GuardSlitTuneError(RuntimeError): ...    # custom error
 
 
-def _USAXS_tune_guardSlits():
+SAXS_GSlitsScaleFct = 1.2       # as Jan suggested
+SAXS_GSlitVStepOut = 1                  # TODO: get value from SPEC : found in terms?
+SAXS_GSlitHStepOut = 1                  # TODO: get value from SPEC : found in terms?
+
+
+def numerical_derivative(x, y):
     """
-    plan: (internal) this performs the guard slit scan
+    computes first derivative yp(xp) of y(x), returns tuple (xp, yp) 
+    
+    here, xp is at midpoints of x
     """
-    yield from bps.null()   # FIXME:
+    if len(x) < 10:
+        raise ValueError(f"Need more points to analyze, received {len(x)}")
+    if len(x) != len(y):
+        raise ValueError(f"X & Y arrays must be same length to analyze, x:{len(x)} y:{len(y)}")
+    x1 = np.array(x[:-1])       # all but the last
+    x2 = np.array(x[1:])        # all but the first
+    y1 = np.array(y[:-1])       # ditto
+    y2 = np.array(y[1:])
+    # let numpy do this work with arrays
+    xp = (x2+x1)/2              # midpoint
+    yp = (y2-y1) * (x2-x1)      # slope
+    return xp, yp
+
+
+def peak_center(x, y, use_area=False):
+    """
+    calculate center-of-mass and sqrt(variance) of y vs. x
+    """
+    if len(x) < 10:
+        raise ValueError(f"Need more points to analyze, received {len(x)}")
+    if len(x) != len(y):
+        raise ValueError(f"X & Y arrays must be same length to analyze, x:{len(x)} y:{len(y)}")
+    
+    if use_area:
+        x1 = np.array(x[:-1])       # all but the last
+        x2 = np.array(x[1:])        # all but the first
+        y1 = np.array(y[:-1])       # ditto
+        y2 = np.array(y[1:])
+        
+        x = (x1+x2)/2               # midpoints
+        y = 0.5*(y1+y2) * (x2-x1)   # areas
+    else:
+        x = np.array(x)
+        y = np.array(y)
+
+    # let numpy do this work with arrays
+    sum_y = y.sum()
+    sum_yx = (y*x).sum()
+    sum_yxx = (y*x*x).sum()
+    
+    x_bar = sum_yx / sum_y
+    variance = sum_yxx / sum_y - x_bar*x_bar
+    width = 2 * np.sqrt(abs(variance))
+    return x_bar, width
 
 
 def tune_GslitsCenter():
@@ -61,16 +113,16 @@ def tune_GslitsCenter():
     old_preset_time = scaler0.preset_time.value
     yield from bps.mv(scaler0.preset_time, 0.2)
 
-    def tune_guard_slit_motor(motor, width, n):
-        if n < 10:
-            raise TuneError(f"Not enough points ({n}) to tune guard slits.")
+    def tune_guard_slit_motor(motor, width, steps):
+        if steps < 10:
+            raise GuardSlitTuneError(f"Not enough points ({n}) to tune guard slits.")
 
         x_c = motor.position
         x_0 = x_c - abs(width)/2
         x_n = x_c + abs(width)/2
 
         tuner = APS_plans.TuneAxis([scaler0], motor)
-        yield from tuner.tune(width=2, num=50)
+        yield from tuner.tune(width=width, num=steps+1)
 
         NO_BEAM_THRESHOLD = 1000
         bluesky_runengine_running = RE.state != "idle"
@@ -89,26 +141,26 @@ def tune_GslitsCenter():
             table.addRow(("FWHM", tuner.peaks.fwhm))
             print(table)
 
-            def reset_and_fail(msg):
+            def cleanup_then_GuardSlitTuneError(msg):
                 print(f"{motor.name}: move to {x_c} (initial position)")
                 yield from bps.mv(
                     motor, x_c,
                     scaler0.preset_time, old_preset_time,
                     ti_filter_shutter, "close"
                     )
-                raise TuneError(msg)
+                raise GuardSlitTuneError(msg)
 
             if not found:
-                yield from reset_and_fail(f"{motor.name} Peak not found.")
+                yield from cleanup_then_GuardSlitTuneError(f"{motor.name} Peak not found.")
             if center < x_0:      # sanity check that start <= COM
                 msg = f"{motor.name}: Computed center too low: {center} < {x_0}"
-                yield from reset_and_fail(msg)
+                yield from cleanup_then_GuardSlitTuneError(msg)
             if center > x_n:      # sanity check that COM  <= end
                 msg = f"{motor.name}: Computed center too high: {center} > {x_n}"
-                yield from reset_and_fail(msg)
-            if max(tuner.peaks.y) <= NO_BEAM_THRESHOLD:
+                yield from cleanup_then_GuardSlitTuneError(msg)
+            if max(tuner.peaks.y_data) <= NO_BEAM_THRESHOLD:
                 msg = f"{motor.name}: Peak intensity not strong enough to tune."
-                yield from reset_and_fail(msg)
+                yield from cleanup_then_GuardSlitTuneError(msg)
 
             # TODO: Any other checks?
             
@@ -122,6 +174,178 @@ def tune_GslitsCenter():
     yield from bps.mv(scaler0.preset_time, old_preset_time)
     
     yield from bps.mv(ti_filter_shutter, "close")
+
+
+def _USAXS_tune_guardSlits():
+    """
+    plan: (internal) this performs the guard slit scan
+    
+    Called from tune_GslitsSize()
+    """
+    # set scaling factor to make guards looser
+    scale_factor = SAXS_GSlitsScaleFct      # TODO: remove this unnecessary shortcut
+ 
+    # # define proper counters and set the geometry... 
+    # plotselect upd2
+    # counters cnt_num(I0) cnt_num(upd2)
+    
+    # remember original motor positons
+    original_position = dict(
+        top = guard_slit.top.position,
+        bot = guard_slit.bot.position,
+        out = guard_slit.out.position,
+        inb = guard_slit.inb.position,
+        )
+    table = pyRestTable.Table()
+    table.addLabel("guard slit blade")
+    table.addLabel("starting position")
+    table.addRow(("top", original_position["top"]))
+    table.addRow(("bottom", original_position["bot"]))
+    table.addRow(("Outboard", original_position["out"]))
+    table.addRow(("Inboard", original_position["inb"]))
+    print(table)
+
+    # Now move all guard slit motors back a bit
+    yield from bps.mv(
+        guard_slit.top, original_position["top"] + SAXS_GSlitVStepOut,
+        guard_slit.bot, original_position["bot"] - SAXS_GSlitVStepOut,
+        guard_slit.out, original_position["out"] + SAXS_GSlitHStepOut,
+        guard_slit.inb, original_position["inb"] - SAXS_GSlitHStepOut,
+        )
+    
+    yield from bps.mv(user_data.state, "autoranging the PD")
+    yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+
+    def cleanup(msg):
+        """if scan is aborted, return motors to original positions"""
+        print("Returning the guard slit motors to original (pre-tune) positions")
+        yield from bps.mv(
+            guard_slit.top, original_position["top"],
+            guard_slit.bot, original_position["bot"],
+            guard_slit.out, original_position["out"],
+            guard_slit.inb, original_position["inb"],
+            )
+        raise GuardSlitTuneError(msg)
+
+    print("And now we can tune all of the guard slits")
+
+    def tune_blade_edge(axis, start, end, steps, ct_time, results):
+        print(f"{axis.name}: scan from {start} to {end}")
+        old_ct_time = scaler0.preset_time.value
+        old_position = axis.position
+
+        yield from bps.mv(  # move to center of scan range for tune
+            scaler0.preset_time, ct_time,
+            axis, (start + end)/2,
+            )
+        scan_width = end - start
+        tuner = APS_plans.TuneAxis([scaler0], axis)
+        yield from tuner.tune(width=scan_width, num=steps+1)
+        
+        # TODO: validate first (apply sanity checks)
+        INTENSITY_DIFFERENCE_TOLERANCE = 500
+        
+        if abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1]) < INTENSITY_DIFFERENCE_TOLERANCE:
+            print("Not enough intensity change from first to last point.")
+            print("Did the guard slit move far enough to move into/out of the beam?")
+            yield from cleanup(f"{axis.name}: Not tuning this axis.")
+        
+        x, y = numerical_derivative(tuner.peaks.x_data, tuner.peaks.y_data)
+        position, width = peak_center(x, y)
+        width *= scale_factor   # expand a bit
+
+        # Check if movement was from unblocked to blocked
+        if tuner.peaks.y_data[0] > tuner.peaks.y_data[-1]:
+            width *= -1     # flip the sign
+        
+        if position < min(start, end):
+            msg = f"{axis.name}: Computed tune position {position} < {min(start, end)}."
+            msg += "  Not tuning this axis."
+            yield from cleanup(msg)
+        if position > max(start, end):
+            msg = f"{axis.name}: Computed tune position {position} > {max(start, end)}."
+            msg += "  Not tuning this axis."
+            yield from cleanup(msg)
+
+        print(f"{axis.name}: will be tuned to {position}")
+        print(f"{axis.name}: width = {width}")
+        # TODO: SPEC comments, too
+        yield from bps.mv(
+            scaler0.preset_time, old_ct_time,
+            axis, old_position,             # reset position for other scans
+            )
+        
+        results["width"] = width
+        results["position"] = position
+  
+    tunes = defaultdict(dict)
+    print("*** 1. tune top guard slits")
+    yield from tune_blade_edge(
+        guard_slit.top, 
+        original_position["top"] + SAXS_GSlitVStepIn, 
+        original_position["top"] - SAXS_GSlitVStepOut, 
+        60, 
+        0.25, 
+        tunes["top"])
+
+    print("*** 2. tune bottom guard slits")
+    yield from tune_blade_edge(
+        guard_slit.bot, 
+        original_position["bot"] - SAXS_GSlitVStepIn, 
+        original_position["bot"] + SAXS_GSlitVStepOut, 
+        60, 
+        0.25, 
+        tunes["bot"])
+
+    print("*** 3. tune outboard guard slits")
+    yield from tune_blade_edge(
+        guard_slit.out, 
+        original_position["out"] + SAXS_GSlitHStepIn, 
+        original_position["out"] - SAXS_GSlitHStepOut, 
+        60, 
+        0.25, 
+        tunes["out"])
+
+    print("*** 4. tune inboard guard slits")
+    yield from tune_blade_edge(
+        guard_slit.inb, 
+        original_position["inb"] - SAXS_GSlitHStepIn, 
+        original_position["inb"] + SAXS_GSlitHStepOut, 
+        60, 
+        0.25, 
+        tunes["inb"])
+
+    # Tuning is done, now move the motors to the center of the beam found
+    yield from bps.mv(
+        guard_slit.top, tunes["top"]["position"],
+        guard_slit.bot, tunes["bot"]["position"],
+        guard_slit.out, tunes["out"]["position"],
+        guard_slit.inb, tunes["inb"]["position"],
+        )
+    # redefine the motor positions so the centers are 0
+    # TODO: reset the EPICS motor record user coordinate to zero?
+    # set gsltop 0   
+    # set gslbot 0   
+    # set gslout 0   
+    # set gslinb 0   
+
+    # center of the slits is set to 0
+    # now move the motors to the width found above
+    # use average of the individual blade values.
+    v = (tunes["top"]["width"] + tunes["bot"]["width"])/2
+    h = (tunes["out"]["width"] + tunes["inb"]["width"])/2
+    yield from bps.mv(
+        guard_slit.top, v,
+        guard_slit.bot, -v,
+        guard_slit.out, h,
+        guard_slit.inb, -h,
+        )
+
+    # sync the slits software
+    yield from bps.mv(
+        guard_slit.h_sync_proc, 1,
+        guard_slit.v_sync_proc, 1,
+        )
 
 
 def tune_GslitsSize():
@@ -159,265 +383,3 @@ def tune_Gslits():
     """
     yield from tune_GslitsCenter()
     yield from tune_GslitsSize()
-
-
-"""
-SPEC code from usaxs_gslit.mac:
-
-#------------------------------------------------------------------------------
-# Internal macros 
-#------------------------------------------------------------------------------
-
-def _user_scan_tail_gst '{
-    # Examine data points accumulated, find centroid and variance
-    # Abort tuning if data is not reliable enough
-    gslit_y[500]
-    gslit_sum_y = 0
-    gslit_sum_xy = 0
-    gslit_sum_xxy = 0
-  
-
-    GSLIT_width = 0
-    if (GSLIT_CURR_PNT < 10) {
-         printf ("Not enough data points taken (%d) to tune guard slits\n", GSLIT_CURR_PNT);
-         exit;
-    } 
-      
-    # Calculate sums of "y", "xy" and "xxy" which will be needed for x_bar and variance
-    for (i=0 ; i < GSLIT_CURR_PNT ; i++) {
-        if (i==0) {gslit_y[i] = 0} else {gslit_y[i]=(GSLIT_I[i-1]-GSLIT_I[i])/(GSLIT_X[i-1]-GSLIT_X[i])}
-        gslit_sum_y += gslit_y[i]
-        gslit_sum_xy += (GSLIT_X[i]*gslit_y[i])
-        gslit_sum_xxy += (GSLIT_X[i]*GSLIT_X[i]*gslit_y[i])
-    }
-    GSLIT_x_bar = gslit_sum_xy/gslit_sum_y
-    variance = gslit_sum_xxy/gslit_sum_y - (GSLIT_x_bar * GSLIT_x_bar)
-    GSLIT_width = 2 * sqrt(fabs(variance))
-
-    if (GSLIT_DEBUG) {
-        printf ("x_bar = %f\nvariance = %f\nwidth = %f\n",GSLIT_x_bar,variance,GSLIT_width)
-        #for (i=0 ; i < GSLIT_CURR_PNT ; i++) {
-        #    printf("GSLIT_I[%d]=%f  GSLIT_X[%d]=%f\n",i,GSLIT_I[i], i, GSLIT_X[i])
-        #}
-    }
-
-    # Sanity check the result before moving motor
-    x_end = GSLIT_X[GSLIT_CURR_PNT-1]
-    x_start = GSLIT_X[0]
-#    if ((GSLIT_x_bar > GSLIT_X[GSLIT_CURR_PNT-1]) || (GSLIT_x_bar < GSLIT_X[0])){
-    if (((GSLIT_x_bar>x_start)&&(GSLIT_x_bar>x_end)) || \
-       ((GSLIT_x_bar<x_start)&&(GSLIT_x_bar<x_end))) {
-        printf("x_bar was calculated outside of the motor\'s travel.\n");
-        printf("Tuning result is unusable, guard motor %s will not be tuned.\n",motor_mne(GSLIT_MOTOR))
-        exit
-    }
-
-    # TODO - Need to find intensity threshold before implementing this 
-
-    if (fabs(GSLIT_I[0]-GSLIT_I[GSLIT_CURR_PNT-1]) < 500) {
-        printf("Not enough intensity change from first to last point.\n")
-        printf("Did the guard slit move far enough to move into/out of the beam?\n")
-        printf("Tuning result is unusable, guard motor %s will not be tuned.\n",motor_mne(GSLIT_MOTOR))
-        exit
-    }
-    
-
-    # Check if movement was from blocked to unblocked or vice versa
-    if (GSLIT_I[0] < GSLIT_I[GSLIT_CURR_PNT]) {
-        GSLIT_width = GSLIT_width
-    } else {
-        GSLIT_width = -1 * GSLIT_width
-    }
-    
-    #A[GSLIT_MOTOR] = GSLIT_x_bar + GSLIT_width
-
-    #move_em ; waitmove ; get_angles
-    #printf("Guard slit motor %s has been tuned to %f.\n", motor_mne(GSLIT_MOTOR),GSLIT_x_bar + GSLIT_width)
-}'
-
-
-#------------------------------------------------------------------------------
-# External macros 
-#------------------------------------------------------------------------------
-def USAXSgslit_init '{
-    global array GSLIT_I[500]
-    global array GSLIT_X[500]
-    global GSLIT_CURR_PNT
-    global GSLIT_MOTOR
-    global GSLIT_DEBUG
-    global GSLIT_x_bar GSLIT_width
-    
-    GSLIT_DEBUG = 1
-}'
-
-
-def USAXSgslit_tune '
-  if ($# != 5) {
-    printf("Usage: USAXSgslit_tune %s\n",\
-       "motor start finish intervals time")
-    exit
-  } 
-    motor = $1; start = $2; finish = $3
-    intervals = int($4); ctime = $5
-    GSLIT_MOTOR = $1
-
-    USAXSgslit_init
-    gslit_tune_on
-   
-    ascan $1 start finish intervals ctime
-
-    gslit_tune_off   
-
-    # center is in GSLIT_x_bar
-    # motor offset to position is in GSLIT_width
-    # new motor position is GSLIT_x_bar + GSLIT_width
-    #printf("Guard slit motor %s has been tuned to %f.\n", motor_mne(GSLIT_MOTOR),A[GSLIT_MOTOR])
-
-'
-
-
-#------------------------------------------------------------------------------
-# The macro which actually tunes the system
-#------------------------------------------------------------------------------
-
-def USAXS_tune_guardSlits '
-
-    local __startPos
-    local __endPos
-    local __ScalingFactor
-    chk_beam_off
-    global ORIG_TOP_POS ORIG_BOT_POS ORIG_INB_POS ORIG_OUT_POS 
-    
-    global SAXS_GSlitsScaleFct
-    global SAXS_GSlitVStepIn, SAXS_GSlitVStepOut
-    global SAXS_GSlitHStepIn, SAXS_GSlitHStepOut
-
-
-    USAXSgslit_init
-    
-    # set scaling factor to make guards looser
-    __ScalingFactor = SAXS_GSlitsScaleFct
-
-    # define proper counters and set the geometry... 
-    plotselect upd2
-    counters cnt_num(I0) cnt_num(upd2)
-   
-    # grab current motor positons
-    waitmove; getangles
-    ORIG_TOP_POS = A[gsltop]
-    ORIG_BOT_POS = A[gslbot]
-    ORIG_OUT_POS = A[gslout]
-    ORIG_INB_POS = A[gslinb]
-    print "top", "bottom", "Outboard", "Inboard"
-    print ORIG_TOP_POS, ORIG_BOT_POS, ORIG_OUT_POS, ORIG_INB_POS 
-    
-    # Now move all guard slit motors back a bit
-    A[gsltop] = ORIG_TOP_POS + SAXS_GSlitVStepOut
-    A[gslbot] = ORIG_BOT_POS - SAXS_GSlitVStepOut
-    A[gslout] = ORIG_OUT_POS + SAXS_GSlitHStepOut
-    A[gslinb] = ORIG_INB_POS - SAXS_GSlitHStepOut
-    move_em; waitmove
-    autorange_UPDI0I00
-
-    # if scan is aborted, return motors to original positions    
-    rdef _cleanup3 \'
-        print "Returning the guard slit motors to original pre-tune positions"
-        A[gsltop] = ORIG_TOP_POS
-        A[gslbot] = ORIG_BOT_POS
-        A[gslout] = ORIG_OUT_POS
-        A[gslinb] = ORIG_INB_POS
-        move_em; waitmove
-        gslit_tune_off 
-     \'
-
-    print "And now we can tune all of the guard slits"
- 
-    print "*** Tuning top guard slits first"
-    __startPos = ORIG_TOP_POS + SAXS_GSlitVStepIn
-    __endPos = ORIG_TOP_POS - SAXS_GSlitVStepOut
-    printf ("Scanning from %f to %f\n", __startPos, __endPos)
-    USAXSgslit_tune gsltop __startPos __endPos 60 0.25
-    __gsltop_value = __ScalingFactor * fabs(GSLIT_width)   
-    __gsltop_tune = GSLIT_x_bar   
-    printf("Gslit motor %s will be tuned to %f.\n", motor_mne(GSLIT_MOTOR),__gsltop_tune);
-    printf ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    #Comment ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    # Move back to scan rest of slits
-    A[gsltop] = ORIG_TOP_POS + SAXS_GSlitVStepOut
-    move_em; waitmove
-   
-
-    print "*** Tuning bottom guard slits next"
-    __endPos = ORIG_BOT_POS + SAXS_GSlitVStepOut
-    __startPos = ORIG_BOT_POS - SAXS_GSlitVStepIn
-    printf ("Scanning from %f to %f\n", __startPos, __endPos)
-    USAXSgslit_tune gslbot __startPos __endPos 60 0.25
-    __gslbot_value = __ScalingFactor * fabs(GSLIT_width)   
-    __gslbot_tune = GSLIT_x_bar
-    printf("Gslit motor %s will be tuned to %f.\n", motor_mne(GSLIT_MOTOR),__gslbot_tune)
-    printf ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    #Comment "GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar
-    # Move back to scan rest of slits
-    A[gslbot] = ORIG_TOP_POS - SAXS_GSlitVStepOut
-    move_em; waitmove
-
- 
-    print "*** Tuning outboard guard slits first"
-    __startPos = ORIG_OUT_POS + SAXS_GSlitHStepIn
-    __endPos = ORIG_OUT_POS - SAXS_GSlitHStepOut
-    printf ("Scanning from %f to %f\n", __startPos, __endPos)
-    USAXSgslit_tune gslout __startPos __endPos 60 0.25
-    __gslout_value = __ScalingFactor * fabs(GSLIT_width)   
-    __gslout_tune = GSLIT_x_bar   
-    printf("Gslit motor %s will be tuned to %f.\n", motor_mne(GSLIT_MOTOR),__gslout_tune);
-    printf ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    #Comment ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    # Move back to scan rest of slits
-    A[gslout] = ORIG_OUT_POS + SAXS_GSlitHStepOut
-    move_em; waitmove
-
-    print "*** Tuning inboard guard slits next"
-    __endPos = ORIG_INB_POS + SAXS_GSlitHStepOut
-    __startPos = ORIG_INB_POS - SAXS_GSlitHStepIn
-    printf ("Scanning from %f to %f\n", __startPos, __endPos)
-    USAXSgslit_tune gslinb __startPos __endPos 60 0.25
-    __gslinb_value = __ScalingFactor * fabs(GSLIT_width)   
-    __gslinb_tune = GSLIT_x_bar
-    printf("Gslit motor %s will be tuned to %f.\n", motor_mne(GSLIT_MOTOR),__gslinb_tune)
-    printf ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    #Comment ("GSLIT_width=%f  GSLIT_x_bar=%f\n", GSLIT_width, GSLIT_x_bar);
-    # Move back to scan rest of slits
-    A[gslinb] = ORIG_INB_POS - SAXS_GSlitHStepOut
-    move_em; waitmove
-
-
-    # Tuning is done, now move the motors to the center of the beam found
-    A[gsltop] = __gsltop_tune
-    A[gslbot] = __gslbot_tune
-    A[gslout] = __gslout_tune
-    A[gslinb] = __gslinb_tune
-    move_em; waitmove
-    gslit_tune_off 
-    # redefine the motor positions so the centers are 0
-    set gsltop 0   
-    set gslbot 0   
-    set gslout 0   
-    set gslinb 0   
-
-    # center of the slits is set to 0, now move the motors to the width found above, use average of the individual blade values.
-    A[gsltop] = (__gsltop_value + __gslbot_value) / 2
-    A[gslbot] = -1*(__gsltop_value + __gslbot_value) / 2
-    A[gslout] = (__gslout_value + __gslinb_value) / 2
-    A[gslinb] = -1*(__gslout_value + __gslinb_value) / 2
-    move_em; waitmove
-
-    # sync the slits software
-    epics_put("9idcLAX:GSlit1H:sync.PROC",1)
-    epics_put("9idcLAX:GSlit1V:sync.PROC",1)
-
-    # normal cleanup macro for ^C usage
-    rdef _cleanup3 \'\'
-
-'
-
-"""

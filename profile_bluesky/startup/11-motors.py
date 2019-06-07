@@ -66,6 +66,9 @@ class GSlitDevice(MotorBundle):
 
     h_size = Component(EpicsSignal, '9idcLAX:GSlit1H:size')
     v_size = Component(EpicsSignal, '9idcLAX:GSlit1V:size')
+
+    h_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1H:sync.PROC')
+    v_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1V:sync.PROC')
     
     gap_tolerance = 0.02        # actual must be this close to desired
     
