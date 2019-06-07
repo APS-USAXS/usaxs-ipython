@@ -22,11 +22,6 @@ internal
 class GuardSlitTuneError(RuntimeError): ...    # custom error
 
 
-SAXS_GSlitsScaleFct = 1.2       # as Jan suggested
-SAXS_GSlitVStepOut = 1                  # TODO: get value from SPEC : found in terms?
-SAXS_GSlitHStepOut = 1                  # TODO: get value from SPEC : found in terms?
-
-
 def numerical_derivative(x, y):
     """
     computes first derivative yp(xp) of y(x), returns tuple (xp, yp) 
@@ -124,7 +119,6 @@ def tune_GslitsCenter():
         tuner = APS_plans.TuneAxis([scaler0], motor)
         yield from tuner.tune(width=width, num=steps+1)
 
-        NO_BEAM_THRESHOLD = 1000
         bluesky_runengine_running = RE.state != "idle"
         
         if bluesky_runengine_running:
@@ -158,8 +152,9 @@ def tune_GslitsCenter():
             if center > x_n:      # sanity check that COM  <= end
                 msg = f"{motor.name}: Computed center too high: {center} > {x_n}"
                 yield from cleanup_then_GuardSlitTuneError(msg)
-            if max(tuner.peaks.y_data) <= NO_BEAM_THRESHOLD:
+            if max(tuner.peaks.y_data) <= guard_slit.tuning_intensity_threshold:
                 msg = f"{motor.name}: Peak intensity not strong enough to tune."
+                msg += f" {max(tuner.peaks.y_data)} < {guard_slit.tuning_intensity_threshold}"
                 yield from cleanup_then_GuardSlitTuneError(msg)
 
             # TODO: Any other checks?
@@ -182,9 +177,6 @@ def _USAXS_tune_guardSlits():
     
     Called from tune_GslitsSize()
     """
-    # set scaling factor to make guards looser
-    scale_factor = SAXS_GSlitsScaleFct      # TODO: remove this unnecessary shortcut
- 
     # # define proper counters and set the geometry... 
     # plotselect upd2
     # counters cnt_num(I0) cnt_num(upd2)
@@ -207,10 +199,10 @@ def _USAXS_tune_guardSlits():
 
     # Now move all guard slit motors back a bit
     yield from bps.mv(
-        guard_slit.top, original_position["top"] + SAXS_GSlitVStepOut,
-        guard_slit.bot, original_position["bot"] - SAXS_GSlitVStepOut,
-        guard_slit.out, original_position["out"] + SAXS_GSlitHStepOut,
-        guard_slit.inb, original_position["inb"] - SAXS_GSlitHStepOut,
+        guard_slit.top, original_position["top"] + guard_slit.v_step_out,
+        guard_slit.bot, original_position["bot"] - guard_slit.v_step_out,
+        guard_slit.out, original_position["out"] + guard_slit.h_step_out,
+        guard_slit.inb, original_position["inb"] - guard_slit.h_step_out,
         )
     
     yield from bps.mv(user_data.state, "autoranging the PD")
@@ -242,17 +234,17 @@ def _USAXS_tune_guardSlits():
         tuner = APS_plans.TuneAxis([scaler0], axis)
         yield from tuner.tune(width=scan_width, num=steps+1)
         
-        # TODO: validate first (apply sanity checks)
-        INTENSITY_DIFFERENCE_TOLERANCE = 500
-        
-        if abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1]) < INTENSITY_DIFFERENCE_TOLERANCE:
-            print("Not enough intensity change from first to last point.")
-            print("Did the guard slit move far enough to move into/out of the beam?")
-            yield from cleanup(f"{axis.name}: Not tuning this axis.")
+        diff = abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1])
+        if diff < guard_slit.tuning_intensity_threshold:
+            msg = f"{axis.name}: Not enough intensity change from first to last point."
+            msg += f" {diff} < {guard_slit.tuning_intensity_threshold}."
+            msg += "  Did the guard slit move far enough to move into/out of the beam?"
+            msg += "  Not tuning this axis."
+            yield from cleanup(msg)
         
         x, y = numerical_derivative(tuner.peaks.x_data, tuner.peaks.y_data)
         position, width = peak_center(x, y)
-        width *= scale_factor   # expand a bit
+        width *= guard_slit.scale_factor   # expand a bit
 
         # Check if movement was from unblocked to blocked
         if tuner.peaks.y_data[0] > tuner.peaks.y_data[-1]:
@@ -282,8 +274,8 @@ def _USAXS_tune_guardSlits():
     print("*** 1. tune top guard slits")
     yield from tune_blade_edge(
         guard_slit.top, 
-        original_position["top"] + SAXS_GSlitVStepIn, 
-        original_position["top"] - SAXS_GSlitVStepOut, 
+        original_position["top"] + guard_slit.v_step_in, 
+        original_position["top"] - guard_slit.v_step_out, 
         60, 
         0.25, 
         tunes["top"])
@@ -291,8 +283,8 @@ def _USAXS_tune_guardSlits():
     print("*** 2. tune bottom guard slits")
     yield from tune_blade_edge(
         guard_slit.bot, 
-        original_position["bot"] - SAXS_GSlitVStepIn, 
-        original_position["bot"] + SAXS_GSlitVStepOut, 
+        original_position["bot"] - guard_slit.v_step_in, 
+        original_position["bot"] + guard_slit.v_step_out, 
         60, 
         0.25, 
         tunes["bot"])
@@ -300,8 +292,8 @@ def _USAXS_tune_guardSlits():
     print("*** 3. tune outboard guard slits")
     yield from tune_blade_edge(
         guard_slit.out, 
-        original_position["out"] + SAXS_GSlitHStepIn, 
-        original_position["out"] - SAXS_GSlitHStepOut, 
+        original_position["out"] + guard_slit.h_step_in, 
+        original_position["out"] - guard_slit.h_step_out, 
         60, 
         0.25, 
         tunes["out"])
@@ -309,8 +301,8 @@ def _USAXS_tune_guardSlits():
     print("*** 4. tune inboard guard slits")
     yield from tune_blade_edge(
         guard_slit.inb, 
-        original_position["inb"] - SAXS_GSlitHStepIn, 
-        original_position["inb"] + SAXS_GSlitHStepOut, 
+        original_position["inb"] - guard_slit.h_step_in, 
+        original_position["inb"] + guard_slit.h_step_out, 
         60, 
         0.25, 
         tunes["inb"])
@@ -322,12 +314,18 @@ def _USAXS_tune_guardSlits():
         guard_slit.out, tunes["out"]["position"],
         guard_slit.inb, tunes["inb"]["position"],
         )
+    
     # redefine the motor positions so the centers are 0
-    # TODO: reset the EPICS motor record user coordinate to zero?
-    # set gsltop 0   
-    # set gslbot 0   
-    # set gslout 0   
-    # set gslinb 0   
+    def redefine(axis, pos):
+        """set motor record's user coordinate to `pos`"""
+        yield from bps.mv(axis.set_use_switch, 1)
+        yield from bps.mv(axis.user_setpoint, pos)
+        yield from bps.mv(axis.set_use_switch, 0)
+
+    yield from redefine(guard_slit.top, 0)
+    yield from redefine(guard_slit.bot, 0)
+    yield from redefine(guard_slit.out, 0)
+    yield from redefine(guard_slit.inb, 0)
 
     # center of the slits is set to 0
     # now move the motors to the width found above
