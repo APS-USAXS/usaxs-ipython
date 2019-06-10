@@ -32,6 +32,7 @@ DEVICES
     Parameters_Transmission()
     Parameters_Radiography()
     Parameters_SAXS()
+    Parameters_SAXS_WAXS()
     Parameters_SBUSAXS()
     Parameters_USAXS()
     Parameters_WAXS()
@@ -491,6 +492,9 @@ class Parameters_SAXS(Device):
     I0 = Component(EpicsSignal, "9idcLAX:SAXS:I0")
 
 
+class Parameters_SAXS_WAXS(Device): ...
+
+
 class Parameters_WAXS(Device):
     x_in = Component(EpicsSignal, "9idcLAX:WAXS_x_in")
     x_out = Component(EpicsSignal, "9idcLAX:WAXS_x_out")
@@ -542,6 +546,7 @@ class GeneralParameters(Device):
     USAXS = Component(Parameters_USAXS)
     SBUSAXS = Component(Parameters_SBUSAXS)
     SAXS = Component(Parameters_SAXS)
+    SAXS_WAXS = Component(Parameters_SAXS_WAXS)
     WAXS = Component(Parameters_WAXS)
     Radiography = Component(Parameters_Radiography)
     Imaging = Component(Parameters_Imaging)
