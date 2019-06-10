@@ -13,7 +13,7 @@ FUNCTIONS
 
 DEVICES
 
-    DCMFeedback()
+    DCM_Feedback()
     ApsPssShutterWithStatus()
     BLEPS_Parameters()
     DiagnosticsParameters()
@@ -108,18 +108,21 @@ class DCM_Feedback(Device):
     def is_on(self):
         return self.on.value == 1
 
+    @APS_plans.run_in_thread
+    def _send_emails(self, subject, message):
+        email_notices.send(subject, message)
+
     def check_position(self):
         diff_hi = self.drvh.value - self.oval.value
         diff_lo = self.oval.value - self.drvl.value
         if min(diff_hi, diff_lo) < 0.2:
+            subject = "USAXS Feedback problem"
+            message = "Feedback is very close to its limits."
             if email_notices.notify_on_feedback:
-                subject = "USAXS Feedback problem"
-                message = "Feedback is very close to its limits."
-                # TODO: must call in thread
-                #email_notices.send(subject, message)
-                print("!"*15)
-                print(subject, message)
-                print("!"*15)
+                self._send_emails(subject, message)
+            print("!"*15)
+            print(subject, message)
+            print("!"*15)
 
 
 class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
