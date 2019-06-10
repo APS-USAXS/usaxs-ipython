@@ -3,6 +3,8 @@ print(__file__)
 """
 Set up custom or complex devices
 
+NOTE: avoid using any PV more than once!
+
 FUNCTIONS
 
     addDeviceDataAsStream()
@@ -13,6 +15,9 @@ DEVICES
 
     DCMFeedback()
     ApsPssShutterWithStatus()
+    BLEPS_Parameters()
+    DiagnosticsParameters()
+    FEEPS_Parameters()
     FlyScanParameters()
     GeneralParameters()
     GeneralParametersCCD()
@@ -230,15 +235,33 @@ class PSS_Parameters(Device):
 
     @property
     def c_station_enabled(self):
-        """look at the switches: are we allowed to operate?"""
+        """
+        look at the switches: are we allowed to operate?
+    
+        The PSS has a beam plug just before the C station
+        
+        :Plug in place:
+          Cannot use beam in 9-ID-C.
+          Should not use FE or mono shutters, monochromator, ti_filter_shutter...
+    
+        :Plug removed:
+          Operations in 9-ID-C are allowed
+        """
         enabled = self.c_shutter_closed_chain_A.value == "OFF" or \
            self.c_shutter_closed_chain_A.value == "OFF"
         return enabled
 
 
+class BLEPS_Parameters(Device):
+    """Beam Line Equipment Protection System"""
+    # TODO: BLEPS main "OK" value 
+
+
+class FEEPS_Parameters(Device):
+    """Front End Equipment Protection System"""
+
 
 # these are the global settings PVs for various parts of the instrument
-# NOTE: avoid using any PV more than once!
 
 
 class FlyScanParameters(Device):
@@ -483,6 +506,16 @@ class GeneralParameters(Device):
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
+
+
+class DiagnosticsParameters(Device):
+    """for beam line diagnostics and post-mortem analyses"""
+    # TODO: 9idcLAX:blCalc:userCalc1 "BeamInHutch". 
+    # see https://github.com/APS-USAXS/ipython-usaxs/issues/150#issuecomment-499547981
+
+    PSS = Component(PSS_Parameters)
+    BL_EPS = Component(BLEPS_Parameters)
+    FE_EPS = Component(FEEPS_Parameters)
 
 
 class Linkam_CI94(APS_devices.ProcessController):
