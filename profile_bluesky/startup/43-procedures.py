@@ -475,10 +475,10 @@ def measure_SAXS_Transmission(md={}):
     
     yield from insertScanFilters()
     yield from bps.mv(
-        terms.SAXS.diode_transmission, s["TR diode"]["value"],
-        terms.SAXS.diode_gain, trd_controls.femto.gain.value,
-        terms.SAXS.I0_transmission, s["I0_USAXS"]["value"],
-        terms.SAXS.I0_gain, I0_controls.femto.gain.value,
+        terms.SAXS_WAXS.diode_transmission, s["TR diode"]["value"],
+        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.value,
+        terms.SAXS_WAXS.I0_transmission, s["I0_USAXS"]["value"],
+        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.value,
     )
     msg = "Measured SAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
         terms.USAXS.transmission.diode_counts.value, 

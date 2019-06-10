@@ -854,7 +854,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler1.display_rate, 60,
 
         scaler0.delay, 0,
-        terms.SAXS.start_exposure_time, ts,
+        terms.SAXS_WAXS.start_exposure_time, ts,
         user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
         user_data.spec_scan, str(SCAN_N),
     )
@@ -879,16 +879,16 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
-        terms.SAXS.I0, scaler1.channels.chan02.s.value,
+        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.value,
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
-        terms.SAXS.end_exposure_time, ts,
+        terms.SAXS_WAXS.end_exposure_time, ts,
         scaler0.delay, old_delay,
 
         user_data.state, "Done SAXS",
         user_data.time_stamp, ts,
     )
-    logger.info(f"I0 value: {terms.SAXS.I0.value}")
+    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
 
 
 def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
@@ -1028,18 +1028,18 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.count, 0,
         scaler1.count, 0,
         # WAXS uses same PVs for normalization and transmission as SAXS, should we aliased it same to terms.WAXS???
-        terms.SAXS.I0, scaler1.channels.chan02.s.value,
-        terms.SAXS.diode_transmission, scaler0.channels.chan04.s.value,
-        terms.SAXS.diode_gain, trd_controls.femto.gain.value,
-        terms.SAXS.I0_transmission, scaler0.channels.chan02.s.value,
-        terms.SAXS.I0_gain, I0_controls.femto.gain.value,
+        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.value,
+        terms.SAXS_WAXS.diode_transmission, scaler0.channels.chan04.s.value,
+        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.value,
+        terms.SAXS_WAXS.I0_transmission, scaler0.channels.chan02.s.value,
+        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.value,
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
-        terms.SAXS.end_exposure_time, ts,
+        terms.SAXS_WAXS.end_exposure_time, ts,
         scaler0.delay, old_delay,
 
         user_data.state, "Done WAXS",
         user_data.time_stamp, ts,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
-    logger.info(f"I0 value: {terms.SAXS.I0.value}")
+    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
