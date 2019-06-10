@@ -37,7 +37,7 @@ try:
     saxs_det = MyPilatusDetector(prefix, name="saxs_det")
     saxs_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
-    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    msg = f"Timeout connecting with {nm} ({prefix})"
     print(msg)
 
 try:
@@ -46,5 +46,5 @@ try:
     waxs_det = MyPilatusDetector(prefix, name="waxs_det")
     waxs_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
-    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    msg = f"Timeout connecting with {nm} ({prefix})"
     print(msg)

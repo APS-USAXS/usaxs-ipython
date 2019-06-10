@@ -122,7 +122,7 @@ def mode_USAXS():
 
     if not confirm_instrument_mode("USAXS in beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info(f"Found UsaxsSaxsMode = {mode_now}")
         logger.info("Moving to proper USAXS mode")
         yield from move_WAXSOut()
         yield from move_SAXSOut()
@@ -174,7 +174,7 @@ def mode_SAXS():
 
     if not confirm_instrument_mode("SAXS in beam"):
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info(f"Found UsaxsSaxsMode = {mode_now}")
         logger.info("Moving to proper SAXS mode")
         yield from move_WAXSOut()
         yield from move_USAXSOut()
@@ -203,7 +203,7 @@ def mode_WAXS():
         logger.debug("WAXS is in beam")
     else:
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        logger.info("Found UsaxsSaxsMode = {}".format(mode_now))
+        logger.info(f"Found UsaxsSaxsMode = {mode_now}")
         logger.info("Moving to proper WAXS mode")
         yield from move_SAXSOut()
         yield from move_USAXSOut()

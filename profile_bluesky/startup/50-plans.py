@@ -102,11 +102,11 @@ def preUSAXStune(md={}):
             # to complete processing and report back to us.
             yield from bps.sleep(1)
         else:
-            print("!!! tune failed for axis {} !!!".format(axis.name))
+            print("!!! tune failed for axis {axis.name} !!!")
             break
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
-    print("USAXS count time: {} second(s)".format(terms.USAXS.usaxs_time.value))
+    print("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
     yield from bps.mv(
         scaler0.preset_time,        terms.USAXS.usaxs_time.value,
         user_data.time_stamp,       str(datetime.datetime.now()),

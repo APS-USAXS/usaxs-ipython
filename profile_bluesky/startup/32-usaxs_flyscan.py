@@ -85,34 +85,33 @@ class UsaxsFlyScanDevice(Device):
             logger.debug(msg)
             user_data.set_state_blocking(msg.split()[0])
             if t > timeout:
-                logger.error("{time.time()-self.t0}s - progress_reporting timeout!!")
+                logger.error(f"{time.time()-self.t0}s - progress_reporting timeout!!")
             else:
-                logger.debug("{time.time()-self.t0}s - progress_reporting is done")
+                logger.debug(f"{time.time()-self.t0}s - progress_reporting is done")
 
         @APS_plans.run_in_thread
         def prepare_HDF5_file():
             fname = os.path.abspath(self.saveFlyData_HDF5_dir)
             if not os.path.exists(fname):
-                msg = "Must save fly scan data to an existing directory."
-                msg += "  Gave {fname}"
+                msg = f"Must save fly scan data to an existing directory.  Gave {fname}"
                 fname = os.path.abspath(self.fallback_dir)
-                msg += "  Using fallback directory {self.fallback_dir}"
+                msg += f"  Using fallback directory {self.fallback_dir}"
                 logger.error(msg)
 
             s = self.saveFlyData_HDF5_file
             _s_ = os.path.join(fname, s)      # for testing here
             if os.path.exists(_s_):
-                msg = "File {_s_} exists.  Will not overwrite."
+                msg = f"File {_s_} exists.  Will not overwrite."
                 s = datetime.datetime.isoformat(datetime.datetime.now(), sep="_").split(".")[0]
                 s = s.replace(":", "").replace("-", "")
                 s = "flyscan_" + s + ".h5"
                 _s_ = os.path.join(fname, s)
-                msg += "  Using fallback file name {_s_}"
+                msg += f"  Using fallback file name {_s_}"
                 logger.error(msg)
             fname = os.path.join(fname, s)
 
-            print("HDF5 config: {self.saveFlyData_config}")
-            print("HDF5 output: {fname}")
+            print(f"HDF5 config: {self.saveFlyData_config}")
+            print(f"HDF5 output: {fname}")
             self._output_HDF5_file_ = fname
             user_data.set_state_blocking("FlyScanning: " + os.path.split(fname)[-1])
 
@@ -127,7 +126,7 @@ class UsaxsFlyScanDevice(Device):
                 raise RuntimeError("Must first call prepare_HDF5_file()")
             self.saveFlyData.saveFile()
 
-            print("HDF5 output complete: {self._output_HDF5_file_}")
+            print(f"HDF5 output complete: {self._output_HDF5_file_}")
             self.saveFlyData = None
 
         ######################################################################

@@ -57,12 +57,10 @@ class PlcProtectionDevice(Device):
                 user_data.collection_in_progress, 0,     # notify the GUI and others
             )
             if self.suspender is not None:
-                msg +="\n P.S. Can resume Bluesky scan: {}\n".format(
-                    suspender.allow_resume)
+                msg += f"\n P.S. Can resume Bluesky scan: {suspender.allow_resume}\n"
 
             # send email to staff ASAP!!!
-            msg +="\n P.S. Can resume Bluesky scan: {}\n".format(
-                suspend_plc_protect.allow_resume)
+            msg += f"\n P.S. Can resume Bluesky scan: {suspend_plc_protect.allow_resume}\n"
             self._tripped_message = msg
             email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
     
@@ -72,8 +70,7 @@ class PlcProtectionDevice(Device):
         else:
             msg = self.tripped_text
             if self.suspender is not None:
-                msg +="\n P.S. Can resume Bluesky scan: {}\n".format(
-                    self.suspender.allow_resume)
+                msg += f"\n P.S. Can resume Bluesky scan: {self.suspender.allow_resume}\n"
             ti_filter_shutter.close()
             user_data.collection_in_progress.put(0)     # notify the GUI and others
         return msg
@@ -107,12 +104,11 @@ class PlcProtectSuspendWhenChanged(APS_suspenders.SuspendWhenChanged):
             return ''
 
         self._tripped_message = None
-        just = 'Signal {}, got "{}", expected "{}"'.format(
-            self._sig.name,
-            self._sig.get(),
-            self.expected_value)
+        just = f'Signal {self._sig.name},'
+        just += f' got "{self._sig.get()}",'
+        just += f' expected "{self.expected_value}"'
         if not self.allow_resume:
-            just += self.justification_text
+            just += "  " + self.justification_text
             self._tripped_message = plc_protect.stop_in_suspender()
 
         return '\n----\n'.join(

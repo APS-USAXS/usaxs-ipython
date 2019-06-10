@@ -10,11 +10,7 @@ DATABROKER_ROOT_PATH = "/"
 
 def _validate_AD_HDF5_path_(path, root_path):
     if not path.startswith(root_path):
-        msg = "error in file {}:\n  path '{}' must start with '{}".format(
-            __file__,
-            path,
-            root_path
-        )
+        msg = f"error in file {__file__}:\n  path '{path}' must start with '{root_path}"
         raise ValueError(msg)
 
 

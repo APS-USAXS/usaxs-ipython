@@ -142,7 +142,7 @@ def _gains_subgroup_(cls, nm, gains, **kwargs):
     """internal: used in AmplifierAutoDevice"""
     defn = OrderedDict()
     for i in gains:
-        key = '{}{}'.format(nm, i)
+        key = f'{nm}{i}'
         defn[key] = (cls, '', dict(ch_num=i))
 
     return defn
@@ -349,7 +349,7 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
                     value = s.s.value     # ScalerCH channels
                 readings[pvname].append(value)
     
-        s_range_name = "gain{}".format(n)
+        s_range_name = f"gain{n}"
         for control in control_list:
             g = control.auto.ranges.__getattr__(s_range_name)
             pvname = getScalerChannelPvname(control.signal)
@@ -357,12 +357,12 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
                 g.background, np.mean(readings[pvname]),
                 g.background_error, np.std(readings[pvname]),
             )
-            msg = "{} range={} gain={}  bkg={}  +/- {}".format(
-                control.nickname, 
-                n,
-                _gain_to_str_(control.auto.gain.value), 
-                g.background.value, 
-                g.background_error.value)
+            msg = f"{control.nickname}"
+            msg += f" range={n}"
+            msg += f" gain={ _gain_to_str_(control.auto.gain.value)}"
+            msg += f" bkg={g.background.value}"
+            msg += f" +/- {g.background_error.value)}" 
+                
             logger.info(msg)
             print(msg)
 
@@ -450,7 +450,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             elif isinstance(control.signal, EpicsSignalRO):
                 actual_rate = control.signal.value
             else:
-                raise ValueError("unexpected control.signal: {}".format(control.signal))
+                raise ValueError(f"unexpected control.signal: {control.signal}")
             converged.append(actual_rate <= max_rate)
         
         if False not in converged:      # all True?
@@ -458,7 +458,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             for control in controls:
                 yield from bps.mv(control.auto.mode, "manual")
             break   # no changes
-        logger.debug("converged: {}".format(converged))
+        logger.debug(f"converged: {converged}")
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions

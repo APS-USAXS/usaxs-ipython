@@ -18,5 +18,5 @@ try:
     prefix = area_detector_EPICS_PV_prefix[nm]
     blackfly_det = MyPointGreyDetector(prefix, name="blackfly_det")
 except TimeoutError as exc_obj:
-    msg = "Timeout connecting with {} ({})".format(nm, prefix)
+    msg = f"Timeout connecting with {nm} ({prefix})"
     print(msg)
