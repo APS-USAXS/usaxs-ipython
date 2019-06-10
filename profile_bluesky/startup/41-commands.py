@@ -1,6 +1,25 @@
 print(__file__)
 
-"""USAXS commands"""
+"""
+USAXS commands
+
+FUNCTIONS
+
+    angle2q()
+    beforeScanComputeOtherStuff()
+    cleanupText()
+    confirmUsaxsSaxsOutOfBeam()
+    IfRequestedStopBeforeNextScan()
+    move_SAXSIn()
+    move_SAXSOut()
+    move_USAXSIn()
+    move_USAXSOut()
+    move_WAXSIn()
+    move_WAXSOut()
+    q2angle()
+    set_USAXS_slits()
+
+"""
 
 ### This file is work-in-progress
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac

@@ -1,6 +1,32 @@
 print(__file__)
 
-# Bluesky plans (scans)
+"""
+Bluesky plans (scans)
+
+PLANS
+
+    afterPlan()
+    beforePlan()
+    execute_command_list()
+    FlyScan()
+    preUSAXStune()
+    run_command_file()
+    SAXS()
+    WAXS()
+    uascan()
+
+UTILITIES
+
+    command_list_as_table()
+    get_command_list()
+    makeOrderedDictFromTwoLists()
+    parse_Excel_command_file()
+    parse_text_command_file()
+    postCommandsListfile2WWW()
+    split_quoted_line()
+    summarize_command_file()
+
+"""
 
 
 def uascan():

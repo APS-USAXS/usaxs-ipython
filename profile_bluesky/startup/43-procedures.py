@@ -3,7 +3,31 @@ print(__file__)
 """
 USAXS mode change procedures
 
-see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
+FUNCTIONS
+
+    areaDetectorAcquire()
+    confirm_instrument_mode()
+    DCMfeedbackON()
+    insertRadiographyFilters()
+    insertSaxsFilters()
+    insertScanFilters()
+    insertTransmissionFilters()
+    insertWaxsFilters()
+    measure_SAXS_Transmission()
+    measure_USAXS_Transmission()
+    mode_imaging()
+    mode_OpenBeamPath()
+    mode_Radiography()
+    mode_SAXS()
+    mode_SBUAXS()
+    mode_USAXS()
+    mode_WAXS()
+    remaining_time_reporter()
+
+INTERNAL
+
+    _insertFilters_()
+
 """
 
 
