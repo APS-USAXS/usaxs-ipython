@@ -1,6 +1,43 @@
 print(__file__)
 
-"""Set up custom or complex devices"""
+"""
+Set up custom or complex devices
+
+FUNCTIONS
+
+    addDeviceDataAsStream()
+    device_read2table()
+    trim_string_for_EPICS()
+
+DEVICES
+
+    DCMFeedback()
+    ApsPssShutterWithStatus()
+    FlyScanParameters()
+    GeneralParameters()
+    GeneralParametersCCD()
+    GeneralUsaxsParametersCenters()
+    GeneralUsaxsParametersDiode()
+    Linkam_CI94()
+    Linkam_T96()
+    Parameters_Al_Ti_Filters()
+    Parameters_Al_Ti_Filters_Imaging()
+    Parameters_Imaging()
+    Parameters_OutOfBeam()
+    Parameters_Transmission()
+    Parameters_Radiography()
+    Parameters_SAXS()
+    Parameters_SBUSAXS()
+    Parameters_USAXS()
+    Parameters_WAXS()
+    PreUsaxsTuneParameters()
+    PSS_Parameters()
+    UsaxsMotor()
+    UsaxsMotorTunable()
+    UserDataDevice()
+    xxSimulatedApsPssShutterWithStatus()
+
+"""
 
 
 # simple enumeration used by DCM_Feedback()
