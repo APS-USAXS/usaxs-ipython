@@ -882,7 +882,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         terms.SAXS.I0, scaler1.channels.chan02.s.value,
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
-        terms.SAXS.end_exposure_time, ts,
+        terms.SAXS_WAXS.end_exposure_time, ts,
         scaler0.delay, old_delay,
 
         user_data.state, "Done SAXS",
