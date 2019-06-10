@@ -236,7 +236,7 @@ class PSS_Parameters(Device):
     b_beam_ready = Component(EpicsSignalRO, "PA:09ID:B_BEAM_READY.VAL", string=True)
     a_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_A_FES_OPEN_PL", string=True)
     b_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_B_FES_OPEN_PL", string=True)
-    a_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_A_SBS_CLSD_PL", string=True)
+    # does not connect: a_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_A_SBS_CLSD_PL", string=True)
     b_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_B_SBS_CLSD_PL", string=True)
     c_shutter_closed_chain_A = Component(EpicsSignalRO, "PA:09ID:SCS_PS_CLSD_LS", string=True)
     c_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:SCS_PS_CLSD_LS", string=True)
