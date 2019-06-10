@@ -13,6 +13,8 @@ undulator = APS_devices.ApsUndulatorDual("ID09", name="undulator")
 sd.baseline.append(undulator)
 
 diagnostics = DiagnosticsParameters(name="diagnostics")
+sd.baseline.append(diagnostics)
+
 
 def operations_in_9idc():
     """
