@@ -259,7 +259,6 @@ class PSS_Parameters(Device):
 
 class BLEPS_Parameters(Device):
     """Beam Line Equipment Protection System"""
-    # TODO: BLEPS main "OK" value 
     red_light = Component(EpicsSignalRO, "9idBLEPS:RED_LIGHT", string=True)
     station_shutter_b = Component(EpicsSignalRO, "9idBLEPS:SBS_CLOSED", string=True)
     flow_1 = Component(EpicsSignal, "9idBLEPS:FLOW1_CURRENT", write_pv="9idBLEPS:FLOW1_SET_POINT", string=True)
