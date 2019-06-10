@@ -475,24 +475,27 @@ class Parameters_SAXS(Device):
 
     filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:SAXS:Exp_")
 
-    diode_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPD")
-    I0_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0")
-    diode_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPDgain")
-    I0_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0gain")
-
     base_dir = Component(EpicsSignal, "9idcLAX:SAXS:directory", string=True)
 
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:SAXS:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:SAXS:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:SAXS:AcquireTime")
+
+
+class Parameters_SAXS_WAXS(Device): 
+    """
+    terms used by both SAXS & WAXS
+    """
     start_exposure_time = Component(EpicsSignal, "9idcLAX:SAXS:StartExposureTime")
     end_exposure_time = Component(EpicsSignal, "9idcLAX:SAXS:EndExposureTime")
 
+    diode_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPDgain")
+    diode_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrPD")
+    I0_gain = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0gain")
+    I0_transmission = Component(EpicsSignal, "9idcLAX:SAXS:SAXS_TrI0")
+
     # this is Io value from gates scalar in LAX for Nexus file
     I0 = Component(EpicsSignal, "9idcLAX:SAXS:I0")
-
-
-class Parameters_SAXS_WAXS(Device): ...
 
 
 class Parameters_WAXS(Device):
