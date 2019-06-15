@@ -42,5 +42,5 @@ try:
     alta_det = MyAltaDetector(prefix, name="alta_det")
     alta_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
-    msg = f"Timeout connecting with {}nm ({prefix})"
+    msg = f"Timeout connecting with {nm} ({prefix})"
     print(msg)

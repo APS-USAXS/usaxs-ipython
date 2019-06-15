@@ -361,7 +361,7 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             msg += f" range={n}"
             msg += f" gain={ _gain_to_str_(control.auto.gain.value)}"
             msg += f" bkg={g.background.value}"
-            msg += f" +/- {g.background_error.value)}" 
+            msg += f" +/- {g.background_error.value}" 
                 
             logger.info(msg)
             print(msg)
