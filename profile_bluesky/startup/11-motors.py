@@ -72,10 +72,10 @@ class GSlitDevice(MotorBundle):
     
     gap_tolerance = 0.02        # actual must be this close to desired
     scale_factor = 1.2    # 1.2x the size of the beam should be good guess for guard slits.
-    h_step_in = 0.2       # 0.2mm step out the beam
-    v_step_in = 0.1       # 0.1mm step out the beam
-    h_step_out = 1.1      # 1.1mm step over of beam
-    v_step_out = 0.4      # 0.4mm step over of beam
+    h_step_away = 0.2     # 0.2mm step away from beam
+    v_step_away = 0.1     # 0.1mm step away from beam
+    h_step_into = 1.1     # 1.1mm step into the beam (blocks the beam)
+    v_step_into = 0.4     # 0.4mm step into the beam (blocks the beam)
     tuning_intensity_threshold = 500
     
     def set_size(self, *args, h=None, v=None):

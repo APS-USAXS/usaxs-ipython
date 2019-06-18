@@ -188,7 +188,7 @@ def _USAXS_tune_guardSlits():
     original_position = dict(
         top = guard_slit.top.position,
         bot = guard_slit.bot.position,
-        out = guard_slit.out.position,
+        out = guard_slit.outb.position,
         inb = guard_slit.inb.position,
         )
     table = pyRestTable.Table()
@@ -202,10 +202,14 @@ def _USAXS_tune_guardSlits():
 
     # Now move all guard slit motors back a bit
     yield from bps.mv(
-        guard_slit.top, original_position["top"] + guard_slit.v_step_out,
-        guard_slit.bot, original_position["bot"] - guard_slit.v_step_out,
-        guard_slit.out, original_position["out"] + guard_slit.h_step_out,
-        guard_slit.inb, original_position["inb"] - guard_slit.h_step_out,
+        guard_slit.top, original_position["top"] + guard_slit.v_step_into,
+        guard_slit.bot, original_position["bot"] - guard_slit.v_step_into,
+        )
+    # do in two steps
+    # -- we locked up all four motor records when we did it all at the same time
+    yield from bps.mv(
+        guard_slit.outb, original_position["out"] + guard_slit.h_step_into,
+        guard_slit.inb, original_position["inb"] - guard_slit.h_step_into,
         )
     
     yield from bps.mv(user_data.state, "autoranging the PD")
@@ -217,7 +221,7 @@ def _USAXS_tune_guardSlits():
         yield from bps.mv(
             guard_slit.top, original_position["top"],
             guard_slit.bot, original_position["bot"],
-            guard_slit.out, original_position["out"],
+            guard_slit.outb, original_position["out"],
             guard_slit.inb, original_position["inb"],
             )
         raise GuardSlitTuneError(msg)
@@ -281,8 +285,8 @@ def _USAXS_tune_guardSlits():
     print("*** 1. tune top guard slits")
     yield from tune_blade_edge(
         guard_slit.top, 
-        original_position["top"] + guard_slit.v_step_in, 
-        original_position["top"] - guard_slit.v_step_out, 
+        original_position["top"] + guard_slit.v_step_away, 
+        original_position["top"] - guard_slit.v_step_into, 
         60, 
         0.25, 
         tunes["top"])
@@ -290,17 +294,17 @@ def _USAXS_tune_guardSlits():
     print("*** 2. tune bottom guard slits")
     yield from tune_blade_edge(
         guard_slit.bot, 
-        original_position["bot"] - guard_slit.v_step_in, 
-        original_position["bot"] + guard_slit.v_step_out, 
+        original_position["bot"] - guard_slit.v_step_away, 
+        original_position["bot"] + guard_slit.v_step_into, 
         60, 
         0.25, 
         tunes["bot"])
 
     print("*** 3. tune outboard guard slits")
     yield from tune_blade_edge(
-        guard_slit.out, 
-        original_position["out"] + guard_slit.h_step_in, 
-        original_position["out"] - guard_slit.h_step_out, 
+        guard_slit.outb, 
+        original_position["out"] + guard_slit.h_step_away, 
+        original_position["out"] - guard_slit.h_step_into, 
         60, 
         0.25, 
         tunes["out"])
@@ -308,8 +312,8 @@ def _USAXS_tune_guardSlits():
     print("*** 4. tune inboard guard slits")
     yield from tune_blade_edge(
         guard_slit.inb, 
-        original_position["inb"] - guard_slit.h_step_in, 
-        original_position["inb"] + guard_slit.h_step_out, 
+        original_position["inb"] - guard_slit.h_step_away, 
+        original_position["inb"] + guard_slit.h_step_into, 
         60, 
         0.25, 
         tunes["inb"])
@@ -318,7 +322,7 @@ def _USAXS_tune_guardSlits():
     yield from bps.mv(
         guard_slit.top, tunes["top"]["position"],
         guard_slit.bot, tunes["bot"]["position"],
-        guard_slit.out, tunes["out"]["position"],
+        guard_slit.outb, tunes["out"]["position"],
         guard_slit.inb, tunes["inb"]["position"],
         )
     
@@ -331,7 +335,7 @@ def _USAXS_tune_guardSlits():
 
     yield from redefine(guard_slit.top, 0)
     yield from redefine(guard_slit.bot, 0)
-    yield from redefine(guard_slit.out, 0)
+    yield from redefine(guard_slit.outb, 0)
     yield from redefine(guard_slit.inb, 0)
 
     # center of the slits is set to 0
@@ -342,7 +346,7 @@ def _USAXS_tune_guardSlits():
     yield from bps.mv(
         guard_slit.top, v,
         guard_slit.bot, -v,
-        guard_slit.out, h,
+        guard_slit.outb, h,
         guard_slit.inb, -h,
         )
 
@@ -377,11 +381,11 @@ def tune_GslitsSize():
     yield from _USAXS_tune_guardSlits()
     yield from bps.mv(
         ti_filter_shutter, "close",
-        terms.SAXS.guard_h_size, tune_Gslits.h_size.value,
-        terms.SAXS.guard_v_size, tune_Gslits.v_size.value,
+        terms.SAXS.guard_h_size, guard_slit.h_size.value,
+        terms.SAXS.guard_v_size, guard_slit.v_size.value,
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
-    printf(f"Set V Slit={tune_Gslits.v_size.value} and H SLit={tune_Gslits.h_size.value}")
+    print(f"Guard slit now: V={guard_slit.v_size.value} and H={guard_slit.h_size.value}")
 
 
 def tune_Gslits():
