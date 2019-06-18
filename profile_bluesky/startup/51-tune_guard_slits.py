@@ -37,7 +37,7 @@ def numerical_derivative(x, y):
     y2 = np.array(y[1:])
     # let numpy do this work with arrays
     xp = (x2+x1)/2              # midpoint
-    yp = (y2-y1) * (x2-x1)      # slope
+    yp = (y2-y1) / (x2-x1)      # slope
     return xp, yp
 
 
@@ -258,8 +258,9 @@ def _USAXS_tune_guardSlits():
         width *= guard_slit.scale_factor   # expand a bit
 
         # Check if movement was from unblocked to blocked
-        if tuner.peaks.y_data[0] > tuner.peaks.y_data[-1]:
-            width *= -1     # flip the sign
+        # not necessary and makes this code fail
+        # if tuner.peaks.y_data[0] > tuner.peaks.y_data[-1]:
+        #     width *= -1     # flip the sign
         
         if position < min(start, end):
             msg = f"{axis.name}: Computed tune position {position} < {min(start, end)}."
@@ -355,6 +356,7 @@ def _USAXS_tune_guardSlits():
         guard_slit.h_sync_proc, 1,
         guard_slit.v_sync_proc, 1,
         )
+    yield from guard_slit.status_update()
 
 
 def tune_GslitsSize():
@@ -366,8 +368,8 @@ def tune_GslitsSize():
     yield from IfRequestedStopBeforeNextScan()
     yield from mode_USAXS()
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.value,
+        usaxs_slit.h_size, terms.SAXS.h_size.value,
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
     yield from bps.mv(
