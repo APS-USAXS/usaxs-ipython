@@ -3,7 +3,6 @@ print(__file__)
 """
 tune the guard slits
 
-
 public
 
     tune_Gslits()
@@ -77,6 +76,8 @@ def peak_center(x, y, use_area=False):
 def tune_GslitsCenter():
     """
     plan: optimize the guard slits' position
+    
+    tune to the peak centers
     """
     yield from IfRequestedStopBeforeNextScan()
     title = "tuning USAXS Gslit center"
@@ -115,9 +116,12 @@ def tune_GslitsCenter():
         x_c = motor.position
         x_0 = x_c - abs(width)/2
         x_n = x_c + abs(width)/2
+        
+        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.channels.chan01.kind = Kind.config
 
-        tuner = APS_plans.TuneAxis([scaler0], motor)
-        yield from tuner.tune(width=width, num=steps+1)
+        tuner = APS_plans.TuneAxis([scaler0], motor, signal_name=UPD_SIGNAL.chname.value)
+        yield from tuner.tune(width=-width, num=steps+1)
 
         bluesky_runengine_running = RE.state != "idle"
         
@@ -137,6 +141,7 @@ def tune_GslitsCenter():
 
             def cleanup_then_GuardSlitTuneError(msg):
                 print(f"{motor.name}: move to {x_c} (initial position)")
+                scaler0.select_channels(None)
                 yield from bps.mv(
                     motor, x_c,
                     scaler0.preset_time, old_preset_time,
@@ -229,7 +234,11 @@ def _USAXS_tune_guardSlits():
             axis, (start + end)/2,
             )
         scan_width = end - start
-        tuner = APS_plans.TuneAxis([scaler0], axis)
+
+        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.channels.chan01.kind = Kind.config
+
+        tuner = APS_plans.TuneAxis([scaler0], axis, signal_name=UPD_SIGNAL.chname.value)
         yield from tuner.tune(width=scan_width, num=steps+1)
         
         diff = abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1])
@@ -347,6 +356,8 @@ def _USAXS_tune_guardSlits():
 def tune_GslitsSize():
     """
     plan: optimize the guard slits' gap
+    
+    tune to the slit edges (peak of the derivative of diode vs. position)
     """
     yield from IfRequestedStopBeforeNextScan()
     yield from mode_USAXS()
