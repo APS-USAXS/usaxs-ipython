@@ -189,7 +189,8 @@ class xxSimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithS
 
 class UsaxsMotor(EpicsMotorLimitsMixin, EpicsMotor): pass
 
-class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor): pass
+class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor):
+    width = Component(Signal, value=0)
 
 
 # TODO: override for https://github.com/BCDA-APS/apstools/issues/124
