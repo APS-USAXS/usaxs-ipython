@@ -3,7 +3,6 @@ print(__file__)
 """
 tune the guard slits
 
-
 public
 
     tune_Gslits()
@@ -115,6 +114,9 @@ def tune_GslitsCenter():
         x_c = motor.position
         x_0 = x_c - abs(width)/2
         x_n = x_c + abs(width)/2
+        
+        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.channels.chan01.kind = Kind.config
 
         tuner = APS_plans.TuneAxis([scaler0], motor)
         yield from tuner.tune(width=-width, num=steps+1)
@@ -137,6 +139,7 @@ def tune_GslitsCenter():
 
             def cleanup_then_GuardSlitTuneError(msg):
                 print(f"{motor.name}: move to {x_c} (initial position)")
+                scaler0.select_channels(None)
                 yield from bps.mv(
                     motor, x_c,
                     scaler0.preset_time, old_preset_time,
