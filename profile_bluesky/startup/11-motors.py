@@ -51,16 +51,20 @@ class UsaxsSlitDevice(MotorBundle):
         move_motors(self.h_size, h, self.v_size, v)
 
 
+class GuardSlitMotor(UsaxsMotor):
+    status_update = Component(EpicsSignal, ".STUP")
+
+
 class GSlitDevice(MotorBundle):
     """
     guard slit
 
     * aperture: (h_size, v_size)
     """
-    bot  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
-    inb  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
-    outb = Component(UsaxsMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
-    top  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
+    bot  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
+    inb  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
+    outb = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
+    top  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
     x    = Component(UsaxsMotor, '9idcLAX:m58:c1:m5', labels=("gslit",))
     y    = Component(UsaxsMotor, '9idcLAX:m58:c0:m6', labels=("gslit",))
 
@@ -99,6 +103,18 @@ class GSlitDevice(MotorBundle):
     @property
     def gap_ok(self):
         return self.h_gap_ok and self.v_h_gap_ok
+    
+    def status_update(self):
+        # TODO: Did this code cause the following exception?
+        #  RuntimeError: Another set() call is still in progress
+        yield from bps.abs_set(self.top.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.bot.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.outb.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.inb.status_update, 1)
+        yield from bps.sleep(0.05)
     
 
 class UsaxsCollimatorStageDevice(MotorBundle):
