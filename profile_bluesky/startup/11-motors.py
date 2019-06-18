@@ -51,23 +51,36 @@ class UsaxsSlitDevice(MotorBundle):
         move_motors(self.h_size, h, self.v_size, v)
 
 
+class GuardSlitMotor(UsaxsMotor):
+    status_update = Component(EpicsSignal, ".STUP")
+
+
 class GSlitDevice(MotorBundle):
     """
     guard slit
 
     * aperture: (h_size, v_size)
     """
-    bot  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
-    inb  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
-    outb = Component(UsaxsMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
-    top  = Component(UsaxsMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
+    bot  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
+    inb  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
+    outb = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
+    top  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
     x    = Component(UsaxsMotor, '9idcLAX:m58:c1:m5', labels=("gslit",))
     y    = Component(UsaxsMotor, '9idcLAX:m58:c0:m6', labels=("gslit",))
 
     h_size = Component(EpicsSignal, '9idcLAX:GSlit1H:size')
     v_size = Component(EpicsSignal, '9idcLAX:GSlit1V:size')
+
+    h_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1H:sync.PROC')
+    v_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1V:sync.PROC')
     
     gap_tolerance = 0.02        # actual must be this close to desired
+    scale_factor = 1.2    # 1.2x the size of the beam should be good guess for guard slits.
+    h_step_away = 0.2     # 0.2mm step away from beam
+    v_step_away = 0.1     # 0.1mm step away from beam
+    h_step_into = 1.1     # 1.1mm step into the beam (blocks the beam)
+    v_step_into = 0.4     # 0.4mm step into the beam (blocks the beam)
+    tuning_intensity_threshold = 500
     
     def set_size(self, *args, h=None, v=None):
         """move the slits to the specified size"""
@@ -90,6 +103,18 @@ class GSlitDevice(MotorBundle):
     @property
     def gap_ok(self):
         return self.h_gap_ok and self.v_h_gap_ok
+    
+    def status_update(self):
+        # TODO: Did this code cause the following exception?
+        #  RuntimeError: Another set() call is still in progress
+        yield from bps.abs_set(self.top.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.bot.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.outb.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.inb.status_update, 1)
+        yield from bps.sleep(0.05)
     
 
 class UsaxsCollimatorStageDevice(MotorBundle):

@@ -542,8 +542,8 @@ def instrument_default_tune_ranges():
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000035)
 
     elif 12.99 <= monochromator.dcm.energy.value < 18.1:   # Si 220 crystals
-        m_stage.r.tuner.width = 0.003
-        a_stage.r.tuner.width = 0.0012
+        m_stage.r.tuner.width = 0.0030
+        a_stage.r.tuner.width = 0.0014
         m_stage.r2p.tuner.width = 8
         a_stage.r2p.tuner.width = 5
         ms_stage.rp.tuner.width = 3
@@ -551,18 +551,18 @@ def instrument_default_tune_ranges():
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
 
     elif 18.1 <= monochromator.dcm.energy.value < 20.8:   # Si 220 crystals
-        m_stage.r.tuner.width = 0.003
-        a_stage.r.tuner.width = 0.0010
-        m_stage.r2p.tuner.width = 6
-        a_stage.r2p.tuner.width = 5
+        m_stage.r.tuner.width = 0.0026
+        a_stage.r.tuner.width = 0.0012
+        m_stage.r2p.tuner.width = 8
+        a_stage.r2p.tuner.width = 6
         ms_stage.rp.tuner.width = 3
         as_stage.rp.tuner.width = 3
         yield from bps.mv(terms.USAXS.usaxs_minstep, 0.000025)
 
     elif 20.8 <= monochromator.dcm.energy.value:   # Si 220 crystals
-        m_stage.r.tuner.width = 0.003
+        m_stage.r.tuner.width = 0.0025
         a_stage.r.tuner.width = 0.0010
-        m_stage.r2p.tuner.width = 6
+        m_stage.r2p.tuner.width = 8
         a_stage.r2p.tuner.width = 5
         ms_stage.rp.tuner.width = 3
         as_stage.rp.tuner.width = 3
