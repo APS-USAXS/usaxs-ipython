@@ -120,7 +120,7 @@ def tune_GslitsCenter():
         scaler0.select_channels([UPD_SIGNAL.chname.value])
         scaler0.channels.chan01.kind = Kind.config
 
-        tuner = APS_plans.TuneAxis([scaler0], motor)
+        tuner = APS_plans.TuneAxis([scaler0], motor, signal_name=UPD_SIGNAL.chname.value)
         yield from tuner.tune(width=-width, num=steps+1)
 
         bluesky_runengine_running = RE.state != "idle"
@@ -238,7 +238,7 @@ def _USAXS_tune_guardSlits():
         scaler0.select_channels([UPD_SIGNAL.chname.value])
         scaler0.channels.chan01.kind = Kind.config
 
-        tuner = APS_plans.TuneAxis([scaler0], axis)
+        tuner = APS_plans.TuneAxis([scaler0], axis, signal_name=UPD_SIGNAL.chname.value)
         yield from tuner.tune(width=scan_width, num=steps+1)
         
         diff = abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1])
