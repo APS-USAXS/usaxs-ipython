@@ -76,6 +76,8 @@ def peak_center(x, y, use_area=False):
 def tune_GslitsCenter():
     """
     plan: optimize the guard slits' position
+    
+    tune to the peak centers
     """
     yield from IfRequestedStopBeforeNextScan()
     title = "tuning USAXS Gslit center"
@@ -232,6 +234,10 @@ def _USAXS_tune_guardSlits():
             axis, (start + end)/2,
             )
         scan_width = end - start
+
+        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.channels.chan01.kind = Kind.config
+
         tuner = APS_plans.TuneAxis([scaler0], axis)
         yield from tuner.tune(width=scan_width, num=steps+1)
         
@@ -350,6 +356,8 @@ def _USAXS_tune_guardSlits():
 def tune_GslitsSize():
     """
     plan: optimize the guard slits' gap
+    
+    tune to the slit edges (peak of the derivative of diode vs. position)
     """
     yield from IfRequestedStopBeforeNextScan()
     yield from mode_USAXS()
