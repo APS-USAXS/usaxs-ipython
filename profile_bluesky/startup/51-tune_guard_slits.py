@@ -117,7 +117,7 @@ def tune_GslitsCenter():
         x_n = x_c + abs(width)/2
 
         tuner = APS_plans.TuneAxis([scaler0], motor)
-        yield from tuner.tune(width=width, num=steps+1)
+        yield from tuner.tune(width=-width, num=steps+1)
 
         bluesky_runengine_running = RE.state != "idle"
         
