@@ -127,7 +127,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     bluesky_runengine_running = RE.state != "idle"
 
     yield from IfRequestedStopBeforeNextScan()
-    yield from before_plan()
 
     yield from mode_USAXS()
 
@@ -137,11 +136,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
     )
-
-    if terms.preUSAXStune.needed:
-        # tune at previous sample position
-        # don't overexpose the new sample position
-        yield from preUSAXStune(md=md)
+    yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -331,7 +326,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     # FS_disableASRP
 
     # measure_USAXS_PD_dark_currents    # used to be here, not now
-    yield from after_plan()
+    yield from after_plan(weight=3)
 
 
 def makeOrderedDictFromTwoLists(labels, values):
@@ -442,16 +437,20 @@ def before_plan(md={}):
     """
     things to be done before every data collection plan
     """
-    yield from bps.null()
+    if terms.preUSAXStune.needed:
+        # tune at previous sample position
+        # don't overexpose the new sample position
+        yield from preUSAXStune(md=md)
 
 
-def after_plan(md={}):
+
+def after_plan(weight=1, md={}):
     """
     things to be done after every data collection plan
     """
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
-        terms.preUSAXStune.num_scans_last_tune.value+1
+        terms.preUSAXStune.num_scans_last_tune.value + weight
         )
 
 
@@ -764,7 +763,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     collect SAXS data
      """
     yield from IfRequestedStopBeforeNextScan()
-    yield from before_plan()
 
     yield from mode_SAXS()
 
@@ -777,11 +775,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
         user_data.sample_thickness, thickness,
     )
-
-    if terms.preUSAXStune.needed:
-        # tune at previous sample position
-        # don't overexpose the new sample position
-        yield from tune_saxs_optics(md=md)
+    yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -919,7 +913,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     collect WAXS data
      """
     yield from IfRequestedStopBeforeNextScan()
-    yield from before_plan()
 
     yield from mode_WAXS()
 
@@ -930,11 +923,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         user_data.sample_thickness, thickness,
     )
-
-    if terms.preUSAXStune.needed:
-        # tune at previous sample position
-        # don't overexpose the new sample position
-        yield from tune_saxs_optics(md=md)
+    yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
