@@ -16,6 +16,7 @@ import time
 
 # logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(os.path.split(__file__)[-1])
+logger.setLevel(logging.DEBUG)
 
 # do not warn if the HDF5 library version has changed
 # headers are 1.8.15, library is 1.8.16
@@ -267,6 +268,7 @@ class SaveFlyScan(object):
                 value = pv_spec.pv.get()
             if value is [None]:
                 value = 'no data'
+            logger.debug("saveFile(): writing {pv_spec}")
             if not isinstance(value, numpy.ndarray):
                 value = [value]
             else:
@@ -337,6 +339,7 @@ class SaveFlyScan(object):
             v.make_link(f)
 
         f.close()    # be CERTAIN to close the file
+        logger.debug("saveFile(): file closed")
 
     def _read_configuration(self):
         global field_registry, group_registry, link_registry, pv_registry
@@ -550,7 +553,7 @@ def main():
     except TimeoutException as _exception_message:
         logger.warning("exiting because of timeout!!!!!!!")
         sys.exit(1)     # exit silently with error, 1=TIMEOUT
-    logger.info('wrote file: ' + dataFile)
+    logger.debug('wrote file: ' + dataFile)
 
 
 def developer():
