@@ -307,7 +307,7 @@ def mode_Radiography():
     TV should now show Radiography CCD image. 
     
     But before calling - are you REALLY sure the sample is not blocking the beam? 
-       Move sample out and try RE(tune_usaxs_optics()) again.
+       Move sample out and try RE(preUSAXStune()) again.
 
     If still no image on the CCD, check: 
     
@@ -317,8 +317,8 @@ def mode_Radiography():
     * Shutters opened? 
     * Sample/holder out of beam? 
     
-    - if all is OK, try running RE(tune_usaxs_optics()).
-    tune_usaxs_optics worked? Run RE(mode_Radiography()). 
+    - if all is OK, try running RE(preUSAXStune()).
+    preUSAXStune worked? Run RE(mode_Radiography()). 
     
     Still not working? Call Jan, Ivan or Matt.
     """

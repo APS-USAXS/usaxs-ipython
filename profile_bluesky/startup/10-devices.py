@@ -349,7 +349,7 @@ class PreUsaxsTuneParameters(Device):
         EXAMPLE::
         
             if terms.preUSAXStune.needed:
-                yield from tune_usaxs_optics()
+                yield from preUSAXStune()
                 # TODO: and then reset terms as approriate
         
         """
