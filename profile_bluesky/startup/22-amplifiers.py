@@ -460,8 +460,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             complete = True
             for control in controls:
                 yield from bps.mv(control.auto.mode, "manual")
-            break   # no changes
             logger.debug(f"converged: {converged}")
+            break   # no changes
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions
