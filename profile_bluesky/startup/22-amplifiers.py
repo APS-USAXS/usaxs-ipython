@@ -459,7 +459,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         if False not in converged:      # all True?
             complete = True
             for control in controls:
-                yield from bps.mv(control.auto.mode, "manual")      # TODO: or auto+background
+                yield from bps.mv(control.auto.mode, "manual")
             break   # no changes
             logger.debug(f"converged: {converged}")
 
