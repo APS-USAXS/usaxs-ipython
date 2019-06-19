@@ -470,6 +470,9 @@ def tune_diode(md={}):
 def tune_usaxs_optics(side=False, md={}):
     """
     tune all the instrument optics currently in configuration
+    
+    This plan is for staff use.
+    Users are advised to use preUSAXStune() instead.
     """
     yield from mode_USAXS()
 
