@@ -171,9 +171,12 @@ class UsaxsFlyScanDevice(Device):
         specwriter._cmt("stop", f"fly scan completed in {elapsed} s")
 
         if bluesky_runengine_running:
+            msg = f"writing fly scan HDF5 file: {self._output_HDF5_file_}"
+            print(msg)
             yield from user_data.set_state_plan("writing fly scan HDF5 file")
             finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
-            specwriter._cmt("stop", f"finished writing fly scan HDF5 file: {self._output_HDF5_file_}")
+            specwriter._cmt("stop", f"finished {msg}")
+            print(f"finished {msg}")
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0,
