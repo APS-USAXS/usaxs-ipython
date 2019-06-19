@@ -127,6 +127,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     bluesky_runengine_running = RE.state != "idle"
 
     yield from IfRequestedStopBeforeNextScan()
+    yield from before_plan()
 
     yield from mode_USAXS()
 
@@ -330,6 +331,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     # FS_disableASRP
 
     # measure_USAXS_PD_dark_currents    # used to be here, not now
+    yield from after_plan()
 
 
 def makeOrderedDictFromTwoLists(labels, values):
@@ -442,11 +444,15 @@ def before_plan(md={}):
     """
     yield from bps.null()
 
+
 def after_plan(md={}):
     """
     things to be done after every data collection plan
     """
-    yield from bps.null()
+    yield from bps.mv(      # increment it
+        terms.preUSAXStune.num_scans_last_tune,
+        terms.preUSAXStune.num_scans_last_tune.value+1
+        )
 
 
 def parse_Excel_command_file(filename):
@@ -758,6 +764,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     collect SAXS data
      """
     yield from IfRequestedStopBeforeNextScan()
+    yield from before_plan()
 
     yield from mode_SAXS()
 
@@ -904,6 +911,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.time_stamp, ts,
     )
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
+    yield from after_plan()
 
 
 def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
@@ -911,6 +919,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     collect WAXS data
      """
     yield from IfRequestedStopBeforeNextScan()
+    yield from before_plan()
 
     yield from mode_WAXS()
 
@@ -1058,3 +1067,4 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
+    yield from after_plan()
