@@ -434,7 +434,6 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
         yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
-        # print(APS_utils.dictionary_table(scaler0.read()))
         
         # amplifier sequence program (in IOC) will adjust the gain now
         
@@ -455,14 +454,14 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             else:
                 raise ValueError(f"unexpected control.signal: {control.signal}")
             converged.append(actual_rate <= max_rate)
-            print(f"gain={gain_now}  rate: {actual_rate}  max: {max_rate}  converged={converged}")
+            logger.debug(f"gain={gain_now}  rate: {actual_rate}  max: {max_rate}  converged={converged}")
         
         if False not in converged:      # all True?
             complete = True
             for control in controls:
                 yield from bps.mv(control.auto.mode, "manual")      # TODO: or auto+background
             break   # no changes
-            print(f"converged: {converged}")
+            logger.debug(f"converged: {converged}")
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions
