@@ -468,6 +468,9 @@ def tune_diode(md={}):
 
 
 def tune_usaxs_optics(side=False, md={}):
+    """
+    tune all the instrument optics currently in configuration
+    """
     yield from mode_USAXS()
 
     suspender_preinstalled = suspend_BeamInHutch in RE.suspenders
