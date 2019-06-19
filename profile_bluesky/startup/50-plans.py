@@ -5,8 +5,10 @@ Bluesky plans (scans)
 
 PLANS
 
-    afterPlan()
-    beforePlan()
+    after_plan()
+    before_plan()
+    after_command_list()
+    before_command_list()
     execute_command_list()
     FlyScan()
     preUSAXStune()
@@ -372,9 +374,9 @@ def postCommandsListfile2WWW(commands):
         fp.write(file_contents)
 
 
-def beforePlan(md={}, commands=None):
+def before_command_list(md={}, commands=None):
     """
-    things to be done before every data collection plan
+    things to be done before a command list is run
     """
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
@@ -422,9 +424,9 @@ def beforePlan(md={}, commands=None):
         postCommandsListfile2WWW(commands)
 
 
-def afterPlan(md={}):
+def after_command_list(md={}):
     """
-    things to be done after every data collection plan
+    things to be done after a command list is run
     """
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
@@ -432,6 +434,19 @@ def afterPlan(md={}):
         user_data.collection_in_progress, 0,
         ti_filter_shutter, "close",
     )
+
+
+def before_plan(md={}):
+    """
+    things to be done before every data collection plan
+    """
+    yield from bps.null()
+
+def after_plan(md={}):
+    """
+    things to be done after every data collection plan
+    """
+    yield from bps.null()
 
 
 def parse_Excel_command_file(filename):
@@ -691,7 +706,7 @@ def execute_command_list(filename, commands, md={}):
     print(text)
     archive = instrument_archive(text)
 
-    yield from beforePlan(md=md, commands=commands)
+    yield from before_command_list(md=md, commands=commands)
     for command in commands:
         action, args, i, raw_command = command
         print(f"file line {i}: {raw_command}")
@@ -735,7 +750,7 @@ def execute_command_list(filename, commands, md={}):
         else:
             print(f"no handling for line {i}: {raw_command}")
 
-    yield from afterPlan(md=md)
+    yield from after_command_list(md=md)
 
 
 def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
