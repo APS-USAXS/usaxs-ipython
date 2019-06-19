@@ -266,7 +266,7 @@ class SaveFlyScan(object):
                 value = pv_spec.pv.get(as_string=True)
             else:
                 value = pv_spec.pv.get()
-            if value is [None]:
+            if value is None:
                 value = 'no data'
             logger.debug("saveFile(): writing {pv_spec}")
             if not isinstance(value, numpy.ndarray):
@@ -310,7 +310,7 @@ class SaveFlyScan(object):
                 value = pv_spec.pv.get(as_string=True)
             else:
                 value = pv_spec.pv.get()
-            if value is [None]:
+            if value is None:
                 value = 'no data'
             if not isinstance(value, numpy.ndarray):
                 value = [value]
