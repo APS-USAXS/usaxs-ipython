@@ -147,7 +147,6 @@ class UsaxsFlyScanDevice(Device):
         specwriter._cmt("start", "start USAXS Fly scan")
         yield from bps.mv(
             upd_controls.auto.mode, AutorangeSettings.auto_background,
-            terms.preUSAXStune.num_scans_last_tune, terms.preUSAXStune.num_scans_last_tune.value+3, # weighted increment
         )
 
         self.t0 = time.time()
