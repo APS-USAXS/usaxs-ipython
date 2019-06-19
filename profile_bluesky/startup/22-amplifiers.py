@@ -34,6 +34,7 @@ and then use it with inline dictionaries to pick the right PVs.
 
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
+logger.setLevel(logging.DEBUG)
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
@@ -416,7 +417,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
 
     settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
     for control in controls:
-        yield from bps.mv(control.auto.mode, AutorangeSettings.auto_background)
+        yield from bps.mv(control.auto.mode, AutorangeSettings.automatic)
         # faster if we start from last known autoscale gain
         gain = last_gain_dict.get(control.auto.gain.name)
         if gain is not None:    # be cautious, might be unknown
@@ -433,32 +434,35 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
         yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
+        # print(APS_utils.dictionary_table(scaler0.read()))
         
         # amplifier sequence program (in IOC) will adjust the gain now
         
         for control in controls:
             # any gains changed?
-            gain_now = control.auto.gain.value
+            gain_now = control.auto.gain.get()
             gain_previous = last_gain_dict[control.auto.gain.name]
             converged.append(gain_now == gain_previous)
             last_gain_dict[control.auto.gain.name] = gain_now
         
             # are we topped up on any detector?
             max_rate = control.auto.max_count_rate.value
-            if isinstance(control.signal, ScalerChannel):
-                actual_rate = control.signal.s.value
-            elif isinstance(control.signal, EpicsSignalRO):
-                actual_rate = control.signal.value
+            if isinstance(control.signal, ScalerChannel):   # ophyd.ScalerCH
+                actual_rate = control.signal.s.value / control.scaler.time.value
+            elif isinstance(control.signal, EpicsSignalRO): # ophyd.EpicsScaler
+                actual_rate = control.signal.value      # FIXME
+                raise RuntimeError("This scaler needs to divide by time")
             else:
                 raise ValueError(f"unexpected control.signal: {control.signal}")
             converged.append(actual_rate <= max_rate)
+            print(f"gain={gain_now}  rate: {actual_rate}  max: {max_rate}  converged={converged}")
         
         if False not in converged:      # all True?
             complete = True
             for control in controls:
-                yield from bps.mv(control.auto.mode, "manual")
+                yield from bps.mv(control.auto.mode, "manual")      # TODO: or auto+background
             break   # no changes
-        logger.debug(f"converged: {converged}")
+            print(f"converged: {converged}")
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions
