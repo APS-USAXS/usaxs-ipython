@@ -449,7 +449,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             if isinstance(control.signal, ScalerChannel):   # ophyd.ScalerCH
                 actual_rate = control.signal.s.value / control.scaler.time.value
             elif isinstance(control.signal, EpicsSignalRO): # ophyd.EpicsScaler
-                actual_rate = control.signal.value      # FIXME
+                # actual_rate = control.signal.value      # FIXME
                 raise RuntimeError("This scaler needs to divide by time")
             else:
                 raise ValueError(f"unexpected control.signal: {control.signal}")
@@ -460,8 +460,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             complete = True
             for control in controls:
                 yield from bps.mv(control.auto.mode, "manual")
-            break   # no changes
             logger.debug(f"converged: {converged}")
+            break   # no changes
 
     # scaler.stage_sigs = stage_sigs["scaler"]
     # restore starting conditions

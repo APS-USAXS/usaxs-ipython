@@ -154,7 +154,7 @@ def _tune_base_(axis, md={}):
 def tune_mr(md={}):
     yield from bps.mv(scaler0.preset_time, 0.1)
     md['plan_name'] = "tune_mr"
-    print(f"metadata={md}")
+    # print(f"metadata={md}")  # TOO much data to print
     yield from _tune_base_(m_stage.r, md=md)
 
 
