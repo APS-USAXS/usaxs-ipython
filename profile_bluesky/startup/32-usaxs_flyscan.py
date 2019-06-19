@@ -46,6 +46,7 @@ class UsaxsFlyScanDevice(Device):
 
         def _report_(t):
             elapsed = struck.elapsed_real_time.get()
+            channel = None
             if elapsed is not None:
                 channel = struck.current_channel.get()
                 if elapsed > t:     # looking at previous fly scan
@@ -57,7 +58,8 @@ class UsaxsFlyScanDevice(Device):
             values.append(f"{a_stage.r.position:.7f}")
             values.append(f"{a_stage.y.position:.5f}")
             values.append(f"{d_stage.y.position:.5f}")
-            values.append(f"{channel}")
+            if channel is not None:
+                values.append(f"{channel}")
             if elapsed is not None:
                 values.append(f"{elapsed:.2f}")
             return "  ".join([f"{s:11}" for s in values])
