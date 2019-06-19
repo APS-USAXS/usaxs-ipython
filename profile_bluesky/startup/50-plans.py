@@ -138,7 +138,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     if terms.preUSAXStune.needed:
         # tune at previous sample position
         # don't overexpose the new sample position
-        yield from tune_usaxs_optics(md=md)
+        yield from preUSAXStune(md=md)
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -399,7 +399,7 @@ def beforePlan(md={}, commands=None):
 
     if terms.preUSAXStune.run_tune_on_qdo.value:
         logger.info("Runing preUSAXStune as requested at start of measurements")
-        yield from tune_usaxs_optics(md=md)
+        yield from preUSAXStune(md=md)
 
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
@@ -708,7 +708,7 @@ def execute_command_list(filename, commands, md={}):
 
         action = action.lower()
         if action == "preusaxstune":
-            yield from tune_usaxs_optics(md=_md)
+            yield from preUSAXStune(md=_md)
 
         elif action in ("flyscan", "usaxsscan"):
             # TODO: watch for PV which indicates, if USAXS should run step scan or flyscan
