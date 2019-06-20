@@ -132,7 +132,7 @@ def after_command_list(md={}):
     """
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
-        user_data.state, "Ended data collection",
+        user_data.state, "USAXS macro file done",  # exact text triggers the music
         user_data.collection_in_progress, 0,
         ti_filter_shutter, "close",
     )
