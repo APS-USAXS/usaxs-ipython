@@ -339,6 +339,7 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
         readings = {getScalerChannelPvname(s): [] for s in signals}
         
         for m in range(num_readings):
+            yield from bps.sleep(0.05)  # allow amplifier to stabilize on gain
             # count and wait to complete
             yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
             
