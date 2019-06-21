@@ -178,6 +178,7 @@ class UsaxsFlyScanDevice(Device):
             try:
                 yield from user_data.set_state_plan("writing fly scan HDF5 file")
             except Exception as exc:
+                # do not fail the scan just because of updating program state
                 emsg = f"Error: {msg} - {exc}"
                 logger.debug(emsg)
                 print(emsg)
