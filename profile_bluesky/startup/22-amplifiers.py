@@ -45,6 +45,10 @@ def _gain_to_str_(gain):    # convenience function
     return ("%.0e" % gain).replace("+", "").replace("e0", "e")
 
 
+class AutoscaleError(RuntimeError):
+    "raised when autoscale fails to converge"
+
+
 class AutorangeSettings(object):
     """values allowed for sequence program's ``reqrange`` PV"""
     automatic = "automatic"
@@ -476,7 +480,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         print(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
         if RE.state != "idle":      # don't raise if in summarize_plan()
-            raise RuntimeError(msg)
+            raise AutoscaleError(msg)
 
 
 def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations=9):
@@ -497,10 +501,14 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
         if len(control_list) > 0:
             msg = "Autoscaling amplifier for: " + control_list[0].nickname
             logger.info(msg)
-            yield from _scaler_autoscale_(
-                control_list, 
-                count_time=count_time, 
-                max_iterations=max_iterations)
+            try:
+                yield from _scaler_autoscale_(
+                    control_list, 
+                    count_time=count_time, 
+                    max_iterations=max_iterations)
+            except AutoscaleError as exc:
+                emsg = f"{exc} - will continue despite warning"
+                logger.info(emsg)
 
 
 # ------------
