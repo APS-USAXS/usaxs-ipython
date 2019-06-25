@@ -58,9 +58,14 @@ class UsaxsFlyScanDevice(Device):
             values.append(f"{a_stage.r.position:.7f}")
             values.append(f"{a_stage.y.position:.5f}")
             values.append(f"{d_stage.y.position:.5f}")
-            if channel is not None:
+            missing = "-missing-"
+            if channel is None:
+                values.append(missing)
+            else:
                 values.append(f"{channel}")
-            if elapsed is not None:
+            if elapsed is None:
+                values.append(missing)
+            else:
                 values.append(f"{elapsed:.2f}")
             return "  ".join([f"{s:11}" for s in values])
 
