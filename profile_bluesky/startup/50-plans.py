@@ -784,6 +784,8 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
      """
     yield from IfRequestedStopBeforeNextScan()
 
+    yield from before_plan()    # MUST come before mode_WAXS since it might tune
+
     yield from mode_SAXS()
 
     pinz_target = terms.SAXS.z_in.value + constants["SAXS_PINZ_OFFSET"]
@@ -795,7 +797,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
         user_data.sample_thickness, thickness,
     )
-    yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
@@ -937,6 +938,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
      """
     yield from IfRequestedStopBeforeNextScan()
 
+    yield from before_plan()    # MUST come before mode_WAXS since it might tune
+
     yield from mode_WAXS()
 
     yield from bps.mv(
@@ -946,7 +949,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         user_data.sample_thickness, thickness,
     )
-    yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
