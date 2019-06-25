@@ -108,8 +108,8 @@ def before_command_list(md={}, commands=None):
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
             terms.FlyScan.order_number.value,
-            saxs_det.cam.file_number.value,
-            waxs_det.cam.file_number.value,
+            saxs_det.hdf1.file_number.value,
+            waxs_det.hdf1.file_number.value,
         ])
 
     try:
