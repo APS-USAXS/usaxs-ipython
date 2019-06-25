@@ -463,6 +463,18 @@ def execute_command_list(filename, commands, md={}):
             snm = args[3]
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
+        elif action in ("mode_Radiography"):
+            yield from mode_Radiography()
+
+        elif action in ("mode_saxs"):
+            yield from mode_SAXS()
+
+        elif action in ("mode_usaxs"):
+            yield from mode_USAXS()
+
+        elif action in ("mode_waxs"):
+            yield from mode_WAXS()
+
         else:
             print(f"no handling for line {i}: {raw_command}")
 
@@ -938,9 +950,15 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
      """
     yield from IfRequestedStopBeforeNextScan()
 
+    print(f"waxsx start collection ={waxsx.position}")
+
     yield from before_plan()    # MUST come before mode_WAXS since it might tune
 
+    print(f"waxsx after before plan ={waxsx.position}")
+
     yield from mode_WAXS()
+
+    print(f"waxsx after mode_WAXS ={waxsx.position}")
 
     yield from bps.mv(
         usaxs_slit.v_size, terms.SAXS.v_size.value,
@@ -1056,6 +1074,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     _md['plan_name'] = "WAXS"
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
+
+    print(f"waxsx before Image collection={waxsx.position}")
 
     yield from areaDetectorAcquire(waxs_det, md=_md)
     ts = str(datetime.datetime.now())
