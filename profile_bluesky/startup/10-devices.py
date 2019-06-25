@@ -484,6 +484,7 @@ class Parameters_SAXS(Device):
     UsaxsSaxsMode = Component(EpicsSignal, "9idcLAX:SAXS:USAXSSAXSMode", put_complete=True)
     num_images = Component(EpicsSignal, "9idcLAX:SAXS:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:SAXS:AcquireTime")
+    collecting = Component(EpicsSignal, "9idcLAX:collectingSAXS")
 
 
 class Parameters_SAXS_WAXS(Device): 
@@ -510,6 +511,7 @@ class Parameters_WAXS(Device):
     base_dir = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:directory", string=True)
     num_images = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:NumImages")
     acquire_time = Component(EpicsSignal, "9idcLAX:USAXS_WAXS:AcquireTime")
+    collecting = Component(EpicsSignal, "9idcLAX:collectingWAXS")
 
 
 class Parameters_Radiography(Device):

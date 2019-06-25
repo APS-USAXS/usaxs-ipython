@@ -85,9 +85,9 @@ def before_command_list(md={}, commands=None):
         user_data.state, "Starting data collection",
         user_data.collection_in_progress, 1,
         ti_filter_shutter, "close",
+        terms.SAXS.collecting, 0,
+        terms.WAXS.collecting, 0,
     )
-    # epics_put ("9idcLAX:collectingSAXS", 0)
-    # epics_put ("9idcLAX:collectingWAXS", 0)
     if constants["MEASURE_DARK_CURRENTS"]:
         yield from measure_background(
             [upd_controls, I0_controls, I00_controls, trd_controls],
@@ -808,6 +808,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
         user_data.sample_thickness, thickness,
+        terms.SAXS.collecting, 1,
     )
 
     yield from bps.mv(
@@ -934,6 +935,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         terms.SAXS_WAXS.end_exposure_time, ts,
         scaler0.delay, old_delay,
 
+        terms.SAXS.collecting, 0,
         user_data.state, "Done SAXS",
         user_data.time_stamp, ts,
     )
@@ -966,6 +968,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         guard_slit.v_size, terms.SAXS.guard_v_size.value,
         guard_slit.h_size, terms.SAXS.guard_h_size.value,
         user_data.sample_thickness, thickness,
+        terms.WAXS.collecting, 1,
     )
 
     yield from bps.mv(
@@ -1096,6 +1099,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         terms.SAXS_WAXS.end_exposure_time, ts,
         scaler0.delay, old_delay,
 
+        terms.WAXS.collecting, 0,
         user_data.state, "Done WAXS",
         user_data.time_stamp, ts,
     )
