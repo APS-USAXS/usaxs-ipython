@@ -1,5 +1,12 @@
 print(__file__)
 
+# issue #284: start logging console to file
+# https://ipython.org/ipython-doc/3/interactive/magics.html#magic-logstart
+from IPython import get_ipython
+ipython = get_ipython()
+# %logstart -o -t .ipython_console.log "rotate"
+ipython.magic("logstart -o -t .ipython_console.log rotate")
+
 from bluesky import RunEngine
 from bluesky.utils import get_history
 RE = RunEngine(get_history())
