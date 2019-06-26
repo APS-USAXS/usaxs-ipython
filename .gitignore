@@ -19,3 +19,6 @@ mViewer.log
 
 # SPEC data files (default naming convention)
 20*.dat
+
+# logging
+.ipython_console.log*
