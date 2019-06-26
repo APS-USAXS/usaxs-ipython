@@ -3,6 +3,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 
 """Set up default metadata"""
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 RE.md['beamline_id'] = 'APS USAXS 9-ID-C'
 RE.md['proposal_id'] = 'testing Bluesky installation'
 RE.md['pid'] = os.getpid()

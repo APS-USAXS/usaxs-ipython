@@ -35,6 +35,9 @@ and then use it with inline dictionaries to pick the right PVs.
 
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
 logger.setLevel(logging.DEBUG)
 
 

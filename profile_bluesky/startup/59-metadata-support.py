@@ -3,6 +3,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 
 """code that will become part of apstools"""
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 def dictionary_table(dictionary, fmt="simple"):
     """
     return a text table from ``dictionary``

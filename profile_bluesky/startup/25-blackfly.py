@@ -4,6 +4,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """PointGrey BlackFly detector"""
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 # note: this is about the easiest area detector setup in Ophyd
 
 

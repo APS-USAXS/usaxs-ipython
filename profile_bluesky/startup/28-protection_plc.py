@@ -4,6 +4,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """detector protection PLC"""
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 class PlcProtectionDevice(Device):
     """
     Detector Protection PLC interface

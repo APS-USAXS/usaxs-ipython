@@ -8,6 +8,9 @@ from: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/loca
 """
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 """
 This EPICS PV calculates *BeamInHutch* boolean.
 This is used to set the check beam PV to use I000 PD on Mirror window, limit is set

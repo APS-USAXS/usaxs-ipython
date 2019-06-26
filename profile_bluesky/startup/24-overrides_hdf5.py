@@ -3,6 +3,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 
 """override certain apstools.devices"""
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 # custom support is in AD_EpicsHdf5FileName
 class myHdf5EpicsIterativeWriter(
     APS_devices.AD_EpicsHdf5FileName, 

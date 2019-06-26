@@ -7,6 +7,9 @@ aps
 MUST come before filters and shutters
 """
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 aps = APS_devices.ApsMachineParametersDevice(name="aps")
 sd.baseline.append(aps)
 

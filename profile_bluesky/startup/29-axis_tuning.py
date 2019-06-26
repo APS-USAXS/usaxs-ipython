@@ -58,6 +58,9 @@ These attributes, set internally, are results of the tune scan::
 
 """
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 # use center-of-mass, and not peak value: "com"
 TUNE_METHOD_PEAK_CHOICE = "com"
 

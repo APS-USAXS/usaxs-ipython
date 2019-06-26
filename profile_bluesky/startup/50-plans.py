@@ -32,6 +32,9 @@ UTILITIES
 """
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 def makeOrderedDictFromTwoLists(labels, values):
     """return an OrderedDict"""
     if len(values) > len(labels):

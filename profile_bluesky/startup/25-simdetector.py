@@ -3,6 +3,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 
 """ADSimDetector"""
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
 WRITE_HDF5_FILE_PATH_ADSIMDET = "/share1/USAXS_data/test/adsimdet/%Y/%m/%d/"

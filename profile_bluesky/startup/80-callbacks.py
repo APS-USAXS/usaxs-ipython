@@ -1,7 +1,10 @@
 print(__file__)
 print(resource_usage(os.path.split(__file__)[-1]))
 
-# custom callbacks
+"""custom callbacks"""
+
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
 
 
 # collect last scan's documents into doc_collector.documents

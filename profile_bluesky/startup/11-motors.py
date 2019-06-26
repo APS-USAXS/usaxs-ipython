@@ -4,6 +4,9 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """motors, stages, positioners, ..."""
 
 
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
+
 def move_motors(*args):
     """
     move one or more motors at the same time, returns when all moves are done

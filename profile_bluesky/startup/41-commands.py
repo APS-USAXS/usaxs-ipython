@@ -22,6 +22,9 @@ FUNCTIONS
 
 """
 
+
+logger = logging.getLogger(os.path.split(__file__)[-1])
+
 ### This file is work-in-progress
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
