@@ -41,3 +41,22 @@ import logging
 from bluesky.utils import ts_msg_hook
 #RE.msg_hook = ts_msg_hook
 from bluesky.simulators import summarize_plan
+
+import psutil
+import resource
+
+def resource_usage(title=None, vmem=False):
+    """
+    report on current resource usage
+    """
+    usage=resource.getrusage(resource.RUSAGE_SELF)
+    msg = ""
+    if title is not None:
+        msg += f"{title}:"
+    msg += f" user:{usage[0]:.3f}s"
+    msg += f" sys:{usage[1]:.3f}s"
+    msg += f" mem:{usage[2]/1000:.2f}MB"
+    msg += f" cpu:{psutil.cpu_percent()}%"
+    if vmem:
+        msg += f" {psutil.virtual_memory()}"
+    return msg.strip()

@@ -1,4 +1,5 @@
 print(__file__)
+print(resource_usage(os.path.split(__file__)[-1]))
 
 """
 USAXS Fly Scan setup
@@ -67,6 +68,7 @@ class UsaxsFlyScanDevice(Device):
                 values.append(missing)
             else:
                 values.append(f"{elapsed:.2f}")
+            values.append(resource_usage("Flyscan"))
             return "  ".join([f"{s:11}" for s in values])
 
         @APS_plans.run_in_thread
@@ -122,10 +124,13 @@ class UsaxsFlyScanDevice(Device):
             self._output_HDF5_file_ = fname
             user_data.set_state_blocking("FlyScanning: " + os.path.split(fname)[-1])
 
+            print(resource_usage("before SaveFlyScan()"))
             self.saveFlyData = SaveFlyScan(
                 fname,
                 config_file=self.saveFlyData_config)
+            print(resource_usage("before saveFlyData.preliminaryWriteFile()"))
             self.saveFlyData.preliminaryWriteFile()
+            print(resource_usage("after saveFlyData.preliminaryWriteFile()"))
 
         @APS_plans.run_in_thread
         def finish_HDF5_file():
@@ -187,7 +192,9 @@ class UsaxsFlyScanDevice(Device):
                 emsg = f"Error: {msg} - {exc}"
                 logger.debug(emsg)
                 print(emsg)
+            print(resource_usage("before saveFlyData.finish_HDF5_file()"))
             finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
+            print(resource_usage("after saveFlyData.finish_HDF5_file()"))
             specwriter._cmt("stop", f"finished {msg}")
             print(f"finished {msg}")
 

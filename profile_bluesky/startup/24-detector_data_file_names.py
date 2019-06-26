@@ -1,4 +1,5 @@
 print(__file__)
+print(resource_usage(os.path.split(__file__)[-1]))
 
 """
 replace BlueSky file name scheme when used with area detector
