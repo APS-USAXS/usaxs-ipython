@@ -57,8 +57,6 @@ def newSpecFile(title, reset_scan_id=True):
         
     else:
         specwriter.newfile(fname, scan_id=reset_scan_id, RE=RE)
-        msg = f"spec file: {specwriter.spec_filename}"
-        logger.info(msg)
         user_data.spec_file.put(specwriter.spec_filename)
 
     logger.info(f"SPEC file name : {specwriter.spec_filename}")
