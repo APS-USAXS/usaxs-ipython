@@ -32,8 +32,6 @@ INTERNAL
 """
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
 
 def DCMfeedbackON():
     """plan: could send email"""

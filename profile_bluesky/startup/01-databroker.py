@@ -4,8 +4,6 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """set up the data broker (db)"""
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
 import os
 callback_db = {}
 

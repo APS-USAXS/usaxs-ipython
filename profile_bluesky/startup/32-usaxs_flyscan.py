@@ -5,8 +5,6 @@ print(resource_usage(os.path.split(__file__)[-1]))
 USAXS Fly Scan setup
 """
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
 
 """
 sfs = SaveFlyScan("/tmp/sfs.h5", config_file="usaxs_support/saveFlyData.xml")

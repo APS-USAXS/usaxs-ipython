@@ -34,13 +34,6 @@ and then use it with inline dictionaries to pick the right PVs.
 """
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
-
-logger = logging.getLogger(os.path.split(__file__)[-1])
-logger.setLevel(logging.DEBUG)
-
-
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
 AMPLIFIER_MINIMUM_SETTLING_TIME = 0.01    # reasonable?
 

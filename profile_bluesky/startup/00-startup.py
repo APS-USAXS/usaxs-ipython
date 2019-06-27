@@ -42,6 +42,7 @@ import bluesky.magics
 import logging
 # ophyd.logger.setLevel(logging.DEBUG)
 # logging.basicConfig(level=logging.DEBUG)
+# logger = logging.getLogger("bluesky-ipython-shell")
 
 
 # diagnostics

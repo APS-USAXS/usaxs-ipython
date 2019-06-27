@@ -4,8 +4,6 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """filters & shutters"""
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
 if aps.inUserOperations and operations_in_9idc():
     FE_shutter = ApsPssShutterWithStatus(
         "9ida:rShtrA:", 

@@ -4,9 +4,6 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """gather all the imports here"""
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
-
 from collections import deque, OrderedDict, defaultdict
 import datetime
 from enum import Enum

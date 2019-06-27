@@ -4,8 +4,6 @@ print(resource_usage(os.path.split(__file__)[-1]))
 """various detectors"""
 
 
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
 from apstools.devices import SCALER_AUTOCOUNT_MODE
 
 

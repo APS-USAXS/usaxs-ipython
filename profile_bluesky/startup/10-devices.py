@@ -46,10 +46,6 @@ DEVICES
 
 """
 
-
-logger = logging.getLogger(os.path.split(__file__)[-1])
-
-
 # simple enumeration used by DCM_Feedback()
 MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
 
