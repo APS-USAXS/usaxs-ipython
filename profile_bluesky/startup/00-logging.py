@@ -48,9 +48,9 @@ file_log_handler.setFormatter(logging.Formatter(file_log_format))
 file_log_handler.formatter.default_msec_format = "%s.%03d"
 
 logger.warning('logging started')
-
-logger.debug('example Debug message')
-logger.info('example Info message')
 logger.warning(f'logging level = {logger.level}')
-logger.warning('example Warning message')
-logger.error('example Error message')
+
+# logger.debug('example Debug message')
+# logger.info('example Info message')
+# logger.warning('example Warning message')
+# logger.error('example Error message')
