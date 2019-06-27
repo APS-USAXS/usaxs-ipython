@@ -27,6 +27,8 @@ import datetime
 import inspect
 import logging
 import os
+import psutil
+import resource
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
 
@@ -97,6 +99,23 @@ def looky():
     This is just a demonstration.
     """
     print(instrument_archive(text))
+
+
+def resource_usage(title=None, vmem=False):
+    """
+    report on current resource usage
+    """
+    usage=resource.getrusage(resource.RUSAGE_SELF)
+    msg = ""
+    if title is not None:
+        msg += f"{title}:"
+    msg += f" user:{usage[0]:.3f}s"
+    msg += f" sys:{usage[1]:.3f}s"
+    msg += f" mem:{usage[2]/1000:.2f}MB"
+    msg += f" cpu:{psutil.cpu_percent()}%"
+    if vmem:
+        msg += f" {psutil.virtual_memory()}"
+    return msg.strip()
 
 
 if __name__ == "__main__":
