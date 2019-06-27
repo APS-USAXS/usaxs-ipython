@@ -18,11 +18,10 @@ _ipython.magic(f"logstart -o -t {CONSOLE_IO_FILE} rotate")
 # Uncomment the following lines to turn on 
 # verbose messages for debugging.
 import logging
-#ophyd.logger.setLevel(logging.DEBUG)
 #logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("bluesky-ipython-shell")
-
-""" IGNORE THIS CODE FOR NOW
+logger.setLevel(logging.DEBUG)
+#ophyd.logger.setLevel(logging.DEBUG)
 
 stderr_log_handler = logging.StreamHandler()
 logger.addHandler(stderr_log_handler)
@@ -55,6 +54,3 @@ logger.info('example Info message')
 logger.warning(f'logging level = {logger.level}')
 logger.warning('example Warning message')
 logger.error('example Error message')
-
-"""
-
