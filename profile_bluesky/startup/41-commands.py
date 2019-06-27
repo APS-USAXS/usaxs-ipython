@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 USAXS commands
@@ -18,7 +18,6 @@ FUNCTIONS
     move_WAXSIn()
     move_WAXSOut()
     q2angle()
-    set_USAXS_slits()
 
 """
 
@@ -77,14 +76,14 @@ def IfRequestedStopBeforeNextScan():
     pv_txt = "Pausing for user for %g s"
     while terms.PauseBeforeNextScan.value:
         msg = pv_txt % (time.time() - t0)
-        print(msg)
+        logger.info(msg)
         yield from user_data.set_state_plan(msg)
         yield from bps.sleep(1)
         open_the_shutter = True
 
     if terms.StopBeforeNextScan.value:
         msg = "User requested stop data collection before next scan"
-        print(msg)
+        logger.info(msg)
         yield from bps.mv(
             ti_filter_shutter,                  "close",
             terms.StopBeforeNextScan,           0,
@@ -104,7 +103,7 @@ def IfRequestedStopBeforeNextScan():
 def confirmUsaxsSaxsOutOfBeam():
     """raise ValueError if not"""
     if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
-        print("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
+        logger.warning("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
         msg = "Incorrect UsaxsSaxsMode mode found."
         msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)"
         raise ValueError(msg % UsaxsSaxsModes["out of beam"])
@@ -117,7 +116,7 @@ def move_WAXSOut():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving WAXS out of beam")
+    logger.info("Moving WAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
@@ -128,7 +127,7 @@ def move_WAXSOut():
         waxsx.soft_limit_lo.value,
         terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
 
-    print("Removed WAXS from beam position")
+    logger.info("Removed WAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
@@ -139,7 +138,7 @@ def move_WAXSIn():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving to WAXS mode")
+    logger.info("Moving to WAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
     yield from plc_protect.wait_for_interlock()
@@ -160,7 +159,7 @@ def move_WAXSIn():
         usaxs_slit.h_size, terms.SAXS.h_size.value,
     )
 
-    print("WAXS is in position")
+    logger.info("WAXS is in position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["WAXS in beam"])
 
 
@@ -171,7 +170,7 @@ def move_SAXSOut():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving SAXS out of beam")
+    logger.info("Moving SAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
@@ -191,7 +190,7 @@ def move_SAXSOut():
         saxs_stage.y.soft_limit_hi.value,  # don't change this value
         )
 
-    print("Removed SAXS from beam position")
+    logger.info("Removed SAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
@@ -202,7 +201,7 @@ def move_SAXSIn():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving to Pinhole SAXS mode")
+    logger.info("Moving to Pinhole SAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
     yield from plc_protect.wait_for_interlock()
@@ -232,7 +231,7 @@ def move_SAXSIn():
     # move Z _AFTER_ the others finish moving
     yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.value)
 
-    print("Pinhole SAXS is in position")
+    logger.info("Pinhole SAXS is in position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["SAXS in beam"])
 
 
@@ -243,7 +242,7 @@ def move_USAXSOut():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving USAXS out of beam")
+    logger.info("Moving USAXS out of beam")
     # in case there is an error in moving, it is NOT SAFE to start a scan
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
@@ -261,7 +260,7 @@ def move_USAXSOut():
         d_stage.x.soft_limit_lo.value,
         terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
 
-    print("Removed USAXS from beam position")
+    logger.info("Removed USAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
 
 
@@ -272,7 +271,7 @@ def move_USAXSIn():
         ti_filter_shutter,  "close",
     )
 
-    print("Moving to USAXS mode")
+    logger.info("Moving to USAXS mode")
 
     confirmUsaxsSaxsOutOfBeam()
     yield from plc_protect.wait_for_interlock()
@@ -300,17 +299,8 @@ def move_USAXSIn():
         d_stage.y,          terms.USAXS.DY0.value,
     )
 
-    print("USAXS is in position")
+    logger.info("USAXS is in position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["USAXS in beam"])
-
-
-# TODO: necessary to keep this?
-def set_USAXS_slits():
-    """move the USAXS slits to expected values"""
-    usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
-    usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
-    guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
-    guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
 
 
 def beforeScanComputeOtherStuff():

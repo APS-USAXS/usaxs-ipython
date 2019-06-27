@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """PointGrey BlackFly detector"""
 
@@ -20,4 +20,4 @@ try:
     blackfly_det = MyPointGreyDetector(prefix, name="blackfly_det")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
-    print(msg)
+    logger.warning(msg)

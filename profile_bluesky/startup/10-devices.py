@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 Set up custom or complex devices
@@ -120,9 +120,9 @@ class DCM_Feedback(Device):
             message = "Feedback is very close to its limits."
             if email_notices.notify_on_feedback:
                 self._send_emails(subject, message)
-            print("!"*15)
-            print(subject, message)
-            print("!"*15)
+            logger.warning("!"*15)
+            logger.warning(subject, message)
+            logger.warning("!"*15)
 
 
 class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
@@ -162,7 +162,7 @@ class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
         while self.pss_state.get() not in target:
             time.sleep(poll_s)
             # elapsed = time.time() - t0
-            # print(f"waiting {elapsed}s : value={self.pss_state.value}")
+            # logger.debug(f"waiting {elapsed}s : value={self.pss_state.value}")
             if poll_s < self._poll_s_max_:
                 poll_s *= self._poll_factor_   # progressively longer
             if expiration is not None and time.time() > expiration:
@@ -634,10 +634,10 @@ class Linkam_CI94(APS_devices.ProcessController):
     # dsc = Component(EpicsSignalRO, "dsc", kind="omitted")                         # calc
 
     def record_signal(self):
-        """write signal to the console AND SPEC file"""
+        """write signal to the logger AND SPEC file"""
         global specwriter
         msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
-        print(msg)
+        logger.info(msg)
         specwriter._cmt("event", msg)
         return msg
 
@@ -677,10 +677,10 @@ class Linkam_T96(APS_devices.ProcessController):
     vacuum_status = Component(EpicsSignalRO, "vacuumStatus_RBV", kind="omitted")
 
     def record_signal(self):
-        """write signal to the console AND SPEC file"""
+        """write signal to the logger AND SPEC file"""
         global specwriter
         msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
-        print(msg)
+        logger.info(msg)
         specwriter._cmt("event", msg)
         return msg
 
@@ -694,7 +694,7 @@ class Linkam_T96(APS_devices.ProcessController):
 
         msg = f"Set {self.controller_name} to {set_point:.2f}{self.units.value}"
         specwriter._cmt("event", msg)
-        print(msg)
+        logger.info(msg)
         
         if wait:
             yield from self.wait_until_settled(

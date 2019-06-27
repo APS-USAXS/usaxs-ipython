@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """custom callbacks"""
 
@@ -17,11 +17,11 @@ if os.getcwd().startswith("/home/beams/USAXS/.ipython"):
 else:
     specwriter.newfile(scan_id=True, RE=RE)
 callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
-print()
-print("writing to SPEC file: " + specwriter.spec_filename)
-print(">>>>   Using default SPEC file name   <<<<")
-print("file will be created when bluesky ends its next scan")
-print("to change SPEC file, use command: newSpecFile('title')")
+logger.info("-"*10)
+logger.info("writing to SPEC file: " + specwriter.spec_filename)
+logger.info(">>>>   Using default SPEC file name   <<<<")
+logger.info("file will be created when bluesky ends its next scan")
+logger.info("to change SPEC file, use command: newSpecFile('title')")
 
 """
 EXAMPLE:
@@ -48,12 +48,12 @@ def newSpecFile(title, reset_scan_id=True):
         reset_scan_id = 0
 
     if os.path.exists(fname):
-        print(f"file already exists: {fname}")
+        logger.info(f"file already exists: {fname}")
         user_data.spec_file.put(fname)
         specwriter.newfile(fname, scan_id=reset_scan_id, RE=RE)
         if reset_scan_id == 0:
             RE.md["scan_id"] = 0
-        print(">>>>   Appending to existing file   <<<<")
+        logger.info(">>>>   Appending to existing file   <<<<")
         
     else:
         specwriter.newfile(fname, scan_id=reset_scan_id, RE=RE)
@@ -61,6 +61,6 @@ def newSpecFile(title, reset_scan_id=True):
         logger.info(msg)
         user_data.spec_file.put(specwriter.spec_filename)
 
-    print(f"SPEC file name : {specwriter.spec_filename}")
-    print(f"Current working directory : {user_data.user_dir.value}")
-    print("file will be created when bluesky ends its next scan")
+    logger.info(f"SPEC file name : {specwriter.spec_filename}")
+    logger.info(f"Current working directory : {user_data.user_dir.value}")
+    logger.info("file will be created when bluesky ends its next scan")

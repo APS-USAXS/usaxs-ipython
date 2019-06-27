@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 USAXS mode change procedures
@@ -413,7 +413,6 @@ def measure_USAXS_Transmission(md={}):
         msg = "Measured USAXS transmission values:\n"
         msg += str(tbl.reST())
         logger.info(msg)
-        print(msg)
 
     else:
         yield from bps.mv(
@@ -486,7 +485,6 @@ def measure_SAXS_Transmission(md={}):
         terms.USAXS.transmission.I0_gain.value
         )
     logger.info(msg)
-    print(msg)
 
 
 @APS_plans.run_in_thread
@@ -496,12 +494,12 @@ def remaining_time_reporter(title, duration_s, interval_s=5, poll_s=0.05):
     t = time.time()
     expires = t + duration_s
     update = t + interval_s
-    print()
+    # print()
     while time.time() < expires:
         remaining = expires - t
         if t > update:
             update += interval_s
-            print(f"{title}: {remaining:.1f}s remaining")
+            logger.info(f"{title}: {remaining:.1f}s remaining")
         time.sleep(poll_s)
         t = time.time()
 
@@ -517,7 +515,7 @@ def areaDetectorAcquire(det, md={}):
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
     )
-    # print(f"DEBUG: areaDetectorAcquire(): {det.hdf1.stage_sigs}")
+    logger.debug(f"areaDetectorAcquire(): {det.hdf1.stage_sigs}")
     md["method"] = "areaDetectorAcquire"
     md["area_detector_name"] = det.name
     if md.get("plan_name") is None:
@@ -530,4 +528,4 @@ def areaDetectorAcquire(det, md={}):
 
     yield from bps.mv(user_data.scanning, "no",)  # we are done
     elapsed = time.time() - t0
-    print(f"Finished SAXS/WAXS data collection in {elapsed} seconds.")
+    logger.info(f"Finished SAXS/WAXS data collection in {elapsed} seconds.")

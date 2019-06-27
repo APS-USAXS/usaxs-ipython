@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """filters & shutters"""
 
@@ -20,13 +20,13 @@ if aps.inUserOperations and operations_in_9idc():
         name="usaxs_shutter")
 
 else:
-    print("!"*30)
+    logger.warning("!"*30)
     if operations_in_9idc():
-        print("Session started when APS not operating.")
+        logger.warning("Session started when APS not operating.")
     else:
-        print("Session started when 9ID-C is not operating.")
-    print("Using simulators for FE_shutter and mono_shutter.")
-    print("!"*30)
+        logger.warning("Session started when 9ID-C is not operating.")
+    logger.warning("Using simulators for FE_shutter and mono_shutter.")
+    logger.warning("!"*30)
     FE_shutter = SimulatedApsPssShutterWithStatus(name="FE_shutter")
     mono_shutter = SimulatedApsPssShutterWithStatus(name="mono_shutter")
     usaxs_shutter = SimulatedApsPssShutterWithStatus(name="usaxs_shutter")

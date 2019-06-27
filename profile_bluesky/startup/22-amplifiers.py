@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 detectors, amplifiers, and related support
@@ -367,7 +367,6 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             msg += f" +/- {g.background_error.value}" 
                 
             logger.info(msg)
-            print(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
     yield from bps.mv(
@@ -474,7 +473,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     )
 
     if not complete and aps.inUserOperations:        # bailed out early from loop
-        print(f"converged={converged}")
+        logger.warning(f"converged={converged}")
         msg = f"FAILED TO FIND CORRECT GAIN IN {max_iterations} AUTOSCALE ITERATIONS"
         if RE.state != "idle":      # don't raise if in summarize_plan()
             raise AutoscaleError(msg)
@@ -505,7 +504,7 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
                     max_iterations=max_iterations)
             except AutoscaleError as exc:
                 emsg = f"{exc} - will continue despite warning"
-                logger.info(emsg)
+                logger.warning(emsg)
 
 
 # ------------

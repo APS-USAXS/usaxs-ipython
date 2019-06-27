@@ -1,4 +1,4 @@
-print(__file__)
+logger.info(__file__)
 
 from bluesky import RunEngine
 from bluesky.utils import get_history

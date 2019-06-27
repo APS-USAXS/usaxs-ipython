@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 configure per-axis tuning
@@ -89,7 +89,7 @@ axis_tune_range = TuneRanges(name="axis_tune_range")
 
 def mr_pretune_hook():
     stage = m_stage.r
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -98,7 +98,7 @@ def mr_pretune_hook():
 
 def mr_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(m_stage.r.name, m_stage.r.position))
+    logger.info(msg.format(m_stage.r.name, m_stage.r.position))
 
     if m_stage.r.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.mr_val_center, m_stage.r.position)
@@ -128,7 +128,7 @@ def _tune_base_(axis, md={}):
     satisfies: report of tuning OK/not OK on console
     """
     yield from IfRequestedStopBeforeNextScan()
-    print("tuning axis: ", axis.name)
+    logger.info("tuning axis: ", axis.name)
     axis_start = axis.position
     yield from bps.mv(
         mono_shutter, "open",
@@ -142,15 +142,15 @@ def _tune_base_(axis, md={}):
     )
 
     found = axis.tuner.peak_detected()
-    print("axis: ", axis.name)
-    print("starting position:", axis_start)
-    print("peak detected:", found)
+    logger.info("axis: " + axis.name)
+    logger.info(f"starting position: {axis_start}")
+    logger.info(f"peak detected: {found}")
     if found:
-        print("  max:", axis.tuner.peaks.max)
-        print("  center:", axis.tuner.peaks.cen)
-        print("  centroid:", axis.tuner.peaks.com)
-        print("  fwhm:", axis.tuner.peaks.fwhm)
-    print("final position:", axis.position)
+        logger.info("  max: {axis.tuner.peaks.max}")
+        logger.info("  center: {axis.tuner.peaks.cen}")
+        logger.info("  centroid: {axis.tuner.peaks.com}")
+        logger.info("  fwhm: {axis.tuner.peaks.fwhm}")
+    logger.info("final position: {axis.position}")
 
 
 def tune_mr(md={}):
@@ -165,7 +165,7 @@ def tune_mr(md={}):
 
 def m2rp_pretune_hook():
     stage = m_stage.r2p
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
@@ -178,7 +178,7 @@ def m2rp_posttune_hook():
     # TODO: first, re-position piezo considering hysteresis?
     #
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(m_stage.r2p.name, m_stage.r2p.position))
+    logger.info(msg.format(m_stage.r2p.name, m_stage.r2p.position))
     yield from bps.mv(scaler0.delay, 0.05)
 
     if m_stage.r2p.tuner.tune_ok:
@@ -210,7 +210,7 @@ def tune_m2rp(md={}):
 
 def msrp_pretune_hook():
     stage = ms_stage.rp
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -219,7 +219,7 @@ def msrp_pretune_hook():
 
 def msrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(ms_stage.rp.name, ms_stage.rp.position))
+    logger.info(msg.format(ms_stage.rp.name, ms_stage.rp.position))
 
     if ms_stage.rp.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.msr_val_center, ms_stage.rp.position)
@@ -248,7 +248,7 @@ def tune_msrp(md={}):
 
 def ar_pretune_hook():
     stage = a_stage.r
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -257,7 +257,7 @@ def ar_pretune_hook():
 
 def ar_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(a_stage.r.name, a_stage.r.position))
+    logger.info(msg.format(a_stage.r.name, a_stage.r.position))
 
     if a_stage.r.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.ar_val_center, a_stage.r.position)
@@ -294,7 +294,7 @@ def tune_ar(md={}):
 
 def asrp_pretune_hook():
     stage = as_stage.rp
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -303,7 +303,7 @@ def asrp_pretune_hook():
 
 def asrp_posttune_hook():
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(as_stage.rp.name, as_stage.rp.position))
+    logger.info(msg.format(as_stage.rp.name, as_stage.rp.position))
     yield from bps.mv(terms.USAXS.asr_val_center, as_stage.rp.position)
 
     if as_stage.rp.tuner.tune_ok:
@@ -337,7 +337,7 @@ def tune_asrp(md={}):
 
 def a2rp_pretune_hook():
     stage = a_stage.r2p
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
@@ -350,7 +350,7 @@ def a2rp_posttune_hook():
     # TODO: first, re-position piezo considering hysteresis?
     #
     msg = "Tuning axis {}, final position is {}"
-    print(msg.format(a_stage.r2p.name, a_stage.r2p.position))
+    logger.info(msg.format(a_stage.r2p.name, a_stage.r2p.position))
     yield from bps.mv(scaler0.delay, 0.05)
 
     if a_stage.r2p.tuner.tune_ok:
@@ -384,7 +384,7 @@ def tune_a2rp(md={}):
 
 def dx_pretune_hook():
     stage = d_stage.x
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -393,7 +393,7 @@ def dx_pretune_hook():
 
 def dx_posttune_hook():
     stage = d_stage.x
-    print(f"Tuning axis {stage.name}, final position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, final position is {stage.position}")
 
     if stage.tuner.tune_ok:
         yield from bps.mv(terms.SAXS.dx_in, stage.position)
@@ -425,7 +425,7 @@ def tune_dx(md={}):
 
 def dy_pretune_hook():
     stage = d_stage.y
-    print(f"Tuning axis {stage.name}, current position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.value])
     scaler0.channels.chan01.kind = Kind.config
@@ -434,7 +434,7 @@ def dy_pretune_hook():
 
 def dy_posttune_hook():
     stage = d_stage.y
-    print(f"Tuning axis {stage.name}, final position is {stage.position}")
+    logger.info(f"Tuning axis {stage.name}, final position is {stage.position}")
 
     if stage.tuner.tune_ok:
         yield from bps.mv(terms.USAXS.DY0, stage.position)

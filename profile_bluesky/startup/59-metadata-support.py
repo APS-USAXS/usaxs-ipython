@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """code that will become part of apstools"""
 
@@ -85,5 +85,5 @@ def print_RE_md(dictionary=None, fmt="simple"):
     md = dict(dictionary)   # copy of input for editing
     v = dictionary_table(md["versions"], fmt=fmt)   # sub-table
     md["versions"] = str(v).rstrip()
-    print("RunEngine metadata dictionary:")
-    print(dictionary_table(md, fmt=fmt))
+    logger.info("RunEngine metadata dictionary:")
+    logger.info(dictionary_table(md, fmt=fmt))

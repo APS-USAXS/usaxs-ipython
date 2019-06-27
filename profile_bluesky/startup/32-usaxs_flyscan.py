@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 USAXS Fly Scan setup
@@ -78,18 +78,16 @@ class UsaxsFlyScanDevice(Device):
             while t < startup and not  self.flying.value:    # wait for flyscan to start
                 time.sleep(0.01)
             labels = ("flying, s", "ar, deg", "ay, mm", "dy, mm", "channel", "elapsed, s")
-            print("  ".join([f"{s:11}" for s in labels]))
+            logger.info("  ".join([f"{s:11}" for s in labels]))
             while t < timeout and self.flying.value:
                 if t > self.update_time:
                     self.update_time = t + self.update_interval_s
                     msg = _report_(t - self.t0)
-                    print(msg)
                     logger.debug(msg)
                 time.sleep(0.01)
                 t = time.time()
             msg = _report_(time.time() - self.t0)
-            print(msg)
-            logger.debug(msg)
+            logger.info(msg)
             user_data.set_state_blocking(msg.split()[0])
             if t > timeout:
                 logger.error(f"{time.time()-self.t0}s - progress_reporting timeout!!")
@@ -117,18 +115,18 @@ class UsaxsFlyScanDevice(Device):
                 logger.error(msg)
             fname = os.path.join(fname, s)
 
-            print(f"HDF5 config: {self.saveFlyData_config}")
-            print(f"HDF5 output: {fname}")
+            logger.info(f"HDF5 config: {self.saveFlyData_config}")
+            logger.info(f"HDF5 output: {fname}")
             self._output_HDF5_file_ = fname
             user_data.set_state_blocking("FlyScanning: " + os.path.split(fname)[-1])
 
-            print(resource_usage("before SaveFlyScan()"))
+            logger.debug(resource_usage("before SaveFlyScan()"))
             self.saveFlyData = SaveFlyScan(
                 fname,
                 config_file=self.saveFlyData_config)
-            print(resource_usage("before saveFlyData.preliminaryWriteFile()"))
+            logger.debug(resource_usage("before saveFlyData.preliminaryWriteFile()"))
             self.saveFlyData.preliminaryWriteFile()
-            print(resource_usage("after saveFlyData.preliminaryWriteFile()"))
+            logger.debug(resource_usage("after saveFlyData.preliminaryWriteFile()"))
 
         @APS_plans.run_in_thread
         def finish_HDF5_file():
@@ -136,7 +134,7 @@ class UsaxsFlyScanDevice(Device):
                 raise RuntimeError("Must first call prepare_HDF5_file()")
             self.saveFlyData.saveFile()
 
-            print(f"HDF5 output complete: {self._output_HDF5_file_}")
+            logger.info(f"HDF5 output complete: {self._output_HDF5_file_}")
             self.saveFlyData = None
 
         ######################################################################
@@ -181,7 +179,6 @@ class UsaxsFlyScanDevice(Device):
 
         if bluesky_runengine_running:
             msg = f"writing fly scan HDF5 file: {self._output_HDF5_file_}"
-            print(msg)
             logger.debug(msg)
             try:
                 yield from user_data.set_state_plan("writing fly scan HDF5 file")
@@ -189,12 +186,11 @@ class UsaxsFlyScanDevice(Device):
                 # do not fail the scan just because of updating program state
                 emsg = f"Error: {msg} - {exc}"
                 logger.debug(emsg)
-                print(emsg)
-            print(resource_usage("before saveFlyData.finish_HDF5_file()"))
+            logger.debug(resource_usage("before saveFlyData.finish_HDF5_file()"))
             finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
-            print(resource_usage("after saveFlyData.finish_HDF5_file()"))
+            logger.debug(resource_usage("after saveFlyData.finish_HDF5_file()"))
             specwriter._cmt("stop", f"finished {msg}")
-            print(f"finished {msg}")
+            logger.info(f"finished {msg}")
 
         yield from bps.mv(
             a_stage.r.user_setpoint, self.ar0,

@@ -1,4 +1,5 @@
-print(__file__)
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 tune the guard slits
@@ -137,10 +138,10 @@ def tune_GslitsCenter():
             table.addRow(("center from half max", tuner.peaks.cen))
             table.addRow(("peak max (x,y)", tuner.peaks.max))
             table.addRow(("FWHM", tuner.peaks.fwhm))
-            print(table)
+            logger.info(table)
 
             def cleanup_then_GuardSlitTuneError(msg):
-                print(f"{motor.name}: move to {x_c} (initial position)")
+                logger.warning(f"{motor.name}: move to {x_c} (initial position)")
                 scaler0.select_channels(None)
                 yield from bps.mv(
                     motor, x_c,
@@ -162,7 +163,7 @@ def tune_GslitsCenter():
                 msg += f" {max(tuner.peaks.y_data)} < {guard_slit.tuning_intensity_threshold}"
                 yield from cleanup_then_GuardSlitTuneError(msg)
 
-            print(f"{motor.name}: move to {center} (center of mass)")
+            logger.info(f"{motor.name}: move to {center} (center of mass)")
             yield from bps.mv(motor, center)
 
     # Here is the MAIN EVENT
@@ -198,7 +199,7 @@ def _USAXS_tune_guardSlits():
     table.addRow(("bottom", original_position["bot"]))
     table.addRow(("Outboard", original_position["out"]))
     table.addRow(("Inboard", original_position["inb"]))
-    print(table)
+    logger.info(table)
 
     # Now move all guard slit motors back a bit
     yield from bps.mv(
@@ -217,7 +218,7 @@ def _USAXS_tune_guardSlits():
 
     def cleanup(msg):
         """if scan is aborted, return motors to original positions"""
-        print("Returning the guard slit motors to original (pre-tune) positions")
+        logger.warning("Returning the guard slit motors to original (pre-tune) positions")
         yield from bps.mv(
             guard_slit.top, original_position["top"],
             guard_slit.bot, original_position["bot"],
@@ -226,10 +227,10 @@ def _USAXS_tune_guardSlits():
             )
         raise GuardSlitTuneError(msg)
 
-    print("And now we can tune all of the guard slits, blade-by-blade")
+    logger.info("And now we can tune all of the guard slits, blade-by-blade")
 
     def tune_blade_edge(axis, start, end, steps, ct_time, results):
-        print(f"{axis.name}: scan from {start} to {end}")
+        logger.info(f"{axis.name}: scan from {start} to {end}")
         old_ct_time = scaler0.preset_time.value
         old_position = axis.position
 
@@ -271,8 +272,8 @@ def _USAXS_tune_guardSlits():
             msg += "  Not tuning this axis."
             yield from cleanup(msg)
 
-        print(f"{axis.name}: will be tuned to {position}")
-        print(f"{axis.name}: width = {width}")
+        logger.info(f"{axis.name}: will be tuned to {position}")
+        logger.info(f"{axis.name}: width = {width}")
         # TODO: SPEC comments, too
         yield from bps.mv(
             scaler0.preset_time, old_ct_time,
@@ -283,7 +284,7 @@ def _USAXS_tune_guardSlits():
         results["position"] = position
   
     tunes = defaultdict(dict)
-    print("*** 1. tune top guard slits")
+    logger.info("*** 1. tune top guard slits")
     yield from tune_blade_edge(
         guard_slit.top, 
         original_position["top"] + guard_slit.v_step_away, 
@@ -292,7 +293,7 @@ def _USAXS_tune_guardSlits():
         0.25, 
         tunes["top"])
 
-    print("*** 2. tune bottom guard slits")
+    logger.info("*** 2. tune bottom guard slits")
     yield from tune_blade_edge(
         guard_slit.bot, 
         original_position["bot"] - guard_slit.v_step_away, 
@@ -301,7 +302,7 @@ def _USAXS_tune_guardSlits():
         0.25, 
         tunes["bot"])
 
-    print("*** 3. tune outboard guard slits")
+    logger.info("*** 3. tune outboard guard slits")
     yield from tune_blade_edge(
         guard_slit.outb, 
         original_position["out"] + guard_slit.h_step_away, 
@@ -310,7 +311,7 @@ def _USAXS_tune_guardSlits():
         0.25, 
         tunes["out"])
 
-    print("*** 4. tune inboard guard slits")
+    logger.info("*** 4. tune inboard guard slits")
     yield from tune_blade_edge(
         guard_slit.inb, 
         original_position["inb"] - guard_slit.h_step_away, 
@@ -387,7 +388,7 @@ def tune_GslitsSize():
         terms.SAXS.guard_v_size, guard_slit.v_size.value,
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
-    print(f"Guard slit now: V={guard_slit.v_size.value} and H={guard_slit.h_size.value}")
+    logger.info(f"Guard slit now: V={guard_slit.v_size.value} and H={guard_slit.h_size.value}")
 
 
 def tune_Gslits():

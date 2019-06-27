@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 Bluesky plans (scans)
@@ -366,7 +366,10 @@ def summarize_command_file(filename):
     """
     commands = get_command_list(filename)
     print(f"Command file: {filename}")
-    print(command_list_as_table(commands))
+    text = str(command_list_as_table(commands))
+    print(text)
+    logger.info(f"Command file: {filename}")
+    logger.info(text)
 
 
 def run_command_file(filename, md={}):
@@ -421,13 +424,13 @@ def execute_command_list(filename, commands, md={}):
 
     text = f"Command file: {filename}\n"
     text += str(command_list_as_table(commands))
-    print(text)
+    logger.info(text)
     archive = instrument_archive(text)
 
     yield from before_command_list(md=md, commands=commands)
     for command in commands:
         action, args, i, raw_command = command
-        print(f"file line {i}: {raw_command}")
+        logger.info(f"file line {i}: {raw_command}")
 
         _md = {}
         _md["full_filename"] = full_filename
@@ -478,7 +481,7 @@ def execute_command_list(filename, commands, md={}):
             yield from mode_WAXS()
 
         else:
-            print(f"no handling for line {i}: {raw_command}")
+            logger.info(f"no handling for line {i}: {raw_command}")
 
     yield from after_command_list(md=md)
 
@@ -562,11 +565,11 @@ def preUSAXStune(md={}):
             # to complete processing and report back to us.
             yield from bps.sleep(1)
         else:
-            print("!!! tune failed for axis {axis.name} !!!")
+            logger.warning("!!! tune failed for axis {axis.name} !!!")
             break
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
-    print("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
+    logger.info("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
     yield from bps.mv(
         scaler0.preset_time,        terms.USAXS.usaxs_time.value,
         user_data.time_stamp,       str(datetime.datetime.now()),
@@ -839,9 +842,9 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     if not pilatus_path.endswith("/"):
         pilatus_path += "/"        # area detector needs this
     local_name = os.path.join(SAXSscan_path, SAXS_file_name)
-    print(f"Area Detector HDF5 file: {local_name}")
+    logger.info(f"Area Detector HDF5 file: {local_name}")
     pilatus_name = os.path.join(pilatus_path, SAXS_file_name)
-    print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
+    logger.info(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
 
     yield from bps.mv(
         saxs_det.hdf1.file_name, scan_title_clean,
@@ -954,15 +957,15 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
      """
     yield from IfRequestedStopBeforeNextScan()
 
-    print(f"waxsx start collection ={waxsx.position}")
+    logger.debug(f"waxsx start collection ={waxsx.position}")
 
     yield from before_plan()    # MUST come before mode_WAXS since it might tune
 
-    print(f"waxsx after before plan ={waxsx.position}")
+    logger.debug(f"waxsx after before plan ={waxsx.position}")
 
     yield from mode_WAXS()
 
-    print(f"waxsx after mode_WAXS ={waxsx.position}")
+    logger.debug(f"waxsx after mode_WAXS ={waxsx.position}")
 
     yield from bps.mv(
         usaxs_slit.v_size, terms.SAXS.v_size.value,
@@ -999,9 +1002,9 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     if not pilatus_path.endswith("/"):
         pilatus_path += "/"        # area detector needs this
     local_name = os.path.join(WAXSscan_path, WAXS_file_name)
-    print(f"Area Detector HDF5 file: {local_name}")
+    logger.info(f"Area Detector HDF5 file: {local_name}")
     pilatus_name = os.path.join(pilatus_path, WAXS_file_name)
-    print(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
+    logger.info(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
 
     yield from bps.mv(
         waxs_det.hdf1.file_name, scan_title_clean,
@@ -1080,7 +1083,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
 
-    print(f"waxsx before Image collection={waxsx.position}")
+    logger.debug(f"waxsx before Image collection={waxsx.position}")
 
     yield from areaDetectorAcquire(waxs_det, md=_md)
     ts = str(datetime.datetime.now())

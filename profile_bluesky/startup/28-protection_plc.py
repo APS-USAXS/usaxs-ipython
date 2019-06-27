@@ -1,5 +1,5 @@
-print(__file__)
-print(resource_usage(os.path.split(__file__)[-1]))
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """detector protection PLC"""
 
@@ -44,7 +44,7 @@ class PlcProtectionDevice(Device):
             yield from bps.sleep(self.SLEEP_POLL_s)
             if verbose:
                 elapsed = time.time()-t0
-                print(msg % elapsed)
+                logger.info(msg, elapsed)
         yield from bps.null()   # always yield at least one Msg
     
     def stop_if_tripped(self, verbose=True):
@@ -53,7 +53,7 @@ class PlcProtectionDevice(Device):
         else:
             msg = self.tripped_text
             if verbose:
-                print(msg)
+                logger.warning(msg)
             yield from bps.mv(
                 ti_filter_shutter, "close",
                 user_data.collection_in_progress, 0,     # notify the GUI and others
