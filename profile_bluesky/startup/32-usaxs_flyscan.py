@@ -66,7 +66,7 @@ class UsaxsFlyScanDevice(Device):
                 values.append(missing)
             else:
                 values.append(f"{elapsed:.2f}")
-            values.append(resource_usage("Flyscan"))
+            values.append(resource_usage())
             return "  ".join([f"{s:11}" for s in values])
 
         @APS_plans.run_in_thread

@@ -85,5 +85,6 @@ def print_RE_md(dictionary=None, fmt="simple"):
     md = dict(dictionary)   # copy of input for editing
     v = dictionary_table(md["versions"], fmt=fmt)   # sub-table
     md["versions"] = str(v).rstrip()
-    logger.info("RunEngine metadata dictionary:")
-    logger.info(dictionary_table(md, fmt=fmt))
+    msg = ("RunEngine metadata dictionary:\n")
+    msg += str(dictionary_table(md, fmt=fmt))
+    logger.info(msg)
