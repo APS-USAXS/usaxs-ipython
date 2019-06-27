@@ -142,15 +142,15 @@ def _tune_base_(axis, md={}):
     )
 
     found = axis.tuner.peak_detected()
-    logger.info("axis: " + axis.name)
+    logger.info(f"axis: {axis.name}")
     logger.info(f"starting position: {axis_start}")
     logger.info(f"peak detected: {found}")
     if found:
-        logger.info("  max: {axis.tuner.peaks.max}")
-        logger.info("  center: {axis.tuner.peaks.cen}")
-        logger.info("  centroid: {axis.tuner.peaks.com}")
-        logger.info("  fwhm: {axis.tuner.peaks.fwhm}")
-    logger.info("final position: {axis.position}")
+        logger.info(f"  max: {axis.tuner.peaks.max}")
+        logger.info(f"  center: {axis.tuner.peaks.cen}")
+        logger.info(f"  centroid: {axis.tuner.peaks.com}")
+        logger.info(f"  fwhm: {axis.tuner.peaks.fwhm}")
+    logger.info(f"final position: {axis.position}")
 
 
 def tune_mr(md={}):
