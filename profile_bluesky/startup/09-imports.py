@@ -64,7 +64,7 @@ from apstools.devices import Struck3820
 from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 
-from usaxs_support.saveFlyData import SaveFlyScan, flyscan_prep
+from usaxs_support.saveFlyData import SaveFlyScan
 from usaxs_support.surveillance import instrument_archive
 
 import pyRestTable

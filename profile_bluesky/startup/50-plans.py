@@ -95,9 +95,6 @@ def before_command_list(md={}, commands=None):
             [upd_controls, I0_controls, I00_controls, trd_controls],
         )
 
-    # run any steps (such as metadata PV connections) if any fly scans
-    prep = flyscan_prep(commands)   # TODO: prep object must be findable by SaveFlyData
-
     # reset the ranges to be used when tuning optical axes (issue #129)
     # These routines are defined in file: 29-axis-tuning.py
     yield from instrument_default_tune_ranges()
