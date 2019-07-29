@@ -140,8 +140,10 @@ class NeXus_Structure(object):
     
     def _connect_ophyd(self):
         pvlist = [pv.pvname for pv in self.pv_registry.values()]
-        xref = APS_utils.connect_pvlist(pvlist)
-        print(xref)
+        xref = APS_utils.connect_pvlist(pvlist, wait=False)
+        for signal, item in zip(xref.values(), self.pv_registry.values()):
+            if signal.pvname == item.pvname:
+                item.ophyd_signal = signal
 
 
 def getGroupObjectByXmlNode(xml_node, manager):
