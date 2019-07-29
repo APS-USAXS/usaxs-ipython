@@ -567,6 +567,11 @@ def developer2():
     sfs.saveFile()
 
 
+def flyscan_prep(commands=[]):
+    prep = {}   # TODO: could be a (module) global variable, findable from SaveFlyData
+    return prep
+
+
 if __name__ == '__main__':
     # main()  # production system
     # developer()
