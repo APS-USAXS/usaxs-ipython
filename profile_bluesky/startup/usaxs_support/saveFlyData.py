@@ -33,6 +33,8 @@ path = os.path.dirname(__file__)
 XML_CONFIGURATION_FILE = os.path.join(path, 'saveFlyData.xml')
 XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 
+# TODO: refactor
+# see: https://github.com/APS-USAXS/ipython-usaxs/issues/276#issuecomment-516027300
 field_registry = {}    # key: node/@label,        value: Field_Specification object
 group_registry = {}    # key: HDF5 absolute path, value: Group_Specification object
 link_registry = {}     # key: node/@label,        value: Link_Specification object
