@@ -487,7 +487,7 @@ def measure_SAXS_Transmission(md={}):
     logger.info(msg)
 
 
-@APS_plans.run_in_thread
+@APS_utils.run_in_thread
 def remaining_time_reporter(title, duration_s, interval_s=5, poll_s=0.05):
     if duration_s < interval_s:
         return
