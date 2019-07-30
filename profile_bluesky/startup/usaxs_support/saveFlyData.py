@@ -62,38 +62,26 @@ class SaveFlyScan(object):
         
         note: not for production use in bluesky
               this routine is used for development code
+        
+        TODO: consider refactor to BS plan (subscribe, status objects, ...)
         """
         import epics
+        logger.warning("import epics : refactor for bluesky/ophyd")
+        logger.warning("make this a bluesky plan")
         def keep_waiting():
             triggered = self.trigger.get() in self.trigger_accepted_values
-            #time_remains = quitting_time >= datetime.datetime.now()
-            #if not time_remains:
-            #    raise TimeoutException()
             return not triggered
-        # FIXME: for bluesky ops and REMOVE calls to epics.
+
         self.trigger = epics.PV(self.trigger_pv)
-        #timeout_s = max(0, epics.caget(self.scantime_pv))
-        #quitting_time = datetime.datetime.now() + datetime.timedelta(seconds=(timeout_s+70))
         epics.caput(self.flyScanNotSaved_pv, 1)
-        #!# measure amount of time spent in next step and write to a PV
-        #!t0 = time.time()
-        self.preliminaryWriteFile()        # file is already open, write preliminary data
-        #!t1 = time.time()
-        #!epics.caput('9idcLAX:float15.DESC', 'preliminaryWriteFile()')
-        #!epics.caput('9idcLAX:float15', t1 - t0)
-        #!# measure amount of time spent in next step and write to a PV
-        #!t0 = time.time()
+        # file is open now, write preliminary data
+        self.preliminaryWriteFile()
+
         while keep_waiting():
             time.sleep(self.trigger_poll_interval_s)
-        #!t1 = time.time()
-        #!epics.caput('9idcLAX:float16.DESC', 'keep_waiting()')
-        #!epics.caput('9idcLAX:float16', t1 - t0)
-        #!# measure amount of time spent in next step and write to a PV
-        #!t0 = time.time()
-        self.saveFile()                    # write the remaining data and close the file
-        #!t1 = time.time()
-        #!epics.caput('9idcLAX:float17.DESC', 'saveFile()')
-        #!epics.caput('9idcLAX:float17', t1 - t0)
+
+        # write the remaining data and close the file
+        self.saveFile()
         epics.caput(self.flyScanNotSaved_pv, 0)
 
     def preliminaryWriteFile(self):
@@ -111,8 +99,10 @@ class SaveFlyScan(object):
             if not isinstance(value, numpy.ndarray):
                 value = [value]
             else:
-                if pv_spec.length_limit and pv_spec.length_limit in self.mgr.pv_registry:
-                    length_limit = self.mgr.pv_registry[pv_spec.length_limit].ophyd_signal.get()
+                lim = pv_spec.length_limit
+                pv_reg = self.mgr.pv_registry
+                if lim and lim in pv_reg:
+                    length_limit = pv_reg[lim].ophyd_signal.get()
                     if len(value) > length_limit:
                         value = value[:length_limit]
 
