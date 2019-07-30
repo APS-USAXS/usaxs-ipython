@@ -24,6 +24,7 @@ import logging
 from apstools import utils as APS_utils
 from lxml import etree as lxml_etree
 import os
+import socket
 import time
 
 
@@ -327,7 +328,7 @@ def _developer():
     developer's scratch space
     """
     print("basic tests while developing this module")
-    assert manager == None, "starting condition should be None"
+    assert manager is None, "starting condition should be None"
 
     config_file = XML_CONFIGURATION_FILE
 
@@ -339,7 +340,7 @@ def _developer():
     assert boss == mgr, "identical to first structure"
 
     reset_manager()
-    assert manager == None, "structure reset"
+    assert manager is None, "structure reset"
 
     mgr = get_manager(config_file)
     assert isinstance(mgr, NeXus_Structure), "new structure created"
@@ -351,15 +352,24 @@ def _developer():
     assert len(mgr.pv_registry) > 0
 
     t0 = time.time()
+    timeout = 2.0
     mgr._connect_ophyd()
     for _i in range(500):   # limited wait to connect
         verdict = mgr.connected
-        logger.debug(f"connected: {verdict}  time:{time.time()-t0}")
-        if verdict:
+        t = time.time() - t0
+        logger.debug(f"connected: {verdict}  time:{t}")
+        if verdict or t > timeout:
             break       # seems to take about 60-70 ms with current XML file
         time.sleep(0.005)
-    assert mgr.connected
-    logger.debug(f"connected {len(mgr.pv_registry)} PVs in {time.time()-t0:.04f} s")
+    
+    workstation = socket.gethostname()
+    if workstation.find("usaxscontrol") >= 0:
+        assert mgr.connected
+
+    conn = [pv
+            for pv in mgr.pv_registry.values()
+            if pv.ophyd_signal.connected]
+    logger.debug(f"connected {len(conn)} of {len(mgr.pv_registry)} PVs in {time.time()-t0:.04f} s")
 
 
 if __name__ == "__main__":
