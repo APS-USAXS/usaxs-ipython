@@ -21,8 +21,8 @@ INTERNAL
 """
 
 import logging
-from apstools import utils as APS_utils
 from lxml import etree as lxml_etree
+from ophyd import Component, EpicsSignal
 import os
 import socket
 import time
@@ -38,6 +38,10 @@ XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 TRIGGER_POLL_INTERVAL_s = 0.1
 
 manager = None # singleton instance of NeXus_Structure
+
+
+class EpicsSignalDesc(EpicsSignal):
+    desc = Component(EpicsSignal, ".DESC")
 
 
 def reset_manager():
@@ -144,11 +148,15 @@ class NeXus_Structure(object):
         self.configured = True
 
     def _connect_ophyd(self):
-        pvlist = [pv.pvname for pv in self.pv_registry.values()]
-        xref = APS_utils.connect_pvlist(pvlist, wait=False)
-        for signal, item in zip(xref.values(), self.pv_registry.values()):
-            if signal.pvname == item.pvname:
-                item.ophyd_signal = signal
+        for i, pv in enumerate(self.pv_registry.values()):
+            oname = f"metadata_{i+1:04d}"
+            if pv.pvname.find(".") < 0:
+                creator = EpicsSignalDesc
+            else:
+                # includes a field as p[art of pvname
+                # cannot attach .DESC as suffix to this
+                creator = EpicsSignal
+            pv.ophyd_signal = creator(pv.pvname, name=oname)
 
     @property
     def connected(self):
