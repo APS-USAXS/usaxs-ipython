@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-save data from USAXS Fly scans in NeXus HDF5 files 
+save data from USAXS Fly scans in NeXus HDF5 files
 
 PUBLIC FUNCTIONS
 
@@ -24,6 +24,7 @@ import logging
 from apstools import utils as APS_utils
 from lxml import etree as lxml_etree
 import os
+import time
 
 
 logger = logging.getLogger(os.path.split(__file__)[-1])
@@ -41,7 +42,7 @@ manager = None # singleton instance of NeXus_Structure
 def reset_manager():
     """
     clear the NeXus structure manager
-    
+
     The configuration file must be parsed the next time the
     structure manager object is requested using ``get_manager()``.
     """
@@ -53,8 +54,8 @@ def reset_manager():
 def get_manager(config_file):
     """
     return a reference to the NeXus structure manager
-    
-    If the manager is not defined (``None``), then create a 
+
+    If the manager is not defined (``None``), then create a
     new instance of ``NeXus_Structure()``.
     """
     global manager
@@ -68,7 +69,7 @@ class NeXus_Structure(object):
     """
     parse XML configuration, layout structure of HDF5 file, define PVs in ophyd
     """
-    
+
     def __init__(self, config_file):
         self.config_filename = config_file
 
@@ -105,7 +106,7 @@ class NeXus_Structure(object):
         node = root.xpath('/saveFlyData/triggerPV')[0]
         self.trigger_pv = node.attrib['pvname']
         acceptable_values = (
-            int(node.attrib['done_value']), 
+            int(node.attrib['done_value']),
             node.attrib['done_text'],
             )
         self.trigger_accepted_values = acceptable_values
@@ -128,22 +129,28 @@ class NeXus_Structure(object):
         nx_structure = root.xpath('/saveFlyData/NX_structure')[0]
         for node in nx_structure.xpath('//group'):
             Group_Specification(node, self)
- 
+
         for node in nx_structure.xpath('//field'):
             Field_Specification(node, self)
- 
+
         for node in nx_structure.xpath('//PV'):
             PV_Specification(node, self)
- 
+
         for node in nx_structure.xpath('//link'):
             Link_Specification(node, self)
-    
+
     def _connect_ophyd(self):
         pvlist = [pv.pvname for pv in self.pv_registry.values()]
         xref = APS_utils.connect_pvlist(pvlist, wait=False)
         for signal, item in zip(xref.values(), self.pv_registry.values()):
             if signal.pvname == item.pvname:
                 item.ophyd_signal = signal
+
+    @property
+    def connected(self):
+        arr = [pv.ophyd_signal.connected
+               for pv in self.pv_registry.values()]
+        return not (False in arr)
 
 
 def getGroupObjectByXmlNode(xml_node, manager):
@@ -281,6 +288,7 @@ class PV_Specification(object):
         # _s = xml_element_node.attrib.get('string', "false")
         # print(f"PV: {self.pvname}  string:{self.as_string}  node:{_s}")
         self.pv = None
+        self.ophyd_signal = None
         aas = xml_element_node.attrib.get('acquire_after_scan', 'false')
         self.acquire_after_scan = aas.lower() in ('t', 'true')
 
@@ -334,11 +342,21 @@ def _developer():
     assert isinstance(mgr, NeXus_Structure), "new structure created"
     assert boss != mgr, "new structure different from first structure"
     del boss
-    
+
     mgr._read_configuration()
     assert mgr.trigger_poll_interval_s == TRIGGER_POLL_INTERVAL_s
     assert len(mgr.pv_registry) > 0
+
+    t0 = time.time()
     mgr._connect_ophyd()
+    for _i in range(500):   # limited wait to connect
+        verdict = mgr.connected
+        logger.debug(f"connected: {verdict}  time:{time.time()-t0}")
+        if verdict:
+            break       # seems to take about 60-70 ms with current XML file
+        time.sleep(0.005)
+    assert mgr.connected
+    logger.debug(f"connected {len(mgr.pv_registry)} PVs in {time.time()-t0:.04f} s")
 
 
 if __name__ == "__main__":
