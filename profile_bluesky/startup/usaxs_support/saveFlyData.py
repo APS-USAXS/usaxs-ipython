@@ -8,7 +8,6 @@ save EPICS data from USAXS Fly Scan to a NeXus file
 
 import datetime
 import logging
-from lxml import etree as lxml_etree
 import numpy
 import os
 import sys
@@ -67,7 +66,13 @@ class SaveFlyScan(object):
         self._prepare_to_acquire()
 
     def waitForData(self):
-        '''wait until the data is ready, then save it'''
+        """
+        wait until the data is ready, then save it
+        
+        note: not for production use in bluesky
+              this routine is used for development code
+        """
+        import epics
         def keep_waiting():
             triggered = self.trigger.get() in self.trigger_accepted_values
             #time_remains = quitting_time >= datetime.datetime.now()
@@ -346,6 +351,7 @@ def developer():
 
 
 def developer2():
+    """this is what USAXS FlyScan uses"""
     sfs = SaveFlyScan("/tmp/sfs.h5", XML_CONFIGURATION_FILE)
     sfs.preliminaryWriteFile()
     sfs.saveFile()
