@@ -34,6 +34,7 @@ XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 
 
 class TimeoutException(Exception): pass
+class EpicsNotConnected(Exception): pass
 
 
 class SaveFlyScan(object):
@@ -53,16 +54,6 @@ class SaveFlyScan(object):
         self.config_file = config_file or os.path.join(path, XML_CONFIGURATION_FILE)
         
         self.mgr = nexus.get_manager(self.config_file)
-        if not self.mgr.configured:
-            self.mgr._read_configuration()
-            t0 = time.time()
-            self.mgr._connect_ophyd()
-            for _i in range(50):   # limited wait to connect
-                verdict = self.mgr.connected
-                logger.debug(f"connected: {verdict}  time:{time.time()-t0}")
-                if verdict:
-                    break       # seems to take about 60-70 ms with current XML file
-                time.sleep(0.01)
         self._prepare_to_acquire()
 
     def waitForData(self):
@@ -193,10 +184,19 @@ class SaveFlyScan(object):
         return os.path.split(os.path.abspath(__file__))[0]
 
     def _prepare_to_acquire(self):
-        '''connect to EPICS and create the HDF5 file and structure'''
-        # connect to EPICS PVs
-        for pv_spec in self.mgr.pv_registry.values():
-            pv_spec.pv = epics.PV(pv_spec.pvname)
+        '''connect with EPICS and create HDF5 file and structure'''
+        if not self.mgr.configured:
+            self.mgr._read_configuration()
+            t0 = time.time()
+            self.mgr._connect_ophyd()
+            for _i in range(50):   # limited wait to connect
+                verdict = self.mgr.connected
+                logger.debug(f"connected: {verdict}  time:{time.time()-t0}")
+                if verdict:
+                    break       # seems to take about 60-70 ms with current XML file
+                time.sleep(0.01)
+
+        #TODO: if not mgr.connected: raise EpicsNotConnected()
 
         # create the file
         for key, xture in sorted(self.mgr.group_registry.items()):
@@ -204,17 +204,15 @@ class SaveFlyScan(object):
                 # create the file and internal structure
                 f = h5py.File(self.hdf5_file_name, "w")
                 # the following are attributes to the root element of the HDF5 file
-                addAttributes(f,
-                    **dict(
-                        file_name = self.hdf5_file_name,
-                        creator = __file__,
-                        creator_version = self.creator_version,
-                        creator_config_file = self.config_file,
-                        HDF5_Version = h5py.version.hdf5_version,
-                        h5py_version = h5py.version.version,
-                        # NX_class = "NXroot",    # not illegal, *never* used
-                    )
-                )
+                root_attrs = {}
+                root_attrs["file_name"] = self.hdf5_file_name
+                root_attrs["creator"] = __file__
+                root_attrs["creator_version"] = self.creator_version
+                root_attrs["creator_config_file"] = self.config_file
+                root_attrs["HDF5_Version"] = h5py.version.hdf5_version
+                root_attrs["h5py_version"] = h5py.version.version
+                # root_attrs["NX_class"] = "NXroot",    # not illegal, *never* used
+                addAttributes(f, **root_attrs)
                 xture.hdf5_group = f
             else:
                 hdf5_parent = xture.group_parent.hdf5_group
@@ -237,15 +235,17 @@ class SaveFlyScan(object):
 
     def _attachEpicsAttributes(self, node, pv):
         '''attach common attributes from EPICS to the HDF5 tree node'''
-        pvname = os.path.splitext(pv.pvname)[0]
-        # TODO: Add .DESC field to EpicsSignal
-        desc = epics.caget(pvname+'.DESC') or ''
-        addAttributes(node, **dict(
-            epics_pv = pv.pvname.encode('utf8'),
-            units = (pv.units or '').encode('utf8'),
-            epics_type = pv.type,
-            epics_description = desc.encode('utf8')
-        ))
+        if hasattr(pv.ophyd_signal, "desc"):
+            desc = pv.ophyd_signal.desc.value
+        else:
+            desc = ''
+
+        attr = {}
+        attr["epics_pv"] = pv.pvname.encode('utf8')
+        attr["units"] = (pv.units or '').encode('utf8')
+        attr["epics_type"] = pv.type
+        attr["epics_description"] = desc.encode('utf8')
+        addAttributes(node, **attr)
 
 
 def makeDataset(parent, name, data = None, **attr):
