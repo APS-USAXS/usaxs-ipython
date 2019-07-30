@@ -72,6 +72,7 @@ class NeXus_Structure(object):
 
     def __init__(self, config_file):
         self.config_filename = config_file
+        self.configured = False
 
         self.field_registry = {}    # key: node/@label,        value: Field_Specification object
         self.group_registry = {}    # key: HDF5 absolute path, value: Group_Specification object
@@ -138,6 +139,8 @@ class NeXus_Structure(object):
 
         for node in nx_structure.xpath('//link'):
             Link_Specification(node, self)
+
+        self.configured = True
 
     def _connect_ophyd(self):
         pvlist = [pv.pvname for pv in self.pv_registry.values()]
