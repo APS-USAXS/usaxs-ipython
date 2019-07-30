@@ -196,7 +196,7 @@ class SaveFlyScan(object):
                     break       # seems to take about 60-70 ms with current XML file
                 time.sleep(0.01)
 
-        #TODO: if not mgr.connected: raise EpicsNotConnected()
+        #TODO: short wait, then if not mgr.connected: raise EpicsNotConnected()
 
         # create the file
         for key, xture in sorted(self.mgr.group_registry.items()):
