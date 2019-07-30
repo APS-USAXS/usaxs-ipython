@@ -21,4 +21,4 @@ mViewer.log
 20*.dat
 
 # logging
-.ipython_console.log*
+.ipython_*.log*
