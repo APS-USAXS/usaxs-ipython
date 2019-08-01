@@ -223,14 +223,12 @@ class UserDataDevice(Device):
 
     def set_state_plan(self, msg):
         """plan: tell EPICS about what we are doing"""
-        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
-        msg = trim_string_for_EPICS(msg)
+        msg = APS_utils.trim_string_for_EPICS(msg)
         yield from bps.abs_set(self.state, msg)
 
     def set_state_blocking(self, msg):
         """ophyd: tell EPICS about what we are doing"""
-        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
-        msg = trim_string_for_EPICS(msg)
+        msg = APS_utils.trim_string_for_EPICS(msg)
         self.state.put(msg)
 
 
