@@ -691,7 +691,7 @@ class Linkam_T96(APS_devices.ProcessController):
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
 
-        msg = f"Set {self.controller_name} to {set_point:.2f}{self.units.value}"
+        msg = f"Set {self.controller_name} to {self.target.setpoint:.2f}{self.units.value}"
         specwriter._cmt("event", msg)
         logger.info(msg)
         
