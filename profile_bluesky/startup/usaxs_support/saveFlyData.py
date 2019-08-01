@@ -26,6 +26,7 @@ import h5py
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
 from . import nexus
+# import nexus    # when testing this module directly
 
 
 path = os.path.dirname(__file__)
@@ -52,22 +53,23 @@ class SaveFlyScan(object):
 
         path = self._get_support_code_dir()
         self.config_file = config_file or os.path.join(path, XML_CONFIGURATION_FILE)
-        
+
         self.mgr = nexus.get_manager(self.config_file)
         self._prepare_to_acquire()
 
     def waitForData(self):
         """
         wait until the data is ready, then save it
-        
+
         note: not for production use in bluesky
               this routine is used for development code
-        
+
         TODO: consider refactor to BS plan (subscribe, status objects, ...)
         """
         import epics
         logger.warning("import epics : refactor for bluesky/ophyd")
         logger.warning("make this a bluesky plan")
+        raise RuntimeWarning("Need to refactor as BS plan")
         def keep_waiting():
             triggered = self.trigger.get() in self.trigger_accepted_values
             return not triggered
@@ -113,7 +115,7 @@ class SaveFlyScan(object):
                 if ds is None:
                     logger.debug(f"Could not create {pv_spec.label}")
                     continue
-                self._attachEpicsAttributes(ds, pv_spec.pv)
+                self._attachEpicsAttributes(ds, pv_spec)
                 addAttributes(ds, **pv_spec.attrib)
             #except Exception as e:
             except IOError as e:
@@ -153,7 +155,7 @@ class SaveFlyScan(object):
             try:
                 logger.debug(f"saveFile(name=\"{pv_spec.label}\", data={value})")
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
-                self._attachEpicsAttributes(ds, pv_spec.pv)
+                self._attachEpicsAttributes(ds, pv_spec)
                 addAttributes(ds, **pv_spec.attrib)
             except Exception as e:
                 logger.debug("saveFile():")
@@ -232,8 +234,16 @@ class SaveFlyScan(object):
 
         attr = {}
         attr["epics_pv"] = pv.pvname.encode('utf8')
-        attr["units"] = (pv.units or '').encode('utf8')
-        attr["epics_type"] = pv.type
+        if hasattr(pv, "units"):
+            t = pv.units
+        else:
+            t = ""
+        attr["units"] = t.encode('utf8')
+        if hasattr(pv, "type"):
+            t = pv.type
+        else:
+            t = ""
+        attr["epics_type"] = t
         attr["epics_description"] = desc.encode('utf8')
         addAttributes(node, **attr)
 
@@ -268,12 +278,16 @@ def makeDataset(parent, name, data = None, **attr):
             if len(data) == 1 and isinstance(data[0], str):
                 data = [numpy.string_(data[0])]
                 logger.debug("converting [string] to [numpy.string_]")
-            logger.debug("makeDataset(name=\"%s\", data=%s)" % (name, str(data)))
+            logger.debug(f"makeDataset(name='{name}', data={data})")
             obj = parent.create_dataset(name, data=data)
         except TypeError as _exc:
             logger.debug(f"Could not save name = {name} : {_exc}")
             obj = None
             # raise _exc            # if want to re-raise the exception
+        except Exception as _exc:
+            logger.debug(f"Unexpected Exception: {name} : {_exc}")
+            obj = None
+
         #obj = parent.create_dataset(name, data=data, compression="gzip")
         #obj = parent.create_dataset(name, data=data, compression="lzf")
     if obj is not None:
