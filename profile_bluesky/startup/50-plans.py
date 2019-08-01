@@ -127,6 +127,10 @@ def before_command_list(md={}, commands=None):
     if commands is not None:
         postCommandsListfile2WWW(commands)
 
+    # force the next FlyScan to reload the metadata configuration
+    # which forces a (re)connection to the EPICS PVs
+    reset_manager()
+
 
 def after_command_list(md={}):
     """
