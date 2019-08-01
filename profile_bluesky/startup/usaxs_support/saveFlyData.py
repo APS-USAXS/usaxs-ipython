@@ -70,7 +70,7 @@ class SaveFlyScan(object):
         logger.warning("import epics : refactor for bluesky/ophyd")
         logger.warning("make this a bluesky plan")
         raise RuntimeWarning("Need to refactor as BS plan")
-        def keep_waiting():         # lgtm [py/unreachable-statement] 
+        def keep_waiting():         # lgtm [py/unreachable-statement]
             triggered = self.trigger.get() in self.trigger_accepted_values
             return not triggered
 
@@ -177,9 +177,9 @@ class SaveFlyScan(object):
 
     def _prepare_to_acquire(self):
         '''connect with EPICS and create HDF5 file and structure'''
+        t0 = time.time()
         if not self.mgr.configured:
             self.mgr._read_configuration()
-            t0 = time.time()
             self.mgr._connect_ophyd()
             for _i in range(50):   # limited wait to connect
                 verdict = self.mgr.connected
@@ -189,6 +189,12 @@ class SaveFlyScan(object):
                 time.sleep(0.01)
 
         #TODO: short wait, then if not mgr.connected: raise EpicsNotConnected()
+        connect_timeout = 3.0
+        while not self.mgr.connected:
+            if time.time() - t0 > connect_timeout:
+                raise EpicsNotConnected()
+            time.sleep(0.1)
+
 
         # create the file
         for key, xture in sorted(self.mgr.group_registry.items()):
