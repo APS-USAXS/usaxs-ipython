@@ -1073,7 +1073,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
         scaler0.delay, 0,
         terms.SAXS_WAXS.start_exposure_time, ts,
-        user_data.state, f"WAXS collection for {terms.SAXS.acquire_time.value} s",
+        user_data.state, f"WAXS collection for {terms.WAXS.acquire_time.value} s",
     )
 
     yield from bps.mv(
