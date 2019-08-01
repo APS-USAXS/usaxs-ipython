@@ -108,7 +108,7 @@ class DCM_Feedback(Device):
     def is_on(self):
         return self.on.value == 1
 
-    @APS_plans.run_in_thread
+    @APS_utils.run_in_thread
     def _send_emails(self, subject, message):
         email_notices.send(subject, message)
 

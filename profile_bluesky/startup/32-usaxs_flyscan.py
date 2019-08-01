@@ -69,7 +69,7 @@ class UsaxsFlyScanDevice(Device):
             values.append(resource_usage())
             return "  ".join([f"{s:11}" for s in values])
 
-        @APS_plans.run_in_thread
+        @APS_utils.run_in_thread
         def progress_reporting():
             logger.debug("progress_reporting has arrived")
             t = time.time()
@@ -94,7 +94,7 @@ class UsaxsFlyScanDevice(Device):
             else:
                 logger.debug(f"{time.time()-self.t0}s - progress_reporting is done")
 
-        @APS_plans.run_in_thread
+        @APS_utils.run_in_thread
         def prepare_HDF5_file():
             fname = os.path.abspath(self.saveFlyData_HDF5_dir)
             if not os.path.exists(fname):
@@ -128,7 +128,7 @@ class UsaxsFlyScanDevice(Device):
             self.saveFlyData.preliminaryWriteFile()
             logger.debug(resource_usage("after saveFlyData.preliminaryWriteFile()"))
 
-        @APS_plans.run_in_thread
+        @APS_utils.run_in_thread
         def finish_HDF5_file():
             if self.saveFlyData is None:
                 raise RuntimeError("Must first call prepare_HDF5_file()")
