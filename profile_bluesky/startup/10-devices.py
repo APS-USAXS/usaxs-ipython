@@ -221,16 +221,14 @@ class UserDataDevice(Device):
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
 
-    def set_state_plan(self, msg):
+    def set_state_plan(self, msg, confirm=True):
         """plan: tell EPICS about what we are doing"""
-        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
-        msg = trim_string_for_EPICS(msg)
-        yield from bps.mv(self.state, msg)
+        msg = APS_utils.trim_string_for_EPICS(msg)
+        yield from bps.abs_set(self.state, msg, wait=confirm)
 
     def set_state_blocking(self, msg):
         """ophyd: tell EPICS about what we are doing"""
-        # TODO: msg = APS_utils.trim_string_for_EPICS(msg)
-        msg = trim_string_for_EPICS(msg)
+        msg = APS_utils.trim_string_for_EPICS(msg)
         self.state.put(msg)
 
 
@@ -692,7 +690,7 @@ class Linkam_T96(APS_devices.ProcessController):
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
 
-        msg = f"Set {self.controller_name} to {set_point:.2f}{self.units.value}"
+        msg = f"Set {self.controller_name} to {self.target.setpoint:.2f}{self.units.value}"
         specwriter._cmt("event", msg)
         logger.info(msg)
         

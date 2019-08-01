@@ -128,7 +128,7 @@ def _tune_base_(axis, md={}):
     satisfies: report of tuning OK/not OK on console
     """
     yield from IfRequestedStopBeforeNextScan()
-    logger.info("tuning axis: ", axis.name)
+    logger.info(f"tuning axis: {axis.name}")
     axis_start = axis.position
     yield from bps.mv(
         mono_shutter, "open",
