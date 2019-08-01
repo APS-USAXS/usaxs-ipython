@@ -70,7 +70,7 @@ class SaveFlyScan(object):
         logger.warning("import epics : refactor for bluesky/ophyd")
         logger.warning("make this a bluesky plan")
         raise RuntimeWarning("Need to refactor as BS plan")
-        def keep_waiting():
+        def keep_waiting():         # lgtm [py/unreachable-statement] 
             triggered = self.trigger.get() in self.trigger_accepted_values
             return not triggered
 
