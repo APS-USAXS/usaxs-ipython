@@ -21,9 +21,10 @@ INTERNAL
 """
 
 import logging
-from apstools import utils as APS_utils
 from lxml import etree as lxml_etree
+from ophyd import Component, EpicsSignal
 import os
+import socket
 import time
 
 
@@ -37,6 +38,10 @@ XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 TRIGGER_POLL_INTERVAL_s = 0.1
 
 manager = None # singleton instance of NeXus_Structure
+
+
+class EpicsSignalDesc(EpicsSignal):
+    desc = Component(EpicsSignal, ".DESC")
 
 
 def reset_manager():
@@ -72,6 +77,7 @@ class NeXus_Structure(object):
 
     def __init__(self, config_file):
         self.config_filename = config_file
+        self.configured = False
 
         self.field_registry = {}    # key: node/@label,        value: Field_Specification object
         self.group_registry = {}    # key: HDF5 absolute path, value: Group_Specification object
@@ -139,12 +145,18 @@ class NeXus_Structure(object):
         for node in nx_structure.xpath('//link'):
             Link_Specification(node, self)
 
+        self.configured = True
+
     def _connect_ophyd(self):
-        pvlist = [pv.pvname for pv in self.pv_registry.values()]
-        xref = APS_utils.connect_pvlist(pvlist, wait=False)
-        for signal, item in zip(xref.values(), self.pv_registry.values()):
-            if signal.pvname == item.pvname:
-                item.ophyd_signal = signal
+        for i, pv in enumerate(self.pv_registry.values()):
+            oname = f"metadata_{i+1:04d}"
+            if pv.pvname.find(".") < 0:
+                creator = EpicsSignalDesc
+            else:
+                # includes a field as p[art of pvname
+                # cannot attach .DESC as suffix to this
+                creator = EpicsSignal
+            pv.ophyd_signal = creator(pv.pvname, name=oname)
 
     @property
     def connected(self):
@@ -324,7 +336,7 @@ def _developer():
     developer's scratch space
     """
     print("basic tests while developing this module")
-    assert manager == None, "starting condition should be None"
+    assert manager is None, "starting condition should be None"
 
     config_file = XML_CONFIGURATION_FILE
 
@@ -336,7 +348,7 @@ def _developer():
     assert boss == mgr, "identical to first structure"
 
     reset_manager()
-    assert manager == None, "structure reset"
+    assert manager is None, "structure reset"
 
     mgr = get_manager(config_file)
     assert isinstance(mgr, NeXus_Structure), "new structure created"
@@ -348,15 +360,24 @@ def _developer():
     assert len(mgr.pv_registry) > 0
 
     t0 = time.time()
+    timeout = 2.0
     mgr._connect_ophyd()
     for _i in range(500):   # limited wait to connect
         verdict = mgr.connected
-        logger.debug(f"connected: {verdict}  time:{time.time()-t0}")
-        if verdict:
+        t = time.time() - t0
+        logger.debug(f"connected: {verdict}  time:{t}")
+        if verdict or t > timeout:
             break       # seems to take about 60-70 ms with current XML file
         time.sleep(0.005)
-    assert mgr.connected
-    logger.debug(f"connected {len(mgr.pv_registry)} PVs in {time.time()-t0:.04f} s")
+    
+    workstation = socket.gethostname()
+    if workstation.find("usaxscontrol") >= 0:
+        assert mgr.connected
+
+    conn = [pv
+            for pv in mgr.pv_registry.values()
+            if pv.ophyd_signal.connected]
+    logger.debug(f"connected {len(conn)} of {len(mgr.pv_registry)} PVs in {time.time()-t0:.04f} s")
 
 
 if __name__ == "__main__":
