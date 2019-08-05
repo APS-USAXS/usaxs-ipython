@@ -8,6 +8,7 @@ from collections import deque, OrderedDict, defaultdict
 import datetime
 from enum import Enum
 import getpass
+import IPython
 import itertools
 import os
 from pathlib import PurePath
@@ -69,3 +70,5 @@ from usaxs_support.saveFlyData import SaveFlyScan
 from usaxs_support.surveillance import instrument_archive
 
 import pyRestTable
+
+sys.path.append(IPython.paths.get_ipython_dir())
