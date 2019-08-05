@@ -758,3 +758,9 @@ class Linkam_T96(UsaxsProcessController):
             yield from self.wait_until_settled(
                 timeout=timeout, 
                 timeout_fail=timeout_fail)
+
+    # @property
+    # def settled(self):
+    #     """Is signal close enough to target?"""
+    #     print(f"{self.value} C, in position? {self.ramp_at_limit.value}")
+    #     return self.ramp_at_limit.get() in (True, 1, "Yes")
