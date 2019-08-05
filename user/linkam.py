@@ -1,5 +1,6 @@
 # this is a Linkam plan
 
+import time
 
 def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp2, rate2, md={}):
     """
