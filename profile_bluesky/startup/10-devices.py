@@ -580,7 +580,67 @@ class DiagnosticsParameters(Device):
         return self.beam_in_hutch_swait.val.value != 0
 
 
-class Linkam_CI94(APS_devices.ProcessController):
+class UsaxsProcessController(APS_devices.ProcessController):
+    """
+    temporary override
+    
+    see https://github.com/APS-USAXS/ipython-usaxs/issues/292
+    """
+
+    @property
+    def settled(self):
+        """Is signal close enough to target?"""
+        diff = abs(self.signal.get() - self.target.value)
+        return diff <= self.tolerance.value
+
+    def wait_until_settled(self, timeout=None, timeout_fail=False):
+        """
+        plan: wait for controller signal to reach target within tolerance
+        """
+        # see: https://stackoverflow.com/questions/2829329/catch-a-threads-exception-in-the-caller-thread-in-python
+        t0 = time.time()
+        _st = DeviceStatus(self.signal)
+
+        if self.settled:
+            # just in case signal already at target
+            _st._finished(success=True)
+        else:
+            started = False
+    
+            def changing_cb(*args, **kwargs):
+                if started and self.settled:
+                    _st._finished(success=True)
+    
+            token = self.signal.subscribe(changing_cb)
+            started = True
+            report = 0
+            while not _st.done and not self.settled:
+                elapsed = time.time() - t0
+                if timeout is not None and elapsed > timeout:
+                    _st._finished(success=self.settled)
+                    msg = f"{self.controller_name} Timeout after {elapsed:.2f}s"
+                    msg += f", target {self.target.value:.2f}{self.units.value}"
+                    msg += f", now {self.signal.get():.2f}{self.units.value}"
+                    print(msg)
+                    if timeout_fail:
+                        raise TimeoutError(msg)
+                    continue
+                if elapsed >= report:
+                    report += self.report_interval_s
+                    msg = f"Waiting {elapsed:.1f}s"
+                    msg += f" to reach {self.target.value:.2f}{self.units.value}"
+                    msg += f", now {self.signal.get():.2f}{self.units.value}"
+                    print(msg)
+                yield from bps.sleep(self.poll_s)
+
+            self.signal.unsubscribe(token)
+
+        self.record_signal()
+        elapsed = time.time() - t0
+        print(f"Total time: {elapsed:.3f}s, settled:{_st.success}")
+
+
+class Linkam_CI94(UsaxsProcessController):
     """
     Linkam model CI94 temperature controller
     
@@ -640,7 +700,7 @@ class Linkam_CI94(APS_devices.ProcessController):
         return msg
 
 
-class Linkam_T96(APS_devices.ProcessController):
+class Linkam_T96(UsaxsProcessController):
     """
     Linkam model T96 temperature controller
     
