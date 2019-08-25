@@ -1,0 +1,56 @@
+##################################################################
+# S32id pseudo motors's configuration
+# 
+# Created by Xuesong Jiao, May 2006
+# History:
+# X. Jiao May 8,2006 -> added slit1 pseudomotors
+#
+#################################################################
+ 
+# 2011-09-09,JIL: removed these slits since they are no longer used
+# These are the two lines in the config file that setup this "motor controller"
+#PSE_MAC_MOT	 = slit1h 2
+#PSE_MAC_MOT	 = slit1v 2
+
+#pseudo motor for Slit1 Horizontal center and gap
+
+#def slit1h_config(mne, type, unit, module, chan) '{
+#      if (type == "mot")
+#              return "slux sldx"
+#}'
+
+#def slit1h_calc(mne, mode) '{
+#      if (mode == 0) {
+#              if (mne == s1hgap)
+#                      A[mne] = A[sldx] - A[slux]
+#              if (mne == s1hcen)
+#                      A[mne] = (A[sldx] + A[slux])/2
+#      } else {
+#              if (mne == sldx)
+#                      A[mne] = A[s1hcen] + A[s1hgap]/2
+#              if (mne == slux)
+#                      A[mne] = A[s1hcen] - A[s1hgap]/2
+#      }
+#}' 
+
+
+#pseudo motor for Slit1 Vertical center and gap
+
+#def slit1v_config(mne, type, unit, module, chan) '{
+#      if (type == "mot")
+#              return "sluy sldy"
+#}'
+
+#def slit1v_calc(mne, mode) '{
+#      if (mode == 0) {
+#              if (mne == s1vgap)
+#                      A[mne] = A[sldy] - A[sluy]
+#              if (mne == s1vcen)
+#                      A[mne] = (A[sldy] + A[sluy])/2
+#      } else {
+#              if (mne == sldy)
+#                      A[mne] = A[s1vcen] + A[s1vgap]/2
+#              if (mne == sluy)
+#                      A[mne] = A[s1vcen] - A[s1vgap]/2
+#      }
+#}' 

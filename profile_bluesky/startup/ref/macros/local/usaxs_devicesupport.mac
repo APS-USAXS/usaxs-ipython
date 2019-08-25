@@ -1,0 +1,122 @@
+#
+#  usaxs_devicesupport.mac
+#
+#  macros for devices support
+#  maintained by Jan Ilavsky
+#  
+#  
+
+########### SVN repository information ###################
+# $Date: 2018-02-12 14:17:10 -0600 (Mon, 12 Feb 2018) $
+# $Author: ilavsky $
+# $Revision: 1472 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_devicesupport.mac $
+# $Id: usaxs_devicesupport.mac 1472 2018-02-12 20:17:10Z ilavsky $
+########### SVN repository information ###################
+
+
+# this file contains macros for spec support of various devices. 
+
+# Linkam
+
+# RecordLinkamTemp 
+#    this will write temperatures of the Linkam heater in the spec file as comment
+#
+# set_LinkamTemp 50
+#    this will set the target Linkam temperature to 50 degrees. Assumes the Linkam is running (Start was pushed)
+#
+# set_LinkamRate 20
+#     this will set the heating/cooling rate of Linkam to 20 deg/minute
+#
+# WaitLinkamTemp 
+#     this waits until the Linkam is done heating/cooling. And prints some messages to tell you what is happening... 
+def RecordLinkamTemp '{
+     """write temperatures to file"""
+	TEMPLINK = sprintf ("Temperature 1 of Linkam is %g deg C", epics_get("9idcLAX:ci94:temp"))     
+     comment "%s" TEMPLINK 
+#	TEMPLINK = sprintf ("Temperature 2 of Linkam is %g deg C", epics_get("9idcLAX:ci94:temp2"))     
+#    comment "%s" TEMPLINK
+     ###
+}'
+def set_LinkamTemp '{
+    local LA_settemp
+    LA_settemp = ($1)
+    epics_put("9idcLAX:ci94:start", 1)
+    epics_put("9idcLAX:ci94:setLimit", LA_settemp)
+    TEMPLINK = sprintf ("Linkam Set Temperature changed to %g deg C", epics_get("9idcLAX:ci94:setLimit"))
+    comment "%s" TEMPLINK
+}'
+def get_LinkamTemp 'epics_get("9idcLAX:ci94:temp")'
+
+def get_LinkamTemp1 'epics_get("9idcLAX:ci94:temp")'
+
+def set_LinkamRate 'epics_put("9idcLAX:ci94:setRate", $1)'
+
+def WaitLinkamTemp '{
+    local LA_start_time, LA_settemp, LA_readtemp
+    LA_settemp = epics_get("9idcLAX:ci94:setLimit")
+    printf("Waiting for Temperature 1 to reach %g deg C", LA_settemp)
+    LA_start_temp = time()
+
+    LA_readtemp = epics_get("9idcLAX:ci94:temp")
+    while(fabs(LA_readtemp-LA_settemp) > 3){
+        sleep(5)
+        printf("Waited for %d seconds, currently at %g C\r", time()-LA_start_temp, LA_readtemp)
+        LA_readtemp = epics_get("9idcLAX:ci94:temp")
+    }
+}'
+
+
+
+# Euroterm
+def set_EuroTemp '{
+    local LA_settemp
+    LA_settemp = ($1)
+    epics_put("9idcLAX:tc1:SetPointTempWrite", LA_settemp*10)
+    TEMPLINK = sprintf ("Euroterm Set Temperature changed to %g deg C", (epics_get("9idcLAX:tc1:SetPointSensor")/10))
+    comment "%s" TEMPLINK
+}'
+def WaitEuroTemp '{
+    local LA_start_time, LA_settemp, LA_readtemp
+    LA_settemp = epics_get("9idcLAX:tc1:SetPointTempWrite")
+    printf("Waiting for Temperature to reach %g deg C", LA_settemp/10)
+    LA_start_temp = time()
+    LA_readtemp = epics_get("9idcLAX:tc1:SetPointSensor")
+    while(fabs(LA_readtemp-LA_settemp) > 50){
+        sleep(5)
+        printf("Waited for %d seconds, currently at %g C\r", time()-LA_start_temp, LA_readtemp/10)
+        LA_readtemp = epics_get("9idcLAX:tc1:SetPointSensor")
+    }
+}'
+def RecordEuroTemp '{
+     """write temperatures to file"""
+	TEMPLINK = sprintf ("Temperature 1 of Euroterm is %g deg C", (epics_get("9idcLAX:tc1:SetPointSensor")/10))     
+     comment "%s" TEMPLINK 
+     ###
+}'
+
+
+
+# struck
+#def CollectStruck '{
+#    epics_put("9idcLAX:3820:EraseStart", 1)
+#    local WaitForStruck 
+#    WaitForStruck = epics_get("9idcLAX:3820:Acquiring", "short")
+#    while(WaitForStruck ){
+#        sleep(1)
+#        WaitForStruck = epics_get("9idcLAX:3820:Acquiring", "short")
+#    }
+#}'
+#def SaveStruck '{
+#  if( $# != 1) {
+#    printf ("SaveStruck sample_name\n");
+#    exit;
+#  }
+  ## struckSave.sh -f test7.dat -n 200
+#  local StruckFileName, StruckNumChannels, tempStruckName
+#  tempStruckName   = __returnSampleName("$1")
+#  StruckNumChannels = epics_get("9idcLAX:3820:NuseAll")
+#  StruckFileName =sprintf("%s_%s.dat",tempStruckName, int(time()) )
+#  unix( sprintf("struckSave.sh -f %s -n %g", StruckFileName, StruckNumChannels))
+#  comment "Struck data saved into %s" StruckFileName
+#}'

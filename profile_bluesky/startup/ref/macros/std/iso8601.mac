@@ -1,0 +1,48 @@
+"""
+Summary
+=======
+
+Provides function macros to report current date and time
+in ISO-8601 format.
+
+Description
+===========
+
+In NeXus HDF5 files, dates and clock times are represented in 
+ISO8601 format (yyyy-mm-ddThh:mm:ss) or the later modification 
+without the "T" in the middle.  
+The SPEC ``date()`` function returns the date like it is 
+shown from the UNIX command line ``date`` function::
+
+  in RFC 2822 format.  Example: Mon, 07 Aug 2006 12:34:56 -0600
+
+Since we will be writing NeXus HDF5 files, we need standard 
+SPEC functions to get the date from UNIX with the ISO-8601 format.
+
+..  Perhaps there is a better way in SPEC to keep it all internal to SPEC?
+
+:ISO-8601: http://www.w3.org/TR/NOTE-datetime, 
+   http://en.wikipedia.org/wiki/ISO_8601
+
+"""
+
+
+def date_iso8601() '{
+  """return the current date/time in ISO8601 format: yyyy-mm-ddThh:mm:ss"""
+  local iso8601
+  iso8601 = "0000-00-00T00:00:00"
+  unix("date +%Y-%m-%dT%H:%M:%S", iso8601)
+  return iso8601
+}'
+		
+def date_iso8601_modified() '{
+  """
+  return the current date/time in modified ISO8601 format: yyyy-mm-dd hh:mm:ss
+  
+  :see: http://en.wikipedia.org/wiki/ISO_8601#cite_note-17
+  """
+  local iso8601
+  iso8601 = "0000-00-00 00:00:00"
+  unix("date \"+%Y-%m-%d %H:%M:%S\"", iso8601)
+  return iso8601
+}'

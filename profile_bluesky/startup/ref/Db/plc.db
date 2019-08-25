@@ -1,0 +1,8 @@
+record(calcout, "$(P)$(R)")
+{
+  field(DESC, "Countdown timer")
+  field(A,    "$(V)")
+  field(INPB, "$(P)$(T) CP NMS")
+  field(CALC, "(A-B)/10.0")
+  field(PREC, "1")
+}

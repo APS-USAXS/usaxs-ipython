@@ -1,0 +1,400 @@
+#
+#  usaxs_tuning.mac
+#
+#  USAXS-specific macros
+#  maintained by Jan Ilavsky
+#
+#
+# this file contains macros which tune USAXS instrument.... 
+# June 02 - replaced all lax:upd2 with brq:pd01:seq01 to move UPD to e-brick 
+# 2007-09-10,PRJ: replaced all "lax:" with "32idbLAX:"
+# September 27, 2007 replaced all "brq:" with "32idbUSX:" since the PVV names changed. JIL
+# July 26, 2008 - speed up tune_mr and tune_ar
+# October 08, change to EPICS variables
+# June 2009, JIL, add useMSstage for "hybrid" setup, removed unused macros
+# April 2010, JIL. Changed step size for tune_a2rp from 0.25 to 0.35
+# June 2010, XJIAO, Changed 32idbLAX and 32idbUSX to 9idcLAX/USX after moved to 15ID
+# October 2010, JIL, Changed top be able to use Femto300
+# December 2010, PAB, Added command to close CCD shutter when starting a tune to prevent CCD damage if started from radiography mode.
+# February 2012, JIL, MOdified how main tune_usaxs_motor works. 
+# April 6, 2012, JIL, Added autotuning I0 gains
+# June 26, 2012, JIL, modified tuning for I0 and I00 gains to reflect improvements in sequence program.  
+# December 5, 2012 JIL, added globals for tuning macros
+# June 17, 2013, JIL, modified tune_dx to save also in USAXS/SAXS/WAXS position table
+# April 03, 2014, JIL, shorten times for tuning macros 
+# APril 9, 2014, JIL, shortened times for scanning more. 
+#  edit:  2015-03-16, JIL:    added handling for preUSAXStune from epics PVs and fixed bug in preUSAXStune when called from radiography mode (did nto put diode in place). 
+
+# Following tuning macros are available:
+# tune_mr	.... tunes MR, requires parameters - counter (I0 or I00), time, and potentially halfrange  
+# tune_m2rp .... tunes m2rp
+# tune_m2rp_scan .... tunes m2rp using scanning (old method)
+# tune_ar   .... tunes AR, sets AR_VAL_CENTER
+# tune_a2rp .... tunes a2rp 
+# tune_a2rp_scan .... tunes a2rp using scanning (old method)
+# tune_asrp .... tunes asrp, sets ASRP0 
+# tune_msrp .... tunes msrp
+# preUSAXStune   tunes mr, m2rp,ar, and a2rp - if SBUSAXS is used also msrp and asrp
+# tune_sx   .... tunes (centers on the hole) sx
+# tune_sy   .... same sy
+# tune_sample .. tunes sx and then sy
+# tune_dx   .... centers PD on the beam in x direction
+# tune_dy   .... centers PD on beam in y direction
+# tune_diode ... tunes dx and then dy
+# run_preUSAXStuneIfNeeded ... runs preUSAXStuneif asked for or increases the count numbers... 
+
+
+
+###################################################################################
+###################################################################################
+def run_preUSAXStuneIfNeeded'{
+ if( $# != 1) {
+    printf ("usage: preUSAXStuneIfNeeded CalledFromWhere\n")
+    exit;
+  }
+  local CalledFromWhere			## 1 for SAXS/WAXS and 2 for USAXS
+  CalledFromWhere = $1
+  if(CalledFromWhere<1.5){	
+        set_NumScansFromLastTune (NumScansFromLastTune+1)
+        } else {
+        set_NumScansFromLastTune (NumScansFromLastTune+USAXS_tune_USAXSMutliplier)
+  }
+  if(CalledFromWhere>1.5 || RunPreUSAXStuneNext){
+      ### this is USAXS call or user asked for preUSAXS tune by checkbox... 
+     if((ReqNumScansBetweenTune< NumScansFromLastTune) || RunPreUSAXStuneNext || ((time() - EPOCHTimeOfLastTune)>ReqTimeBetweenTune) ) {
+        comment "preUSAXStune requested. Either user asked for it, number of scans or time between tunes reached." 
+        preUSAXStune
+     }
+  }else{
+     ### this is called from SAXS or WAXS, preSWAXStune reacts only to time
+     if(((time() - EPOCHTimeOfLastTune)>ReqTimeBetweenTune) ) {
+        comment "preSWAXStune needed, time between tunes reached." 
+        preSWAXStune
+        #preUSAXStune
+     }
+ 
+  }
+}'
+
+
+
+
+###################################################################################
+  
+def tune_mstage '
+  global useSBUSAXS 
+  global useMSstage
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tune")
+  openMonoShutter
+  usaxs_CheckBeamStandard
+  chk_beam_on
+  autorange_I0I00amps                    # set correctly the gains for I0 and I00
+  tune_mr;                               # tune M stage to monochromator
+  tune_m2rp;                             # tune M stage parallelity
+'
+
+
+###################################################################################
+###################################################################################
+###################################################################################
+  
+def preUSAXStune '
+  DCMfeedbackON
+  closeCCDshutter                         # close CCD shutter in case we are in Radiography mode
+  IfRequestedStopBeforeNextScan           # stop if user chose to do so. 
+  useModeUSAXS                            # should be done only in USAXS mode. 
+  moveDetector DIODE_DX DIODE_DY          # if user was in Radiography mode, move diode in place
+  global useSBUSAXS 
+  global useMSstage
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tune")
+  openMonoShutter
+  usaxs_CheckBeamStandard
+  chk_beam_on
+  set_USAXS_Slits                        # make sure USAXS slits are set correctly...
+  autorange_I0I00amps                    # set correctly the gains for I0 and I00
+  tune_mr;                               # tune M stage to monochromator
+  tune_m2rp;                             # tune M stage paralelity
+  #tune_m2rp_fbe;                         # tune M stage paralelity using feedback
+  if(useSBUSAXS==1||useMSstage==1){tune_msrp} # tune msrp stage
+  if(useSBUSAXS==1){tune_asrp}           # tune asrp stage and set ASRP0 value
+  autorange_UPDI0I00                     # set correctly the ranges for all amplifiers
+  tune_ar ;                              # tune up the analyzer crystal pair
+  autorange_UPDI0I00                     # set correctly the ranges for all amplifiers
+  tune_a2rp ;                            # tune up the analyzer crystal pair
+  #tune_a2rp_fbe                         # using the feedback    
+  printf ("USAXS count time is %g second(s)\n", USAXS_TIME)
+  ct USAXS_TIME
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "pre-USAXS optics tuning done")
+  set_NumScansFromLastTune 0
+  set_RunPreUSAXStuneNext 0
+  set_EPOCHTimeOfLastTune time()
+'
+
+###################################################################################
+###################################################################################
+###################################################################################
+  
+def preSWAXStune '
+  DCMfeedbackON
+  closeCCDshutter                         # close CCD shutter in case we are in Radiography mode
+  IfRequestedStopBeforeNextScan           # stop if user chose to do so. 
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "pre-SAXS/WAXS optics tune")
+  openMonoShutter
+  usaxs_CheckBeamStandard
+  chk_beam_on
+ # epics_put("9idcLAX:GSlit1V:size.VAL",0) # Close Guard slits to 0 to preven any downstream damage
+  move_em; waitmove
+  autorange_I0I00amps                    # set correctly the gains for I0 and I00
+  tune_mr;                               # tune M stage to monochromator
+  tune_m2rp;                             # tune M stage paralelity
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+  epics_put ("9idcLAX:USAXS:state",       "pre-SAXS/WAXS optics tuning done")
+  ##set_RunPreUSAXStuneNext 0
+  set_EPOCHTimeOfLastTune time()
+ # epics_put("9idcLAX:GSlit1V:size.VAL",SAXS_VGSlit) # open Guard slits back. 
+  move_em; waitmove 
+'
+###################################################################################
+###################################################################################
+###################################################################################
+#################################################################################
+###################################################################################
+###################################################################################
+
+def tune_sy 'tune_usaxs_motor sy -10.0 10.0 20 1'
+def tune_sx 'tune_usaxs_motor sx -10.0 10.0 20 1'
+def tune_sample 'tune_sx; tune_sy'
+
+def tune_dy '{
+     tune_usaxs_motor dy -5.0 5.0 20 0.2
+     #save dy position 
+     set_DIODE_DY A[dy]
+     set_DY0 A[dy]
+}'
+
+def tune_dx '{
+     tune_usaxs_motor dx -5.0 5.0 20 0.2
+     #save dx position 
+     set_DIODE_DX A[dx]
+     epics_put("9idcLAX:USAXS_Pin:dx_in", A[dx])
+}'
+def tune_diode 'tune_dx; tune_dy'
+
+###################################################################################
+###################################################################################
+###################################################################################
+def tune_mr '
+     global useSBUSAXS
+     global useMSstage
+     global tune_ok
+     global USAXS_tune_mr_range          # range for tune mr 
+     if(useSBUSAXS==1||useMSstage==1){counters cnt_num(I00) cnt_num(I00)} else {counters cnt_num(I0) cnt_num(I0)}
+     if(useSBUSAXS==1||useMSstage==1){plotselect I00} else {plotselect I0}
+     tune_usaxs_motor mr -1*USAXS_tune_mr_range USAXS_tune_mr_range 30 0.1
+     set_MR_VAL_CENTER A[mr]
+     plotselect upd2
+     counters cnt_num(I0) cnt_num(upd2)
+    '
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tune_ar   '{
+  global USAXS_tune_ar_range          # range for tune ar 
+  local __range
+  local sbMessage1
+  __range = USAXS_tune_ar_range
+  if( $# == 1 ) { __range = $1 }
+ 
+  sbMessage1 = sprintf("Tunning motor Ar, starting condition is %g", A[ar])
+  comment "%s" sbMessage1
+  tune_usaxs_motor ar __range -1*__range 35 0.1
+      # we are now at the top of the AR rocking curve
+      # let us define the beam center as such
+  waitmove; get_angles;
+  sbMessage1 = sprintf("Tunning motor Ar, ending condition is %g", A[ar])
+  comment "%s" sbMessage1
+  # store AR center
+  set_AR_VAL_CENTER A[ar]
+      # remember the Q calculation needs a new 2theta0
+      # use the current AR encoder position
+  epics_put("9idcLAX:USAXS:Q.B", epics_get("9idcLAX:USAXS:Q.A"))
+}'
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tune_a2rp '{
+    global USAXS_tune_a2rp_range        # range for tune a2rp
+    local __range
+    __range = USAXS_tune_a2rp_range
+    if( $# == 1 ) { __range = $1 } 
+    
+	epics_put("9idcLAX:vsc:c0.DLY", 0.02)
+	tune_usaxs_motor a2rp -1*__range __range 30 0.1
+	epics_put("9idcLAX:vsc:c0.DLY", 0.05)
+	# try to approach from the original position since the piezzos seem to have some hysteresis
+	umvr a2rp -0.1
+	sleep(0.2)
+	umv a2rp pl_COM
+}'
+
+def tune_a2rp_fbe '
+    DCMfeedbackOFF
+    openTiFilterShutter
+    epics_put("9idcLAX:fbe:a2rp:on", 1)
+    sleep (M2rpA2rpTuneTime)
+    sbMessage = sprintf("a2rp tunning using feedback for %s seconds", M2rpA2rpTuneTime)
+    comment "%s" sbMessage
+    epics_put("9idcLAX:fbe:a2rp:on", 0)
+    get_angles 
+    DCMfeedbackON
+    closeTiFilterShutter
+    printf ("a2rp0 position for next scan is %g volts [V]\n", A[a2rp])
+'
+ 
+def tune_m2rp_fbe '
+    global useSBUSAXS
+    global useMSstage
+    if(useSBUSAXS==1||useMSstage==1){
+    if(useSBUSAXS==1||useMSstage==1){
+        # use I00 as feedback channel
+        #epics_put("9idcLAX:userAve2.INPB","9idcUSX:ath01:ana01:ai06.VAL")
+    } else {
+        # use I0 as feedback channel
+        #epics_put("9idcLAX:userAve2.INPB","9idcUSX:ath01:ana01:ai05.VAL")
+    }
+    }
+    DCMfeedbackOFF
+    openTiFilterShutter
+    epics_put("9idcLAX:fbe:m2rp:on", 1)
+    sbMessage = sprintf("m2rp tunning using feedback for %s seconds", M2rpA2rpTuneTime)
+    comment "%s" sbMessage
+    sleep (M2rpA2rpTuneTime)
+    epics_put("9idcLAX:fbe:m2rp:on", 0)
+    get_angles 
+    closeTiFilterShutter
+    DCMfeedbackON
+    printf ("m2rp0 position for next scan is %g volts [V]\n", A[m2rp])
+'
+ 
+def tune_m2rp '
+     global useSBUSAXS
+     global useMSstage
+     global tune_ok
+     global USAXS_tune_m2rp_range        # range for tune m2rp 
+	 epics_put("9idcLAX:vsc:c0.DLY", 0.02)
+     if(useSBUSAXS==1||useMSstage==1){counters cnt_num(I00) cnt_num(I00)} else {counters cnt_num(I0) cnt_num(I0)}
+     if(useSBUSAXS==1||useMSstage==1){plotselect I00} else {plotselect I0}
+     tune_usaxs_motor m2rp -1*USAXS_tune_m2rp_range USAXS_tune_m2rp_range 20 0.1
+     if(tune_ok){umv m2rp pl_COM}
+ 	 epics_put("9idcLAX:vsc:c0.DLY", 0.05)
+     plotselect upd2
+     counters cnt_num(I0) cnt_num(upd2)
+'
+
+# for germanium X tals
+# def tune_a2rp_Ge 'tune_usaxs_motor a2rp -0.6 0.4 20 -2e4'
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tune_asrp '{
+   global USAXS_tune_asr_range         # range for tune asr 
+   tune_usaxs_motor asrp -1*USAXS_tune_asr_range USAXS_tune_asr_range 40 0.1
+   # store asrp center
+   set_ASR_VAL_CENTER pl_COM
+   printf ("asrp0 position for next scan is %g volts [V]\n", ASRP0)
+    
+}'
+
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tune_msrp '{
+  global USAXS_tune_msr_range         # range for tune msr 
+  counters cnt_num(I0) cnt_num(I0)
+  plotselect I0
+  tune_usaxs_motor msrp -1*USAXS_tune_msr_range USAXS_tune_msr_range 30 0.1
+  # store msrp center
+  set_MSR_VAL_CENTER pl_COM
+  counters cnt_num(I0) cnt_num(upd2)
+  plotselect upd2
+}'
+###################################################################################
+###################################################################################
+###################################################################################
+###################################################################################
+###################################################################################
+###################################################################################
+
+def tune_usaxs_motor '{
+  #
+  # tune_usaxs_motor uses start and finish in a "lup" (a.k.a. dscan)
+  #
+  local __motor __start __finish __numSteps __time
+  local NO_BEAM_THRESHOLD
+  local sbMessage, _i_
+  local I_HAVE_BEAM
+  local oldtitle
+  global tune_ok
+  global Use_DLPCA300
+
+
+  if( $# != 5) {
+    printf("usage: tune_usaxs_motor motor start finish numSteps time\n");
+    printf("Error: you gave %d parameters\n", $#)
+    exit;
+  }
+  __motor = $1
+  __start = $2
+  __finish = $3
+  __numSteps = $4
+  __time = $5
+  
+  IfRequestedStopBeforeNextScan      ## stop if user requested
+
+  oldtitle = TITLE
+  TITLE = sprintf("tuning USAXS motor %s", \'$1\')
+  epics_put ("9idcLAX:USAXS:sampleTitle", TITLE)
+  comment "%s" TITLE
+
+  NO_BEAM_THRESHOLD = 1000
+
+  epics_put ("9idcLAX:USAXS:userName",    USER)
+  epics_put ("9idcLAX:USAXS:userDir",     CWD)
+  epics_put ("9idcLAX:USAXS:specFile",    DATAFILE)
+  epics_put ("9idcLAX:USAXS:specScan",    SCAN_N+1)
+  epics_put ("9idcLAX:USAXS:scanMacro",   "tune_usaxs_motor")
+  epics_put ("9idcLAX:USAXS:timeStamp",   date())
+
+  closeCCDshutter
+  openMonoShutter
+  openTiFilterShutter
+  sleep(0.1)
+  epics_put ("9idcLAX:USAXS:state", sprintf("%s", "autoranging the PD"))
+  autorange_UPDI0I00                      ; # after this the I0, I00 and UPD are in manual mode...
+  get_angles      # spec seems to be loosing track of motor positions when moved from css/python
+  epics_put ("9idcLAX:USAXS:state", TITLE)
+    
+    lup $1 __finish __start __numSteps __time
+    if (pl_MAX > 4 * pl_MIN) {
+      umv $1 pl_COM
+      sbMessage = sprintf("setting motor %s to %g", motor_mne($1), pl_COM)
+      comment "%s" sbMessage
+      tune_ok = 1
+    } else {
+      sbMessage = sprintf("Could not tune motor %s, no clear peak resolved", motor_mne($1))
+      comment "%s" sbMessage
+      tune_ok = 0
+    }
+    epics_put (sprintf("9idcUSX:%s:mode",PDstring), "2")
+  TITLE = oldtitle
+  closeTiFilterShutter
+  #ct 0.1
+}'

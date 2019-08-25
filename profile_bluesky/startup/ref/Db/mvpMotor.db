@@ -1,0 +1,92 @@
+# incorporates Pete's notions of things we want to have configured
+# 2002-Aug-14
+record(motor, "$(P)$(M)") {
+  field(DESC, "$(DESC)")
+  field(DTYP, "$(DTYP)")
+  field(DIR,  "$(DIR)")
+  field(OFF,  "$(OFF)")
+  field(FOFF, "$(FOFF)")
+  field(VELO, "$(VELO)")
+  field(VBAS, "$(VBAS)")
+  field(VMAX, "$(VMAX)")
+  field(ACCL, "$(ACCL)")
+  field(BDST, "$(BDST)")
+  field(BVEL, "$(BVEL)")
+  field(BACC, "$(BACC)")
+  # pass the encoder counts/revolution to the
+  # MVP2001 driver support so it can
+  # _properly_ calculate the MVP acceleration term
+  # Also, allow the user to specify a current limit 
+  # for the controller so the motor is not treated as a fuse.
+  # PARMS = ENCODER_CPR,MAX_CURRENT_IN_mA
+  field(OUT,  "#C$(CARD) S$(SLOT) @$(PARM)")
+  # specify SREV and UREV instead of MRES
+  field(SREV, "$(SREV)")
+  field(UREV, "$(UREV)")
+  field(PREC, "$(PREC)")
+  field(EGU,  "$(EGU)")
+  field(DHLM, "$(DHLM)")
+  field(DLLM, "$(DLLM)")
+  field(INIT, "$(INIT)")
+  # KMP - 08/29/02 - added PREM field for ANO command
+  field(PREM, "$(PREM)")  
+  # set the default tweak value to be small
+  field(TWV,  ".001")
+  field(ERES, "$(ERES)")
+  field(UEIP, "$(UEIP)")
+  field(URIP, "$(URIP)")
+}
+
+record(transform, "$(P)$(M)_ableput") {
+  field(CLCB,"a")
+  field(CLCC,"a")
+  field(OUTA,"$(P)$(M).DISA NPP NMS")
+  field(OUTB,"$(P)$(M).DISP NPP NMS")
+  field(OUTC,"$(P)$(M).DISA NPP NMS")
+}
+
+record(bo, "$(P)$(M)_able") {
+  field(DESC,"motor enable")
+  field(PINI,"YES")
+  field(OUT, "$(P)$(M)_ableput.A PP MS")
+  field(ZNAM,"Enable")
+  field(ONAM,"Disable")
+}
+
+# allow users to change the velocity (or speed)
+# by sending a multipler to the
+#    $(P)$(M)_vCh.A field
+record(scalcout, "$(P)$(M)_vCh") {
+  field(DESC, "change velocity")
+  field(INPB, "$(P)$(M).S")
+  field(INPC, "$(P)$(M).SBAS")
+  field(INPD, "$(P)$(M).SMAX")
+  field(CALC, "min(max(a*b,c),d)")
+  field(OUT,  "$(P)$(M).S")
+}
+
+# allow users to change the tweak value
+# by sending a multipler to the
+#    $(P)$(M)_twCh.A field
+record(scalcout, "$(P)$(M)_twCh") {
+  field(DESC, "change TWV")
+  field(INPB, "$(P)$(M).TWV")
+  field(INPC, "$(P)$(M).MRES")
+  field(INPD, "$(P)$(M).HLM")
+  field(INPE, "$(P)$(M).LLM")
+  field(CALC, "min(max(a*b,c),d-e)")
+  field(OUT,  "$(P)$(M).TWV")
+}
+#
+# Allow a single button in medm to unstick a moving motor
+#
+record(seq,"$(P)$(M)_unstick") {
+	field(DESC,"Unstick motor")
+	field(DO1,"0")
+	field(LNK1,"$(P)$(M).SPMG  NPP NMS")
+	field(DLY1,"0.5")
+	field(DO2,"3")
+	field(LNK2,"$(P)$(M).SPMG  NPP NMS")
+	field(DLY2,"0.5")
+	field(PINI,"NO")
+}

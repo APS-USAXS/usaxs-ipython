@@ -1,0 +1,208 @@
+
+########### SVN repository information ###################
+# $Date: 2015-12-21 16:36:43 -0600 (Mon, 21 Dec 2015) $
+# $Author: usaxs $
+# $Revision: 1266 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_headers.mac $
+# $Id: usaxs_headers.mac 1266 2015-12-21 22:36:43Z usaxs $
+########### SVN repository information ###################
+
+#
+#  usaxs_headers.mac
+#
+#  USAXS-specific macros
+#  maintained by Jan Ilavsky (and sometimes Pete Jemian)
+#  last edit:  2009-05-22
+#
+#
+# this file contains the definiton of headers for spec running usaxs. 
+# June 02 - replaced all lax:upd2 with brq:pd01:seq01 to move UPD to e-brick 
+# 2007-09-10,PRJ: replaced all "lax:" with "32idbLAX:"
+# September 27, 2007 replaced all brq: with 32idbUSX: since the PVV names changed. JIL
+# 2008-08-29,PRJ: added undulator energy, tracking, and offset (has been given only in #U line by SoftE.mac from BCDA)
+# 2008-10-16 JIL. Added variables in header which are now in spec and are useful to be recorded in header. 
+# 2009-05-22 JIL. Changed to use ar position instead of arencoder (for Aerotech motor)
+# 2009-10-08 JIL. Change to use MR encoder through ik320
+# 2010-06-30 XJIAO. changed to 32idbUSX and 32idbLAX to 9idcUSX/LAX after moved to 15ID
+# 2010-10-25 JIL, fixes for 15IDD
+# 2012-04-19 JIL, changes diode reqrange to lurange to avoid problems with stale PD range being read
+# 2013-04-11 JIL, added values for pindiode USAXS transmission code.
+
+
+def UNICAT_geometry_filehead_H '{
+  global _H  _V  _H_COUNT
+
+  # 15IDD parameters
+  _H[_H_COUNT++] = "DCM_energy"
+  _H[_H_COUNT++] = "DCM_lambda"
+  _H[_H_COUNT++] = "UND_energy"
+  _H[_H_COUNT++] = "UND_tracking"
+  _H[_H_COUNT++] = "UND_offset"
+
+  # 15IDD USAXS encoder
+  _H[_H_COUNT++] = "mrEnc"
+  _H[_H_COUNT++] = "arEnc"
+  _H[_H_COUNT++] = "line_break"
+
+  # 15IDD USAXS Peak Position centers and FIlter Choices
+  _H[_H_COUNT++] = "mrCenter"
+  _H[_H_COUNT++] = "arCenter"
+  _H[_H_COUNT++] = "msrCenter"
+  _H[_H_COUNT++] = "asrCenter"
+  _H[_H_COUNT++] = "Scan_Al_Filter"
+  _H[_H_COUNT++] = "Scan_Ti_Filter"
+  _H[_H_COUNT++] = "line_break"
+
+  # 15IDD USAXS I0 detector
+  _H[_H_COUNT++] = "I0AmpGain"
+#  _H[_H_COUNT++] = "I0AmpDark"
+  _H[_H_COUNT++] = "I00AmpGain"
+#  _H[_H_COUNT++] = "I00AmpDark"
+  _H[_H_COUNT++] = "line_break"
+
+  # 15IDD USAXS Femto amplifier + photodiode
+  _H[_H_COUNT++] = "UPD2mode"
+  _H[_H_COUNT++] = "UPD2range"
+  _H[_H_COUNT++] = "UPD2vfc"
+  _H[_H_COUNT++] = "UPD2gain"
+  _H[_H_COUNT++] = "UPD2selected"
+  _H[_H_COUNT++] = "UPDsize"
+  _H[_H_COUNT++] = "line_break"
+
+  _H[_H_COUNT++] = "UPD2gain1"
+  _H[_H_COUNT++] = "UPD2bkg1"
+  _H[_H_COUNT++] = "UPD2bkgErr1"
+  _H[_H_COUNT++] = "line_break"
+
+  _H[_H_COUNT++] = "UPD2gain2"
+  _H[_H_COUNT++] = "UPD2bkg2"
+  _H[_H_COUNT++] = "UPD2bkgErr2"
+  _H[_H_COUNT++] = "line_break" 
+
+  _H[_H_COUNT++] = "UPD2gain3"
+  _H[_H_COUNT++] = "UPD2bkg3"
+  _H[_H_COUNT++] = "UPD2bkgErr3"
+  _H[_H_COUNT++] = "line_break"
+
+  _H[_H_COUNT++] = "UPD2gain4"
+  _H[_H_COUNT++] = "UPD2bkg4"
+  _H[_H_COUNT++] = "UPD2bkgErr4"
+  _H[_H_COUNT++] = "line_break"
+
+  _H[_H_COUNT++] = "UPD2gain5"
+  _H[_H_COUNT++] = "UPD2bkg5"
+  _H[_H_COUNT++] = "UPD2bkgErr5"
+  _H[_H_COUNT++] = "line_break"
+
+  # USAXS sample thickness and other parameters
+  _H[_H_COUNT++] = "thickness"
+  _H[_H_COUNT++] = "ARenc_0"
+  _H[_H_COUNT++] = "SAD"
+  _H[_H_COUNT++] = "SDD"
+  _H[_H_COUNT++] = "CCD_DX"
+  _H[_H_COUNT++] = "CCD_DY"
+  _H[_H_COUNT++] = "line_break"
+
+  _H[_H_COUNT++] = "DIODE_DX"
+  _H[_H_COUNT++] = "DIODE_DY"
+  _H[_H_COUNT++] = "UATERM"
+  _H[_H_COUNT++] = "sampleYstep"
+
+  _H[_H_COUNT++] = "line_break"
+
+  # USAXS sample transmission using pin diode
+  _H[_H_COUNT++] = "USAXSPinT_Measure"
+  _H[_H_COUNT++] = "USAXSPinT_AyPosition"
+  _H[_H_COUNT++] = "USAXSPinT_Time"
+  _H[_H_COUNT++] = "USAXSPinT_pinCounts"
+  _H[_H_COUNT++] = "USAXSPinT_pinGain"
+  _H[_H_COUNT++] = "USAXSPinT_I0Counts"
+  _H[_H_COUNT++] = "USAXSPinT_I0Gain"
+  _H[_H_COUNT++] = "line_break"
+}'
+
+def UNICAT_geometry_filehead_V '{
+  global _H  _V  _H_COUNT  
+  local _FemtoGain
+  global Use_DLPCA300
+
+
+  
+  # These are the gains of the Femto amplifier support code
+  for (i=0; i<7; i++) {
+    _FemtoGain[i]   = pow(10,5+i)
+    _FemtoGain[i+8] = pow(10,3+i)
+  }
+
+  _V["DCM_energy"]        = epics_get("9ida:BraggEAO")
+  _V["DCM_lambda"]        = epics_get("9ida:BraggLambdaAO")
+  _V["UND_energy"]        = epics_get(sprintf("%sEnergy",UND_PV))
+  _V["UND_tracking"]      = UNDE_TRACK_ON
+  _V["UND_offset"]        = Und_Off
+
+  _V["mrEnc"]        = epics_get("9idcLAX:mr:encoder")
+  _V["arEnc"]        = sprintf ("%s%.6f", "", epics_get("9idcLAX:aero:c0:m1"))
+
+  _V["I0AmpGain"]     = epics_get("9idcUSX:fem02:seq01:gain")
+  _V["I00AmpGain"]     = epics_get("9idcUSX:fem03:seq01:gain")
+
+  _V["UPDsize"]      = epics_get("9idcLAX:USAXS:UPDsize")
+  _V["UPD2vfc"]      = epics_get(sprintf("9idcUSX:%s:vfc",PDstring))
+  _V["UPD2gain"]     = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain",PDstring)))
+  _V["UPD2selected"] = 1
+
+  _V["UPD2mode"]     = epics_get(sprintf("9idcUSX:%s:mode",PDstring),"short")
+  _V["UPD2range"]    = epics_get(sprintf("9idcUSX:%s:lurange",PDstring),"short")
+  
+  _V["UPD2gain1"]    = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain0",PDstring)))
+  _V["UPD2bkg1"]     = epics_get(sprintf("9idcUSX:%s:bkg0",PDstring))
+  _V["UPD2bkgErr1"]  = epics_get(sprintf("9idcUSX:%s:bkgErr0",PDstring))
+
+  _V["UPD2gain2"]    = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain1",PDstring)))
+  _V["UPD2bkg2"]     = epics_get(sprintf("9idcUSX:%s:bkg1",PDstring))
+  _V["UPD2bkgErr2"]  = epics_get(sprintf("9idcUSX:%s:bkgErr1",PDstring))
+
+  _V["UPD2gain3"]    = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain2",PDstring)))
+  _V["UPD2bkg3"]     = epics_get(sprintf("9idcUSX:%s:bkg2",PDstring))
+  _V["UPD2bkgErr3"]  = epics_get(sprintf("9idcUSX:%s:bkgErr2",PDstring))
+
+  _V["UPD2gain4"]    = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain3",PDstring)))
+  _V["UPD2bkg4"]     = epics_get(sprintf("9idcUSX:%s:bkg3",PDstring))
+  _V["UPD2bkgErr4"]  = epics_get(sprintf("9idcUSX:%s:bkgErr3",PDstring))
+
+  _V["UPD2gain5"]    = sprintf("%.1e", epics_get(sprintf("9idcUSX:%s:gain4",PDstring)))
+  _V["UPD2bkg5"]     = epics_get(sprintf("9idcUSX:%s:bkg4",PDstring))
+  _V["UPD2bkgErr5"]  = epics_get(sprintf("9idcUSX:%s:bkgErr4",PDstring))
+
+  _V["thickness"]    = USAXS_SAMPLE_THICKNESS
+  _V["ARenc_0"]      = epics_get("9idcLAX:USAXS:Q.B")
+  _V["SAD"]          = epics_get("9idcLAX:USAXS:SAD")
+  _V["SDD"]          = epics_get("9idcLAX:USAXS:SDD")
+  _V["mrCenter"]     = epics_get("9idcLAX:USAXS:MRcenter")
+  _V["msrCenter"]    = epics_get("9idcLAX:USAXS:MSRcenter")
+  _V["arCenter"]     = epics_get("9idcLAX:USAXS:ARcenter")
+  _V["asrCenter"]    = epics_get("9idcLAX:USAXS:ASRcenter")
+  _V["Scan_Al_Filter"]    = epics_get("9idcLAX:USAXS:Scan_Al_Filter")
+  _V["Scan_Ti_Filter"]    = epics_get("9idcLAX:USAXS:Scan_Ti_Filter")
+
+  _V["CCD_DX"]    = epics_get("9idcLAX:USAXS:CCD_dx")
+  _V["CCD_DY"]    = epics_get("9idcLAX:USAXS:CCD_dy")
+  _V["DIODE_DX"]    = epics_get("9idcLAX:USAXS:Diode_dx")
+  _V["DIODE_DY"]    = epics_get("9idcLAX:USAXS:DY0")
+  _V["UATERM"]    = epics_get("9idcLAX:USAXS:UATerm")
+
+  _V["USAXSPinT_Measure"]       = epics_get("9idcLAX:USAXS:TR_MeasurePinTrans")
+  _V["USAXSPinT_AyPosition"]    = epics_get("9idcLAX:USAXS:TR_AyPosition")
+  _V["USAXSPinT_Time"]          = epics_get("9idcLAX:USAXS:TR_MeasurementTime")
+  _V["USAXSPinT_pinCounts"]     = epics_get("9idcLAX:USAXS:TR_pinCounts")
+  _V["USAXSPinT_pinGain"]       = epics_get("9idcLAX:USAXS:TR_pinGain")
+  _V["USAXSPinT_I0Counts"]      = epics_get("9idcLAX:USAXS:TR_I0Counts")
+  _V["USAXSPinT_I0Gain"]        = epics_get("9idcLAX:USAXS:TR_I0Gain")
+#  _V["USAXSPinT_Measure"]       = USAXS_MEASURE_PIN_TRANS      
+#  _V["USAXSPinT_AyPosition"]    = USAXSPinT_AyPosition         
+#  _V["USAXSPinT_Time"]          = USAXSPinT_MeasurementTime    
+#  _V["USAXSPinT_pinCounts"]     = USAXSPinT_pinCounts          
+#  _V["USAXSPinT_pinGain"]       = USAXSPinT_pinGain            
+#  _V["USAXSPinT_I0Counts"]      = USAXSPinT_I0Counts           
+#  _V["USAXSPinT_I0Gain"]        = USAXSPinT_I0Gain             
+}'

@@ -1,0 +1,296 @@
+
+############################################################################
+#
+# USER MACROS TO REDEFINE
+#
+############################################################################
+def UNICAT_beamline_filehead_H ''                ;#  (SPECD/site.mac)
+def UNICAT_beamline_filehead_V ''                ;#  (SPECD/site.mac)
+def UNICAT_geometry_filehead_H ''                ;#  (SPECD/GEOM/conf.mac)
+def UNICAT_geometry_filehead_V ''                ;#  (SPECD/GEOM/conf.mac)
+def UNICAT_user_filehead_H ''                    ;#  (./spec.mac)
+def UNICAT_user_filehead_V ''                    ;#  (./spec.mac)
+############################################################################
+#
+# INSTRUCTIONS
+#
+############################################################################
+#
+# qdo uni_scan_head.mac   from the site.mac file
+# redefine the above six macros (as necessary)
+#  that is it.
+#-------------------
+# Further notes:
+#
+#  these hooks define the content of the UNICAT additions
+#  to the SPEC scan headers
+#  beamline: general beamline values of interest to all instruments (SPECD/site.mac)
+#  geometry: values of interest to a particular geometry            (SPECD/GEOM/conf.mac)
+#  user:     values of interest to a particular user                (./spec.mac)
+#
+# The macros above are used by users to define the layout of
+# items to appear in the SPEC scan header (*filehead_H macros)
+# and to gather the content for those entries (*filehead_V macros).
+#
+# It is assumed that each entry (both label and value)
+# has no embedded whitespace.
+#
+# It is not necessary for the user to redefine 
+# the UNICAT_beamline_Fheader macro.  
+# This would likely break the system.
+#
+# Examples are shown below for the *beamline_filehead* macros.
+# ---------------
+# *filehead_H macros
+#   These macros must include this "global" declaration
+#     global _H  _V  _H_COUNT
+#
+#   Remaining lines add items to each header line.
+#   _H_COUNT keeps a running total of the number of entries
+#     # APS storage ring
+#     _H[_H_COUNT++] = "SR_current"
+#     _H[_H_COUNT++] = "SR_fill"
+#   use this special symbol "line_break" to create a new header line
+#     _H[_H_COUNT++] = "line_break"
+#
+#  Use unique keywords to define each item 
+#   (the usual variable naming conventions apply)
+#  However, these names are only symbolic identifiers
+#  and are completely independent of the SPEC variable names.
+#  (They are text indices to the associative array _V which holds the values.)
+# ---------------
+# *filehead_V macros
+#   These macros must include this "global" declaration
+#     global _H  _V  _H_COUNT
+#
+#   Remaining lines assign values to each header entry:
+#     _V["SR_current"]     = epics_get("S:SRcurrentAI")
+#     _V["SR_fill"]        = aps_sr_fillNumber
+#     _V["SR_status"]      = epics_get("S:DesiredMode","short")
+#
+#   Use any spec command or method to make the assignments.
+#   This example shows EPICS PVs and a local variable
+
+##############################################################################
+##############################################################################
+##############################################################################
+  #
+  # Since user_filehead is called before the motor labels are written
+  # (with the #O%d statements), we cannot use additional #O%d lines
+  # to write beam line variables as well.
+  #  Ok.
+  #  We will arbitrarily decide to use:
+  #      #H%d  labels of beam line variables (written once during newfile)
+  #      #V%d  values of beam line variables (written for each scan)
+  #  While we could save the labels as the subscripts to the array _V,
+  #  there is no provision in the AWK language to reveal how many
+  #  items are in the array, nor to sort them into a particular order.
+  #
+global _H; # associative array with labels of scan header entries
+global _V; # associative array with values of scan header entries
+global _H_COUNT; # counter of number of beam line info to record
+
+#------------------------------------------------
+#
+# Tell SPEC to use our custom file and scan headers
+# by redefining the SPEC standard macros
+#    Also, provide the user with hooks to put 
+#    items that would usually have been put into
+#    the SPEC standard macros
+def UNICAT_beamline_prescan_head  ''
+def UNICAT_beamline_postscan_head ''
+cdef("user_filehead",      "\n UNICAT_beamline_filehead",      "beamline", 0x20)
+cdef("Fheader",            "\n UNICAT_beamline_Fheader",       "beamline", 0x20)
+cdef("user_prescan_head",  "\n UNICAT_beamline_prescan_head",  "beamline", 0x20)
+cdef("user_postscan_head", "\n UNICAT_beamline_postscan_head", "beamline", 0x20)
+
+
+#------------------------------------------------
+def UNICAT_beamline_filehead '{
+  local  i  _label
+  global _H  _V  _H_COUNT  
+  #
+  # Define the information to be recorded
+  # The same label can be used in more than one place to
+  # put the same information in multiple places in the table
+  #
+
+  # start the item counter at zero
+  _H_COUNT = 0
+
+  # here is the beam line list of items to be recorded
+  UNICAT_beamline_filehead_H
+
+  # here is a hook for SPEC administrators to add items to this list
+  # which are dependent on the SPEC geometry (instrument)
+  UNICAT_geometry_filehead_H
+
+        # here is a hook for users to add items to this list
+  UNICAT_user_filehead_H
+
+  #
+  # print out the labels on the scan file header
+  # labels will appear in the order as defined in _H
+  #
+  local i,j,row,s
+  for (i=0, row=-1, j=1; i<_H_COUNT; i++) {
+    if (j == 1) { 
+      s = sprintf("#H%d", ++row)
+      j = 0  
+    }
+    if (_H[i] == "line_break") {
+      print s
+      j = 1
+      s = ""
+    } else {
+      s = s sprintf("  %s", _H[i])
+      #DEBUG# print "row " row ",  item = " i ",  s = <" s ">"
+      if ((i+1) == _H_COUNT) {
+        # make certain that the last row is always printed
+        # even if it does not have a trailing "line_break"
+        print s
+      }
+    }
+  }
+}'
+
+
+#------------------------------------------------
+def UNICAT_beamline_Fheader '{
+  global _H  _V  _H_COUNT
+  #
+  # update the information to be recorded
+  # can set these in any order
+  # values will appear in the order as defined in _H
+  #
+
+     # beam line list of items to be recorded
+  UNICAT_beamline_filehead_V
+
+     # hook for SPEC administrators to add items to this list
+     # which are dependent on the SPEC geometry (instrument)
+  UNICAT_geometry_filehead_V
+
+     # hook for users to add items to this list
+  UNICAT_user_filehead_V
+
+     #
+     # print out the values of the recorded information
+     #
+  local i,j,s
+  if (TITLE != "") { 
+    s = sprintf("#C %s\n", TITLE)
+    print s
+  }
+
+  local i,j,row,s
+  for (i=0, row=-1, j=1; i<_H_COUNT; i++) {
+    if (j == 1) { 
+      s = sprintf("#V%d", ++row)
+      j = 0  
+    }
+    if (_H[i] == "line_break") {
+      print s
+      j = 1
+      s = ""
+    } else {
+      s = s sprintf(" %s", _V[_H[i]])
+      #DEBUG# print "row " row ",  item = " i ",  s = <" s ">"
+      if ((i+1) == _H_COUNT) {
+        # make certain that the last row is always printed
+        # even if it does not have a trailing "line_break"
+        print s
+      }
+    }
+  }
+}'
+
+#
+# example beamline file header macros
+
+#------------------------------------------------
+def UNICAT_beamline_filehead_H '{
+  global _H  _V  _H_COUNT  
+  #
+  # Define the information to be recorded
+  # The same label can be used in more than one place to
+  # put the same information in multiple places in the table
+  #
+  # NOTE   This is an example.
+  #        Users should redefine this macro after qdo this file.
+  #
+
+  # APS storage ring
+  _H[_H_COUNT++] = "SR_current"
+  _H[_H_COUNT++] = "SR_fill"
+  _H[_H_COUNT++] = "SR_status"
+  _H[_H_COUNT++] = "SR_mode"
+  _H[_H_COUNT++] = "SR_fb"
+  _H[_H_COUNT++] = "SR_fbH"
+  _H[_H_COUNT++] = "SR_fbV"
+  _H[_H_COUNT++] = "SR_topUp"
+  _H[_H_COUNT++] = "barometer_mbar"
+  _H[_H_COUNT++] = "line_break"
+
+  # storage ring beam position monitors
+  _H[_H_COUNT++] = "SR_BPM_HP"
+  _H[_H_COUNT++] = "SR_BPM_VP"
+  _H[_H_COUNT++] = "SR_BPM_HA"
+  _H[_H_COUNT++] = "SR_BPM_VA"
+
+  # 33ID undulator
+  _H[_H_COUNT++] = "ID_gap"
+  _H[_H_COUNT++] = "ID_E"
+  _H[_H_COUNT++] = "ID_harmonic"
+  _H[_H_COUNT++] = "ID_taperGap"
+  _H[_H_COUNT++] = "ID_taperE"
+  _H[_H_COUNT++] = "line_break"
+
+  # 33ID Front-End X-ray beam position monitors
+  _H[_H_COUNT++] = "FE_XBPM_HP"
+  _H[_H_COUNT++] = "FE_XBPM_VP"
+  _H[_H_COUNT++] = "FE_XBPM_HA"
+  _H[_H_COUNT++] = "FE_XBPM_VA"
+  _H[_H_COUNT++] = "line_break"
+}'
+#------------------------------------------------
+def UNICAT_beamline_filehead_V '{
+  global _H  _V  _H_COUNT  
+  #
+  # update the information to be recorded
+  # can set these in any order
+  # values will appear in the order as defined in _H
+  #
+  # NOTE   This is an example.
+  #        Users should redefine this macro after qdo this file.
+  #
+  _V["SR_current"]     = epics_get("S:SRcurrentAI")
+  _V["SR_fill"]        = aps_sr_fillNumber
+  _V["SR_status"]      = epics_get("S:DesiredMode","short")
+  _V["SR_mode"]        = aps_sr_mode
+  _V["SR_fb"]          = epics_get("SRFB:GBL:LoopStatusBI","short")
+  _V["SR_fbH"]         = epics_get("SRFB:GBL:HLoopStatusBI","short")
+  _V["SR_fbV"]         = epics_get("SRFB:GBL:VLoopStatusBI","short")
+  _V["SR_topUp"]       = epics_get("Mt:TopUpAutoEnableC.VAL","short")
+  _V["barometer_mbar"] = epics_get("APS:BarometricPressure:MBR")
+  #_V["SR_orbitCorr"]  = epics_get("S:OrbitCorrection:CC")
+
+  _V["ID_gap"]         = und_gap
+  _V["ID_E"]           = und_E
+  _V["ID_taperGap"]    = epics_get("ID09:TaperGap.VAL")
+  _V["ID_taperE"]      = epics_get("ID09:TaperEnergy.VAL")
+  _V["ID_harmonic"]    = und_harmonic
+
+  _V["SR_BPM_HP"]      = epics_get("S9:ID:SrcPt:xPositionM")
+  _V["SR_BPM_VP"]      = epics_get("S9:ID:SrcPt:yPositionM")
+  _V["SR_BPM_HA"]      = epics_get("S9:ID:SrcPt:xAngleM")
+  _V["SR_BPM_VA"]      = epics_get("S9:ID:SrcPt:yAngleM")
+
+  _V["FE_XBPM_HP"]     = epics_get("FE:09:ID:HPOSITION:CC")
+  _V["FE_XBPM_VP"]     = epics_get("FE:09:ID:VPOSITION:CC")
+  _V["FE_XBPM_HA"]     = epics_get("FE:09:ID:HANGLE:CC")
+  _V["FE_XBPM_VA"]     = epics_get("FE:09:ID:VANGLE:CC")
+}'
+
+
+############################## DO NOT DELETE THIS LINE ############################

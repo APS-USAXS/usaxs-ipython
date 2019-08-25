@@ -1,0 +1,40 @@
+###############################################################################
+#                              site macros 
+# You can add common used user macros here
+# 
+# for geometry-specific macros, please add them to conf.mac under that
+# geometry ie, usaxs/conf.mac 
+# or to SPECD/usaxs.mac (which seems to be the local preference)
+###############################################################################
+
+########### SVN repository information ###################
+# $Date: 2016-04-29 15:14:57 -0500 (Fri, 29 Apr 2016) $
+# $Author: usaxs $
+# $Revision: 1291 $
+# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/config/site.mac $
+# $Id: site.mac 1291 2016-04-29 20:14:57Z usaxs $
+########### SVN repository information ###################
+
+DO_DIR =  "~/spec/macros/std"
+qdo aalength.mac
+qdo lp.mac
+qdo checkbeam.mac
+qdo uspec_column.mac
+qdo showmotors.mac
+qdo pseudo.mac
+qdo uni_scan_head.mac
+qdo SoftE.mac
+qdo AreaDetector.mac
+qdo macrolist.mac
+
+DO_DIR = "~/spec/macros/local"
+qdo usaxs_newfile.mac
+#
+# 2011-09-16, PRJ: moved to usaxs/conf.mac file
+#  if (SPEC=="usaxs") {
+#
+#    qdo /data/spec/macros/usaxs/usaxs_load.mac
+#
+#  }
+
+

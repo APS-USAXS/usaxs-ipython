@@ -1,0 +1,10 @@
+file stringout_settings.req P=$(P)string$(N)1
+file stringout_settings.req P=$(P)string$(N)2
+file stringout_settings.req P=$(P)string$(N)3
+file stringout_settings.req P=$(P)string$(N)4
+file stringout_settings.req P=$(P)string$(N)5
+file stringout_settings.req P=$(P)string$(N)6
+file stringout_settings.req P=$(P)string$(N)7
+file stringout_settings.req P=$(P)string$(N)8
+file stringout_settings.req P=$(P)string$(N)9
+file stringout_settings.req P=$(P)string$(M)0

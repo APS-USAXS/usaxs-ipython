@@ -1,0 +1,640 @@
+# usaxs_anisoscan.mac
+# Code developed by Ross Andrews in 2017
+# this macro should scan anisotropy of sample in SBUSAXS mode for given q, it does fly scanning.
+# use:  anisoFlyscan (q Value)  (ART-150 speed in deg/sec) (points per revolution to measure)  (Number of revolutions to measure)
+# 
+####################################################################
+
+##  Comments, changes
+# 2017-06-15 JIL - version 1, directly from Ross. Works kind of fine. Need to fix:
+#			1. I0 gain is not set correctly and hence normalization is not working right.
+#  			2. Spec data written have incorrect format - my Igor reader does nto reead them. Either empty line or offset of first number for line start confuses the reader. 
+##  needs to be fixed bofre next use. 
+# 2017-06-15 JAK - small changes to fix scanfile issues. Remove redundant newlines in header variables. Change printf to a comment.
+#
+
+	
+def AnisoFlyScanSeries '{
+		if( $# != 4) {
+		printf ("usage: runAnisoFlyScanSeries startQ endQ NumberLinearllySpacedQPoints numberCycles")
+		exit;
+			}
+	
+	
+		________setTheStartQ = $1
+		________setTheEndQ = $2
+		________setTheNumPts = $3
+		________setTheNumCycles = $4
+		
+		if (________setTheStartQ > ________setTheEndQ){
+		
+			p "Start q greater than end q - exiting"
+			exit;
+			}
+		
+		
+		
+		cycleNumerCouter = 0
+		
+		anisoScanBetweenTune = 10
+		
+		__calcIncrementer = (________setTheEndQ - ________setTheStartQ)/________setTheNumPts
+		___dummyString = sprintf("Start q = %6.6f  End q = %6.6f over %5i points; Calculated q spacing =  %6.6f", ________setTheStartQ,________setTheEndQ,________setTheNumPts,__calcIncrementer)
+		comment "%s" ___dummyString
+		
+		
+		for (___qPointsMeasureUse = ________setTheStartQ;  ___qPointsMeasureUse < ________setTheEndQ+__calcIncrementer; ___qPointsMeasureUse =___qPointsMeasureUse + __calcIncrementer) {
+	
+			cycleNumerCouter = cycleNumerCouter +1
+			___dummyStringP = sprintf("Cycles %i", cycleNumerCouter)
+			p ___dummyStringP
+			
+			epics_put("9idcLAX:USAXS:state", sprintf("Running AnisoFlyScan at q = %5.5f",___qPointsMeasureUse  ))
+			
+			if( cycleNumerCouter > anisoScanBetweenTune) {
+				comment "Run tune"
+				cycleNumerCouter = 0
+				__resetAStagetoCenter
+				preUSAXStune
+				}
+				
+
+			runAnisoFlyScan ___qPointsMeasureUse 10 1200 ________setTheNumCycles
+
+	
+		}
+	
+		__resetAStagetoCenter
+	
+	
+	
+	
+	
+	}'
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+def floor(x) '{
+	    return int(x > 0.0 ? x : x - 1);
+	  }'
+	  
+	  
+def __tuneTheAStage '{
+
+	comment "Tuning the A stage"
+	__resetAStagetoCenter
+	useModeUSAXS
+	openTiFilterShutter
+	tune_ar
+	tune_a2rp
+	closeTiFilterShutter
+
+
+
+}'
+
+
+
+	  
+	  
+def __resetAStagetoCenter '{
+
+
+	__currARCNETER = AR_VAL_CENTER
+	__currAYCenter = AY0
+	__currDYcenter = DY0
+	
+	__dummyString = sprintf("Move USAXS to q = 0: Ar = %6.3f degrees, dy to %3.1f mm, Ay to %3.1f mm", __currARCNETER,  __currDYcenter,__currAYCenter )
+	comment "%s" __dummyString 
+	epics_put("9idcLAX:USAXS:state", "Returning ar, ay, dy to q = 0")
+	
+	umv ar __currARCNETER
+	umv dy __currDYcenter
+	umv ay __currAYCenter 
+	
+	
+	# tune_ar
+	# tune_a2rp
+
+
+
+
+    }'
+	  
+	  
+def __calcUSAXSpositionsMove '{
+
+
+	if(fabs($1) >0.4) {
+	
+		printf ("That q is much too large")
+		exit;
+		
+		}
+
+	if( $# != 1) {
+			  printf ("usage: __calcUSAXSpositionsMove qValue")
+			exit;   }
+			
+	__qValue = $1
+	__currSDD = epics_get("9idcLAX:USAXS:SDD")
+	__currSAD = epics_get("9idcLAX:USAXS:SAD")		
+	__currARCNETER = AR_VAL_CENTER
+	__currAYCenter = AY0
+	__currDYcenter = DY0
+	__currEnergy = 12.4 / A[en]
+	
+	epics_put("9idcLAX:USAXS:state", sprintf("Moving ar, ay, dy to q = %5.5f",__qValue))
+	
+	#SCANNING DOWN
+	
+	__moveToArAngle = __currARCNETER - (360/PI)*asin(__qValue   * __currEnergy  / (4*PI))		
+	__setDyVal =  __currDYcenter + _usaxs_triangulateR(__moveToArAngle, __currARCNETER, __currSDD)
+	__setAyVal = __currAYCenter + _usaxs_triangulateR (__moveToArAngle,__currARCNETER, __currSAD )
+	
+	__dummyString = sprintf("Move USAXS to q = %4.4f: Ar = %6.3f degrees, dy to %3.1f mm, Ay to %3.1f mm", __qValue, __moveToArAngle, __setDyVal , __setAyVal )
+	comment "%s" __dummyString 
+	
+	umv ar __moveToArAngle
+	umv dy __setDyVal
+	umv ay __setAyVal
+	
+	
+   
+	   }'
+	   
+	   
+def _usaxs_triangulateR (rot,center,dist) '{
+	  local offset
+	  offset = dist * tan((rot-center)*PI/180)
+	  return(offset)
+	}'
+
+
+def __modGetUPDRange 'exp10(5+ UPDRange)'
+
+
+
+
+
+def runAnisoFlyScan  '{
+
+	if( $# != 4) {
+			  printf ("usage: anisoFlyscan q speed(deg/sec) points(pts/360 deg) measRevs")
+			exit;
+	   }
+
+	if(fabs($1) >0.4) {
+	
+		printf ("That q is much too large")
+		exit;
+		
+		}
+		
+	useModeUSAXS
+	
+	rdef _cleanup3 \'cleanupAnisoFlyscan\'
+
+
+
+
+	   
+	__usQPoint = $1
+	__usSetSpeed = $2
+	__usNumPoints = $3
+	__usmeasRevs = $4
+	
+	epics_put("9idcLAX:USAXS:state", sprintf("Running AnisoFlyScan at q = %5.5f",__usQPoint  ))
+	
+	
+	anisoFlyScanSetup __usQPoint __usSetSpeed __usNumPoints __usmeasRevs
+	
+	anisoFlyScanInitialize
+	anisoFlyScanPrepare __usQPoint __usSetSpeed  __usNumPoints __usmeasRevs
+
+	
+	openTiFilterShutter
+	
+	# WAIT TO START MEASURING UNTIL ANGLE CROSSES START POINT
+	__currentWaitingAngle = epics_get("9idcLAX:m58:c1:m3.RBV")
+	p "Motor running, waiting for start point......"
+	checkARTMotorRunning
+	
+	
+
+	
+	
+	while(__currentWaitingAngle<__initialAngleR){
+						#sleep(0.01)
+						count 0.05
+						__currentWaitingAngle = epics_get("9idcLAX:m58:c1:m3.RBV") }	
+	#count ____countingTimePerPoint						
+	ond
+	#p ___startHeader
+	#p ___anisoHeader 
+	
+	__scanHeaderDef = sprintf("AnisoFlyScan %g %g %g %g", $1, $2, $3, $4)
+	___startHeader = sprintf("AnisoFlyScan at q = %5.5f Start ",__usQPoint)
+	___anisoHeader = sprintf("%13s%13s%13s%13s%13s%13s%13s%13s%13s","Center", "Intensity",  "Error", "Start", "End", "IO",  "I0 Gain","UPD", "UPD Gain")
+	
+	printf("#C %s\n",___startHeader)	
+	HEADER = __scanHeaderDef
+	
+	printf("\n#S %d  %s\n#D %s\n",++SCAN_N,__scanHeaderDef,DATE)
+	printf("#N %d\n", 9 )
+	printf("#L %s\n",___anisoHeader)
+	
+	__meanError = 0.
+	
+		# RECORD ANGLES, INTENSITY, ETC. UNTIL DESIRED MAX MEASUREMENT ANGLE EXCEEDED, THEN BREAK
+		for(measCounter=1;measCounter<____totalMeasurementPoints;measCounter++){				
+			__startAngle = epics_get("9idcLAX:m58:c1:m3.RBV") 				
+			#######count ____countingTimePerPoint	
+#									sleep (____countingTimePerPoint	)													
+#			__currentUPDRage = __modGetUPDRange
+#			__currentNormRange = I0_Range_
+#			__countsOnUPD = S[upd2]/S[seconds]
+#			__countsOnNorm = S[I0]/S[seconds]		
+#			__normedCountsInit = __countsOnUPD / __countsOnNorm * exp10(2*(log10(__currentNormRange)-5))/exp10(2*UPDRange)
+#			__normedCounts = __normedCountsInit/____countingTimePerPoint
+			
+			
+			
+							
+			_anisoFlyScanCountErr ____countingTimePerPoint
+			__normedCounts = __meanCountsFound
+			__meanError = __PCTstDevCountsFound
+			
+			
+			
+			__endAngle = epics_get("9idcLAX:m58:c1:m3.RBV")
+			__meanAngle = (__endAngle - __startAngle  )/2. + __startAngle		
+			____fileWriteLine = sprintf("%13.2f%13.2f%13.5f%13.2f%13.2f%13i%13i%13i%13i",__meanAngle,__normedCounts,__meanError, __startAngle, __endAngle,__countsOnNorm,log10(I0_Range_),__countsOnUPD, UPDRange+5)
+			printf("%s", ____fileWriteLine)
+			printf("\n")
+			ANISOFLYDAT[0][measCounter] = __meanAngle
+			ANISOFLYDAT[1][measCounter] = __normedCounts
+			anisoFlyScanPlot
+			
+			if (__endAngle > __maxDataAngle) break			
+			}
+	
+		closeTiFilterShutter
+		comment "AnisoFlyScan complete"
+		offd
+		p "\n"
+		##########################DCMfeedbackON
+		epics_put("9idcLAX:m58:c1:m3.JOGF",0)
+		
+				sleep(0.5)
+		anisoFlyScanFinish
+
+
+}'
+
+
+
+def _anisoFlyScanCountErr  '{
+
+
+		_countingTime = $1
+		_subCountingTIme = _countingTime/3.
+		
+
+
+		__currentUPDRage = __modGetUPDRange
+		__currentNormRange = I0_Range_
+		count _subCountingTIme
+		#sleep (_subCountingTIme)
+		__countsOnUPD = S[upd2]/S[seconds]
+		__countsOnNorm = S[I0]/S[seconds]
+		__normedCountsInit = __countsOnUPD / __countsOnNorm * exp10(2*(log10(__currentNormRange)-5))/exp10(2*UPDRange)			
+		__normedCounts1 = __normedCountsInit/_subCountingTIme
+		
+		count _subCountingTIme
+		#sleep (_subCountingTIme)
+		__countsOnUPD = S[upd2]/S[seconds]
+		__countsOnNorm = S[I0]/S[seconds]
+		__normedCountsInit = __countsOnUPD / __countsOnNorm * exp10(2*(log10(__currentNormRange)-5))/exp10(2*UPDRange)			
+		__normedCounts2= __normedCountsInit/_subCountingTIme
+		count _subCountingTIme
+		#sleep (_subCountingTIme)
+		__countsOnUPD = S[upd2]/S[seconds]
+		__countsOnNorm = S[I0]/S[seconds]
+		__normedCountsInit = __countsOnUPD / __countsOnNorm * exp10(2*(log10(__currentNormRange)-5))/exp10(2*UPDRange)			
+		__normedCounts3 = __normedCountsInit/_subCountingTIme
+	
+		__meanCountsFound = (__normedCounts1 + __normedCounts2 + __normedCounts3)/3
+		__meanCountsFoundDen = __meanCountsFound
+		
+		if(__meanCountsFoundDen<1)__meanCountsFoundDen=1
+	
+		__PCTstDevCountsFound = (((__normedCounts1-__meanCountsFound)*(__normedCounts1-__meanCountsFound)+(__normedCounts2-__meanCountsFound)*(__normedCounts2-__meanCountsFound)+(__normedCounts3-__meanCountsFound)*(__normedCounts3-__meanCountsFound))/3)/__meanCountsFoundDen
+
+
+
+}'
+
+
+
+
+### Define Cleanup macro for ^c
+
+
+def cleanupAnisoFlyscan '{
+
+	#Turn off data
+	offd
+	comment "User aborted AnisoFlyScan"
+	
+	
+	#Stop motor, restore original position	
+	DCMfeedbackON
+	epics_put("9idcLAX:m58:c1:m3.JOGF",0)
+	sleep(1)
+	__finalAngle = epics_get("9idcLAX:m58:c1:m3.RBV")
+	_____absoluteFinalAngle =  __finalAngle-360*floor(__finalAngle/360)
+	_____currentOffset = _____absoluteFinalAngle-__absoluteInitialAng
+
+	
+	if(_____currentOffset<-180) _____currentOffset = 360 - fabs(_____currentOffset)
+	if(_____currentOffset>180) _____currentOffset =   _____currentOffset -360
+
+	_____changeUser = __finalAngle - _____currentOffset
+	
+			
+			
+					
+	__resetPosState = sprintf("Sample angle %3.1f (%3.1f) deg; return to original %3.1f deg by moving to %3.1f",__finalAngle, _____absoluteFinalAngle , __absoluteInitialAng, _____changeUser)
+	
+	ond
+	p __resetPosState
+	offd
+
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.HLM",500000000000)
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.LLM",-500000000000)
+	sleep(0.2)
+
+	if (fabs(__absoluteInitialAng-360)<0.01) __absoluteInitialAng = 0
+	sleep(0.2)
+
+	umv art _____changeUser 
+	sleep(0.2)
+	wait(0)
+	p "\n"
+	epics_put("9idcLAX:m58:c1:m3.SSET",1)
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.VAL",__absoluteInitialAng)
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.SUSE",1)
+	sleep(0.2)
+
+		
+	# Restore Ar, Ay, Dy to q = 0
+	__resetAStagetoCenter
+	closeTiFilterShutter
+	
+	# Restore default cleanup
+	rdef _cleanup3 \'\'
+
+
+
+
+}'
+
+
+
+
+def anisoFlyScanSetup  '{
+
+
+	if( $# != 4) {
+			  printf ("usage: anisoFlyscan q speed(deg/sec) points(pts/360 deg) measRevs")
+			exit;
+	   }
+	   
+	ANISOFLYPTS = $3*($4+1)
+
+	global long array ANISOFLYDAT[2][ANISOFLYPTS]
+
+
+
+}'
+
+
+
+def anisoFlyScanPlot '{
+
+
+	if (PLOT_MODE&128) {
+					plot_cntl(sprintf("colors=%s",rplot_col))
+					plot_cntl("open")
+			}
+		plot_defaults($#,"$1","$2","$3","$4")
+			
+			
+		plot_cntl("erase")
+		plot_range(0,__maxDataAngle,"auto","auto")
+		plot_cntl("addpoint")
+        array_plot(ANISOFLYDAT[0][:measCounter-1],ANISOFLYDAT[1][:measCounter-1])
+		plot_move(-50,0,sprintf("AnisoFlyScan at q = %4.4f",__usQPoint))
+		plot_move(0,3)
+
+}'
+
+def anisoFlyScanInitialize  '{
+
+	___currMaxSpeed = epics_get("9idcLAX:m58:c1:m3.VMAX")
+	
+	if (__usSetSpeed >___currMaxSpeed ){
+	    dummyStr = sprintf("Selected speed of %3.1f deg/sec is greater than soft limit of %3.1f deg/sec; using maximum",__usSetSpeed,___currMaxSpeed )
+		__usSetSpeed = ___currMaxSpeed 
+		comment "%s" dummyStr
+		}
+	#MOVE TO Q
+	__calcUSAXSpositionsMove __usQPoint
+	____totalMeasurementPoints = __usmeasRevs*__usNumPoints
+	____countingTimePerPoint = 360./__usNumPoints*1/__usSetSpeed
+	
+	___countingTimeStat = sprintf("Integration = %2.2f sec/segment",____countingTimePerPoint)
+	
+	p ___countingTimeStat
+	
+	#SET STANDARD MOTOR SPEEDS
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.ACCL",0.4)
+	sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.JAR",100)
+	sleep(0.2)
+	
+	
+	__initialAngleR = epics_get("9idcLAX:m58:c1:m3.VAL")
+	__absoluteInitialAng = __initialAngleR-floor(__initialAngleR/360)*360	
+	if ((fabs(__absoluteInitialAng)-360)<0.001) __absoluteInitialAng =0 
+	__maxDataAngle = __initialAngleR+360*__usmeasRevs
+	
+	#ZERO LIMITS SO MOTOR WILL RUN FOREVER
+	epics_put("9idcLAX:m58:c1:m3.DHLM",0)
+		sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.DLLM",0)
+		sleep(0.2)
+	epics_put("9idcLAX:m58:c1:m3.JVEL",__usSetSpeed)
+	
+	#JOG MOTOR BACKWARS AT SPEED __usSetSpeed -- RUNNING START
+	
+	epics_put("9idcLAX:m58:c1:m3.JOGR",1)
+	___backJogTime =  __usSetSpeed / 10
+	p "Jog backwards..."
+	sleep(___backJogTime)
+	epics_put("9idcLAX:m58:c1:m3.JOGR",0)
+	p "...done"
+	sleep(0.2)
+
+
+
+
+}'
+
+
+def anisoFlyScanPrepare '{
+
+
+	##########################openTiFilterShutter
+	epics_put("9idcLAX:USAXS:state", sprintf("Running AnisoFlyScan at q = %5.5f",__usQPoint  ))
+	
+	# AUTORANGE PD, DO A FEW DUMMY COUNTS
+	
+	autorange_UPDI0I00
+	DCMfeedbackOFF  
+	modeAutoRange_UPD
+
+
+	
+
+	
+	
+	# JOG MOTOR FORWARD
+	epics_put("9idcLAX:m58:c1:m3.JOGF",1)	
+	sleep(0.1)
+	
+
+	
+	HEADING = sprintf("AnisoFlyScan %g %g %g %g", $1, $2, $3, $4)
+	#scan_head
+	
+
+	___anisoHeader = sprintf("%13s%13s%13s%13s%13s%13s%13s%13s","Center", "Intensity",  "Start", "End", "IO",  "I0 Gain","UPD", "UPD Gain")
+	#___anisoHeader = sprintf("%13s%13s%13s%13s%13s%13s%13s%13s","Center", "Intensity",  "Start", "End", "I0 Gain", "UPD Gain", "IO", "UPD")
+	p "\n"
+	___startHeader = sprintf("AnisoFlyScan at q = %5.5f Start \n",__usQPoint)
+
+	
+
+
+
+}'
+
+
+def anisoFlyScanFinish '{
+
+
+		__finalAngle = epics_get("9idcLAX:m58:c1:m3.RBV")
+		_____absoluteFinalAngle =  __finalAngle-360*floor(__finalAngle/360)
+		_____currentOffset = _____absoluteFinalAngle-__absoluteInitialAng
+
+		
+			if(_____currentOffset<-180) _____currentOffset = 360 - fabs(_____currentOffset)
+			if(_____currentOffset>180) _____currentOffset =   _____currentOffset -360
+	
+			_____changeUser = __finalAngle - _____currentOffset
+			
+			
+			
+					
+		__resetPosState = sprintf("Sample angle %3.1f (%3.1f) deg; return to original %3.1f deg by moving to %3.1f",__finalAngle, _____absoluteFinalAngle , __absoluteInitialAng, _____changeUser)
+		
+		ond
+		comment "%s" __resetPosState
+		offd
+
+			sleep(0.2)
+			epics_put("9idcLAX:m58:c1:m3.HLM",500000000000)
+			sleep(0.2)
+			epics_put("9idcLAX:m58:c1:m3.LLM",-500000000000)
+			sleep(0.2)
+	
+			if (fabs(__absoluteInitialAng-360)<0.01) __absoluteInitialAng = 0
+			sleep(0.2)
+	
+			umv art _____changeUser 
+			sleep(0.2)
+			wait(0)
+			p "\n"
+			epics_put("9idcLAX:m58:c1:m3.SSET",1)
+			sleep(0.2)
+			epics_put("9idcLAX:m58:c1:m3.VAL",__absoluteInitialAng)
+			sleep(0.2)
+			epics_put("9idcLAX:m58:c1:m3.SUSE",1)
+			sleep(0.2)
+
+		# Restore default cleanup
+		rdef _cleanup3 \'\'
+		# Move back to q = 0
+		__resetAStagetoCenter
+		
+		closeTiFilterShutter
+		DCMfeedbackON
+
+
+
+}'
+
+
+def checkARTMotorRunning   '{
+	_initialValue = epics_get("9idcLAX:m58:c1:m3.RBV")
+	sleep(0.3)
+	_nextValue = epics_get("9idcLAX:m58:c1:m3.RBV")
+	diffValeAngErs = fabs(_initialValue-_nextValue)
+	
+
+	
+	while(diffValeAngErs<0.001){
+	
+		p "Start failed - retrying"
+		epics_put("9idcLAX:m58:c1:m3.JOGF",0)	
+		sleep(0.1)
+		epics_put("9idcLAX:m58:c1:m3.JOGF",1)	
+		sleep(0.1)
+		_nextValue = epics_get("9idcLAX:m58:c1:m3.RBV")
+		diffValeAngErs = fabs(_initialValue-_nextValue)
+
+		
+		
+			}	
+
+
+
+
+
+}'
+
+
+
+
+
+
+
+
+

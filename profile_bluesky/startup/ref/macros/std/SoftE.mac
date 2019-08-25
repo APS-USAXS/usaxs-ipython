@@ -1,0 +1,262 @@
+#==============================================================================
+#**************SPEC macros for the Advanced Photon Source**********************
+#==============================================================================
+# 
+# Macro: softE.mac
+#
+# Beamline: Sector 9ID/USAXS
+#
+# Description: These macros are used to setup a macro motor of Kohzu mono energy
+#              . You have to configure it in the spec configuration screen first.
+#              For instruments that use Orientation Matrix( i.e. fourc geometry,
+#              calculating HKL based on energy etc.) it is not recommended. Instead
+#              you should use the built-in Escan macro coupled with undulators.mac.
+#               
+#              
+#
+# Written by: Xuesong Jiao 
+# Date:       Feb. 21 2007
+# 
+# Modified by:   2015-01-14 JAK     
+#
+# User macros: und_setup- sets up the energy offset between undulator and mono and
+#                         select the harmonic value
+#              show_und - displays current undulator settings
+#              moveundE - changes the undulator energy [and harmonic]
+#              undscan  - scans the undulator in Kev
+#              und_tracking_on/off - when the mono energy softmotor is moved/scaned, the
+#                            undulator energy will also be changed automatically. The
+#                            value depends on the desired mono energy and the offset
+#                            between the mono and the unulator.
+#                             
+#              
+#              
+#              
+#===============================================================================             
+# edit: 10/26/2010 JIL to fix for 15ID
+#        2015-01-14 JAK update for move to 9IDC  
+# 	2015-02-09 JIL fix PV 
+
+
+
+global kohzu_PV kohzuMV_PV UND_PV Und_Off UNDE_TRACK_ON
+global kohzuStop_PV kohzuMode_PV kohzuMove_PV
+UND_PV = "ID09:"  # changed to 9idc configuration JAK  2015-01-14
+kohzu_PV = "9ida:BraggE"
+kohzuMV_PV = "9ida:KohzuMoving"
+kohzuStop_PV = "9ida:allstop"
+kohzuMode_PV = "9ida:KohzuModeBO"
+kohzuMove_PV = "9ida:KohzuPutBO"
+Und_Delay = 0.1
+UNDE_TRACK_ON=0
+Und_Off=0.0
+#make sure the mono motion in manual mode
+epics_put("9ida:KohzuModeBO",0)
+
+#Macro motor of monochromator energy with undulator tracking on/off
+def kohzuE_cmd(mne,key,p1) '{
+     if (key == "set_position") {
+         return
+     }
+     if( key == "position") {
+         return (epics_get(sprintf("%sRdbkAO",kohzu_PV)))
+     }
+     if( key =="start_one") {
+         if(epics_get(kohzuMode_PV,"short") ==1 ) {
+            epics_put(kohzuMode_PV,0)
+            sleep(0.1)
+         }
+                                                                                                          
+         if(epics_get(kohzuMode_PV,"short") == 0) {
+              epics_put(sprintf("%sAO",kohzu_PV),p1)
+              epics_put(kohzuMove_PV,1);
+               
+         }
+
+
+         if(UNDE_TRACK_ON) {
+           epics_put(sprintf("%sScanEnergy",UND_PV),p1+Und_Off)     
+             
+         }
+     }
+     if( key =="get_status") {
+        
+        if( epics_get(kohzuMV_PV,"short") == 1 ) {
+          return (0x02)
+        } else {
+          if(UNDE_TRACK_ON) {
+              if(epics_get(sprintf("%sBusy",UND_PV),"short") ==1) {
+                   return(0x02)
+              } else 
+                return 0
+          }
+        }
+     }
+      if( key =="abort_one") {
+        epics_put(kohzuStop_PV,"1")
+        if(UNDE_TRACK_ON) {
+             epics_put(sprintf("%s.Stop",UND_PV),1)
+        }
+     }      
+     if( key == "preread_all" ) { return}
+     
+   
+}'
+
+#==================Undulator macors==========================================
+
+if(!(whatis("u_column_add")&0x2)) {
+  qdo uspec_column.mac
+}
+
+def show_und'
+      printf("\n%40.40s","Curent Undulator Status")
+      printf("\n%30.30s %9.4f","Gap(mm):",epics_get(sprintf("%sGap",UND_PV)))
+      printf("\n%30.30s %9.4f","Energy(keV):",epics_get(sprintf("%sEnergy",UND_PV)))
+      printf("\n%30.30s %9i","Harmonic:",epics_get(sprintf("%sHarmonicValue",UND_PV)))
+      
+'      
+
+def und_setup'{
+      local h
+      printf("\nSetup for undulator: %s \n\n",UND_PV)
+      Und_Off = getval("  Monochromator Undulator energy offset:",Und_Off)
+      h = getval("  Harmonic Select:",epics_get(sprintf("%sHarmonicValue",UND_PV)))
+      epics_put(sprintf("%sHarmonicValue",UND_PV),h)
+      show_und
+}'
+
+# moveundE - Moves undulator to given position (comments move).
+def moveundE'{
+        
+	if ($# != 1 && $# !=2 || $# == 2 && $2%2 != 1) {
+		print "Usage:  moveundE E [n]"
+		print "        E=Energy (keV)"
+		print "        n=harmonic"
+		print "        Give harmonic when want to change"
+		print "        Only odd harmonics allowed"
+		exit
+	}
+	
+	if ($# == 2 ) {
+		und_harm = $2
+		local uh_pv
+		uh_pv = UND_PV "HarmonicValue"
+		epics_put(uh_pv,und_harm)
+		sleep(0.25)
+	}
+			
+	local En
+        _moveundE $1
+	
+	En = epics_get(UND_PV "Energy")
+	comment "Undulator moved to: %g" En    
+}'
+
+# undscan - scans the undulator in energy units
+def undscan '{
+	
+	if ($# != 4 ) {
+		print "Usage: undscan start finish intervals time "
+		print "       (Units are KeV)"
+		exit
+	} 
+
+	{ _s1 = $1; _f1 = $2; _n1 = int($3); _ctime = $4; }
+
+	if (_n1 <= 0) {
+		print "Number of Intervals <= 0"
+		exit
+	} 
+	if (_s1 <= 0 || _f1 <= 0) {
+		print "Can only deal with positive energies."
+		exit
+	}
+
+	HEADING = sprintf("undscan %g %g %g %g",$1,$2,$3,$4)
+	_d1 = (_f1 - _s1) / _n1++
+	X_L = "Energy (keV)"
+	Y_L = cnt_name(DET)
+	_sx = _s1; _fx = _f1
+
+	
+	
+	FPRNT=sprintf("Energy  Gap  TaperGap  ")
+	PPRNT=sprintf("%9.9s %9.9s %9.9s ", "Energy","Gap","TaperGap")
+	VPRNT=PPRNT
+	_stype = 1|(1<<8)
+	_cols=3
+
+	scan_head
+	def _scan_on \'
+	 {
+	   for (; NPTS < _n1; NPTS++) {
+		local E gap E_pv tgap
+		E = _s1 + NPTS * _d1
+		
+		epics_put(sprintf("%sScanEnergy.VAL",EP_Und),E)
+		waitund
+		
+                E = epics_get(UND_PV "Energy")
+		gap = epics_get(UND_PV "Gap")
+		tgap= epics_get(UND_PV "TaperGap")
+		FPRNT=sprintf("%g %.8g %.8g ",E,gap,tgap)
+		PPRNT=sprintf("%9.4f %9.4f %9.4f ",E,gap,tgap)
+		VPRNT=PPRNT
+		scan_loop
+		scan_data(NPTS, E)
+		scan_plot
+	   }
+	 }
+	 scan_tail
+	\'
+	_scan_on
+}'
+
+#und_tracking_off - Turns on undulator tracking during energy softmotor move/scan
+def und_tracking_on'{
+        local cmd
+	# 2008-10-26,PRJ: this conflicts with some USAXS analysis software; turn off for now
+	#comment "Undulator tracking is on"
+	UNDE_TRACK_ON =1 
+	#cdef("Fheader",\'
+	#	printf("#C Undulator Tracking is on; Offset:%5.3f\n",Und_Off)
+	#	 \',"und","0x20")
+        cmd = sprintf("epics_get(\"%s\")",sprintf("%sEnergy",UND_PV));
+        u_column_add("Und_E","%.8g",cmd,"und");
+        
+}'
+
+#und_tracking_off - Turns off undulator tracking during energy softmotor move/scan
+def und_tracking_off'
+        UNDE_TRACK_ON =0
+	# 2008-10-26,PRJ: this conflicts with some USAXS analysis software; turn off for now
+	#comment "Undulator tracking is off"
+        cdef("Fheader","","und","delete")
+        u_column_remove("Und_E","und")
+'        
+
+
+
+#=========================internal macros===================================
+# _moveundE - Moves undulator to given position. 
+def _moveundE'{
+    local Enew Eold 
+        
+    Enew = $1
+    Eold = epics_get(EP_Und "EnergySet")
+    
+    if (Enew != Eold) {
+	epics_put(sprintf("%sScanEnergy",UND_PV),Enew)
+    	waitund
+    }
+           
+}'
+
+#wait for undulator motions done
+def waitund '
+     sleep(Und_Delay)
+     while( epics_get(sprintf("%sBusy",UND_PV),"short") == 1 ){ sleep(0.1) }
+	
+'
+

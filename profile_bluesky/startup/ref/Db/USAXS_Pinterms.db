@@ -1,0 +1,76 @@
+# USAXS_Pinterms.db
+# prelimnary version PB 2011.04.11
+# modified JIL 2011.07.05
+
+grecord(ao,        "9idcLAX:USAXS_Pin:AcquireTime")
+grecord(ao,        "9idcLAX:USAXS_Pin:NumImages")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:waxs_x_out")
+grecord(ao,        "9idcLAX:USAXS_Pin:waxs_x_in")
+grecord(ao,        "9idcLAX:USAXS_Pin:waxs_x_limit_offset")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:ax_out")
+grecord(ao,        "9idcLAX:USAXS_Pin:ax_in")
+grecord(ao,        "9idcLAX:USAXS_Pin:ax_limit_offset")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_z_out")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_z_in")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_z_limit_offset")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_y_out")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_y_in")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_y_limit_offset")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:dx_out")
+grecord(ao,        "9idcLAX:USAXS_Pin:dx_in")
+grecord(ao,        "9idcLAX:USAXS_Pin:dx_limit_offset")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_hslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_vslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:USAXS_vslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:USAXS_hslit_ap")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_hgslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_vgslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:USAXS_vgslit_ap")
+grecord(ao,        "9idcLAX:USAXS_Pin:USAXS_hgslit_ap")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Exp_Al_Filter")
+grecord(ao,        "9idcLAX:USAXS_Pin:Exp_Ti_Filter")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_TrPD")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_TrI0")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_TrPDgain")
+grecord(ao,        "9idcLAX:USAXS_Pin:Pin_TrI0gain")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:USAXSSAXSMode")
+
+grecord(stringout, "9idcLAX:USAXS_Pin:sampleTitle")
+grecord(waveform,  "9idcLAX:USAXS_Pin:directory")
+{
+  field(FTVL,"CHAR")
+  field(NELM,"256")
+}
+
+
+grecord(stringout, "9idcLAX:USAXS_Pin:state")
+grecord(stringout, "9idcLAX:USAXS_Pin:timeStamp")
+grecord(stringout, "9idcLAX:USAXS_Pin:userDir")
+grecord(stringout, "9idcLAX:USAXS_Pin:userName")
+
+grecord(ao,        "9idcLAX:USAXS_Pin:AcquireTime")
+grecord(ao,        "9idcLAX:USAXS_Pin:NumImages")
+
+grecord(ao,        "9idcLAX:USAXS_WAXS:Exp_Al_Filter")
+grecord(ao,        "9idcLAX:USAXS_WAXS:Exp_Ti_Filter")
+
+grecord(stringout, "9idcLAX:USAXS_WAXS:sampleTitle")
+grecord(waveform, "9idcLAX:USAXS_WAXS:directory")
+{
+  field(FTVL,"CHAR")
+  field(NELM,"256")
+}
+
+grecord(ao,        "9idcLAX:USAXS_WAXS:AcquireTime")
+grecord(ao,        "9idcLAX:USAXS_WAXS:NumImages")
+

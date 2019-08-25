@@ -1,0 +1,134 @@
+# This is the streamDevice protocol file for the Watson Marlow 505Du/RL
+InTerminator = CR;
+OutTerminator = CR;
+ReadTimeout = 100;
+setEcho {
+	out "SE%d";
+}
+
+setSetPoint {
+	out "SS%6.2f";
+	}
+
+setOnOff {
+	out "SO%d";
+	}
+
+setPowerStatus {
+	out "SW%d";
+	}
+
+setHighAlm {
+	out "SH%6.2d";
+	}
+
+setLowAlm { 
+	out "SL%6.2f";
+	}
+
+setRemoteProbe { 
+	out "Sr%d";
+	}
+
+getSetPoint {
+	out "RS";in "%f";
+}
+
+getIntTemp {
+	out "RT"; in "%f";
+}
+
+getExtTemp {
+	out "RR"; in "%f";
+}
+
+getPowerStatus {
+	out "RW"; in "%d";
+}
+
+getTempUnits {
+	out "RU"; in "%s";
+}
+
+getHighAlm {
+	out "RH";in "%f";
+}
+
+getLowAlm {
+	out "RL"; in "%f";
+}
+
+getAlarmStatus {
+	out "RF"; in "%d";
+}
+
+setPgmNum {
+	out "SV%d";
+}
+
+setPgmNumSteps {
+	out "Ss%d";
+}
+
+setPgmLastLoopNum {
+	out "SK%d";
+}
+
+setPgmStepSetP {
+	out "SY%(A)d,%(B)%f";
+}
+
+setPgmStepPeriod {
+	out "SX%(A)d,%(B)%f";
+	}
+
+setPgmHold {
+	out "SZ%d";
+	}
+
+setPgmOp {
+ 	out "SG%d";
+}
+
+setPgmEnd {
+	out "SR";
+}
+setPgmSkipPeriod {
+	out "SJ";
+}
+
+getPgmNumber {
+	out "RV"; in "%d";
+}
+
+getPgmNumSteps {
+	out "Rs"; in "%d";
+}
+
+getPgmNumLoops {
+	out "RK"; in "%d";
+}
+
+getPgmLoopNum {
+	out "RI"; in "%d";
+}
+
+getPgmStepSetP {
+	out "RY%d"; in "%f";
+}
+
+getPgmStepPeriod {
+	out "RX%d"; in "%f";
+}
+
+getPgmStepNum {
+	out "RC"; in "%d";
+}
+
+getPgmStepElapseTime {
+	out "RE"; in "%f";
+}
+
+getPgmStatus P
+	out "RG"; in "%d";
+}

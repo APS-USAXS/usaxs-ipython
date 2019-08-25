@@ -1,0 +1,12 @@
+#
+# P   : prefix for IOC
+# W   : waveform record name
+# D   : waveform record description
+# NELM   : number of elements
+# FTVL   : type of each element
+#
+grecord(waveform,"$(P)$(W)")
+{
+	field(NELM, "$(NELM)")
+	field(FTVL, "$(FTVL)")
+}
