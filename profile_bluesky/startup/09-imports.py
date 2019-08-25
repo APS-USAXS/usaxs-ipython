@@ -65,6 +65,18 @@ from apstools.devices import Struck3820
 from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
 
+req_version = (1,1,7)
+cur_version = apstools.__version__
+if cur_version < req_version:
+    ver_str = '.'.join((map(str,req_version)))
+    msg = (
+        f'Requires apstools {req_version}+'
+        f' you have {cur_version}'
+        '\n\n'
+        'You should type `exit` now and update apstools'
+        )
+    raise RuntimeError(msg)
+
 from usaxs_support.nexus import reset_manager, get_manager
 from usaxs_support.saveFlyData import SaveFlyScan
 from usaxs_support.surveillance import instrument_archive

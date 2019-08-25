@@ -201,7 +201,8 @@ class UsaxsFlyScanDevice(Device):
             )
 
         # add an event with our MCA data in the "mca" stream
-        yield from addDeviceDataAsStream([struck.mca1, struck.mca2, struck.mca3], "mca")
+        yield from APS_plans.addDeviceDataAsStream(
+            [struck.mca1, struck.mca2, struck.mca3], "mca")
 
         logger.debug(f"after return: {time.time() - self.t0}s")
         yield from user_data.set_state_plan("fly scan finished")
@@ -214,5 +215,3 @@ usaxs_flyscan.saveFlyData_config = "/share1/AreaDetectorConfig/FlyScan_config/sa
 # Flyscan() will override these and set them in the way the isntrument prefers.
 usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"   # developer
 usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
-
-# RE(usaxs_flyscan.plan())

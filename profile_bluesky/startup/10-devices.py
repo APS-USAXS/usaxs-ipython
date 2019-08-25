@@ -8,7 +8,6 @@ NOTE: avoid using any PV more than once!
 
 FUNCTIONS
 
-    addDeviceDataAsStream()
     device_read2table()
     trim_string_for_EPICS()
 
@@ -48,31 +47,6 @@ DEVICES
 
 # simple enumeration used by DCM_Feedback()
 MONO_FEEDBACK_OFF, MONO_FEEDBACK_ON = range(2)
-
-
-def addDeviceDataAsStream(devices, label):
-    """
-    add an ophyd Device as an addtional document stream
-    
-    Use this within a custom plan, such as this example::
-
-        yield from bps.open_run()
-        # ...
-        yield from addDeviceStream(prescanDeviceList, "metadata_prescan")
-        # ...
-        yield from custom_scan_procedure()
-        # ...
-        yield from addDeviceStream(postscanDeviceList, "metadata_postscan")
-        # ...
-        yield from bps.close_run()
-
-    """
-    yield from bps.create(name=label)
-    if isinstance(devices, Device):     # just in case...
-        devices = [devices]
-    for d in devices:
-        yield from bps.read(d)
-    yield from bps.save()
 
 
 def device_read2table(device, show_ancient=True, fmt="simple"):
