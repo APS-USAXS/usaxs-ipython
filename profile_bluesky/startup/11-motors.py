@@ -1,192 +1,182 @@
-print(__file__)
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """motors, stages, positioners, ..."""
 
 
+def move_motors(*args):
+    """
+    move one or more motors at the same time, returns when all moves are done
+    
+    move_motors(m1, 0)
+    move_motors(m2, 0, m3, 0, m4, 0)
+    """
+    status = []
+    for m, v in APS_utils.pairwise(args):
+        status.append(m.move(v, wait=False))
+    
+    for st in status:
+        ophyd.status.wait(st)
 
-# sx = EpicsMotor('9idcLAX:m58:c2:m1', name='sx')  # sx
-# sy = EpicsMotor('9idcLAX:m58:c2:m2', name='sy')  # sy
 
-class UsaxsSampleStageDevice(Device):
+class UsaxsSampleStageDevice(MotorBundle):
     """USAXS sample stage"""
-    x = Component(EpicsMotor, '9idcLAX:m58:c2:m1')
-    y = Component(EpicsMotor, '9idcLAX:m58:c2:m2')
-
-sample_stage = UsaxsSampleStageDevice('', name='sample_stage')
-append_wa_motor_list(sample_stage.x, sample_stage.y)
+    x = Component(UsaxsMotor, '9idcLAX:m58:c2:m1', labels=("sample",))
+    y = Component(UsaxsMotor, '9idcLAX:m58:c2:m2', labels=("sample",))
 
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-# dx = EpicsMotor('9idcLAX:m58:c2:m3', name='dx')  # dx
-# dy = EpicsMotor('9idcLAX:aero:c2:m1', name='dy')  # dy
-
-class UsaxsDetectorStageDevice(Device):
+class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
-    x = Component(EpicsMotor, '9idcLAX:m58:c2:m3')
-    y = Component(EpicsMotor, '9idcLAX:aero:c2:m1')
-
-detector_stage = UsaxsDetectorStageDevice('', name='detector_stage')
-append_wa_motor_list(detector_stage.x, detector_stage.y)
+    x = Component(UsaxsMotorTunable, '9idcLAX:m58:c2:m3', labels=("detector", "tunable",))
+    y = Component(UsaxsMotorTunable, '9idcLAX:aero:c2:m1', labels=("detector", "tunable",))
 
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+class UsaxsSlitDevice(MotorBundle):
+    """
+    USAXS slit just before the sample
+    
+    * center of slit: (x, y)
+    * aperture: (h_size, v_size)
+    """
+    h_size = Component(UsaxsMotor, '9idcLAX:m58:c2:m8', labels=("uslit",))
+    x      = Component(UsaxsMotor, '9idcLAX:m58:c2:m6', labels=("uslit",))
+    v_size = Component(UsaxsMotor, '9idcLAX:m58:c2:m7', labels=("uslit",))
+    y      = Component(UsaxsMotor, '9idcLAX:m58:c2:m5', labels=("uslit",))
+    
+    def set_size(self, *args, h=None, v=None):
+        """move the slits to the specified size"""
+        if h is None:
+            raise ValueError("must define horizontal size")
+        if v is None:
+            raise ValueError("must define vertical size")
+        move_motors(self.h_size, h, self.v_size, v)
 
 
-# uslhap = EpicsMotor('9idcLAX:m58:c2:m8', name='uslhap')  # uslithorap
-# uslhcen = EpicsMotor('9idcLAX:m58:c2:m6', name='uslhcen')  # uslithorcen
-# uslvap = EpicsMotor('9idcLAX:m58:c2:m7', name='uslvap')  # uslitverap
-# uslvcen = EpicsMotor('9idcLAX:m58:c2:m5', name='uslvcen')  # uslitvercen
-
-class UsaxsSlitDevice(Device):
-    """USAXS slit just before the sample"""
-    hap  = Component(EpicsMotor, '9idcLAX:m58:c2:m8')
-    hcen = Component(EpicsMotor, '9idcLAX:m58:c2:m6')
-    vap  = Component(EpicsMotor, '9idcLAX:m58:c2:m7')
-    vcen = Component(EpicsMotor, '9idcLAX:m58:c2:m5')
-
-usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
-append_wa_motor_list(
-    usaxs_slit.hcen, usaxs_slit.vcen,
-    usaxs_slit.hap,  usaxs_slit.vap
-)
+class GuardSlitMotor(UsaxsMotor):
+    status_update = Component(EpicsSignal, ".STUP")
 
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+class GSlitDevice(MotorBundle):
+    """
+    guard slit
+
+    * aperture: (h_size, v_size)
+    """
+    bot  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m6', labels=("gslit",))
+    inb  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m4', labels=("gslit",))
+    outb = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m3', labels=("gslit",))
+    top  = Component(GuardSlitMotor, '9idcLAX:mxv:c0:m5', labels=("gslit",))
+    x    = Component(UsaxsMotor, '9idcLAX:m58:c1:m5', labels=("gslit",))
+    y    = Component(UsaxsMotor, '9idcLAX:m58:c0:m6', labels=("gslit",))
+
+    h_size = Component(EpicsSignal, '9idcLAX:GSlit1H:size')
+    v_size = Component(EpicsSignal, '9idcLAX:GSlit1V:size')
+
+    h_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1H:sync.PROC')
+    v_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1V:sync.PROC')
+    
+    gap_tolerance = 0.02        # actual must be this close to desired
+    scale_factor = 1.2    # 1.2x the size of the beam should be good guess for guard slits.
+    h_step_away = 0.2     # 0.2mm step away from beam
+    v_step_away = 0.1     # 0.1mm step away from beam
+    h_step_into = 1.1     # 1.1mm step into the beam (blocks the beam)
+    v_step_into = 0.4     # 0.4mm step into the beam (blocks the beam)
+    tuning_intensity_threshold = 500
+    
+    def set_size(self, *args, h=None, v=None):
+        """move the slits to the specified size"""
+        if h is None:
+            raise ValueError("must define horizontal size")
+        if v is None:
+            raise ValueError("must define vertical size")
+        move_motors(self.h_size, h, self.v_size, v)
+    
+    @property
+    def h_gap_ok(self):
+        gap = self.outb.position - self.inb.position
+        return abs(gap - terms.SAXS.guard_h_size.value) <= self.gap_tolerance
+    
+    @property
+    def v_h_gap_ok(self):
+        gap = self.top.position - self.bot.position
+        return abs(gap - terms.SAXS.guard_v_size.value) <= self.gap_tolerance
+    
+    @property
+    def gap_ok(self):
+        return self.h_gap_ok and self.v_h_gap_ok
+    
+    def status_update(self):
+        # TODO: Did this code cause the following exception?
+        #  RuntimeError: Another set() call is still in progress
+        yield from bps.abs_set(self.top.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.bot.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.outb.status_update, 1)
+        yield from bps.sleep(0.05)
+        yield from bps.abs_set(self.inb.status_update, 1)
+        yield from bps.sleep(0.05)
+    
+
+class UsaxsCollimatorStageDevice(MotorBundle):
+    """USAXS Collimator (Monochromator) stage"""
+    r = Component(UsaxsMotorTunable, '9idcLAX:aero:c3:m1', labels=("collimator", "tunable",))
+    x = Component(UsaxsMotor, '9idcLAX:m58:c0:m2', labels=("collimator",))
+    y = Component(UsaxsMotor, '9idcLAX:m58:c0:m3', labels=("collimator",))
+    r2p = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m2', labels=("collimator", "tunable",))
 
 
-# BotMS = EpicsMotor('9ida:m46', name='BotMS')  # MonoSl_bot
-# InbMS = EpicsMotor('9ida:m43', name='InbMS')  # MonoSl_inb
-# OutMS = EpicsMotor('9ida:m44', name='OutMS')  # MonoSl_out
-# TopMS = EpicsMotor('9ida:m45', name='TopMS')  # MonoSl_top
-
-class MonoSlitDevice(Device):
-    """mono beam slit"""
-    bot = Component(EpicsMotor, '9ida:m46')
-    inb = Component(EpicsMotor, '9ida:m43')
-    out = Component(EpicsMotor, '9ida:m44')
-    top = Component(EpicsMotor, '9ida:m45')
-
-mono_slit = MonoSlitDevice('', name='mono_slit')
-append_wa_motor_list(
-    mono_slit.top, mono_slit.bot,
-    mono_slit.inb, mono_slit.out
-)
+class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
+    """USAXS Collimator (Monochromator) side-reflection stage"""
+    #r = Component(UsaxsMotor, '9idcLAX:xps:c0:m5', labels=("side_collimator",))
+    #t = Component(UsaxsMotor, '9idcLAX:xps:c0:m3', labels=("side_collimator",))
+    x = Component(UsaxsMotor, '9idcLAX:m58:c1:m1', labels=("side_collimator",))
+    y = Component(UsaxsMotor, '9idcLAX:m58:c1:m2')
+    rp = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m3', labels=("side_collimator", "tunable",))
 
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+class UsaxsAnalyzerStageDevice(MotorBundle):
+    """USAXS Analyzer stage"""
+    r = Component(UsaxsMotorTunable, '9idcLAX:aero:c0:m1', labels=("analyzer", "tunable"))
+    x = Component(UsaxsMotor, '9idcLAX:m58:c0:m5', labels=("analyzer",))
+    y = Component(UsaxsMotor, '9idcLAX:aero:c1:m1', labels=("analyzer",))
+    z = Component(UsaxsMotor, '9idcLAX:m58:c0:m7', labels=("analyzer",))
+    r2p = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m1', labels=("analyzer", "tunable"))
+    rt = Component(UsaxsMotor, '9idcLAX:m58:c1:m3', labels=("analyzer",))
 
 
-# gslbot = EpicsMotor('9idcLAX:mxv:c0:m6', name='gslbot')  # GSlit_bot
-# gslinb = EpicsMotor('9idcLAX:mxv:c0:m4', name='gslinb')  # GSlit_inb
-# gslitx = EpicsMotor('9idcLAX:m58:c1:m5', name='gslitx')  # Gslit_X
-# gslity = EpicsMotor('9idcLAX:m58:c0:m6', name='gslity')  # Gslit_Y
-# gslout = EpicsMotor('9idcLAX:mxv:c0:m3', name='gslout')  # GSlit_outb
-# gsltop = EpicsMotor('9idcLAX:mxv:c0:m5', name='gsltop')  # GSlit_top
+class UsaxsAnalyzerSideReflectionStageDevice(MotorBundle):
+    """USAXS Analyzer side-reflection stage"""
+    #r = Component(UsaxsMotor, '9idcLAX:xps:c0:m6', labels=("analyzer",))
+    #t = Component(UsaxsMotor, '9idcLAX:xps:c0:m4', labels=("analyzer",))
+    y = Component(UsaxsMotor, '9idcLAX:m58:c1:m4', labels=("analyzer",))
+    rp = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m4', labels=("analyzer", "tunable"))
 
-class GSlitDevice(Device):
-    """guard slit"""
-    bot = Component(EpicsMotor, '9idcLAX:mxv:c0:m6')
-    inb = Component(EpicsMotor, '9idcLAX:mxv:c0:m4')
-    out = Component(EpicsMotor, '9idcLAX:mxv:c0:m3')
-    top = Component(EpicsMotor, '9idcLAX:mxv:c0:m5')
-    x = Component(EpicsMotor, '9idcLAX:m58:c1:m5')
-    y = Component(EpicsMotor, '9idcLAX:m58:c0:m6')
+
+class SaxsDetectorStageDevice(MotorBundle):
+    """SAXS detector stage (aka: pin SAXS stage)"""
+    x = Component(UsaxsMotor, '9idcLAX:mxv:c0:m1', labels=("saxs",))
+    y = Component(UsaxsMotor, '9idcLAX:mxv:c0:m8', labels=("saxs",))
+    z = Component(UsaxsMotor, '9idcLAX:mxv:c0:m2', labels=("saxs",))
+
 
 guard_slit = GSlitDevice('', name='guard_slit')
-append_wa_motor_list(
-    guard_slit.top, guard_slit.bot,
-    guard_slit.inb, guard_slit.out,
-    guard_slit.x,   guard_slit.y
-)
+usaxs_slit = UsaxsSlitDevice('', name='usaxs_slit')
+sd.baseline.append(guard_slit)
+sd.baseline.append(usaxs_slit)
 
+s_stage    = UsaxsSampleStageDevice('', name='s_stage')
+d_stage    = UsaxsDetectorStageDevice('', name='d_stage')
 
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+m_stage    = UsaxsCollimatorStageDevice('', name='m_stage')
+ms_stage   = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 
-# mr = EpicsMotor('9idcLAX:aero:c3:m1', name='mr')  # mr
-# mx = EpicsMotor('9idcLAX:m58:c0:m2', name='mx')  # mx
-# my = EpicsMotor('9idcLAX:m58:c0:m3', name='my')  # my
-# m2rp = EpicsMotor('9idcLAX:pi:c0:m2', name='m2rp')  # USAXS.m2rp
-# #msr = EpicsMotor('9idcLAX:xps:c0:m5', name='msr')  # msr
-# msrp = EpicsMotor('9idcLAX:pi:c0:m3', name='msrp')  # USAXS.msrp
-# #mst = EpicsMotor('9idcLAX:xps:c0:m3', name='mst')  # mst
-# msx = EpicsMotor('9idcLAX:m58:c1:m1', name='msx')  # msx
-# msy = EpicsMotor('9idcLAX:m58:c1:m2', name='msy')  # msy
+a_stage    = UsaxsAnalyzerStageDevice('', name='a_stage')
+as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
 
-class UsaxsCollimatorStageDevice(Device):
-    """USAXS Analyzer stage"""
-    r = Component(EpicsMotor, '9idcLAX:aero:c3:m1')
-    x = Component(EpicsMotor, '9idcLAX:m58:c0:m2')
-    y = Component(EpicsMotor, '9idcLAX:m58:c0:m3')
-    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m2')
-    sx = Component(EpicsMotor, '9idcLAX:m58:c1:m1')
-    sy = Component(EpicsMotor, '9idcLAX:m58:c1:m2')
-    srp = Component(EpicsMotor, '9idcLAX:pi:c0:m3')
+saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 
-m_stage = UsaxsCollimatorStageDevice('', name='m_stage')
-append_wa_motor_list(
-    m_stage.r, m_stage.x, m_stage.y,
-    m_stage.r2p, 
-    m_stage.sx, m_stage.sy, m_stage.srp
-)
-
-
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-
-# ar = EpicsMotor('9idcLAX:aero:c0:m1', name='ar')  # ar
-# ax = EpicsMotor('9idcLAX:m58:c0:m5', name='ax')  # ax
-# ay = EpicsMotor('9idcLAX:aero:c1:m1', name='ay')  # ay
-# az = EpicsMotor('9idcLAX:m58:c0:m7', name='az')  # az
-# a2rp = EpicsMotor('9idcLAX:pi:c0:m1', name='a2rp')  # USAXS.a2rp
-# art = EpicsMotor('9idcLAX:m58:c1:m3', name='art')  # ART50-100
-# #asr = EpicsMotor('9idcLAX:xps:c0:m6', name='asr')  # asr
-# asrp = EpicsMotor('9idcLAX:pi:c0:m4', name='asrp')  # USAXS.asrp
-# #ast = EpicsMotor('9idcLAX:xps:c0:m4', name='ast')  # ast
-# asy = EpicsMotor('9idcLAX:m58:c1:m4', name='asy')  # asy
-
-class UsaxsAnalyzerStageDevice(Device):
-    """USAXS Analyzer stage"""
-    r = Component(EpicsMotor, '9idcLAX:aero:c0:m1')
-    x = Component(EpicsMotor, '9idcLAX:m58:c0:m5')
-    y = Component(EpicsMotor, '9idcLAX:aero:c1:m1')
-    z = Component(EpicsMotor, '9idcLAX:m58:c0:m7')
-    r2p = Component(EpicsMotor, '9idcLAX:pi:c0:m1')
-    rt = Component(EpicsMotor, '9idcLAX:m58:c1:m3')
-    sy = Component(EpicsMotor, '9idcLAX:m58:c1:m4')
-    srp = Component(EpicsMotor, '9idcLAX:pi:c0:m4')
-
-a_stage = UsaxsAnalyzerStageDevice('', name='a_stage')
-append_wa_motor_list(
-    a_stage.r, a_stage.x, a_stage.y, a_stage.z,
-    a_stage.r2p, a_stage.rt,
-    a_stage.sy, a_stage.srp
-)
-
-
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-# pin_x = EpicsMotor('9idcLAX:mxv:c0:m1', name='pin_x')  # pin_x
-# pin_y = EpicsMotor('9idcLAX:mxv:c0:m8', name='pin_y')  # pin_y
-# pin_z = EpicsMotor('9idcLAX:mxv:c0:m2', name='pin_z')  # pin_z
-
-class PinStageDevice(Device):
-    """USAXS Pin stage"""
-    x = Component(EpicsMotor, '9idcLAX:mxv:c0:m1')
-    y = Component(EpicsMotor, '9idcLAX:mxv:c0:m8')
-    z = Component(EpicsMotor, '9idcLAX:mxv:c0:m2')
-    
-pin_stage = PinStageDevice('', name='pin_stage')
-append_wa_motor_list(
-    pin_stage.x, pin_stage.y, pin_stage.z,
-)
-
-
-# . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-camy = EpicsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
-tcam = EpicsMotor('9idcLAX:m58:c1:m6', name='tcam')  # tcam
-tens = EpicsMotor('9idcLAX:m58:c1:m8', name='tens')  # Tension
-waxsx = EpicsMotor('9idcLAX:m58:c0:m4', name='waxsx')  # WAXS X
-append_wa_motor_list(camy, tcam, tens, waxsx)
+camy       = UsaxsMotor('9idcLAX:m58:c1:m7', name='camy')  # cam_y
+tcam       = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam')  # tcam
+tens       = UsaxsMotor('9idcLAX:m58:c1:m8', name='tens')  # Tension
+waxsx      = UsaxsMotor('9idcLAX:m58:c0:m4', name='waxsx', labels=("waxs",))  # WAXS X

@@ -1,6 +1,8 @@
-print(__file__)
+logger.info(__file__)
+logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
-# set up the data broker (db)
+"""set up the data broker (db)"""
+
 
 import os
 callback_db = {}
@@ -31,6 +33,7 @@ get_ipython().register_magics(BlueskyMagics)
 # Set up the BestEffortCallback.
 from bluesky.callbacks.best_effort import BestEffortCallback
 bec = BestEffortCallback()
+bec.disable_baseline()    # do not print baseline before/after a plan runs
 callback_db['BestEffortCallback'] = RE.subscribe(bec)
 peaks = bec.peaks  # just as alias for less typing
 

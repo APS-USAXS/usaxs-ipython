@@ -13,3 +13,12 @@ mViewer.log
 .project
 .pydevproject
 .settings
+
+# APS IT
+.loglogin
+
+# SPEC data files (default naming convention)
+20*.dat
+
+# logging
+.ipython_*.log*
