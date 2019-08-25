@@ -215,5 +215,3 @@ usaxs_flyscan.saveFlyData_config = "/share1/AreaDetectorConfig/FlyScan_config/sa
 # Flyscan() will override these and set them in the way the isntrument prefers.
 usaxs_flyscan.saveFlyData_HDF5_dir ="/share1/USAXS_data/test"   # developer
 usaxs_flyscan.saveFlyData_HDF5_file ="sfs.h5"
-
-# RE(usaxs_flyscan.plan())
