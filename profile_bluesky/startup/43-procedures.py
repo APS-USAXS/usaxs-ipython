@@ -274,7 +274,6 @@ def mode_Radiography():
     
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_ON,
-        mono_shutter, "open",
         ccd_shutter, "close",
     )
   
@@ -302,8 +301,18 @@ def mode_Radiography():
         )
 
     yield from user_data.set_state_plan("Radiography Mode")
-    msg = """
-    TV should now show Radiography CCD image. 
+
+    if aps.shutter_permit.value in (1, 'PERMIT'):
+        yield from bps.mv(
+            mono_shutter, "open",
+        )
+
+    if mono_shutter.state == "open":
+        msg = "TV should now show Radiography CCD image."
+    else:
+        msg = "The mono shutter is closed now.  APS beam dump?"
+
+    msg += """
     
     But before calling - are you REALLY sure the sample is not blocking the beam? 
        Move sample out and try RE(preUSAXStune()) again.
