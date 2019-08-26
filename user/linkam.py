@@ -43,12 +43,12 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
             md["title"]=sampleMod
             yield from WAXS(pos_X, pos_Y, thickness, sampleMod, md={})
         
-        
     t0 = time.time()
     yield from collectAllThree()
     
     yield from bps.mv(linkam_tc1.ramp_rate, rate1)          #sets the rate of next ramp
     yield from linkam_tc1.set_target(temp1, wait=False)     #sets the temp of next ramp
+    print(f"Ramping temperature to {temp1} C")  
     
     while not linkam_tc1.settled:                           #runs data collection until next temp
         yield from collectAllThree()
@@ -59,7 +59,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
     while time.time()-t1 < delay1:                          # collects data for delay1 seconds
         yield from collectAllThree()
  
-    print(f"waited for {delay1} seconds, now ramp down")  
+    print(f"waited for {delay1} seconds, now ramp temperature to {temp2} C")  
 
     yield from bps.mv(linkam_tc1.ramp_rate, rate2)          #sets the rate of next ramp
     yield from linkam_tc1.set_target(temp2, wait=False)     #sets the temp of next ramp
