@@ -64,9 +64,11 @@ from apstools.devices import EpicsMotorShutter
 from apstools.devices import Struck3820
 from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps_ophyd.busy import BusyStatus
+import apstools
 
 req_version = (1,1,7)
-cur_version = apstools.__version__
+# NOTE: this fails if apstools.__version__ has any non-integer parts!
+cur_version = tuple(map(int,apstools.__version__.split(".")))
 if cur_version < req_version:
     ver_str = '.'.join((map(str,req_version)))
     msg = (
