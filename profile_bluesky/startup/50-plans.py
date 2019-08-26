@@ -443,6 +443,7 @@ def execute_command_list(filename, commands, md={}):
         _md["action"] = action
         _md["parameters"] = args    # args is shorter than parameters, means the same thing here
         _md["archive"] = archive
+        _md["iso8601"] = datetime.datetime.now().isoformat(" ")
 
         _md.update(md or {})      # overlay with user-supplied metadata
 
@@ -456,6 +457,7 @@ def execute_command_list(filename, commands, md={}):
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
+            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from Flyscan(sx, sy, sth, snm, md=_md)
 
         elif action in ("saxs", "saxsexp"):
@@ -463,6 +465,7 @@ def execute_command_list(filename, commands, md={}):
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
+            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from SAXS(sx, sy, sth, snm, md=_md)
 
         elif action in ("waxs", "waxsexp"):
@@ -470,6 +473,7 @@ def execute_command_list(filename, commands, md={}):
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
+            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
         elif action in ("mode_Radiography"):
