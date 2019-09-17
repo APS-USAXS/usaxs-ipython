@@ -23,6 +23,7 @@ FUNCTIONS
     mode_SBUAXS()
     mode_USAXS()
     mode_WAXS()
+    reset_USAXS()
     remaining_time_reporter()
 
 INTERNAL
@@ -485,6 +486,53 @@ def measure_SAXS_Transmission(md={}):
         terms.USAXS.transmission.I0_gain.value
         )
     logger.info(msg)
+
+
+def reset_USAXS():      # FIXME: work-in-progress!!!
+    """
+    bluesky plan to set USAXS instrument in safe configuration
+
+    CAUTION: work-in-progress!!!
+    """
+    logger.info("Resetting USAXS")
+    yield from user_data.set_state_plan("resetting motors")
+    # TODO: setplot 131 (resets SPEC plotting)
+    yield from DCMfeedbackON()
+    yield from bps.mv(
+        scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
+        upd_controls.auto.mode, AutorangeSettings.auto_background,
+        I0_controls.auto.mode, AutorangeSettings.manual,
+        I00_controls.auto.mode, AutorangeSettings.manual,
+        ti_filter_shutter, "close",
+        user_data.scanning, "no",
+    )
+    move_list = [
+        d_stage.y, terms.USAXS.DY0.value,
+        a_stage.y, terms.USAXS.AY0.value,
+        a_stage.r, terms.USAXS.ar_val_center.value,
+    ]
+    if terms.USAXS.useSBUSAXS.value:
+        move_list += [
+            as_stage.rp, terms.USAXS.ASRP0.value,
+            ]
+    yield from bps.mv(*move_list)  # move all motors at once
+    # TODO: TITLE = SPEC_STD_TITLE
+
+    # TODO: epics_put (sprintf("9idcUSX:%s:mode",PDstring), 2) 
+    yield from bps.mv(
+        scaler0.count_mode, 1,
+    )
+    yield from user_data.set_state_plan("USAXS reset complete")
+    # TODO: if(NOTIFY_ON_RESET) { sendNotifications("USAXS has reset","spec has encountered a problem and reset the USAXS.");} 
+    # TODO: chk_beam_off 
+    # TODO: rdef _cleanup3 \'\' 
+
+    # unset dataCollectionInProgress so GUI (and other 
+    # tools) that user is collecting data...
+    #   (1-not running, 0 running) 
+    yield from bps.mv(
+        user_data.collection_in_progress, 1,
+    )
 
 
 @APS_utils.run_in_thread
