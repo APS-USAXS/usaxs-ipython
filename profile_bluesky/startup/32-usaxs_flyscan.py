@@ -200,8 +200,24 @@ class UsaxsFlyScanDevice(Device):
             ti_filter_shutter, "close",
             )
 
+
+        def addDeviceDataAsStream(devices, label):
+            """
+            fixes bug in apstools.plans.addDeviceDataAsStream
+
+            * https://github.com/BCDA-APS/apstools/issues/255
+            * https://github.com/APS-USAXS/ipython-usaxs/issues/307
+            """
+            yield from bps.create(name=label)
+            if not isinstance(devices, list):     # just in case...
+                devices = [devices]
+            for d in devices:
+                yield from bps.read(d)
+            yield from bps.save()
+
         # add an event with our MCA data in the "mca" stream
-        yield from APS_plans.addDeviceDataAsStream(
+        # TODO: yield from APS_plans.addDeviceDataAsStream(
+        yield from addDeviceDataAsStream(
             [struck.mca1, struck.mca2, struck.mca3], "mca")
 
         logger.debug(f"after return: {time.time() - self.t0}s")
