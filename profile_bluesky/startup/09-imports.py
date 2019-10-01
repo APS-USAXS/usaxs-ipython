@@ -18,6 +18,9 @@ import threading
 import time
 import uuid
 
+# custom bluesky exception when aborting a scan
+from bluesky.run_engine import RequestAbort
+
 from ophyd import Component, Device, DeviceStatus, Signal
 from ophyd import EpicsMotor, EpicsScaler, MotorBundle
 from ophyd import EpicsSignal, EpicsSignalRO, EpicsSignalWithRBV
