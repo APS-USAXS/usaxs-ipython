@@ -81,6 +81,9 @@ usaxs_q = usaxs_q_calc.val
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)
 
+sample_data = SampleDataDevice(name="sample_data")
+sd.baseline.append(sample_data)
+
 bss_user_info = APS_devices.ApsBssUserInfoDevice(
     "9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
