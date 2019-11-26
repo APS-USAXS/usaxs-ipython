@@ -23,3 +23,6 @@ mViewer.log
 # logging
 .ipython_*.log*
 .logs/
+
+# Microsoft Visual Studio Code editor
+.vscode/
