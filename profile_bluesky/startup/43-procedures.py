@@ -532,7 +532,7 @@ def reset_USAXS():
             )
 
     yield from bps.mv(
-        user_data.collection_in_progress, 1,
+        user_data.collection_in_progress, 0,    #despite the label, 0 means not collecting
     )
 
 
