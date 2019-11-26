@@ -524,10 +524,6 @@ def reset_USAXS():
     yield from bps.mv(*move_list)  # move all motors at once
     # TITLE = SPEC_STD_TITLE
 
-    yield from bps.mv(
-        upd_autorange_controls.mode, "auto+background",
-        scaler0.count_mode, 1,
-    )
     yield from user_data.set_state_plan("USAXS reset complete")
     if NOTIFY_ON_RESET:
         email_notices.send(
