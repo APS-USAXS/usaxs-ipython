@@ -8,23 +8,20 @@ logger.info(__file__)
 
 def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp2, rate2, md={}):
     """
-    collect RT USAXS/WAXS for N1
-    change temperature T
-    collect USAXS/WAXS while heating
-    when T reached, hold for N2 minutes, collecting data repeatedly
-    change T to RT
-    collect data while ramping
-    reach RT
+    collect RT USAXS/SAXS/WAXS
+    change temperature T to temp1 with rate1
+    collect USAXS/SAXS/WAXS while heating
+    when temp1 reached, hold for delay1 seconds, collecting data repeatedly
+    change T to temp2 with rate2sampleTitleMod
     collect final data
-    
-    sampleTitleMod = f"{sample}_{temperature_C:.0f}C_{(time.time()-t0)/60:.0f}min"
-    Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
+    stop
     
     reload by : 
-    %run -i -m user.linkam
+    %run -m linkam
     """
+
     def setSampleName():
-        return f"{scan_title}_{linkam_tc1.value:.0f}C_{(time.time()-t0)/60:.0f}min" 
+        return f"{scan_title}_{linkam.value:.0f}C_{(time.time()-t0)/60:.0f}min" 
         
     def collectAllThree():
         debug=False
@@ -43,29 +40,36 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
             md["title"]=sampleMod
             yield from WAXS(pos_X, pos_Y, thickness, sampleMod, md={})
         
+    linkam = linkam_tc1
+    #linkam = linkam_ci94
+    logger.info(f"Linkam controller PV prefix={linkam.prefix}")
+
     t0 = time.time()
     yield from collectAllThree()
     
-    yield from bps.mv(linkam_tc1.ramp_rate, rate1)          #sets the rate of next ramp
-    yield from linkam_tc1.set_target(temp1, wait=False)     #sets the temp of next ramp
-    print(f"Ramping temperature to {temp1} C")  
+    yield from bps.mv(linkam.ramp_rate, rate1)          #sets the rate of next ramp
+    yield from linkam.set_target(temp1, wait=False)     #sets the temp of next ramp
+    logger.info(f"Ramping temperature to {temp1} C")  
     
-    while not linkam_tc1.settled:                           #runs data collection until next temp
+    while not linkam.settled:                           #runs data collection until next temp
         yield from collectAllThree()
       
-    print(f"Reached temperature, now collecting data for {delay1} seconds")  
+    logger.info(f"Reached temperature, now collecting data for {delay1} seconds")  
     t1 = time.time()
     
     while time.time()-t1 < delay1:                          # collects data for delay1 seconds
         yield from collectAllThree()
  
-    print(f"waited for {delay1} seconds, now ramp temperature to {temp2} C")  
+    logger.info(f"waited for {delay1} seconds, now ramping temperature to {temp2} C")  
 
-    yield from bps.mv(linkam_tc1.ramp_rate, rate2)          #sets the rate of next ramp
-    yield from linkam_tc1.set_target(temp2, wait=False)     #sets the temp of next ramp
+    yield from bps.mv(linkam.ramp_rate, rate2)          #sets the rate of next ramp
+    yield from linkam.set_target(temp2, wait=False)     #sets the temp of next ramp
 
-    while not linkam_tc1.settled:                           #runs data collection until next temp
+    while not linkam.settled:                           #runs data collection until next temp
         yield from collectAllThree()
+
+    logger.info(f"reached {temp2} C")  
 
     yield from collectAllThree()
 
+    logger.info(f"finished")  

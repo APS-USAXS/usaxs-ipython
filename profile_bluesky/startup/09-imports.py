@@ -18,6 +18,9 @@ import threading
 import time
 import uuid
 
+# custom bluesky exception when aborting a scan
+from bluesky.run_engine import RequestAbort
+
 from ophyd import Component, Device, DeviceStatus, Signal
 from ophyd import EpicsMotor, EpicsScaler, MotorBundle
 from ophyd import EpicsSignal, EpicsSignalRO, EpicsSignalWithRBV
@@ -49,7 +52,7 @@ import apstools.callbacks as APS_callbacks
 import apstools.devices as APS_devices
 import apstools.filewriters as APS_filewriters
 import apstools.plans as APS_plans
-import apstools.synApps_ophyd as APS_synApps_ophyd
+import apstools.synApps as APS_synApps
 import apstools.suspenders as APS_suspenders
 import apstools.utils as APS_utils
 
@@ -63,7 +66,7 @@ from apstools.devices import EpicsMotorLimitsMixin
 from apstools.devices import EpicsMotorShutter
 from apstools.devices import Struck3820
 from apstools.filewriters import SpecWriterCallback, spec_comment
-from apstools.synApps_ophyd.busy import BusyStatus
+from apstools.synApps.busy import BusyStatus
 import apstools
 
 req_version = (1,1,7)
@@ -85,4 +88,9 @@ from usaxs_support.surveillance import instrument_archive
 
 import pyRestTable
 
-sys.path.append(IPython.paths.get_ipython_dir())
+sys.path.append(
+    os.path.join(
+        IPython.paths.get_ipython_dir(),
+        "user",
+        )
+    )

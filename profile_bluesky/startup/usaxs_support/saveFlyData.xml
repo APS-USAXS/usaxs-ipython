@@ -81,6 +81,34 @@ Additionally, you can check this file for validity and that all PVs exist with t
                     <attribute name="canSAS_class" value="SASsample" />
                     <PV label="name" pvname="9idcLAX:USAXS:sampleTitle" string="true" />
                     <PV label="thickness" pvname="9idcLAX:USAXS:SampleThickness" />
+                    <PV label="description" pvname="9idcSample:Description" />
+                    <PV label="chemical_formula" pvname="9idcSample:ChemicalFormula" />
+
+                    <PV label="temperature" pvname="9idcSample:Temperature">
+                        <attribute name="units" value="C" />
+                    </PV>
+                    <PV label="concentration" pvname="9idcSample:Concentration">
+                        <attribute name="units" value="g/cm3" />
+                    </PV>
+                    <PV label="volume_fraction" pvname="9idcSample:VolumeFraction" />
+                    <PV label="scattering_length_density" pvname="9idcSample:ScatteringLengthDensity">
+                        <attribute name="units" value="cm/cm3" />
+                    </PV>
+                    <PV label="magnetic_field" pvname="9idcSample:MagneticField" />
+                    <PV label="stress_field" pvname="9idcSample:StressField" />
+                    <PV label="electric_field" pvname="9idcSample:ElectricField">
+                        <attribute name="units" value="V" />
+                    </PV>
+                    <PV label="x_translation" pvname="9idcSample:XTranslation">
+                        <attribute name="units" value="mm" />
+                    </PV>
+                    <PV label="rotation_angle" pvname="9idcSample:RotationAngle">
+                        <attribute name="units" value="degrees" />
+                    </PV>
+
+                    <PV label="magnetic_field_direction" pvname="9idcSample:MagneticFieldDir" />
+                    <PV label="stress_field_direction" pvname="9idcSample:StressFieldDir" />
+                    <PV label="electric_field_direction" pvname="9idcSample:ElectricFieldDir" />
                 </group>
 
                 <group name="flyScan" class="NXdata">

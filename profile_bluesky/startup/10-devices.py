@@ -38,6 +38,7 @@ DEVICES
     Parameters_WAXS()
     PreUsaxsTuneParameters()
     PSS_Parameters()
+    SampleDataDevice()
     UsaxsMotor()
     UsaxsMotorTunable()
     UserDataDevice()
@@ -174,6 +175,47 @@ def trim_string_for_EPICS(msg):
     if len(msg) > MAX_EPICS_STRINGOUT_LENGTH:
         msg = msg[:MAX_EPICS_STRINGOUT_LENGTH-1]
     return msg
+
+
+class SampleDataDevice(Device):
+    """sample information, (initially) based on NeXus requirements"""
+    temperature = Component(EpicsSignal, "9idcSample:Temperature")
+    concentration = Component(EpicsSignal, "9idcSample:Concentration")
+    volume_fraction = Component(EpicsSignal, "9idcSample:VolumeFraction")
+    scattering_length_density = Component(EpicsSignal, "9idcSample:ScatteringLengthDensity")
+    magnetic_field = Component(EpicsSignal, "9idcSample:MagneticField")
+    stress_field = Component(EpicsSignal, "9idcSample:StressField")
+    electric_field = Component(EpicsSignal, "9idcSample:ElectricField")
+    x_translation = Component(EpicsSignal, "9idcSample:XTranslation")
+    rotation_angle = Component(EpicsSignal, "9idcSample:RotationAngle")
+
+    magnetic_field_dir = Component(EpicsSignal, "9idcSample:MagneticFieldDir", string=True)
+    stress_field_dir = Component(EpicsSignal, "9idcSample:StressFieldDir", string=True)
+    electric_field_dir = Component(EpicsSignal, "9idcSample:ElectricFieldDir", string=True)
+
+    description = Component(EpicsSignal, "9idcSample:Description", string=True)
+    chemical_formula = Component(EpicsSignal, "9idcSample:ChemicalFormula", string=True)
+
+    def resetAll(self):
+        """bluesky plan to reset all to preset values"""
+        yield from bps.mv(
+            self.temperature, 25,
+            self.concentration, 1,
+            self.volume_fraction, 1,
+            self.scattering_length_density, 1,
+            self.magnetic_field, 0,
+            self.stress_field, 0,
+            self.electric_field, 0,
+            self.x_translation, 0,
+            self.rotation_angle, 0,
+
+            self.magnetic_field_dir, "X",
+            self.stress_field_dir, "X",
+            self.electric_field_dir, "X",
+
+            self.description, "",
+            self.chemical_formula, "",
+        )
 
 
 class UserDataDevice(Device):
@@ -543,7 +585,7 @@ class GeneralParameters(Device):
 
 class DiagnosticsParameters(Device):
     """for beam line diagnostics and post-mortem analyses"""
-    beam_in_hutch_swait = Component(APS_synApps_ophyd.swaitRecord , "9idcLAX:blCalc:userCalc1")
+    beam_in_hutch_swait = Component(APS_synApps.SwaitRecord , "9idcLAX:blCalc:userCalc1")
 
     PSS = Component(PSS_Parameters)
     BL_EPS = Component(BLEPS_Parameters)

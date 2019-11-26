@@ -92,8 +92,33 @@ def IfRequestedStopBeforeNextScan():
             user_data.state, "Aborted data collection",
        )
  
-        RE.pause_msg = "DEBUG: stopped the scans, ignore the (informative) exception trace"
-        RE.abort(reason=msg)        # this gonna work?
+        # RE.pause_msg = "DEBUG: stopped the scans, ignore the (informative) exception trace"
+        raise RequestAbort(msg)        # long exception trace?
+        # To make the exception trace brief, `%xmode Minimal`
+        """
+        example:
+        
+        In [8]: def plan(): 
+           ...:     raise RequestAbort("Aborted from plan because user requested") 
+        In [9]: RE(plan())                                                                                                                          
+        ---------------------------------------------------------------------------
+        RequestAbort                              Traceback (most recent call last)
+        <ipython-input-9-a6361a080fc0> in <module>
+        ----> 1 RE(plan())
+
+        <ipython-input-8-7178eb5f1267> in plan()
+              1 def plan():
+        ----> 2     raise RequestAbort("Aborted from plan because user requested")
+              3 
+              4 
+
+        RequestAbort: Aborted from plan because user requested
+        In [12]: %xmode Minimal                                                                                                                     
+        Exception reporting mode: Minimal
+
+        In [13]: RE(plan())                                                                                                                         
+        RequestAbort: Aborted from plan because user requested
+        """
 
     if open_the_shutter:
         yield from bps.mv(mono_shutter, "open")     # waits until complete

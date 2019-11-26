@@ -539,10 +539,10 @@ upd_controls = DetectorAmplifierAutorangeDevice(
 )
 #upd_photocurrent = ComputedScalerAmplifierSignal(
 #    name="upd_photocurrent", parent=upd_controls)
-upd_photocurrent_calc = APS_synApps_ophyd.swaitRecord(
+upd_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:upd", 
     name="upd_photocurrent_calc")
-upd_photocurrent = upd_photocurrent_calc.val
+upd_photocurrent = upd_photocurrent_calc.value
 
 trd_controls = DetectorAmplifierAutorangeDevice(
     "TR diode",
@@ -554,10 +554,10 @@ trd_controls = DetectorAmplifierAutorangeDevice(
 )
 #trd_photocurrent = ComputedScalerAmplifierSignal(
 #    name="trd_photocurrent", parent=trd_controls)
-trd_photocurrent_calc = APS_synApps_ophyd.swaitRecord(
+trd_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:trd", 
     name="trd_photocurrent_calc")
-trd_photocurrent = trd_photocurrent_calc.val
+trd_photocurrent = trd_photocurrent_calc.value
 
 I0_controls = DetectorAmplifierAutorangeDevice(
     "I0_USAXS",
@@ -569,10 +569,10 @@ I0_controls = DetectorAmplifierAutorangeDevice(
 )
 #I0_photocurrent = ComputedScalerAmplifierSignal(
 #    name="I0_photocurrent", parent=I0_controls)
-I0_photocurrent_calc = APS_synApps_ophyd.swaitRecord(
+I0_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I0", 
     name="I0_photocurrent_calc")
-I0_photocurrent = I0_photocurrent_calc.val
+I0_photocurrent = I0_photocurrent_calc.value
 
 I00_controls = DetectorAmplifierAutorangeDevice(
     "I00_USAXS",
@@ -584,16 +584,16 @@ I00_controls = DetectorAmplifierAutorangeDevice(
 )
 #I00_photocurrent = ComputedScalerAmplifierSignal(
 #    name="I00_photocurrent", parent=I00_controls)
-I00_photocurrent_calc = APS_synApps_ophyd.swaitRecord(
+I00_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I00", 
     name="I00_photocurrent_calc")
-I00_photocurrent = I00_photocurrent_calc.val
+I00_photocurrent = I00_photocurrent_calc.value
 
 
-I000_photocurrent_calc = APS_synApps_ophyd.swaitRecord(
+I000_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I000", 
     name="I000_photocurrent_calc")
-I000_photocurrent = I000_photocurrent_calc.val
+I000_photocurrent = I000_photocurrent_calc.value
 
 
 controls_list_I0_I00_TRD = [I0_controls, I00_controls, trd_controls]

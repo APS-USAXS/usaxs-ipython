@@ -18,16 +18,19 @@ scaler0 = myScalerCH('9idcLAX:vsc:c0', name='scaler0')
 scaler1 = myScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
 # scaler2 = ScalerCH('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback
 
-#scaler0 = ScalerCH('9idcLAX:vsc:c0', name='scaler0')
-# chan01 : sec (seconds)
-# chan02 : I0 (I0)
-# chan03 : I00 (I00)
-# chan04 : upd2 (USAXS_PD)
-# chan05 : trd (TR_diode)
-# chan06 : I000 (I000)
 APS_devices.use_EPICS_scaler_channels(scaler0)
 APS_devices.use_EPICS_scaler_channels(scaler1)
 
+clock = scaler0.channels.chan01.s
+I0 = scaler0.channels.chan02.s
+I00 = scaler0.channels.chan03.s
+upd2 = scaler0.channels.chan04.s
+trd = scaler0.channels.chan05.s
+I000 = scaler0.channels.chan06.s
+
+for item in (clock, I0, I00, upd2, trd, I000):
+    item._ophyd_labels_ = set(["channel", "counter",])
+del item
 
 # use introspection to identify channel names
 if isinstance(scaler0, ScalerCH):

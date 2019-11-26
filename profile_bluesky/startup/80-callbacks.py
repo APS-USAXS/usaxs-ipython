@@ -62,3 +62,11 @@ def newSpecFile(title, reset_scan_id=True):
     logger.info(f"SPEC file name : {specwriter.spec_filename}")
     logger.info(f"Current working directory : {user_data.user_dir.value}")
     logger.info("file will be created when bluesky ends its next scan")
+
+# -------------------------------
+# print the symbol table
+
+logger.info(f"""
+Known ophyd structures: show_ophyd_symbols():
+{APS_utils.show_ophyd_symbols(printing=False)}
+""")
