@@ -585,7 +585,7 @@ class GeneralParameters(Device):
 
 class DiagnosticsParameters(Device):
     """for beam line diagnostics and post-mortem analyses"""
-    beam_in_hutch_swait = Component(APS_synApps_ophyd.swaitRecord , "9idcLAX:blCalc:userCalc1")
+    beam_in_hutch_swait = Component(APS_synApps.SwaitRecord , "9idcLAX:blCalc:userCalc1")
 
     PSS = Component(PSS_Parameters)
     BL_EPS = Component(BLEPS_Parameters)

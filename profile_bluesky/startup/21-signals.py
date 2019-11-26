@@ -73,10 +73,10 @@ monochromator = MyMonochromator(name="monochromator")
 sd.baseline.append(monochromator)
 
 
-userCalcs_lax = APS_devices.userCalcsDevice("9idcLAX:", name="userCalcs_lax")
+userCalcs_lax = APS_devices.UserCalcsDevice("9idcLAX:", name="userCalcs_lax")
 
-usaxs_q_calc = APS_synApps_ophyd.swaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
-usaxs_q = usaxs_q_calc.val
+usaxs_q_calc = APS_synApps.SwaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
+# usaxs_q = usaxs_q_calc.value
 
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)
