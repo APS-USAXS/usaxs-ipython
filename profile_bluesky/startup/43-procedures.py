@@ -488,15 +488,12 @@ def measure_SAXS_Transmission(md={}):
     logger.info(msg)
 
 
-def reset_USAXS():      # FIXME: work-in-progress!!!
+def reset_USAXS():  
     """
     bluesky plan to set USAXS instrument in safe configuration
-
-    CAUTION: work-in-progress!!!
     """
     logger.info("Resetting USAXS")
     yield from user_data.set_state_plan("resetting motors")
-    # TODO: setplot 131 (resets SPEC plotting)
     yield from DCMfeedbackON()
     yield from bps.mv(
         scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
@@ -516,20 +513,19 @@ def reset_USAXS():      # FIXME: work-in-progress!!!
             as_stage.rp, terms.USAXS.ASRP0.value,
             ]
     yield from bps.mv(*move_list)  # move all motors at once
-    # TODO: TITLE = SPEC_STD_TITLE
+    # TITLE = SPEC_STD_TITLE
 
-    # TODO: epics_put (sprintf("9idcUSX:%s:mode",PDstring), 2) 
     yield from bps.mv(
+        upd_autorange_controls.mode, "auto+background",
         scaler0.count_mode, 1,
     )
     yield from user_data.set_state_plan("USAXS reset complete")
-    # TODO: if(NOTIFY_ON_RESET) { sendNotifications("USAXS has reset","spec has encountered a problem and reset the USAXS.");} 
-    # TODO: chk_beam_off 
-    # TODO: rdef _cleanup3 \'\' 
+    if NOTIFY_ON_RESET:
+        email_notices.send(
+            "USAXS has reset",
+            "spec has encountered a problem and reset the USAXS."
+            )
 
-    # unset dataCollectionInProgress so GUI (and other 
-    # tools) that user is collecting data...
-    #   (1-not running, 0 running) 
     yield from bps.mv(
         user_data.collection_in_progress, 1,
     )
