@@ -264,7 +264,7 @@ def ar_posttune_hook():
         # remember the Q calculation needs a new 2theta0
         # use the current AR encoder position
         yield from bps.mv(
-            usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
+            usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.value,
             a_stage.r, terms.USAXS.ar_val_center.value,
         )
     scaler0.select_channels(None)
