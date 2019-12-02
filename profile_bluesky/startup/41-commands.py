@@ -7,6 +7,7 @@ USAXS commands
 FUNCTIONS
 
     angle2q()
+    becplot_prune_fifo()
     beforeScanComputeOtherStuff()
     cleanupText()
     confirmUsaxsSaxsOutOfBeam()
@@ -44,6 +45,42 @@ def q2angle(q, wavelength):
 def angle2q(angle, wavelength):
     # angle is in 2theta
     return (4*np.pi/wavelength) * np.sin(angle*np.pi/2/180)
+
+
+def becplot_prune_fifo(n, y, x):
+    """
+    find the plot with axes x and y and replot with only the last *n* lines
+
+    Note: this is not a bluesky plan.  Call it as normal Python function.
+
+    EXAMPLE::
+
+        becplot_prune_fifo(1, noisy, m1)
+
+    PARAMETERS
+    
+    n : int
+        number of plots to keep
+    
+    y : object
+        ophyd Signal object on dependent (y) axis
+    
+    x : object
+        ophyd Signal object on independent (x) axis
+    """
+    for liveplot in bec._live_plots.values():
+        lp = liveplot.get(y.name)
+        if lp is None:
+            logging.debug(f"no LivePlot with name {y.name}")
+            continue
+        if lp.x != x.name or lp.y != y.name:
+            logging.debug(f"no LivePlot with axes ('{x.name}', '{y.name}')")
+            continue
+        # print(lp.x, lp.y)
+        if len(lp.ax.lines) > n:
+            logging.debug(f"limiting LivePlot({y.name}) to {n} traces")
+            lp.ax.lines = lp.ax.lines[-n:]
+            lp.update_plot()
 
 
 def cleanupText(text):
