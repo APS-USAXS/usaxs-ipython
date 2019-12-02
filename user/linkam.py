@@ -14,10 +14,10 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
     when temp1 reached, hold for delay1 seconds, collecting data repeatedly
     change T to temp2 with rate2sampleTitleMod
     collect final data
-    stop
+    and it will end here...
     
-    reload by : 
-    %run -m linkam
+    reload by 
+    # %run -m linkam
     """
 
     def setSampleName():
@@ -35,19 +35,19 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
             yield from Flyscan(pos_X, pos_Y, thickness, sampleMod, md={})
             sampleMod = setSampleName()
             md["title"]=sampleMod
-            yield from SAXS(pox_X, pos_Y, thickness, sampleMod, md={})
+            yield from SAXS(pos_X, pos_Y, thickness, sampleMod, md={})
             sampleMod = setSampleName()
             md["title"]=sampleMod
             yield from WAXS(pos_X, pos_Y, thickness, sampleMod, md={})
         
-    linkam = linkam_tc1
-    #linkam = linkam_ci94
+    #linkam = linkam_tc1
+    linkam = linkam_ci94
     logger.info(f"Linkam controller PV prefix={linkam.prefix}")
 
     t0 = time.time()
     yield from collectAllThree()
     
-    yield from bps.mv(linkam.ramp_rate, rate1)          #sets the rate of next ramp
+    yield from bps.mv(linkam.set_rate, rate1)          #sets the rate of next ramp
     yield from linkam.set_target(temp1, wait=False)     #sets the temp of next ramp
     logger.info(f"Ramping temperature to {temp1} C")  
     
@@ -62,7 +62,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
  
     logger.info(f"waited for {delay1} seconds, now ramping temperature to {temp2} C")  
 
-    yield from bps.mv(linkam.ramp_rate, rate2)          #sets the rate of next ramp
+    yield from bps.mv(linkam.set_rate, rate2)          #sets the rate of next ramp
     yield from linkam.set_target(temp2, wait=False)     #sets the temp of next ramp
 
     while not linkam.settled:                           #runs data collection until next temp
