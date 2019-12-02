@@ -151,7 +151,13 @@ def before_plan(md={}):
     if terms.preUSAXStune.needed:
         # tune at previous sample position
         # don't overexpose the new sample position
-        yield from preUSAXStune(md=md)
+        # select between positions 
+        mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
+        if mode_now == "USAXS in beam" : 
+            yield from preUSAXStune(md=md)
+        else:
+            yield from preSWAXStune(md=md)
+
 
 
 
@@ -588,6 +594,73 @@ def preUSAXStune(md={}):
         terms.preUSAXStune.epoch_last_tune,     time.time(),
     )
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+def preSWAXStune(md={}):
+    """
+    tune the SAXS & WAXS optics in any mode, is safe
+
+    USAGE:  ``RE(preSWAXStune())``
+    """
+    yield from bps.mv(
+        monochromator.feedback.on, MONO_FEEDBACK_ON,
+        mono_shutter, "open",
+        ccd_shutter, "close",
+    )
+    yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
+
+    if terms.preUSAXStune.use_specific_location.value in (1, "yes"):
+        yield from bps.mv(
+            s_stage.x, terms.preUSAXStune.sx.value,
+            s_stage.y, terms.preUSAXStune.sy.value,
+            )
+
+    yield from bps.mv(
+        user_data.time_stamp, str(datetime.datetime.now()),
+        user_data.state, "pre-SWAXS optics tune",
+
+        scaler0.preset_time,  0.1,
+    )
+    # when all that is complete, then ...
+    yield from bps.mv(ti_filter_shutter, "open")
+
+    # TODO: install suspender using usaxs_CheckBeamStandard.value
+
+    tuners = OrderedDict()                 # list the axes to tune
+    tuners[m_stage.r] = tune_mr            # tune M stage to monochromator
+    tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
+    if terms.USAXS.useMSstage.value:
+        tuners[ms_stage.rp] = tune_msrp    # align MSR stage with M stage
+
+    # now, tune the desired axes, bail out if a tune fails
+    yield from bps.install_suspender(suspend_BeamInHutch)
+    for axis, tune in tuners.items():
+        yield from bps.mv(ti_filter_shutter, "open")
+        yield from tune(md=md)
+        if axis.tuner.tune_ok:
+            # If we don't wait, the next tune often fails
+            # intensity stays flat, statistically
+            # We need to wait a short bit to allow EPICS database
+            # to complete processing and report back to us.
+            yield from bps.sleep(1)
+        else:
+            logger.warning("!!! tune failed for axis {axis.name} !!!")
+            break
+    yield from bps.remove_suspender(suspend_BeamInHutch)
+
+    logger.info("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
+    yield from bps.mv(
+        scaler0.preset_time,        terms.USAXS.usaxs_time.value,
+        user_data.time_stamp,       str(datetime.datetime.now()),
+        user_data.state,            "pre-SWAXS optics tuning done",
+
+        terms.preUSAXStune.num_scans_last_tune, 0,
+        terms.preUSAXStune.run_tune_next,       0,
+        terms.preUSAXStune.epoch_last_tune,     time.time(),
+    )
+
+
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -661,7 +734,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     )
     yield from user_data.set_state_plan("Moving to Q=0")
     yield from bps.mv(
-        usaxs_q_calc.channels.B.value, terms.USAXS.ar_val_center.value,
+        usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.value,
     )
 
     # TODO: what to do with USAXSScanUp?
@@ -809,7 +882,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
      """
     yield from IfRequestedStopBeforeNextScan()
 
-    yield from before_plan()    # MUST come before mode_WAXS since it might tune
+    yield from before_plan()    # MUST come before mode_SAXS since it might tune
 
     yield from mode_SAXS()
 
