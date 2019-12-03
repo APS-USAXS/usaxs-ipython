@@ -27,4 +27,4 @@ import bluesky.magics
 from bluesky.utils import ts_msg_hook
 #RE.msg_hook = ts_msg_hook
 from bluesky.simulators import summarize_plan
-from usaxs_support.surveillance import resource_usage
+# from usaxs_support.surveillance import resource_usage

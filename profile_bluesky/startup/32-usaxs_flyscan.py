@@ -1,5 +1,5 @@
 logger.info(__file__)
-logger.debug(resource_usage(os.path.split(__file__)[-1]))
+# logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 USAXS Fly Scan setup
@@ -66,7 +66,7 @@ class UsaxsFlyScanDevice(Device):
                 values.append(missing)
             else:
                 values.append(f"{elapsed:.2f}")
-            values.append(resource_usage())
+            # values.append(resource_usage())
             return "  ".join([f"{s:11}" for s in values])
 
         @APS_utils.run_in_thread
@@ -120,13 +120,13 @@ class UsaxsFlyScanDevice(Device):
             self._output_HDF5_file_ = fname
             user_data.set_state_blocking("FlyScanning: " + os.path.split(fname)[-1])
 
-            logger.debug(resource_usage("before SaveFlyScan()"))
+            # logger.debug(resource_usage("before SaveFlyScan()"))
             self.saveFlyData = SaveFlyScan(
                 fname,
                 config_file=self.saveFlyData_config)
-            logger.debug(resource_usage("before saveFlyData.preliminaryWriteFile()"))
+            # logger.debug(resource_usage("before saveFlyData.preliminaryWriteFile()"))
             self.saveFlyData.preliminaryWriteFile()
-            logger.debug(resource_usage("after saveFlyData.preliminaryWriteFile()"))
+            # logger.debug(resource_usage("after saveFlyData.preliminaryWriteFile()"))
 
         @APS_utils.run_in_thread
         def finish_HDF5_file():
@@ -186,9 +186,9 @@ class UsaxsFlyScanDevice(Device):
                 # do not fail the scan just because of updating program state
                 emsg = f"Error: {msg} - {exc}"
                 logger.debug(emsg)
-            logger.debug(resource_usage("before saveFlyData.finish_HDF5_file()"))
+            # logger.debug(resource_usage("before saveFlyData.finish_HDF5_file()"))
             finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
-            logger.debug(resource_usage("after saveFlyData.finish_HDF5_file()"))
+            # logger.debug(resource_usage("after saveFlyData.finish_HDF5_file()"))
             specwriter._cmt("stop", f"finished {msg}")
             logger.info(f"finished {msg}")
 

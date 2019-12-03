@@ -1,5 +1,5 @@
 logger.info(__file__)
-logger.debug(resource_usage(os.path.split(__file__)[-1]))
+# logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 """
 Bluesky plans (scans)
