@@ -603,6 +603,10 @@ class UsaxsProcessController(APS_devices.ProcessController):
     see https://github.com/APS-USAXS/ipython-usaxs/issues/292
     """
 
+    # override in subclass with EpicsSignal as appropriate
+    rate = Component(Signal, kind="omitted")     # temperature change per minute
+    speed = Component(Signal, kind="omitted")    # rotational speed (RPM) of pump
+
     @property
     def settled(self):
         """Is signal close enough to target?"""
