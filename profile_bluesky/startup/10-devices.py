@@ -688,8 +688,8 @@ class Linkam_CI94(UsaxsProcessController):
     # DO NOT USE: temperature2 = Component(EpicsSignalRO, "temp2")
     pump_speed = Component(EpicsSignalRO, "pumpSpeed", kind="omitted")
 
-    rate = Component(EpicsSignal, "setRate", kind="omitted")
-    speed = Component(EpicsSignal, "setSpeed", kind="omitted")
+    rate = Component(EpicsSignal, "setRate", kind="omitted")    # RPM
+    speed = Component(EpicsSignal, "setSpeed", kind="omitted")  # deg/min, speed 0 = automatic control
     end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")
     end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")
     start_control = Component(EpicsSignal, "start", kind="omitted")
