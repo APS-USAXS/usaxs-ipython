@@ -8,7 +8,7 @@ TODO: (the next URL is old, need the new one)
 '''
 
 
-class ustep(object):
+class Ustep(object):
     '''
     find the series of positions for the USAXS
 
@@ -30,7 +30,7 @@ class ustep(object):
         exponent = 1.2
         minStep = 0.0001
 
-        ar_positions_step = ustep(start, center, finish, numPts, exponent, minStep)
+        ar_positions_step = Ustep(start, center, finish, numPts, exponent, minStep)
         ar_positions = ar_positions_step.series
         ar_trajectory = cycler(ar, ar_positions)
 
@@ -164,7 +164,7 @@ def main():
     numPts = 100
     exponent = 1.2
     minStep = 0.0001
-    u = ustep(start, center, finish, numPts, exponent, minStep)
+    u = Ustep(start, center, finish, numPts, exponent, minStep)
     print(u.factor)
     print(u.series)
 
