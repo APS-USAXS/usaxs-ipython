@@ -57,7 +57,7 @@ def my_custom_plan(sx, sy, thickness, sample_name, temperature, iterations=9, md
         "total_iteration": iterations,
         }
     yield from _measure_all_three(sx, sy, thickness, sample_name, md=md)
-    yield from bps.mv(linkam.set_rate, 100)			# degrees C/minute
+    yield from bps.mv(linkam.rate, 100)			# degrees C/minute
     yield from linkam.set_target(temperature, wait=True)	# degrees C
     for i in range(iterations):
         print(f"Iteration {i+1} of {iterations}, elapsed time = {time.time() - t0:.3f}s")

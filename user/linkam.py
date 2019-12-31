@@ -47,7 +47,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
     t0 = time.time()
     yield from collectAllThree()
     
-    yield from bps.mv(linkam.set_rate, rate1)          #sets the rate of next ramp
+    yield from bps.mv(linkam.rate, rate1)          #sets the rate of next ramp
     yield from linkam.set_target(temp1, wait=False)     #sets the temp of next ramp
     logger.info(f"Ramping temperature to {temp1} C")  
     
@@ -62,7 +62,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
  
     logger.info(f"waited for {delay1} seconds, now ramping temperature to {temp2} C")  
 
-    yield from bps.mv(linkam.set_rate, rate2)          #sets the rate of next ramp
+    yield from bps.mv(linkam.rate, rate2)          #sets the rate of next ramp
     yield from linkam.set_target(temp2, wait=False)     #sets the temp of next ramp
 
     while not linkam.settled:                           #runs data collection until next temp
