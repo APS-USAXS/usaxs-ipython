@@ -85,6 +85,7 @@ if cur_version < req_version:
 from usaxs_support.nexus import reset_manager, get_manager
 from usaxs_support.saveFlyData import SaveFlyScan
 from usaxs_support.surveillance import instrument_archive
+from usaxs_support.ustep import Ustep
 
 import pyRestTable
 
