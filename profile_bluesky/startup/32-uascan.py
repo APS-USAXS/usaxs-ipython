@@ -74,7 +74,7 @@ def uascan(
 
     def _after_scan_():
         yield from bps.mv(
-            # clear the user bit to indicate USAXS scan is not running
+            # indicate USAXS scan is not running
             terms.USAXS.scanning, 0,
 
             monochromator.feedback.on, MONO_FEEDBACK_ON,
@@ -90,13 +90,13 @@ def uascan(
         yield from user_data.set_state_plan("returning AR, AY, SY, and DY")
         moves = [
             # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
-            sy, prescan_positions["sy"],
-            dy, prescan_positions["dy"],
-            ay, prescan_positions["ay"],
-            ar, prescan_positions["ar"],
+            s_stage.y, prescan_positions["sy"],
+            d_stage.y, prescan_positions["dy"],
+            a_stage.y, prescan_positions["ay"],
+            a_stage.r, prescan_positions["ar"],
         ]
         if terms.USAXS.useSBUSAXS:
-            moves += [asrp, prescan_positions["asrp"]]
+            moves += [as_stage.rp, prescan_positions["asrp"]]
         # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
         yield from bps.mv(*moves)
 
