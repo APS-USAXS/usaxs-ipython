@@ -61,20 +61,48 @@ def uascan(
         count_time = CT_RANGE[0]
 
     # original values before scan
-    # FIXME: get correct values
-    before_scan = {
-    'dy' : 0,            # position of photodiode before scan
-	'ay' : 0,            # position of AY before scan
-	'sy' : 0,            # position of SY before scan
-	'ar' : 0,            # position of AR motor before scan
-    'ASRP' : 0,          # position of ASRP motor before scan
-    }
+    prescan_positions = {
+        'sy' : s_stage.y.position,
+        'dy' : d_stage.y.position,
+        'ay' : a_stage.y.position,
+        'ar' : a_stage.r.position,
+        'asrp' : as_stage.rp.position,
+        }
 
-    if useSBUSAXS:
+    if terms.USAXS.useSBUSAXS:
         pass        # FIXME:
 
-    def _scan_on():
+    def _after_scan_():
+        yield from bps.mv(
+            # clear the user bit to indicate USAXS scan is not running
+            terms.USAXS.scanning, 0,
+
+            monochromator.feedback.on, MONO_FEEDBACK_ON,
+
+            scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
+            upd_controls.auto.mode, "auto+background",
+            I0_controls.auto.mode, "manual",
+            I00_controls.auto.mode, "manual",
+
+            # close the shutter after each scan to preserve the detector
+            ti_filter_shutter, "close",
+            )
+        yield from user_data.set_state_plan("returning AR, AY, SY, and DY")
+        moves = [
+            # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
+            sy, prescan_positions["sy"],
+            dy, prescan_positions["dy"],
+            ay, prescan_positions["ay"],
+            ar, prescan_positions["ar"],
+        ]
+        if terms.USAXS.useSBUSAXS:
+            moves += [asrp, prescan_positions["asrp"]]
+        # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
+        yield from bps.mv(*moves)
+
+    def _scan_():
         scan_over = False
         # TODO: work-in-progress
 
-    # TODO: work-in-progress
+	yield from _scan_()
+    yield from _after_scan_()

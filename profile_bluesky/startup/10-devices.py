@@ -441,6 +441,7 @@ class Parameters_USAXS(Device):
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
     scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
+    scanning = Component(EpicsSignal,                 "9idcLAX:USAXS:scanning")
     start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
