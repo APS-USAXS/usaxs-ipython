@@ -5,19 +5,6 @@ logger.info(__file__)
 CT_RANGE = [0, 0, 0, 0, 0]  # Where are these values changed?
 
 
-"""
-USAXS step scan: uascan
-
-    (base) user@host:~/.../startup/ref$ grep "^def " macros/local/usaxs_uascan.mac
-    def USAXSscan '{
-    def USAXSscanStep '{
-    def measure_USAXS_PinT'
-    def set_Filters_For_Transm '
-    def resetUSAXS '{
-    def uascan '
-"""
-
-
 def uascan(
         motor, start, reference, finish, minStep,
         exponent, intervals, count_time,
