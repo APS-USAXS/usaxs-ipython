@@ -429,6 +429,10 @@ class Parameters_USAXS(Device):
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
     ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
     asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
+    
+    # Measured by JIL on 6/4/2016, average of two measured numbers
+    asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
+    
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
     ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
