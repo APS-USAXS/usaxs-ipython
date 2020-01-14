@@ -88,7 +88,7 @@ def uascan(
             ti_filter_shutter, "close",
             )
         yield from user_data.set_state_plan("returning AR, AY, SY, and DY")
-        moves = [
+        motor_resets = [
             # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
             s_stage.y, prescan_positions["sy"],
             d_stage.y, prescan_positions["dy"],
@@ -96,9 +96,9 @@ def uascan(
             a_stage.r, prescan_positions["ar"],
         ]
         if terms.USAXS.useSBUSAXS:
-            moves += [as_stage.rp, prescan_positions["asrp"]]
+            motor_resets += [as_stage.rp, prescan_positions["asrp"]]
         # reset motors to pre-scan positions: AY, SY, DY, and "the first motor" (AR)
-        yield from bps.mv(*moves)
+        yield from bps.mv(*motor_resets)  # all at once
 
     def _scan_():
         scan_over = False
