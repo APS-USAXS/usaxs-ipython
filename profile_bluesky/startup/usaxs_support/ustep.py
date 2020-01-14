@@ -147,9 +147,8 @@ def main():
     exponent = 1.2
     minStep = 0.0001
     u = Ustep(start, center, finish, numPts, exponent, minStep)
-    angles = u.series()
 
-    print(f"factor={u.factor} for {len(angles)} points")
+    print(f"factor={u.factor} for {len(u.series())} points")
     for i, angle in enumerate(u.stepper()):
         print(i, angle)
 
