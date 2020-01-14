@@ -3,8 +3,7 @@
 '''
 Step-Size Algorithm for Bonse-Hart Ultra-Small-Angle Scattering Instruments
 
-TODO: (the next URL is old, need the new one)
-:see: http://usaxs.xray.aps.anl.gov/docs/ustep/index.html
+:see: https://www.jemian.org/SAS/ustep.pdf
 '''
 
 
