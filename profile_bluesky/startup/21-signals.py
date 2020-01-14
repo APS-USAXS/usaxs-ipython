@@ -136,5 +136,7 @@ linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
 terms = GeneralParameters(name="terms")
 sd.baseline.append(terms)
 
+fuel_spray_bit = EpicsSignal("9idcLAX:bit1", name="fuel_spray_bit")
+
 # terms.summary() to see all the fields
 # terms.read() to read all the fields from EPICS
