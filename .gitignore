@@ -26,3 +26,6 @@ mViewer.log
 
 # Microsoft Visual Studio Code editor
 .vscode/
+
+# Jupyter notebooks
+*.ipynb
