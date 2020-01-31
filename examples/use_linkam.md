@@ -98,7 +98,7 @@ def my_temperature_sequence(sx, sy, thickness, sample_name, t_start, t_end, t_st
         "temperature_end": t_end,
         "temperature_step": t_step,
     }
-    yield from bps.mv(linkam_tc1.set_rate, 100)            # degrees C/minute
+    yield from bps.mv(linkam_tc1.rate, 100)            # degrees C/minute
 
     sign = 1            # assume ascending temperature
     if t_end < t_start:

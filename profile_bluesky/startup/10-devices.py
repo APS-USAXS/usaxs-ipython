@@ -603,6 +603,10 @@ class UsaxsProcessController(APS_devices.ProcessController):
     see https://github.com/APS-USAXS/ipython-usaxs/issues/292
     """
 
+    # override in subclass with EpicsSignal as appropriate
+    rate = Component(Signal, kind="omitted")     # temperature change per minute
+    speed = Component(Signal, kind="omitted")    # rotational speed (RPM) of pump
+
     @property
     def settled(self):
         """Is signal close enough to target?"""
@@ -684,8 +688,8 @@ class Linkam_CI94(UsaxsProcessController):
     # DO NOT USE: temperature2 = Component(EpicsSignalRO, "temp2")
     pump_speed = Component(EpicsSignalRO, "pumpSpeed", kind="omitted")
 
-    set_rate = Component(EpicsSignal, "setRate", kind="omitted")
-    set_speed = Component(EpicsSignal, "setSpeed", kind="omitted")
+    rate = Component(EpicsSignal, "setRate", kind="omitted")    # RPM
+    speed = Component(EpicsSignal, "setSpeed", kind="omitted")  # deg/min, speed 0 = automatic control
     end_after_profile = Component(EpicsSignal, "endAfterProfile", kind="omitted")
     end_on_stop = Component(EpicsSignal, "endOnStop", kind="omitted")
     start_control = Component(EpicsSignal, "start", kind="omitted")
@@ -735,7 +739,7 @@ class Linkam_T96(UsaxsProcessController):
     heating = Component(EpicsSignalWithRBV, "heating", kind="omitted")
     lnp_mode = Component(EpicsSignalWithRBV, "lnpMode", kind="omitted")
     lnp_speed = Component(EpicsSignalWithRBV, "lnpSpeed", kind="omitted")
-    ramp_rate = Component(EpicsSignalWithRBV, "rampRate", kind="omitted")
+    rate = Component(EpicsSignalWithRBV, "rampRate", kind="omitted")
     vacuum_limit_readback = Component(EpicsSignalWithRBV, "vacuumLimit", kind="omitted")
 
     controller_config = Component(EpicsSignalRO, "controllerConfig_RBV", kind="omitted")
