@@ -124,6 +124,7 @@ class UsaxsCollimatorStageDevice(MotorBundle):
     x = Component(UsaxsMotor, '9idcLAX:m58:c0:m2', labels=("collimator",))
     y = Component(UsaxsMotor, '9idcLAX:m58:c0:m3', labels=("collimator",))
     r2p = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m2', labels=("collimator", "tunable",))
+    isChannelCut = True
 
 
 class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
