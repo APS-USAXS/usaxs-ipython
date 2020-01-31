@@ -559,7 +559,8 @@ def preUSAXStune(md={}):
 
     tuners = OrderedDict()                 # list the axes to tune
     tuners[m_stage.r] = tune_mr            # tune M stage to monochromator
-    tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
+    if not m_stage.isChannelCut:
+        tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
     if terms.USAXS.useMSstage.get():
         tuners[ms_stage.rp] = tune_msrp    # align MSR stage with M stage
     if terms.USAXS.useSBUSAXS.get():
