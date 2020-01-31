@@ -205,6 +205,17 @@ def tune_m2rp(md={}):
     yield from bps.sleep(0.1)   # piezo is fast, give the system time to react
 
 
+def empty_plan(*args, **kwargs):
+    logger.info(f"Doing nothing: args={args}, kwargs={kwargs}")
+    yield from bps.null()
+
+
+if m_stage.isChannelCut:
+    m_stage.r2p.tuner = empty_plan      # TODO: should mimic APS_plans.TuneAxis()?
+    m_stage.r2p.pre_tune_method = empty_plan
+    m_stage.r2p.post_tune_method = empty_plan
+
+
 # -------------------------------------------
 
 
