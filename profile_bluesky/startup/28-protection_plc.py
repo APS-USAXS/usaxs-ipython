@@ -35,7 +35,10 @@ class PlcProtectionDevice(Device):
     
     @property
     def interlocked(self):
-        return not 0 in (self.SAXS_Y.value, self.WAXS_X.value, self.AX.value)
+        return not 0 in (
+            self.SAXS_Y.get(), 
+            self.WAXS_X.get(), 
+            self.AX.get())
     
     def wait_for_interlock(self, verbose=True):
         t0 = time.time()
@@ -48,7 +51,7 @@ class PlcProtectionDevice(Device):
         yield from bps.null()   # always yield at least one Msg
     
     def stop_if_tripped(self, verbose=True):
-        if self.operations_status.value == 1:
+        if self.operations_status.get() == 1:
             self._tripped_message = None
         else:
             msg = self.tripped_text
@@ -67,7 +70,7 @@ class PlcProtectionDevice(Device):
             email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
     
     def stop_in_suspender(self):
-        if self.operations_status.value == 1:
+        if self.operations_status.get() == 1:
             msg = None
         else:
             msg = self.tripped_text

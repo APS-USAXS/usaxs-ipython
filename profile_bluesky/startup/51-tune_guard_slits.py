@@ -95,8 +95,8 @@ def tune_GslitsCenter():
  
     yield from mode_USAXS()
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.get(),
         )
     yield from bps.mv(ti_filter_shutter, "open")
     yield from insertTransmissionFilters()
@@ -107,7 +107,7 @@ def tune_GslitsCenter():
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
     yield from bps.mv(user_data.state, title)
     
-    old_preset_time = scaler0.preset_time.value
+    old_preset_time = scaler0.preset_time.get()
     yield from bps.mv(scaler0.preset_time, 0.2)
 
     def tune_guard_slit_motor(motor, width, steps):
@@ -118,10 +118,10 @@ def tune_GslitsCenter():
         x_0 = x_c - abs(width)/2
         x_n = x_c + abs(width)/2
         
-        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.select_channels([UPD_SIGNAL.chname.get()])
         scaler0.channels.chan01.kind = Kind.config
 
-        tuner = APS_plans.TuneAxis([scaler0], motor, signal_name=UPD_SIGNAL.chname.value)
+        tuner = APS_plans.TuneAxis([scaler0], motor, signal_name=UPD_SIGNAL.chname.get())
         yield from tuner.tune(width=-width, num=steps+1)
 
         bluesky_runengine_running = RE.state != "idle"
@@ -231,7 +231,7 @@ def _USAXS_tune_guardSlits():
 
     def tune_blade_edge(axis, start, end, steps, ct_time, results):
         logger.info(f"{axis.name}: scan from {start} to {end}")
-        old_ct_time = scaler0.preset_time.value
+        old_ct_time = scaler0.preset_time.get()
         old_position = axis.position
 
         yield from bps.mv(  # move to center of scan range for tune
@@ -240,10 +240,10 @@ def _USAXS_tune_guardSlits():
             )
         scan_width = end - start
 
-        scaler0.select_channels([UPD_SIGNAL.chname.value])
+        scaler0.select_channels([UPD_SIGNAL.chname.get()])
         scaler0.channels.chan01.kind = Kind.config
 
-        tuner = APS_plans.TuneAxis([scaler0], axis, signal_name=UPD_SIGNAL.chname.value)
+        tuner = APS_plans.TuneAxis([scaler0], axis, signal_name=UPD_SIGNAL.chname.get())
         yield from tuner.tune(width=scan_width, num=steps+1)
         
         diff = abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1])
@@ -369,13 +369,13 @@ def tune_GslitsSize():
     yield from IfRequestedStopBeforeNextScan()
     yield from mode_USAXS()
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.v_size.value,
-        usaxs_slit.h_size, terms.SAXS.h_size.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.h_size.get(),
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         )
     yield from bps.mv(
-        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.value,
-        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
+        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.get(),
+        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.get(),
         ti_filter_shutter, "open",
     )
     # insertCCDfilters
@@ -384,11 +384,11 @@ def tune_GslitsSize():
     yield from _USAXS_tune_guardSlits()
     yield from bps.mv(
         ti_filter_shutter, "close",
-        terms.SAXS.guard_h_size, guard_slit.h_size.value,
-        terms.SAXS.guard_v_size, guard_slit.v_size.value,
+        terms.SAXS.guard_h_size, guard_slit.h_size.get(),
+        terms.SAXS.guard_v_size, guard_slit.v_size.get(),
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
-    logger.info(f"Guard slit now: V={guard_slit.v_size.value} and H={guard_slit.h_size.value}")
+    logger.info(f"Guard slit now: V={guard_slit.v_size.get()} and H={guard_slit.h_size.get()}")
 
 
 def tune_Gslits():

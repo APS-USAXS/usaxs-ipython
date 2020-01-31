@@ -73,13 +73,13 @@ class UsaxsFlyScanDevice(Device):
         def progress_reporting():
             logger.debug("progress_reporting has arrived")
             t = time.time()
-            timeout = t + self.scan_time.value + self.timeout_s # extra padded time
+            timeout = t + self.scan_time.get() + self.timeout_s # extra padded time
             startup = t + self.update_interval_s/2
-            while t < startup and not  self.flying.value:    # wait for flyscan to start
+            while t < startup and not  self.flying.get():    # wait for flyscan to start
                 time.sleep(0.01)
             labels = ("flying, s", "ar, deg", "ay, mm", "dy, mm", "channel", "elapsed, s")
             logger.info("  ".join([f"{s:11}" for s in labels]))
-            while t < timeout and self.flying.value:
+            while t < timeout and self.flying.get():
                 if t > self.update_time:
                     self.update_time = t + self.update_interval_s
                     msg = _report_(t - self.t0)

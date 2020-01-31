@@ -94,12 +94,12 @@ class GSlitDevice(MotorBundle):
     @property
     def h_gap_ok(self):
         gap = self.outb.position - self.inb.position
-        return abs(gap - terms.SAXS.guard_h_size.value) <= self.gap_tolerance
+        return abs(gap - terms.SAXS.guard_h_size.get()) <= self.gap_tolerance
     
     @property
     def v_h_gap_ok(self):
         gap = self.top.position - self.bot.position
-        return abs(gap - terms.SAXS.guard_v_size.value) <= self.gap_tolerance
+        return abs(gap - terms.SAXS.guard_v_size.get()) <= self.gap_tolerance
     
     @property
     def gap_ok(self):

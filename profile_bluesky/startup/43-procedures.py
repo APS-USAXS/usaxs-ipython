@@ -49,32 +49,32 @@ def _insertFilters_(a, b):
 def insertRadiographyFilters():
     """plan: insert the EPICS-specified filters"""
     yield from _insertFilters_(
-        terms.USAXS.img_filters.Al.value,    # Bank A: Al
-        terms.USAXS.img_filters.Ti.value,    # Bank B: Ti
+        terms.USAXS.img_filters.Al.get(),    # Bank A: Al
+        terms.USAXS.img_filters.Ti.get(),    # Bank B: Ti
     )
 
 
 def insertSaxsFilters():
     """plan: insert the EPICS-specified filters"""
     yield from _insertFilters_(
-        terms.SAXS.filters.Al.value,    # Bank A: Al
-        terms.SAXS.filters.Ti.value,    # Bank B: Ti
+        terms.SAXS.filters.Al.get(),    # Bank A: Al
+        terms.SAXS.filters.Ti.get(),    # Bank B: Ti
     )
 
 
 def insertScanFilters():
     """plan: insert the EPICS-specified filters"""
     yield from _insertFilters_(
-        terms.USAXS.scan_filters.Al.value,    # Bank A: Al
-        terms.USAXS.scan_filters.Ti.value,    # Bank B: Ti
+        terms.USAXS.scan_filters.Al.get(),    # Bank A: Al
+        terms.USAXS.scan_filters.Ti.get(),    # Bank B: Ti
     )
 
 
 def insertWaxsFilters():
     """plan: insert the EPICS-specified filters"""
     yield from _insertFilters_(
-        terms.WAXS.filters.Al.value,    # Bank A: Al
-        terms.WAXS.filters.Ti.value,    # Bank B: Ti
+        terms.WAXS.filters.Al.get(),    # Bank A: Al
+        terms.WAXS.filters.Ti.get(),    # Bank B: Ti
     )
 
 
@@ -82,9 +82,9 @@ def insertTransmissionFilters():
     """
     set filters to reduce diode damage when measuring tranmission on guard slits etc
     """
-    if monochromator.dcm.energy.value < 12.1:
+    if monochromator.dcm.energy.get() < 12.1:
         al_filters = 0
-    elif monochromator.dcm.energy.value < 18.1:
+    elif monochromator.dcm.energy.get() < 18.1:
         al_filters = 3
     else:
         al_filters = 8
@@ -101,7 +101,7 @@ def confirm_instrument_mode(mode_name):
         One of the strings defined in ``UsaxsSaxsModes``
     """
     expected_mode = UsaxsSaxsModes[mode_name]
-    return terms.SAXS.UsaxsSaxsMode.value == expected_mode
+    return terms.SAXS.UsaxsSaxsMode.get() in (expected_mode, mode_name)
 
 
 def mode_USAXS():
@@ -110,12 +110,12 @@ def mode_USAXS():
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
-        d_stage.x, terms.USAXS.diode.dx.value,
-        d_stage.y, terms.USAXS.diode.dy.value,
-        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
-        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
-        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
-        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
+        d_stage.x, terms.USAXS.diode.dx.get(),
+        d_stage.y, terms.USAXS.diode.dy.get(),
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.get(),
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.get(),
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.get(),
     )
     yield from DCMfeedbackON()
     retune_needed = False
@@ -210,32 +210,32 @@ def mode_WAXS():
         yield from move_WAXSIn()
 
     # move SAXS slits in, used for WAXS mode also
-    v_diff = abs(guard_slit.v_size.value - terms.SAXS.guard_v_size.value)
-    h_diff = abs(guard_slit.h_size.value - terms.SAXS.guard_h_size.value)
+    v_diff = abs(guard_slit.v_size.get() - terms.SAXS.guard_v_size.get())
+    h_diff = abs(guard_slit.h_size.get() - terms.SAXS.guard_h_size.get())
     logger.debug("guard slits horizontal difference = %g" % h_diff)
     logger.debug("guard slits vertical difference = %g" % v_diff)
 
     if max(v_diff, h_diff) > 0.03:
         logger.info("changing Guard slits")
         yield from bps.mv(
-            guard_slit.h_size, terms.SAXS.guard_h_size.value,
-            guard_slit.v_size, terms.SAXS.guard_v_size.value,
+            guard_slit.h_size, terms.SAXS.guard_h_size.get(),
+            guard_slit.v_size, terms.SAXS.guard_v_size.get(),
         )
         # TODO: need completion indication
         #  guard_slit is calculated by a database
         #  support needs a handler that does this wait for us.
         yield from bps.sleep(0.5)           # TODO: needed now?
 
-    v_diff = abs(usaxs_slit.v_size.position - terms.SAXS.v_size.value)
-    h_diff = abs(usaxs_slit.h_size.position - terms.SAXS.h_size.value)
+    v_diff = abs(usaxs_slit.v_size.position - terms.SAXS.v_size.get())
+    h_diff = abs(usaxs_slit.h_size.position - terms.SAXS.h_size.get())
     logger.debug("USAXS slits horizontal difference = %g" % h_diff)
     logger.debug("USAXS slits vertical difference = %g" % v_diff)
 
     if max(v_diff, h_diff) > 0.02:
        logger.info("Moving Beam defining slits")
        yield from bps.mv(
-           usaxs_slit.h_size, terms.SAXS.h_size.value,
-           usaxs_slit.v_size, terms.SAXS.v_size.value,
+           usaxs_slit.h_size, terms.SAXS.h_size.get(),
+           usaxs_slit.v_size, terms.SAXS.v_size.get(),
        )
        yield from bps.sleep(2)     # wait for backlash, seems these motors are slow and spec gets ahead of them?
 
@@ -280,13 +280,13 @@ def mode_Radiography():
   
     yield from bps.mv(
         # move to ccd position 
-        d_stage.x, terms.USAXS.ccd.dx.value,
-        d_stage.y, terms.USAXS.ccd.dy.value,
+        d_stage.x, terms.USAXS.ccd.dx.get(),
+        d_stage.y, terms.USAXS.ccd.dy.get(),
         # make sure slits are in place
-        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
-        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
-        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.get(),
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.get(),
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.get(),
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
     )
     
     yield from insertRadiographyFilters()
@@ -303,7 +303,7 @@ def mode_Radiography():
 
     yield from user_data.set_state_plan("Radiography Mode")
 
-    if aps.shutter_permit.value in (1, 'PERMIT'):
+    if aps.shutter_permit.get() in (1, 'PERMIT'):
         yield from bps.mv(
             mono_shutter, "open",
         )
@@ -368,9 +368,9 @@ def measure_USAXS_Transmission(md={}):
     """
     trmssn = terms.USAXS.transmission   # for convenience
     yield from user_data.set_state_plan("Measure USAXS transmission")
-    if trmssn.measure.value:
+    if trmssn.measure.get():
         yield from mode_USAXS()
-        ay_target = terms.USAXS.AY0.value + constants["USAXS_AY_OFFSET"] + 12*np.sin(terms.USAXS.ar_val_center.value * np.pi/180)
+        ay_target = terms.USAXS.AY0.get() + constants["USAXS_AY_OFFSET"] + 12*np.sin(terms.USAXS.ar_val_center.get() * np.pi/180)
         yield from bps.mv(
             trmssn.ay, ay_target,
             a_stage.y, ay_target,
@@ -381,7 +381,7 @@ def measure_USAXS_Transmission(md={}):
         yield from autoscale_amplifiers([I0_controls, trd_controls])
 
         yield from bps.mv(
-            scaler0.preset_time, trmssn.count_time.value
+            scaler0.preset_time, trmssn.count_time.get()
         )
         md["plan_name"] = "measure_USAXS_Transmission"
         scaler0.select_channels(["I0_USAXS", "TR diode"])
@@ -396,7 +396,7 @@ def measure_USAXS_Transmission(md={}):
             yield from autoscale_amplifiers([I0_controls, trd_controls])
             
             yield from bps.mv(
-                scaler0.preset_time, trmssn.count_time.value
+                scaler0.preset_time, trmssn.count_time.get()
             )
             scaler0.select_channels(["I0_USAXS", "TR diode"])
             yield from bp.count([scaler0], md=md)
@@ -404,22 +404,22 @@ def measure_USAXS_Transmission(md={}):
             s = scaler0.read()
 
         yield from bps.mv(
-            a_stage.y, terms.USAXS.AY0.value,
+            a_stage.y, terms.USAXS.AY0.get(),
             ti_filter_shutter, "close",
         )
         yield from insertScanFilters()
         yield from bps.mv(
             trmssn.diode_counts, s["TR diode"]["value"],
-            trmssn.diode_gain, trd_controls.femto.gain.value,
+            trmssn.diode_gain, trd_controls.femto.gain.get(),
             trmssn.I0_counts, s["I0_USAXS"]["value"],
-            trmssn.I0_gain, I0_controls.femto.gain.value,
+            trmssn.I0_gain, I0_controls.femto.gain.get(),
         )
         tbl = pyRestTable.Table()
         tbl.addLabel("detector")
         tbl.addLabel("counts")
         tbl.addLabel("gain")
-        tbl.addRow(("pinDiode", f"{trmssn.diode_counts.value:f}", f"{trmssn.diode_gain.value}"))
-        tbl.addRow(("I0", f"{trmssn.I0_counts.value:f}", f"{trmssn.I0_gain.value}"))
+        tbl.addRow(("pinDiode", f"{trmssn.diode_counts.get():f}", f"{trmssn.diode_gain.get()}"))
+        tbl.addRow(("I0", f"{trmssn.I0_counts.get():f}", f"{trmssn.I0_gain.get()}"))
         msg = "Measured USAXS transmission values:\n"
         msg += str(tbl.reST())
         logger.info(msg)
@@ -443,8 +443,8 @@ def measure_SAXS_Transmission(md={}):
     yield from user_data.set_state_plan("Measure SAXS transmission")
     yield from mode_SAXS()
     yield from insertTransmissionFilters()
-    pinz_target = terms.SAXS.z_in.value + constants["SAXS_PINZ_OFFSET"]
-    piny_target = terms.SAXS.y_in.value + constants["SAXS_TR_PINY_OFFSET"]
+    pinz_target = terms.SAXS.z_in.get() + constants["SAXS_PINZ_OFFSET"]
+    piny_target = terms.SAXS.y_in.get() + constants["SAXS_TR_PINY_OFFSET"]
     # z has to move before y can move.
     yield from bps.mv(saxs_stage.z, pinz_target)
     #now y can put diode in the beam, open shutter... 
@@ -475,24 +475,24 @@ def measure_SAXS_Transmission(md={}):
 
     # y has to move before z, close shutter... 
     yield from bps.mv(
-        saxs_stage.y, terms.SAXS.y_in.value,
+        saxs_stage.y, terms.SAXS.y_in.get(),
         ti_filter_shutter, "close",
     )
     # z can move.
-    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.value)
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.get())
     
     yield from insertScanFilters()
     yield from bps.mv(
         terms.SAXS_WAXS.diode_transmission, s["TR diode"]["value"],
-        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.value,
+        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.get(),
         terms.SAXS_WAXS.I0_transmission, s["I0_USAXS"]["value"],
-        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.value,
+        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.get(),
     )
     msg = "Measured SAXS transmission values, pinDiode cts =%f with gain %g and I0 cts =%f with gain %g" % (
-        terms.USAXS.transmission.diode_counts.value, 
-        terms.USAXS.transmission.diode_gain.value, 
-        terms.USAXS.transmission.I0_counts.value,
-        terms.USAXS.transmission.I0_gain.value
+        terms.USAXS.transmission.diode_counts.get(), 
+        terms.USAXS.transmission.diode_gain.get(), 
+        terms.USAXS.transmission.I0_counts.get(),
+        terms.USAXS.transmission.I0_gain.get()
         )
     logger.info(msg)
 
@@ -513,13 +513,13 @@ def reset_USAXS():
         user_data.scanning, "no",
     )
     move_list = [
-        d_stage.y, terms.USAXS.DY0.value,
-        a_stage.y, terms.USAXS.AY0.value,
-        a_stage.r, terms.USAXS.ar_val_center.value,
+        d_stage.y, terms.USAXS.DY0.get(),
+        a_stage.y, terms.USAXS.AY0.get(),
+        a_stage.r, terms.USAXS.ar_val_center.get(),
     ]
-    if terms.USAXS.useSBUSAXS.value:
+    if terms.USAXS.useSBUSAXS.get():
         move_list += [
-            as_stage.rp, terms.USAXS.ASRP0.value,
+            as_stage.rp, terms.USAXS.ASRP0.get(),
             ]
     yield from bps.mv(*move_list)  # move all motors at once
     # TITLE = SPEC_STD_TITLE
@@ -557,7 +557,7 @@ def areaDetectorAcquire(det, md={}):
     """
     acquire image(s) from the named area detector
     """
-    acquire_time = det.cam.acquire_time.value
+    acquire_time = det.cam.acquire_time.get()
     # Note: AD's HDF File Writer can use up to 5 seconds to finish writing the file
     
     t0 = time.time()

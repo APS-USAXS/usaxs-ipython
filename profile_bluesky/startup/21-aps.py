@@ -8,7 +8,20 @@ MUST come before filters and shutters
 """
 
 
-aps = APS_devices.ApsMachineParametersDevice(name="aps")
+class ApsSpecialMode(APS_devices.ApsMachineParametersDevice):
+
+    @property
+    def inUserOperations(self):
+        valid_modes = (
+            1,
+            "USER OPERATIONS",
+            "Bm Ln Studies",
+        )
+        verdict = self.machine_status.get() in valid_modes
+        return verdict
+
+
+aps = ApsSpecialMode(name="aps")
 sd.baseline.append(aps)
 
 undulator = APS_devices.ApsUndulatorDual("ID09", name="undulator")
