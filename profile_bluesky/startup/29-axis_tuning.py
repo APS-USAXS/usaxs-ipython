@@ -214,6 +214,7 @@ if m_stage.isChannelCut:
     m_stage.r2p.tuner = empty_plan      # TODO: should mimic APS_plans.TuneAxis()?
     m_stage.r2p.pre_tune_method = empty_plan
     m_stage.r2p.post_tune_method = empty_plan
+    tune_m2rp = empty_plan
 
 
 # -------------------------------------------
