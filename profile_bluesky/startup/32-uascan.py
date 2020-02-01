@@ -6,7 +6,7 @@ CT_RANGE = [0, 0, 0, 0, 0]  # Where are these values changed?
 
 
 def uascan(
-        motor, start, reference, finish, minStep,
+        start, reference, finish, minStep,
         exponent, intervals, count_time,
         dy0, SDD_mm, ay0, SAD_mm,
         useDynamicTime=True,
@@ -15,9 +15,6 @@ def uascan(
     ):
     """
     USAXS ascan (step size varies with distance from a reference point)
-
-    Why do we need to pass `motor` as a parameter?
-    Will it ever be anything different?
     """
     if intervals <= 0:
         raise ValueError(f"intervals must be >0, given: {intervals}")
