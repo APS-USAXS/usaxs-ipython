@@ -81,15 +81,15 @@ class DCM_Feedback(Device):
 
     @property
     def is_on(self):
-        return self.on.value == 1
+        return self.on.get() == 1
 
     @APS_utils.run_in_thread
     def _send_emails(self, subject, message):
         email_notices.send(subject, message)
 
     def check_position(self):
-        diff_hi = self.drvh.value - self.oval.value
-        diff_lo = self.oval.value - self.drvl.value
+        diff_hi = self.drvh.get() - self.oval.get()
+        diff_lo = self.oval.get() - self.drvl.get()
         if min(diff_hi, diff_lo) < 0.2:
             subject = "USAXS Feedback problem"
             message = "Feedback is very close to its limits."
@@ -137,7 +137,7 @@ class ApsPssShutterWithStatus(APS_devices.ApsPssShutterWithStatus):
         while self.pss_state.get() not in target:
             time.sleep(poll_s)
             # elapsed = time.time() - t0
-            # logger.debug(f"waiting {elapsed}s : value={self.pss_state.value}")
+            # logger.debug(f"waiting {elapsed}s : value={self.pss_state.get()}")
             if poll_s < self._poll_s_max_:
                 poll_s *= self._poll_factor_   # progressively longer
             if expiration is not None and time.time() > expiration:
@@ -153,9 +153,9 @@ class xxSimulatedApsPssShutterWithStatus(APS_devices.SimulatedApsPssShutterWithS
     @property
     def state(self):
         """is shutter "open", "close", or "unknown"?"""
-        if self.pss_state.value in self.pss_state_open_values:
+        if self.pss_state.get() in self.pss_state_open_values:
             result = self.valid_open_values[0]
-        elif self.pss_state.value in self.pss_state_closed_values:
+        elif self.pss_state.get() in self.pss_state_closed_values:
             result = self.valid_close_values[0]
         else:
             result = self.unknown_state
@@ -276,8 +276,8 @@ class PSS_Parameters(Device):
         :Plug removed:
           Operations in 9-ID-C are allowed
         """
-        enabled = self.c_shutter_closed_chain_A.value == "OFF" or \
-           self.c_shutter_closed_chain_A.value == "OFF"
+        enabled = self.c_shutter_closed_chain_A.get() == "OFF" or \
+           self.c_shutter_closed_chain_A.get() == "OFF"
         return enabled
 
 
@@ -367,10 +367,10 @@ class PreUsaxsTuneParameters(Device):
                 # TODO: and then reset terms as approriate
         
         """
-        result = self.run_tune_next.value
+        result = self.run_tune_next.get()
         # TODO: next test if not in SAXS or WAXS mode
-        result = result or self.num_scans_last_tune.value  > self.req_num_scans_between_tune.value
-        time_limit = self.epoch_last_tune.value + self.req_time_between_tune.value
+        result = result or self.num_scans_last_tune.get()  > self.req_num_scans_between_tune.get()
+        time_limit = self.epoch_last_tune.get() + self.req_time_between_tune.get()
         result = result or time.time() > time_limit
         self.run_tune_next.put(0)
         return result
@@ -463,8 +463,8 @@ class Parameters_USAXS(Device):
 
     transmission = Component(Parameters_transmission)
 
-    # def UPDRange(self):
-    #     return upd_controls.auto.lurange.value  # TODO: check return value is int
+    def UPDRange(self):
+        return upd_controls.auto.lurange.get()  # TODO: check return value is int
 
 
 class Parameters_SBUSAXS(Device):
@@ -600,7 +600,7 @@ class DiagnosticsParameters(Device):
     
     @property
     def beam_in_hutch(self):
-        return self.beam_in_hutch_swait.val.value != 0
+        return self.beam_in_hutch_swait.val.get() != 0
 
 
 class UsaxsProcessController(APS_devices.ProcessController):
@@ -617,8 +617,8 @@ class UsaxsProcessController(APS_devices.ProcessController):
     @property
     def settled(self):
         """Is signal close enough to target?"""
-        diff = abs(self.signal.get() - self.target.value)
-        return diff <= self.tolerance.value
+        diff = abs(self.signal.get() - self.target.get())
+        return diff <= self.tolerance.get()
 
     def wait_until_settled(self, timeout=None, timeout_fail=False):
         """
@@ -646,8 +646,8 @@ class UsaxsProcessController(APS_devices.ProcessController):
                 if timeout is not None and elapsed > timeout:
                     _st._finished(success=self.settled)
                     msg = f"{self.controller_name} Timeout after {elapsed:.2f}s"
-                    msg += f", target {self.target.value:.2f}{self.units.value}"
-                    msg += f", now {self.signal.get():.2f}{self.units.value}"
+                    msg += f", target {self.target.get():.2f}{self.units.get()}"
+                    msg += f", now {self.signal.get():.2f}{self.units.get()}"
                     print(msg)
                     if timeout_fail:
                         raise TimeoutError(msg)
@@ -655,8 +655,8 @@ class UsaxsProcessController(APS_devices.ProcessController):
                 if elapsed >= report:
                     report += self.report_interval_s
                     msg = f"Waiting {elapsed:.1f}s"
-                    msg += f" to reach {self.target.value:.2f}{self.units.value}"
-                    msg += f", now {self.signal.get():.2f}{self.units.value}"
+                    msg += f" to reach {self.target.get():.2f}{self.units.get()}"
+                    msg += f", now {self.signal.get():.2f}{self.units.get()}"
                     print(msg)
                 yield from bps.sleep(self.poll_s)
 
@@ -721,7 +721,7 @@ class Linkam_CI94(UsaxsProcessController):
     def record_signal(self):
         """write signal to the logger AND SPEC file"""
         global specwriter
-        msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
+        msg = f"{self.controller_name} signal: {self.get():.2f}{self.units.get()}"
         logger.info(msg)
         specwriter._cmt("event", msg)
         return msg
@@ -764,7 +764,7 @@ class Linkam_T96(UsaxsProcessController):
     def record_signal(self):
         """write signal to the logger AND SPEC file"""
         global specwriter
-        msg = f"{self.controller_name} signal: {self.value:.2f}{self.units.value}"
+        msg = f"{self.controller_name} signal: {self.get():.2f}{self.units.get()}"
         logger.info(msg)
         specwriter._cmt("event", msg)
         return msg
@@ -777,7 +777,7 @@ class Linkam_T96(UsaxsProcessController):
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
 
-        msg = f"Set {self.controller_name} to {self.target.setpoint:.2f}{self.units.value}"
+        msg = f"Set {self.controller_name} to {self.target.setpoint:.2f}{self.units.get()}"
         specwriter._cmt("event", msg)
         logger.info(msg)
         
@@ -789,5 +789,5 @@ class Linkam_T96(UsaxsProcessController):
     # @property
     # def settled(self):
     #     """Is signal close enough to target?"""
-    #     print(f"{self.value} C, in position? {self.ramp_at_limit.value}")
+    #     print(f"{self.get()} C, in position? {self.ramp_at_limit.get()}")
     #     return self.ramp_at_limit.get() in (True, 1, "Yes")

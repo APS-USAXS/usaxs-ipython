@@ -25,7 +25,7 @@ else:
         logger.warning("Session started when APS not operating.")
     else:
         logger.warning("Session started when 9ID-C is not operating.")
-    logger.warning("Using simulators for FE_shutter and mono_shutter.")
+    logger.warning("Using simulators for all shutters.")
     logger.warning("!"*30)
     FE_shutter = SimulatedApsPssShutterWithStatus(name="FE_shutter")
     mono_shutter = SimulatedApsPssShutterWithStatus(name="mono_shutter")

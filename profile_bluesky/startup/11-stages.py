@@ -94,12 +94,12 @@ class GSlitDevice(MotorBundle):
     @property
     def h_gap_ok(self):
         gap = self.outb.position - self.inb.position
-        return abs(gap - terms.SAXS.guard_h_size.value) <= self.gap_tolerance
+        return abs(gap - terms.SAXS.guard_h_size.get()) <= self.gap_tolerance
     
     @property
     def v_h_gap_ok(self):
         gap = self.top.position - self.bot.position
-        return abs(gap - terms.SAXS.guard_v_size.value) <= self.gap_tolerance
+        return abs(gap - terms.SAXS.guard_v_size.get()) <= self.gap_tolerance
     
     @property
     def gap_ok(self):
@@ -124,6 +124,7 @@ class UsaxsCollimatorStageDevice(MotorBundle):
     x = Component(UsaxsMotor, '9idcLAX:m58:c0:m2', labels=("collimator",))
     y = Component(UsaxsMotor, '9idcLAX:m58:c0:m3', labels=("collimator",))
     r2p = Component(UsaxsMotorTunable, '9idcLAX:pi:c0:m2', labels=("collimator", "tunable",))
+    isChannelCut = True
 
 
 class UsaxsCollimatorSideReflectionStageDevice(MotorBundle):
@@ -172,7 +173,7 @@ m_stage    = UsaxsCollimatorStageDevice('', name='m_stage')
 ms_stage   = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 
 a_stage    = UsaxsAnalyzerStageDevice('', name='a_stage')
-as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
+as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='as_stage')
 
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 

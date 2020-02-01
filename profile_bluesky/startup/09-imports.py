@@ -70,9 +70,8 @@ from apstools.filewriters import SpecWriterCallback, spec_comment
 from apstools.synApps.busy import BusyStatus
 import apstools
 
-req_version = (1,1,7)
-# NOTE: this fails if apstools.__version__ has any non-integer parts!
-cur_version = tuple(map(int,apstools.__version__.split(".")))
+req_version = (1,1,17)
+cur_version = tuple(map(int,apstools.__version__.split("r")[0].split(".")))
 if cur_version < req_version:
     ver_str = '.'.join((map(str,req_version)))
     msg = (

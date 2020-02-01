@@ -76,7 +76,7 @@ sd.baseline.append(monochromator)
 userCalcs_lax = APS_devices.UserCalcsDevice("9idcLAX:", name="userCalcs_lax")
 
 usaxs_q_calc = APS_synApps.SwaitRecord("9idcLAX:USAXS:Q", name="usaxs_q_calc")
-# usaxs_q = usaxs_q_calc.value
+# usaxs_q = usaxs_q_calc.get()
 
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)

@@ -60,7 +60,7 @@ def newSpecFile(title, reset_scan_id=True):
         user_data.spec_file.put(specwriter.spec_filename)
 
     logger.info(f"SPEC file name : {specwriter.spec_filename}")
-    logger.info(f"Current working directory : {user_data.user_dir.value}")
+    logger.info(f"Current working directory : {user_data.user_dir.get()}")
     logger.info("file will be created when bluesky ends its next scan")
 
 # -------------------------------

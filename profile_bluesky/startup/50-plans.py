@@ -105,15 +105,15 @@ def before_command_list(md={}, commands=None):
 
     yield from beforeScanComputeOtherStuff()        # 41-commands.py
 
-    if terms.preUSAXStune.run_tune_on_qdo.value:
+    if terms.preUSAXStune.run_tune_on_qdo.get():
         logger.info("Runing preUSAXStune as requested at start of measurements")
         yield from preUSAXStune(md=md)
 
     if constants["SYNC_ORDER_NUMBERS"]:
         order_number = max([
-            terms.FlyScan.order_number.value,
-            saxs_det.hdf1.file_number.value,
-            waxs_det.hdf1.file_number.value,
+            terms.FlyScan.order_number.get(),
+            saxs_det.hdf1.file_number.get(),
+            waxs_det.hdf1.file_number.get(),
         ])
 
     try:
@@ -169,7 +169,7 @@ def after_plan(weight=1, md={}):
     """
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
-        terms.preUSAXStune.num_scans_last_tune.value + weight
+        terms.preUSAXStune.num_scans_last_tune.get() + weight
         )
 
 
@@ -531,39 +531,40 @@ def preUSAXStune(md={}):
 
     yield from mode_USAXS()
 
-    if terms.preUSAXStune.use_specific_location.value in (1, "yes"):
+    if terms.preUSAXStune.use_specific_location.get() in (1, "yes"):
         yield from bps.mv(
-            s_stage.x, terms.preUSAXStune.sx.value,
-            s_stage.y, terms.preUSAXStune.sy.value,
+            s_stage.x, terms.preUSAXStune.sx.get(),
+            s_stage.y, terms.preUSAXStune.sy.get(),
             )
 
     yield from bps.mv(
         # ensure diode in place (Radiography puts it elsewhere)
-        d_stage.x, terms.USAXS.diode.dx.value,
-        d_stage.y, terms.USAXS.diode.dy.value,
+        d_stage.x, terms.USAXS.diode.dx.get(),
+        d_stage.y, terms.USAXS.diode.dy.get(),
 
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "pre-USAXS optics tune",
 
         # Is this covered by user_mode, "USAXS"?
-        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
-        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
-        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.get(),
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.get(),
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.get(),
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
 
         scaler0.preset_time,  0.1,
     )
     # when all that is complete, then ...
     yield from bps.mv(ti_filter_shutter, "open")
 
-    # TODO: install suspender using usaxs_CheckBeamStandard.value
+    # TODO: install suspender using usaxs_CheckBeamStandard.get()
 
     tuners = OrderedDict()                 # list the axes to tune
     tuners[m_stage.r] = tune_mr            # tune M stage to monochromator
-    tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
-    if terms.USAXS.useMSstage.value:
+    if not m_stage.isChannelCut:
+        tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
+    if terms.USAXS.useMSstage.get():
         tuners[ms_stage.rp] = tune_msrp    # align MSR stage with M stage
-    if terms.USAXS.useSBUSAXS.value:
+    if terms.USAXS.useSBUSAXS.get():
         tuners[as_stage.rp] = tune_asrp    # align ASR stage with MSR stage and set ASRP0 value
     tuners[a_stage.r] = tune_ar            # tune A stage to M stage
     tuners[a_stage.r2p] = tune_a2rp        # make A stage crystals parallel
@@ -584,9 +585,9 @@ def preUSAXStune(md={}):
             break
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
-    logger.info("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
+    logger.info("USAXS count time: {terms.USAXS.usaxs_time.get()} second(s)")
     yield from bps.mv(
-        scaler0.preset_time,        terms.USAXS.usaxs_time.value,
+        scaler0.preset_time,        terms.USAXS.usaxs_time.get(),
         user_data.time_stamp,       str(datetime.datetime.now()),
         user_data.state,            "pre-USAXS optics tuning done",
 
@@ -611,10 +612,10 @@ def preSWAXStune(md={}):
     )
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
-    if terms.preUSAXStune.use_specific_location.value in (1, "yes"):
+    if terms.preUSAXStune.use_specific_location.get() in (1, "yes"):
         yield from bps.mv(
-            s_stage.x, terms.preUSAXStune.sx.value,
-            s_stage.y, terms.preUSAXStune.sy.value,
+            s_stage.x, terms.preUSAXStune.sx.get(),
+            s_stage.y, terms.preUSAXStune.sy.get(),
             )
 
     yield from bps.mv(
@@ -626,12 +627,13 @@ def preSWAXStune(md={}):
     # when all that is complete, then ...
     yield from bps.mv(ti_filter_shutter, "open")
 
-    # TODO: install suspender using usaxs_CheckBeamStandard.value
+    # TODO: install suspender using usaxs_CheckBeamStandard.get()
 
     tuners = OrderedDict()                 # list the axes to tune
     tuners[m_stage.r] = tune_mr            # tune M stage to monochromator
-    tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
-    if terms.USAXS.useMSstage.value:
+    if not m_stage.isChannelCut:
+        tuners[m_stage.r2p] = tune_m2rp        # make M stage crystals parallel
+    if terms.USAXS.useMSstage.get():
         tuners[ms_stage.rp] = tune_msrp    # align MSR stage with M stage
 
     # now, tune the desired axes, bail out if a tune fails
@@ -650,9 +652,9 @@ def preSWAXStune(md={}):
             break
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
-    logger.info("USAXS count time: {terms.USAXS.usaxs_time.value} second(s)")
+    logger.info("USAXS count time: {terms.USAXS.usaxs_time.get()} second(s)")
     yield from bps.mv(
-        scaler0.preset_time,        terms.USAXS.usaxs_time.value,
+        scaler0.preset_time,        terms.USAXS.usaxs_time.get(),
         user_data.time_stamp,       str(datetime.datetime.now()),
         user_data.state,            "pre-SWAXS optics tuning done",
 
@@ -699,10 +701,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from mode_USAXS()
 
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.value,
-        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.value,
-        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.get(),
+        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.get(),
     )
     yield from before_plan()
 
@@ -723,7 +725,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     if not os.path.exists(flyscan_path) and bluesky_runengine_running:
         # must create this directory if not exists
         os.mkdir(flyscan_path)
-    flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.value)
+    flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.get())
 
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
@@ -735,7 +737,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.sample_thickness, thickness,
         user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
-        # or terms.FlyScan.order_number.value
+        # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
     )
@@ -745,19 +747,19 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     # offset the calc from exact zero so can plot log(|Q|)
-    # q_offset = terms.USAXS.start_offset.value
-    # angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.value)
-    # ar0_calc_offset = terms.USAXS.ar_val_center.value + angle_offset
+    # q_offset = terms.USAXS.start_offset.get()
+    # angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.get())
+    # ar0_calc_offset = terms.USAXS.ar_val_center.get() + angle_offset
 
     yield from bps.mv(
-        a_stage.r, terms.USAXS.ar_val_center.value,
+        a_stage.r, terms.USAXS.ar_val_center.get(),
         # these two were moved by mode_USAXS(), belt & suspenders here
-        d_stage.y, terms.USAXS.diode.dy.value,
-        a_stage.y, terms.USAXS.AY0.value,
+        d_stage.y, terms.USAXS.diode.dy.get(),
+        a_stage.y, terms.USAXS.AY0.get(),
     )
     yield from user_data.set_state_plan("Moving to Q=0")
     yield from bps.mv(
-        usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.value,
+        usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.get(),
     )
 
     # TODO: what to do with USAXSScanUp?
@@ -777,17 +779,17 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         )
 
     # enable asrp link to ar for 2D USAXS
-    if terms.USAXS.is2DUSAXSscan.value:
+    if terms.USAXS.is2DUSAXSscan.get():
         RECORD_SCAN_INDEX_10x_per_second = 9
         yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
 
     # we'll reset these after the scan is done
-    old_femto_change_gain_up = upd_controls.auto.gainU.value
-    old_femto_change_gain_down = upd_controls.auto.gainD.value
+    old_femto_change_gain_up = upd_controls.auto.gainU.get()
+    old_femto_change_gain_down = upd_controls.auto.gainD.get()
 
     yield from bps.mv(
-        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.value,
-        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.value,
+        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.get(),
+        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.get(),
         ti_filter_shutter, "open",
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
@@ -809,24 +811,24 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         lax_autosave.disable, 1,
         # autosave will restart after this interval (s)
-        lax_autosave.max_time, usaxs_flyscan.scan_time.value+9,
+        lax_autosave.max_time, usaxs_flyscan.scan_time.get()+9,
         )
 
     yield from user_data.set_state_plan("Running Flyscan")
 
     ### move the stages to flyscan starting values from EPICS PVs
     yield from bps.mv(
-        a_stage.r, flyscan_trajectories.ar.value[0],
-        a_stage.y, flyscan_trajectories.ay.value[0],
-        d_stage.y, flyscan_trajectories.dy.value[0],
-        ar_start, flyscan_trajectories.ar.value[0],
-        # ay_start, flyscan_trajectories.ay.value[0],
-        # dy_start, flyscan_trajectories.dy.value[0],
+        a_stage.r, flyscan_trajectories.ar.get()[0],
+        a_stage.y, flyscan_trajectories.ay.get()[0],
+        d_stage.y, flyscan_trajectories.dy.get()[0],
+        ar_start, flyscan_trajectories.ar.get()[0],
+        # ay_start, flyscan_trajectories.ay.get()[0],
+        # dy_start, flyscan_trajectories.dy.get()[0],
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
     yield from bps.mv(
-        terms.FlyScan.order_number, terms.FlyScan.order_number.value + 1,  # increment it
+        terms.FlyScan.order_number, terms.FlyScan.order_number.get() + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
     )
@@ -840,7 +842,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
         thickness = thickness,
         scan_title = scan_title,
         )
-    _md['fly_scan_time'] = usaxs_flyscan.scan_time.value
+    _md['fly_scan_time'] = usaxs_flyscan.scan_time.get()
         #'detectors': [det.name for det in detectors],
         #'num_points': num,
         #'num_intervals': num_intervals,
@@ -855,7 +857,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
     # Check if we had bad number of PSO pulses
-    diff = flyscan_trajectories.num_pulse_positions.value - struck.current_channel.get()
+    diff = flyscan_trajectories.num_pulse_positions.get() - struck.current_channel.get()
     if diff > 5 and bluesky_runengine_running:
         msg = "WARNING: Flyscan finished with %g less points" % diff
         logger.warning(msg)
@@ -884,9 +886,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
     yield from bps.mv(
-        a_stage.r, terms.USAXS.ar_val_center.value,
-        a_stage.y, terms.USAXS.AY0.value,
-        d_stage.y, terms.USAXS.DY0.value,
+        a_stage.r, terms.USAXS.ar_val_center.get(),
+        a_stage.y, terms.USAXS.AY0.get(),
+        d_stage.y, terms.USAXS.DY0.get(),
         )
 
     # TODO: make this link for side-bounce
@@ -909,12 +911,12 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
     yield from mode_SAXS()
 
-    pinz_target = terms.SAXS.z_in.value + constants["SAXS_PINZ_OFFSET"]
+    pinz_target = terms.SAXS.z_in.get() + constants["SAXS_PINZ_OFFSET"]
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.v_size.value,
-        usaxs_slit.h_size, terms.SAXS.h_size.value,
-        guard_slit.v_size, terms.SAXS.guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.h_size.get(),
+        guard_slit.v_size, terms.SAXS.guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.guard_h_size.get(),
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
         user_data.sample_thickness, thickness,
         terms.SAXS.collecting, 1,
@@ -939,7 +941,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     # directory is pwd + DATAFILE + "_usaxs"
     # path on local file system
     SAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_saxs")
-    SAXS_file_name = local_file_template % (scan_title_clean, saxs_det.hdf1.file_number.value)
+    SAXS_file_name = local_file_template % (scan_title_clean, saxs_det.hdf1.file_number.get())
     # NFS-mounted path as the Pilatus detector sees it
     pilatus_path = os.path.join("/mnt/usaxscontrol", *SAXSscan_path.split(os.path.sep)[2:])
     # area detector will create this path if needed ("Create dir. depth" setting)
@@ -979,9 +981,9 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         ti_filter_shutter, "open",
-        saxs_det.cam.num_images, terms.SAXS.num_images.value,
-        saxs_det.cam.acquire_time, terms.SAXS.acquire_time.value,
-        saxs_det.cam.acquire_period, terms.SAXS.acquire_time.value + 0.004,
+        saxs_det.cam.num_images, terms.SAXS.num_images.get(),
+        saxs_det.cam.acquire_time, terms.SAXS.acquire_time.get(),
+        saxs_det.cam.acquire_period, terms.SAXS.acquire_time.get() + 0.004,
     )
     old_det_stage_sigs = OrderedDict()
     for k, v in saxs_det.hdf1.stage_sigs.items():
@@ -1000,10 +1002,10 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
-    old_delay = scaler0.delay.value
+    old_delay = scaler0.delay.get()
     yield from bps.mv(
-        scaler1.preset_time, terms.SAXS.acquire_time.value + 1,
-        scaler0.preset_time, 1.2*terms.SAXS.acquire_time.value + 1,
+        scaler1.preset_time, terms.SAXS.acquire_time.get() + 1,
+        scaler0.preset_time, 1.2*terms.SAXS.acquire_time.get() + 1,
         scaler0.count_mode, "OneShot",
         scaler1.count_mode, "OneShot",
 
@@ -1014,7 +1016,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
         scaler0.delay, 0,
         terms.SAXS_WAXS.start_exposure_time, ts,
-        user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.value} s",
+        user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.get()} s",
         user_data.spec_scan, str(SCAN_N),
     )
 
@@ -1038,7 +1040,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from bps.mv(
         scaler0.count, 0,
         scaler1.count, 0,
-        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.value,
+        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.get(),
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
         terms.SAXS_WAXS.end_exposure_time, ts,
@@ -1048,7 +1050,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.state, "Done SAXS",
         user_data.time_stamp, ts,
     )
-    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
+    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
     yield from after_plan()
 
 
@@ -1072,10 +1074,10 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     logger.debug(f"waxsx after mode_WAXS ={waxsx.position}")
 
     yield from bps.mv(
-        usaxs_slit.v_size, terms.SAXS.v_size.value,
-        usaxs_slit.h_size, terms.SAXS.h_size.value,
-        guard_slit.v_size, terms.SAXS.guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.guard_h_size.value,
+        usaxs_slit.v_size, terms.SAXS.v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.h_size.get(),
+        guard_slit.v_size, terms.SAXS.guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.guard_h_size.get(),
         user_data.sample_thickness, thickness,
         terms.WAXS.collecting, 1,
     )
@@ -1099,7 +1101,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     # directory is pwd + DATAFILE + "_usaxs"
     # path on local file system
     WAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_waxs")
-    WAXS_file_name = local_file_template % (scan_title_clean, waxs_det.hdf1.file_number.value)
+    WAXS_file_name = local_file_template % (scan_title_clean, waxs_det.hdf1.file_number.get())
     # NFS-mounted path as the Pilatus detector sees it
     pilatus_path = os.path.join("/mnt/usaxscontrol", *WAXSscan_path.split(os.path.sep)[2:])
     # area detector will create this path if needed ("Create dir. depth" setting)
@@ -1138,9 +1140,9 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         mono_shutter, "open",
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
         ti_filter_shutter, "open",
-        waxs_det.cam.num_images, terms.WAXS.num_images.value,
-        waxs_det.cam.acquire_time, terms.WAXS.acquire_time.value,
-        waxs_det.cam.acquire_period, terms.WAXS.acquire_time.value + 0.004,
+        waxs_det.cam.num_images, terms.WAXS.num_images.get(),
+        waxs_det.cam.acquire_time, terms.WAXS.acquire_time.get(),
+        waxs_det.cam.acquire_period, terms.WAXS.acquire_time.get() + 0.004,
     )
     yield from bps.install_suspender(suspend_BeamInHutch)
     old_det_stage_sigs = OrderedDict()
@@ -1159,10 +1161,10 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         ti_filter_shutter, "close",
     )
 
-    old_delay = scaler0.delay.value
+    old_delay = scaler0.delay.get()
     yield from bps.mv(
-        scaler1.preset_time, terms.WAXS.acquire_time.value + 1,
-        scaler0.preset_time, 1.2*terms.WAXS.acquire_time.value + 1,
+        scaler1.preset_time, terms.WAXS.acquire_time.get() + 1,
+        scaler0.preset_time, 1.2*terms.WAXS.acquire_time.get() + 1,
         scaler0.count_mode, "OneShot",
         scaler1.count_mode, "OneShot",
 
@@ -1173,7 +1175,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 
         scaler0.delay, 0,
         terms.SAXS_WAXS.start_exposure_time, ts,
-        user_data.state, f"WAXS collection for {terms.WAXS.acquire_time.value} s",
+        user_data.state, f"WAXS collection for {terms.WAXS.acquire_time.get()} s",
     )
 
     yield from bps.mv(
@@ -1198,11 +1200,11 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler0.count, 0,
         scaler1.count, 0,
         # WAXS uses same PVs for normalization and transmission as SAXS, should we aliased it same to terms.WAXS???
-        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.value,
-        terms.SAXS_WAXS.diode_transmission, scaler0.channels.chan04.s.value,
-        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.value,
-        terms.SAXS_WAXS.I0_transmission, scaler0.channels.chan02.s.value,
-        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.value,
+        terms.SAXS_WAXS.I0, scaler1.channels.chan02.s.get(),
+        terms.SAXS_WAXS.diode_transmission, scaler0.channels.chan04.s.get(),
+        terms.SAXS_WAXS.diode_gain, trd_controls.femto.gain.get(),
+        terms.SAXS_WAXS.I0_transmission, scaler0.channels.chan02.s.get(),
+        terms.SAXS_WAXS.I0_gain, I0_controls.femto.gain.get(),
         scaler0.display_rate, 5,
         scaler1.display_rate, 5,
         terms.SAXS_WAXS.end_exposure_time, ts,
@@ -1213,5 +1215,5 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.time_stamp, ts,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
-    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.value}")
+    logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
     yield from after_plan()

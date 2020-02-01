@@ -111,14 +111,14 @@ def IfRequestedStopBeforeNextScan():
     RE.pause_msg = bluesky.run_engine.PAUSE_MSG     # sloppy
 
     pv_txt = "Pausing for user for %g s"
-    while terms.PauseBeforeNextScan.value:
+    while terms.PauseBeforeNextScan.get():
         msg = pv_txt % (time.time() - t0)
         logger.info(msg)
         yield from user_data.set_state_plan(msg)
         yield from bps.sleep(1)
         open_the_shutter = True
 
-    if terms.StopBeforeNextScan.value:
+    if terms.StopBeforeNextScan.get():
         msg = "User requested stop data collection before next scan"
         logger.info(msg)
         yield from bps.mv(
@@ -164,8 +164,8 @@ def IfRequestedStopBeforeNextScan():
 
 def confirmUsaxsSaxsOutOfBeam():
     """raise ValueError if not"""
-    if terms.SAXS.UsaxsSaxsMode.value != UsaxsSaxsModes["out of beam"]:
-        logger.warning("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.value)
+    if terms.SAXS.UsaxsSaxsMode.get() != UsaxsSaxsModes["out of beam"]:
+        logger.warning("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.get())
         msg = "Incorrect UsaxsSaxsMode mode found."
         msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)"
         raise ValueError(msg % UsaxsSaxsModes["out of beam"])
@@ -183,11 +183,11 @@ def move_WAXSOut():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # move the WAXS X away from sample
-    yield from bps.mv(waxsx, terms.WAXS.x_out.value)
+    yield from bps.mv(waxsx, terms.WAXS.x_out.get())
 
     yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.value,
-        terms.WAXS.x_out.value + terms.WAXS.x_limit_offset.value)
+        waxsx.soft_limit_lo.get(),
+        terms.WAXS.x_out.get() + terms.WAXS.x_limit_offset.get())
 
     logger.info("Removed WAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
@@ -210,15 +210,15 @@ def move_WAXSIn():
 
     # first move USAXS out of way
     yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.value,
-        terms.WAXS.x_in.value + terms.WAXS.x_limit_offset.value)
+        waxsx.soft_limit_lo.get(),
+        terms.WAXS.x_in.get() + terms.WAXS.x_limit_offset.get())
 
     yield from bps.mv(
-        guard_slit.v_size, terms.SAXS.guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.guard_h_size.value,
-        waxsx,             terms.WAXS.x_in.value,
-        usaxs_slit.v_size, terms.SAXS.v_size.value,
-        usaxs_slit.h_size, terms.SAXS.h_size.value,
+        guard_slit.v_size, terms.SAXS.guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.guard_h_size.get(),
+        waxsx,             terms.WAXS.x_in.get(),
+        usaxs_slit.v_size, terms.SAXS.v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.h_size.get(),
     )
 
     logger.info("WAXS is in position")
@@ -237,19 +237,19 @@ def move_SAXSOut():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # move the pin_z away from sample
-    yield from bps.mv(saxs_stage.z, terms.SAXS.z_out.value)
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_out.get())
 
     yield from saxs_stage.z.set_lim(
-        terms.SAXS.z_out.value - terms.SAXS.z_limit_offset.value,
-        saxs_stage.z.soft_limit_hi.value,  # don't change this value
+        terms.SAXS.z_out.get() - terms.SAXS.z_limit_offset.get(),
+        saxs_stage.z.soft_limit_hi.get(),  # don't change this value
         )
 
     # move pinhole up to out of beam position
-    yield from bps.mv(saxs_stage.y, terms.SAXS.y_out.value)
+    yield from bps.mv(saxs_stage.y, terms.SAXS.y_out.get())
 
     yield from saxs_stage.y.set_lim(
-        terms.SAXS.y_out.value - terms.SAXS.y_limit_offset.value,
-        saxs_stage.y.soft_limit_hi.value,  # don't change this value
+        terms.SAXS.y_out.get() - terms.SAXS.y_limit_offset.get(),
+        saxs_stage.y.soft_limit_hi.get(),  # don't change this value
         )
 
     logger.info("Removed SAXS from beam position")
@@ -273,25 +273,25 @@ def move_SAXSIn():
 
     # first move USAXS out of way
     yield from saxs_stage.y.set_lim(
-        terms.SAXS.y_in.value - terms.SAXS.y_limit_offset.value,
-        saxs_stage.y.soft_limit_hi.value,
+        terms.SAXS.y_in.get() - terms.SAXS.y_limit_offset.get(),
+        saxs_stage.y.soft_limit_hi.get(),
         )
 
     yield from bps.mv(
-        guard_slit.v_size, terms.SAXS.guard_v_size.value,
-        guard_slit.h_size, terms.SAXS.guard_h_size.value,
-        saxs_stage.y,      terms.SAXS.y_in.value,
-        usaxs_slit.v_size, terms.SAXS.v_size.value,
-        usaxs_slit.h_size, terms.SAXS.h_size.value,
+        guard_slit.v_size, terms.SAXS.guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.guard_h_size.get(),
+        saxs_stage.y,      terms.SAXS.y_in.get(),
+        usaxs_slit.v_size, terms.SAXS.v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.h_size.get(),
     )
 
     yield from saxs_stage.z.set_lim(
-        terms.SAXS.z_in.value - terms.SAXS.z_limit_offset.value,
-        saxs_stage.z.soft_limit_hi.value   # do NOT change the hi value
+        terms.SAXS.z_in.get() - terms.SAXS.z_limit_offset.get(),
+        saxs_stage.z.soft_limit_hi.get()   # do NOT change the hi value
         )
 
     # move Z _AFTER_ the others finish moving
-    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.value)
+    yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.get())
 
     logger.info("Pinhole SAXS is in position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["SAXS in beam"])
@@ -309,18 +309,18 @@ def move_USAXSOut():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     yield from bps.mv(
-        a_stage.x, terms.SAXS.ax_out.value,
-        d_stage.x, terms.SAXS.dx_out.value,
+        a_stage.x, terms.SAXS.ax_out.get(),
+        d_stage.x, terms.SAXS.dx_out.get(),
     )
 
     # now Main stages are out of place,
     # so we can now set the limits and then move pinhole in place.
     yield from a_stage.x.set_lim(
-        terms.SAXS.ax_out.value - terms.SAXS.ax_limit_offset.value,
-        a_stage.x.soft_limit_hi.value)
+        terms.SAXS.ax_out.get() - terms.SAXS.ax_limit_offset.get(),
+        a_stage.x.soft_limit_hi.get())
     yield from d_stage.x.set_lim(
-        d_stage.x.soft_limit_lo.value,
-        terms.SAXS.dx_out.value + terms.SAXS.dx_limit_offset.value)
+        d_stage.x.soft_limit_lo.get(),
+        terms.SAXS.dx_out.get() + terms.SAXS.dx_limit_offset.get())
 
     logger.info("Removed USAXS from beam position")
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["out of beam"])
@@ -344,21 +344,21 @@ def move_USAXSIn():
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
     yield from a_stage.x.set_lim(
-        terms.SAXS.ax_in.value - terms.SAXS.ax_limit_offset.value,
-        a_stage.x.soft_limit_hi.value)
+        terms.SAXS.ax_in.get() - terms.SAXS.ax_limit_offset.get(),
+        a_stage.x.soft_limit_hi.get())
     yield from d_stage.x.set_lim(
-        d_stage.x.soft_limit_lo.value,
-        terms.SAXS.dx_in.value + terms.SAXS.dx_limit_offset.value)
+        d_stage.x.soft_limit_lo.get(),
+        terms.SAXS.dx_in.get() + terms.SAXS.dx_limit_offset.get())
 
     yield from bps.mv(
-        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.value,
-        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.value,
-        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.value,
-        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.value,
-        a_stage.y,          terms.USAXS.AY0.value,
-        a_stage.x,          terms.SAXS.ax_in.value,
-        d_stage.x,          terms.SAXS.dx_in.value,
-        d_stage.y,          terms.USAXS.DY0.value,
+        guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
+        guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.get(),
+        usaxs_slit.h_size,  terms.SAXS.usaxs_h_size.get(),
+        usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.get(),
+        a_stage.y,          terms.USAXS.AY0.get(),
+        a_stage.x,          terms.SAXS.ax_in.get(),
+        d_stage.x,          terms.SAXS.dx_in.get(),
+        d_stage.y,          terms.USAXS.DY0.get(),
     )
 
     logger.info("USAXS is in position")

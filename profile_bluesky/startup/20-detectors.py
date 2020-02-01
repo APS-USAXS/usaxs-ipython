@@ -39,13 +39,13 @@ if isinstance(scaler0, ScalerCH):
             continue
         if hasattr(scaler0.channels, ch_attr):
             ch = scaler0.channels.__getattribute__(ch_attr)
-            if ch.chname.value == "I0_USAXS":
+            if ch.chname.get() == "I0_USAXS":
                 I0_SIGNAL = ch
-            elif ch.chname.value == "I00_USAXS":
+            elif ch.chname.get() == "I00_USAXS":
                 I00_SIGNAL = ch
-            elif ch.chname.value == "PD_USAXS":
+            elif ch.chname.get() == "PD_USAXS":
                 UPD_SIGNAL = ch
-            elif ch.chname.value == "TR diode":
+            elif ch.chname.get() == "TR diode":
                 TRD_SIGNAL = ch
 elif isinstance(scaler0, EpicsScaler):
     for ch_attr in scaler0.channels.read_attrs:

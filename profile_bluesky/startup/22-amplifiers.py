@@ -239,9 +239,9 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 
     @property
     def isUpdating(self):
-        v = self.mode.value in (1, AutorangeSettings.auto_background)
+        v = self.mode.get() in (1, AutorangeSettings.auto_background)
         if v:
-            v = self.updating.value in (1, "Updating")
+            v = self.updating.get() in (1, "Updating")
         return v
 
 
@@ -253,9 +253,9 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 #    def __init__(self, name, parent, **kwargs):
 #
 #        def func():		# runs only when Device is triggered
-#            counts = parent.signal.s.value
-#            volts = counts / parent.auto.counts_per_volt.value
-#            volts_per_amp = parent.femto.gain.value
+#            counts = parent.signal.s.get()
+#            volts = counts / parent.auto.counts_per_volt.get()
+#            volts_per_amp = parent.femto.gain.get()
 #            return volts / volts_per_amp
 #
 #        super().__init__(func=func, name=name, **kwargs)
@@ -312,8 +312,8 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
     stage_sigs = {}
     stage_sigs["scaler"] = scaler.stage_sigs   # benign
     original = {}
-    original["scaler.preset_time"] = scaler.preset_time.value
-    original["scaler.auto_count_delay"] = scaler.auto_count_delay.value
+    original["scaler.preset_time"] = scaler.preset_time.get()
+    original["scaler.auto_count_delay"] = scaler.auto_count_delay.get()
     yield from bps.mv(
         scaler.preset_time, count_time,
         scaler.auto_count_delay, 0
@@ -327,14 +327,14 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
         settling_time = AMPLIFIER_MINIMUM_SETTLING_TIME
         for control in control_list:
             yield from control.auto.setGain(n)
-            settling_time = max(settling_time, control.femto.settling_time.value)
+            settling_time = max(settling_time, control.femto.settling_time.get())
         yield from bps.sleep(settling_time)
         
         def getScalerChannelPvname(scaler_channel):
             try:
                 return scaler_channel.pvname        # EpicsScaler channel
             except AttributeError:
-                return scaler_channel.chname.value  # ScalerCH channel
+                return scaler_channel.chname.get()  # ScalerCH channel
         
         # readings is a PV-keyed dictionary
         readings = {getScalerChannelPvname(s): [] for s in signals}
@@ -346,25 +346,26 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             
             for s in signals:
                 pvname = getScalerChannelPvname(s)
-                try:
-                    value = s.value     # EpicsScaler channels
-                except AttributeError:
-                    value = s.s.value     # ScalerCH channels
+                value = s.get()     # EpicsScaler channel value or ScalerCH ScalerChannelTuple
+                if not isinstance(value, float):
+                    value = s.s.get()     # ScalerCH channel value
+                # logger.debug(f"scaler reading: value: {value}")
                 readings[pvname].append(value)
     
         s_range_name = f"gain{n}"
         for control in control_list:
-            g = control.auto.ranges.__getattr__(s_range_name)
+            g = getattr(control.auto.ranges, s_range_name)
             pvname = getScalerChannelPvname(control.signal)
+            # logger.debug(f"gain: {s_range_name} readings:{readings[pvname]}")
             yield from bps.mv(
                 g.background, np.mean(readings[pvname]),
                 g.background_error, np.std(readings[pvname]),
             )
             msg = f"{control.nickname}"
             msg += f" range={n}"
-            msg += f" gain={ _gain_to_str_(control.auto.gain.value)}"
-            msg += f" bkg={g.background.value}"
-            msg += f" +/- {g.background_error.value}" 
+            msg += f" gain={ _gain_to_str_(control.auto.gain.get())}"
+            msg += f" bkg={g.background.get()}"
+            msg += f" +/- {g.background_error.get()}" 
                 
             logger.info(msg)
 
@@ -405,9 +406,9 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
     scaler = controls[0].scaler
     originals = {}
 
-    originals["preset_time"] = scaler.preset_time.value
-    originals["delay"] = scaler.delay.value
-    originals["count_mode"] = scaler.count_mode.value
+    originals["preset_time"] = scaler.preset_time.get()
+    originals["delay"] = scaler.delay.get()
+    originals["count_mode"] = scaler.count_mode.get()
     yield from bps.mv(
         scaler.preset_time, count_time,
         scaler.delay, 0.2,
@@ -423,8 +424,8 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
         gain = last_gain_dict.get(control.auto.gain.name)
         if gain is not None:    # be cautious, might be unknown
             yield from control.auto.setGain(gain)
-        last_gain_dict[control.auto.gain.name] = control.auto.gain.value
-        settling_time = max(settling_time, control.femto.settling_time.value)
+        last_gain_dict[control.auto.gain.name] = control.auto.gain.get()
+        settling_time = max(settling_time, control.femto.settling_time.get())
     
     yield from bps.sleep(settling_time)
 
@@ -446,11 +447,11 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             last_gain_dict[control.auto.gain.name] = gain_now
         
             # are we topped up on any detector?
-            max_rate = control.auto.max_count_rate.value
+            max_rate = control.auto.max_count_rate.get()
             if isinstance(control.signal, ScalerChannel):   # ophyd.ScalerCH
-                actual_rate = control.signal.s.value / control.scaler.time.value
+                actual_rate = control.signal.s.get() / control.scaler.time.get()
             elif isinstance(control.signal, EpicsSignalRO): # ophyd.EpicsScaler
-                # actual_rate = control.signal.value      # FIXME
+                # actual_rate = control.signal.get()      # FIXME
                 raise RuntimeError("This scaler needs to divide by time")
             else:
                 raise ValueError(f"unexpected control.signal: {control.signal}")
@@ -542,7 +543,7 @@ upd_controls = DetectorAmplifierAutorangeDevice(
 upd_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:upd", 
     name="upd_photocurrent_calc")
-upd_photocurrent = upd_photocurrent_calc.value
+upd_photocurrent = upd_photocurrent_calc.get()
 
 trd_controls = DetectorAmplifierAutorangeDevice(
     "TR diode",
@@ -557,7 +558,7 @@ trd_controls = DetectorAmplifierAutorangeDevice(
 trd_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:trd", 
     name="trd_photocurrent_calc")
-trd_photocurrent = trd_photocurrent_calc.value
+trd_photocurrent = trd_photocurrent_calc.get()
 
 I0_controls = DetectorAmplifierAutorangeDevice(
     "I0_USAXS",
@@ -572,7 +573,7 @@ I0_controls = DetectorAmplifierAutorangeDevice(
 I0_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I0", 
     name="I0_photocurrent_calc")
-I0_photocurrent = I0_photocurrent_calc.value
+I0_photocurrent = I0_photocurrent_calc.get()
 
 I00_controls = DetectorAmplifierAutorangeDevice(
     "I00_USAXS",
@@ -587,13 +588,13 @@ I00_controls = DetectorAmplifierAutorangeDevice(
 I00_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I00", 
     name="I00_photocurrent_calc")
-I00_photocurrent = I00_photocurrent_calc.value
+I00_photocurrent = I00_photocurrent_calc.get()
 
 
 I000_photocurrent_calc = APS_synApps.SwaitRecord(
     "9idcLAX:USAXS:I000", 
     name="I000_photocurrent_calc")
-I000_photocurrent = I000_photocurrent_calc.value
+I000_photocurrent = I000_photocurrent_calc.get()
 
 
 controls_list_I0_I00_TRD = [I0_controls, I00_controls, trd_controls]
