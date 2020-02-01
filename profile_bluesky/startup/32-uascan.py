@@ -52,7 +52,10 @@ def uascan(
         s_stage.y,
         d_stage.y,
         scaler0,
-        # TODO: what else?
+        upd_controls.auto.gain,
+        I0_controls.auto.gain,
+        I00_controls.auto.gain,
+        trd_controls.auto.gain,
     ]
 
     if terms.USAXS.useSBUSAXS.value:
