@@ -2,15 +2,11 @@ logger.info(__file__)
 # logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 
-CT_RANGE = [0, 0, 0, 0, 0]  # Where are these values changed?
-
-
 def uascan(
         start, reference, finish, minStep,
         exponent, intervals, count_time,
         dy0, SDD_mm, ay0, SAD_mm,
         useDynamicTime=True,
-        useIntelligentTime=True,
         md={}
     ):
     """
@@ -31,8 +27,6 @@ def uascan(
     count_time_base = count_time
     if useDynamicTime:
         count_time = count_time_base / 3
-    if useIntelligentTime:
-        count_time = CT_RANGE[0]
     
     # stop scaler, if it is counting
     yield from bps.mv(
@@ -87,7 +81,6 @@ def uascan(
     _md['ay0'] = ay0
     _md['SAD_mm'] = SAD_mm
     _md['useDynamicTime'] = str(useDynamicTime)
-    _md['useIntelligentTime'] = str(useIntelligentTime)
 
     def _triangulate_(angle, dist):
         """triangulate offset, given angle of rotation"""
@@ -152,10 +145,6 @@ def uascan(
                     count_time = count_time_base
                 else:
                     count_time = 2*count_time_base
-
-            if useIntelligentTime:
-                updRange = upd_controls.auto.lurange.value
-                count_time = CT_RANGE[updRange]
 
     def _after_scan_():
         yield from bps.mv(
