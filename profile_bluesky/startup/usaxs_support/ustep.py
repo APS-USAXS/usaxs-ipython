@@ -111,7 +111,7 @@ class Ustep(object):
         """
         x = self.start
         for i in range(self.numPts):
-            x += self.direction * self._calc_next_step_(x, factor or self.factor)
+            x += self.sign * self._calc_next_step_(x, factor or self.factor)
             if i == self.numPts-1 and factor is None:
                 yield self.finish
             else:
