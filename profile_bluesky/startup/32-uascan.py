@@ -2,6 +2,23 @@ logger.info(__file__)
 # logger.debug(resource_usage(os.path.split(__file__)[-1]))
 
 
+# uascan()
+# center: 8.746588
+# start: -0.0003 1/A (Q) --> -0.0008 degrees = 8.7474
+# finish: 0.3 1/A (Q) --> 0.8 degrees = 7.9
+# minstep = 0.000025 degrees
+# exponent = 1.0
+# intervals = 200
+# count time = 1 s
+# DY0 = 12.83
+# SDD = 910
+# ay0 = 0
+# SAD = 215
+
+# Ustep(8.7474, 8.746588, 7.9, 200, 1, 0.000025)
+# uascan(8.7474, 8.746588, 7.9, 0.000025, 1, 200, 1, 12.83, 910, 0, 215)
+
+
 def uascan(
         start, reference, finish, minStep,
         exponent, intervals, count_time,
@@ -23,15 +40,31 @@ def uascan(
         f" {ay0} {SAD_mm}"
         f" {exponent} {intervals} {count_time}"
     )
+    plan_args = dict(
+        start = start,
+        reference = reference,
+        finish = finish,
+        minStep = minStep,
+        dy0 = dy0,
+        SDD_mm = SDD_mm,
+        ay0 = ay0,
+        SAD_mm = SAD_mm,
+        exponent = exponent,
+        intervals = intervals,
+        count_time = count_time,
+    )
 
     count_time_base = count_time
-    if useDynamicTime:
-        count_time = count_time_base / 3
     
     # stop scaler, if it is counting
     yield from bps.mv(
-        scaler.count, 0,
-        scaler.preset_time, count_time,
+        scaler0.count, 0,
+        scaler0.preset_time, count_time,
+        scaler0.count_mode, "OneShot",
+        upd_controls.auto.mode, "automatic",
+        I0_controls.auto.mode, "manual",
+        I00_controls.auto.mode, "manual",
+        ti_filter_shutter, "open",
         )
 
     # original values before scan
@@ -46,17 +79,29 @@ def uascan(
     
     # devices which are recorded in the "primary" stream
     read_devices = [
-        m_stage.r,
-        a_stage.r,
-        a_stage.y,
-        s_stage.y,
-        d_stage.y,
+        m_stage.r.user_readback,
+        a_stage.r.user_readback,
+        a_stage.y.user_readback,
+        s_stage.y.user_readback,
+        d_stage.y.user_readback,
         scaler0,
         upd_controls.auto.gain,
         I0_controls.auto.gain,
         I00_controls.auto.gain,
         trd_controls.auto.gain,
+        upd_controls.auto.reqrange,
+        I0_controls.auto.reqrange,
+        I00_controls.auto.reqrange,
+        trd_controls.auto.reqrange,
     ]
+
+    trd.kind = "omitted"
+    I00.kind = "omitted"
+    I000.kind = "omitted"
+    for obj in (m_stage.r, a_stage.r, a_stage.y, s_stage.y, d_stage.y):
+        obj.kind = "omitted"
+        obj.user_setpoint.kind = "omitted"
+        obj.user_readback.kind = "omitted"
 
     if terms.USAXS.useSBUSAXS.value:
         read_devices.append(as_stage.rp)
@@ -70,8 +115,9 @@ def uascan(
     _md.update(md or {})
     _p = scan_cmd.find(" ")
     _md['plan_name'] = scan_cmd[:_p]
-    _md['plan_args'] = scan_cmd[_p+1:]
+    _md['plan_args'] = plan_args
     _md['uascan_factor'] = ar_series.factor
+    _md['uascan_direction'] = ar_series.sign
     _md['useSBUSAXS'] = str(terms.USAXS.useSBUSAXS.value)
     _md['start'] = start
     _md['center'] = reference
@@ -92,10 +138,20 @@ def uascan(
     @bpp.run_decorator(md=_md)
     def _scan_():
         scan_over = False
+        count_time = count_time_base
 
         ar0 = terms.USAXS.center.AR.value
         sy0 = s_stage.y.position
         for i, target_ar in enumerate(ar_series.stepper()):
+
+            if useDynamicTime:
+                if i / intervals < 0.33:
+                    count_time = count_time_base / 3
+                elif i / intervals < 0.66:
+                    count_time = count_time_base
+                else:
+                    count_time = count_time_base * 2
+
             # track ay & dy on scattered beam position
             target_ay = ay0 + _triangulate_(target_ar-ar0, SAD_mm)
             target_dy = dy0 + _triangulate_(target_ar-ar0, SDD_mm)
@@ -108,6 +164,7 @@ def uascan(
                 a_stage.y, target_ay,
                 d_stage.y, target_dy,
                 s_stage.y, target_sy,
+                scaler0.preset_time, count_time
             ]
 
             if terms.USAXS.useSBUSAXS.value:
@@ -156,7 +213,7 @@ def uascan(
 
             monochromator.feedback.on, MONO_FEEDBACK_ON,
 
-            scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
+            scaler0.count_mode, "AutoCount",
             upd_controls.auto.mode, "auto+background",
             I0_controls.auto.mode, "manual",
             I00_controls.auto.mode, "manual",
@@ -177,7 +234,15 @@ def uascan(
         if terms.USAXS.useSBUSAXS.value:
             motor_resets += [as_stage.rp, prescan_positions["asrp"]]
         yield from bps.mv(*motor_resets)  # all at once
+        
+        trd.kind = "hinted" # TODO: correct value?
+        I00.kind = "hinted" # TODO: correct value?
+        I000.kind = "hinted" # TODO: correct value?
+        for obj in (m_stage.r, a_stage.r, a_stage.y, s_stage.y, d_stage.y):
+            obj.kind = "normal" # TODO: correct value?
+            obj.user_setpoint.kind = "normal" # TODO: correct value?
+            obj.user_readback.kind = "hinted" # TODO: correct value?
 
-	# run the scan
+    # run the scan
     yield from _scan_()
     yield from _after_scan_()

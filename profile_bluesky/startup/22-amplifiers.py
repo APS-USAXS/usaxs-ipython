@@ -58,8 +58,8 @@ class CurrentAmplifierDevice(Device):
 
 
 class FemtoAmplifierDevice(CurrentAmplifierDevice):
-    gainindex = Component(EpicsSignal, "gainidx")
-    description = Component(EpicsSignal, "femtodesc")
+    gainindex = Component(EpicsSignal, "gainidx", kind="omitted")
+    description = Component(EpicsSignal, "femtodesc", kind="omitted")
     
     # gain settling time for the device is <150ms
     settling_time = Component(Signal, value=0.08)

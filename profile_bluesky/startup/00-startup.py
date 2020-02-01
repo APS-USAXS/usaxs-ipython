@@ -19,6 +19,7 @@ from bluesky.callbacks import *
 from bluesky.plan_tools import print_summary
 import bluesky.plans as bp
 import bluesky.plan_stubs as bps
+import bluesky.preprocessors as bpp
 import numpy as np
 import bluesky.magics
 

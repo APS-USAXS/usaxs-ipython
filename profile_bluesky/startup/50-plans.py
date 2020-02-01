@@ -504,13 +504,13 @@ def execute_command_list(filename, commands, md={}):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def uascan():
-    """
-    USAXS step scan
+# def uascan():
+#     """
+#     USAXS step scan
 
-    https://github.com/APS-USAXS/ipython-usaxs/issues/8
-    """
-    # TODO: needs proper args & kwargs matching SPEC's signature
+#     https://github.com/APS-USAXS/ipython-usaxs/issues/8
+#     """
+#     # TODO: needs proper args & kwargs matching SPEC's signature
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
