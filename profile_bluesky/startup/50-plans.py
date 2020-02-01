@@ -17,6 +17,8 @@ PLANS
     SAXS()
     WAXS()
     uascan()
+    USAXSscan()
+    USAXSscanStep()
 
 UTILITIES
 
@@ -458,13 +460,12 @@ def execute_command_list(filename, commands, md={}):
             yield from preUSAXStune(md=_md)
 
         elif action in ("flyscan", "usaxsscan"):
-            # TODO: watch for PV which indicates, if USAXS should run step scan or flyscan
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
             snm = args[3]
             _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
-            yield from Flyscan(sx, sy, sth, snm, md=_md)
+            yield from USAXSscan(sx, sy, sth, snm, md=_md)  # either step or fly scan
 
         elif action in ("saxs", "saxsexp"):
             sx = float(args[0])
@@ -665,6 +666,28 @@ def preSWAXStune(md={}):
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+def USAXSscan(x, y, thickness_mm, title, md={}):
+    """
+    general scan macro for fly or step USAXS with 1D or 2D collimation
+    """
+    if terms.FlyScan.use_flyscan:
+        yield from Flyscan(x, y, thickness_mm, title, md={})
+    else:
+        yield from USAXSscanStep(x, y, thickness_mm, title, md={})
+
+
+def USAXSscanStep(x, y, thickness_mm, title, md={}):
+    """
+    general scan macro for step USAXS for both 1D & 2D collimation
+    """
+    bluesky_runengine_running = RE.state != "idle"
+
+    yield from IfRequestedStopBeforeNextScan()
+
+    # TODO: work-in-progress
+    raise NotImplementedError("need to complete this plan")
 
 
 def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):

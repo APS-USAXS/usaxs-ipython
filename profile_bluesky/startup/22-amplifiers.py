@@ -54,7 +54,7 @@ class AutorangeSettings(object):
 
 
 class CurrentAmplifierDevice(Device):
-    gain = Component(EpicsSignalRO, "gain")
+    gain = Component(EpicsSignalRO, "gain", kind="omitted")
 
 
 class FemtoAmplifierDevice(CurrentAmplifierDevice):

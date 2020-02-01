@@ -429,6 +429,12 @@ class Parameters_USAXS(Device):
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
     ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
     asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
+    
+    #	ASRP_DEGREES_PER_VDC = 0.0059721     # measured by JI October 9, 2006 during setup at 32ID. Std Dev 4e-5
+    #  	ASRP_DEGREES_PER_VDC = 0.00059721     # changed by factor of 10 to accomodate new PIUU controller, where we drive directly in V of high voltage. 
+    # Measured by JIL on 6/4/2016, average of two measured numbers
+    asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
+    
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
     ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
@@ -441,6 +447,7 @@ class Parameters_USAXS(Device):
     num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
     sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
     scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
+    scanning = Component(EpicsSignal,                 "9idcLAX:USAXS:scanning")
     start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")

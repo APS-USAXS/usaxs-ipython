@@ -10,6 +10,7 @@ from enum import Enum
 import getpass
 import IPython
 import itertools
+import math
 import os
 from pathlib import PurePath
 import socket
@@ -84,6 +85,7 @@ if cur_version < req_version:
 from usaxs_support.nexus import reset_manager, get_manager
 from usaxs_support.saveFlyData import SaveFlyScan
 from usaxs_support.surveillance import instrument_archive
+from usaxs_support.ustep import Ustep
 
 import pyRestTable
 
