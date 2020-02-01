@@ -346,16 +346,17 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             
             for s in signals:
                 pvname = getScalerChannelPvname(s)
-                try:
-                    value = s.get()     # EpicsScaler channels
-                except AttributeError:
-                    value = s.s.get()     # ScalerCH channels
+                value = s.get()     # EpicsScaler channel value or ScalerCH ScalerChannelTuple
+                if not isinstance(value, float):
+                    value = s.s.get()     # ScalerCH channel value
+                # logger.debug(f"scaler reading: value: {value}")
                 readings[pvname].append(value)
     
         s_range_name = f"gain{n}"
         for control in control_list:
-            g = control.auto.ranges.__getattr__(s_range_name)
+            g = getattr(control.auto.ranges, s_range_name)
             pvname = getScalerChannelPvname(control.signal)
+            # logger.debug(f"gain: {s_range_name} readings:{readings[pvname]}")
             yield from bps.mv(
                 g.background, np.mean(readings[pvname]),
                 g.background_error, np.std(readings[pvname]),
