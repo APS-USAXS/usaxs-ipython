@@ -173,7 +173,7 @@ m_stage    = UsaxsCollimatorStageDevice('', name='m_stage')
 ms_stage   = UsaxsCollimatorSideReflectionStageDevice('', name='ms_stage')
 
 a_stage    = UsaxsAnalyzerStageDevice('', name='a_stage')
-as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='aw_stage')
+as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='as_stage')
 
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 
