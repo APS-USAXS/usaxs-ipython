@@ -12,7 +12,9 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
     change temperature T to temp1 with rate1
     collect USAXS/SAXS/WAXS while heating
     when temp1 reached, hold for delay1 seconds, collecting data repeatedly
-    change T to temp2 with rate2sampleTitleMod
+    change T to temp2 with rate2
+    collect USAXS/SAXS/WAXS while heating
+    when temp2 reached, hold for delay2 seconds, collecting data repeatedly
     collect final data
     and it will end here...
     
