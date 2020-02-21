@@ -12,7 +12,6 @@ from ..session_logs import logger
 logger.info(__file__)
 
 import apstools.devices
-
 from ..framework import sd
 
 class ApsSpecialMode(apstools.devices.ApsMachineParametersDevice):

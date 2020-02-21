@@ -11,6 +11,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 import apstools.synApps
+from ..framework import sd
 from ophyd import Component, Device
 from ophyd import EpicsSignalRO
 
