@@ -1,8 +1,0 @@
-record(bo, "$(P)femto:model")
-{
-  field(DESC, "Femto model")
-  field(ZNAM, "DLPCA200")
-  field(ONAM, "DDPCA300")
-  field(VAL,  "0")
-}
-

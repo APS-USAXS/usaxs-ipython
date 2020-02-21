@@ -1,9 +1,0 @@
-########### SVN repository information ###################
-# $Date: 2015-01-16 11:38:12 -0600 (Fri, 16 Jan 2015) $
-# $Author: usaxs $
-# $Revision: 1047 $
-# $HeadURL: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/config/usaxs/conf.mac $
-# $Id: conf.mac 1047 2015-01-16 17:38:12Z usaxs $
-########### SVN repository information ###################
-
-qdo ~/spec/macros/local/usaxs_load.mac
