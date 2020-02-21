@@ -1,6 +1,6 @@
 
 """
-APS only: connect with facility information
+PSS, FE-EPS, BL-EPS, : diagnostics
 """
 
 __all__ = [
