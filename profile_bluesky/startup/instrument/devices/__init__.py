@@ -10,6 +10,7 @@ from .general_terms import *
 
 from .amplifiers import *
 from .diagnostics import *
+from .filters import *
 from .miscellaneous import *
 from .scaler import *
 from .shutters import *
