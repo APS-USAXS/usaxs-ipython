@@ -81,7 +81,7 @@ from ophyd import DynamicDeviceComponent, FormattedComponent
 from ophyd.scaler import ScalerCH, ScalerChannel
 from ophyd.utils import OrderedDefaultDict
 from .scaler import *
-from .scaler I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
+from .scaler import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs
