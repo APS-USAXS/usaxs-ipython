@@ -9,17 +9,24 @@ from .constants import *
 from .general_terms import *
 
 from .amplifiers import *
+from .autosave import *
 from .diagnostics import *
+from .emails import *
 from .filters import *
+from .linkam import *
 from .miscellaneous import *
+from .monochromator import *
+from .sample_data import *
 from .scaler import *
 from .shutters import *
 from .slits import *
 from .stages import *
 from .struck3820 import *
+from .suspenders import *
+from .trajectories import *
+from .user_data import *
 
 # TODO:
-# 21-filters_shutters.py
 # 21-signals.py
 # 24-detector_data_file_names.py
 # 24-overrides_hdf5.py

@@ -20,6 +20,7 @@ from apstools.devices import EpicsOnOffShutter
 from apstools.devices import SimulatedApsPssShutterWithStatus
 from .aps_source import aps
 from .permit import operations_in_9idc
+import time
 
 
 if aps.inUserOperations and operations_in_9idc():
@@ -54,3 +55,9 @@ ti_filter_shutter = usaxs_shutter       # alias
 ti_filter_shutter.delay_s = 0.2         # shutter needs some recovery time
 
 ccd_shutter = EpicsOnOffShutter("9idcRIO:Galil2Bo0_CMD", name="ccd_shutter")
+
+
+connect_delay_s = 1
+while not mono_shutter.pss_state.connected:
+    logger.info(f"Waiting {connect_delay_s}s for mono shutter PV to connect")
+    time.sleep(connect_delay_s)
