@@ -7,10 +7,6 @@ __all__ = """
     scaler0
     scaler1
     clock  I0  I00  upd2  trd  I000
-    I0_SIGNAL
-    I00_SIGNAL
-    UPD_SIGNAL
-    TRD_SIGNAL
     scaler2_I000_counts
     scaler2_I000_cps
     """.split()
