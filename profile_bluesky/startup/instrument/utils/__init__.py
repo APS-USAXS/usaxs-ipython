@@ -1,1 +1,4 @@
-from .motors import *
+
+"""
+utility functions to support other code
+"""
