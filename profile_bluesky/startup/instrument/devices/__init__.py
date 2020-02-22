@@ -16,6 +16,7 @@ from .filters import *
 from .linkam import *
 from .miscellaneous import *
 from .monochromator import *
+from .protection_plc import *
 from .sample_data import *
 from .scaler import *
 from .shutters import *
@@ -32,5 +33,4 @@ from .pilatus import *
 # from .simdetector import *
 
 # TODO:
-# 28-protection_plc.py
 # 29-axis_tuning.py
