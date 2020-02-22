@@ -13,8 +13,9 @@ logger.info(__file__)
 
 from apstools.devices import ApsBssUserInfoDevice
 from apstools.utils import trim_string_for_EPICS
-from ..framework import sd
 from ophyd import Component, Device, EpicsSignal
+
+from ..framework import sd
 
 
 class UserDataDevice(Device):

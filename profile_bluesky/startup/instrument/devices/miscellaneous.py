@@ -18,7 +18,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from ophyd import EpicsSignal
-from .usaxs_motor import UsaxsMotor
+from .usaxs_motor_devices import UsaxsMotor
 
 camy = UsaxsMotor('9idcLAX:m58:c1:m7', name='camy', labels=("motor",))
 tcam = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam', labels=("motor",))

@@ -68,18 +68,19 @@ __all__ = """
 from ..session_logs import logger
 logger.info(__file__)
 
-from .aps_source import aps
 from apstools.synApps import SwaitRecord
 from bluesky import plan_stubs as bps
 from collections import OrderedDict
 import epics
-from ..framework import RE
 import numpy as np
 from ophyd import Component, Device, Signal
 from ophyd import EpicsSignal, EpicsSignalRO
 from ophyd import DynamicDeviceComponent, FormattedComponent
 from ophyd.scaler import ScalerCH, ScalerChannel
 from ophyd.utils import OrderedDefaultDict
+
+from .aps_source import aps
+from ..framework import RE
 from .scaler import *
 from .scaler import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
 

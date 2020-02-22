@@ -12,10 +12,11 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from bluesky import plan_stubs as bps
+from ophyd import Component, EpicsSignal, MotorBundle
+
 from ..framework import sd
 from .general_terms import terms
-from ophyd import Component, EpicsSignal, MotorBundle
-from .usaxs_motor import UsaxsMotor
+from .usaxs_motor_devices import UsaxsMotor
 from ..utils.motors import move_motors
 
 

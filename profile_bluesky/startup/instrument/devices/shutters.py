@@ -18,9 +18,10 @@ logger.info(__file__)
 from apstools.devices import ApsPssShutterWithStatus
 from apstools.devices import EpicsOnOffShutter
 from apstools.devices import SimulatedApsPssShutterWithStatus
+import time
+
 from .aps_source import aps
 from .permit import operations_in_9idc
-import time
 
 
 if aps.inUserOperations and operations_in_9idc():

@@ -14,9 +14,10 @@ logger.info(__file__)
 
 from apstools.devices import KohzuSeqCtl_Monochromator
 from apstools.utils import run_in_thread
+from ophyd import Component, Device, EpicsSignal
+
 from .emails import email_notices
 from ..framework import sd
-from ophyd import Component, Device, EpicsSignal
 
 
 # simple enumeration used by DCM_Feedback()

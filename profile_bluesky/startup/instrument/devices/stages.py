@@ -17,8 +17,9 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from ophyd import Component, MotorBundle
-from .usaxs_motor import UsaxsMotor
-from .usaxs_motor import UsaxsMotorTunable
+
+from .usaxs_motor_devices import UsaxsMotor
+from .usaxs_motor_devices import UsaxsMotorTunable
 
 
 class UsaxsDetectorStageDevice(MotorBundle):

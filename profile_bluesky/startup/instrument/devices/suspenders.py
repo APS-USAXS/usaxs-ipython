@@ -9,10 +9,11 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from ..framework import RE, sd
-from .aps_source import aps
 import bluesky.suspenders
 from ophyd import Signal
+
+from ..framework import RE, sd
+from .aps_source import aps
 from .permit import BeamInHutch
 from .shutters import mono_shutter
 

@@ -13,10 +13,11 @@ logger.info(__file__)
 
 from apstools.devices import ProcessController
 from bluesky import plan_stubs as bps
-from ..framework import specwriter
 from ophyd import Component, Device, DeviceStatus
 from ophyd import EpicsSignal, EpicsSignalRO, EpicsSignalWithRBV, Signal
 import time
+
+from ..framework import specwriter
 
 
 class UsaxsProcessController(ProcessController):

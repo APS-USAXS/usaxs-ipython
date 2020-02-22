@@ -12,8 +12,9 @@ logger.info(__file__)
 
 from apstools.utils import trim_string_for_EPICS
 from bluesky import plan_stubs as bps
-from ..framework import sd
 from ophyd import Component, Device, EpicsSignal
+
+from ..framework import sd
 
 
 class SampleDataDevice(Device):

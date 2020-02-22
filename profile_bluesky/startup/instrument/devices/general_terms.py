@@ -10,11 +10,11 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from ..framework import sd
 from ophyd import Component, Device, Signal
 from ophyd import EpicsSignal
 
 from .amplifiers import upd_controls
+from ..framework import sd
 
 
 class FlyScanParameters(Device):

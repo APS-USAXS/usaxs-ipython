@@ -12,11 +12,12 @@ logger.info(__file__)
 
 from apstools.suspenders import SuspendWhenChanged
 from bluesky import plan_stubs as bps
+from ophyd import Component, Device, EpicsSignal
+import time
+
 from .emails import email_notices
 from ..framework import RE, sd
-from ophyd import Component, Device, EpicsSignal
 from .shutters import ti_filter_shutter
-import time
 from .user_data import user_data
 
 
