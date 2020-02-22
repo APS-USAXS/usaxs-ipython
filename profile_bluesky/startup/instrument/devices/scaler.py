@@ -7,6 +7,10 @@ __all__ = """
     scaler0
     scaler1
     clock  I0  I00  upd2  trd  I000
+    I0_SIGNAL
+    I00_SIGNAL
+    UPD_SIGNAL
+    TRD_SIGNAL
     scaler2_I000_counts
     scaler2_I000_cps
     """.split()
@@ -15,7 +19,6 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.devices import use_EPICS_scaler_channels
-import epics
 from ophyd import Component, EpicsSignal, EpicsScaler, EpicsSignalRO
 from ophyd.scaler import ScalerCH
 
@@ -34,6 +37,11 @@ scaler2_I000_cps = EpicsSignalRO("9idcLAX:vsc:c2_cts1.B", name="scaler2_I000_cou
 for s in (scaler0, scaler1):
     use_EPICS_scaler_channels(s)
 
+I0_SIGNAL = scaler0.channels.chan02
+I00_SIGNAL = scaler0.channels.chan03
+UPD_SIGNAL = scaler0.channels.chan04
+TRD_SIGNAL = scaler0.channels.chan05
+
 clock = scaler0.channels.chan01.s
 I0 = scaler0.channels.chan02.s
 I00 = scaler0.channels.chan03.s
@@ -44,38 +52,7 @@ I000 = scaler0.channels.chan06.s
 for item in (clock, I0, I00, upd2, trd, I000):
     item._ophyd_labels_ = set(["channel", "counter",])
 
-# use introspection to identify channel names
-if isinstance(scaler0, ScalerCH):
-    for ch_attr in scaler0.channels.read_attrs:
-        if ch_attr.find(".") >= 0:
-            continue
-        if hasattr(scaler0.channels, ch_attr):
-            ch = scaler0.channels.__getattribute__(ch_attr)
-            if ch.chname.get() == "I0_USAXS":
-                I0_SIGNAL = ch
-            elif ch.chname.get() == "I00_USAXS":
-                I00_SIGNAL = ch
-            elif ch.chname.get() == "PD_USAXS":
-                UPD_SIGNAL = ch
-            elif ch.chname.get() == "TR diode":
-                TRD_SIGNAL = ch
-elif isinstance(scaler0, EpicsScaler):
-    for ch_attr in scaler0.channels.read_attrs:
-        if hasattr(scaler0.channels, ch_attr):
-            ch = scaler0.channels.__getattribute__(ch_attr)
-            pv, n = ch.pvname.split(".")
-            n = n[1:]
-            desc = epics.caget(pv + ".NM" + n)
-            if desc == "I0_USAXS":
-                I0_SIGNAL = ch
-            elif desc == "I00_USAXS":
-                I00_SIGNAL = ch
-            elif desc == "PD_USAXS":
-                UPD_SIGNAL = ch
-            elif desc == "TR diode":
-                TRD_SIGNAL = ch
-
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 """
 REFERENCE
