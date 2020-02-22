@@ -4,3 +4,4 @@ extraction:
       version: 3
 queries:
   - exclude: py/unused-import
+  - exclude: py/polluting-import
