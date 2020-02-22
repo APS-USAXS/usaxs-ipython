@@ -26,18 +26,11 @@ from .suspenders import *
 from .trajectories import *
 from .user_data import *
 
-# from .area_detector_common import *
 from .alta import *
 from .blackfly import *
 from .pilatus import *
 # from .simdetector import *
 
 # TODO:
-# 24-detector_data_file_names.py
-# 24-overrides_hdf5.py
-# 25-alta.py
-# 25-blackfly.py
-# 25-pilatus.py
-# 25-simdetector.py
 # 28-protection_plc.py
 # 29-axis_tuning.py
