@@ -17,9 +17,9 @@ logger.info(__file__)
 from ophyd import EpicsSignal
 from .usaxs_motor import UsaxsMotor
 
-camy = UsaxsMotor('9idcLAX:m58:c1:m7', name='camy', labels=("motor"))
-tcam = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam', labels=("motor"))
-tension = UsaxsMotor('9idcLAX:m58:c1:m8', name='tens', labels=("motor"))
+camy = UsaxsMotor('9idcLAX:m58:c1:m7', name='camy', labels=("motor",))
+tcam = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam', labels=("motor",))
+tension = UsaxsMotor('9idcLAX:m58:c1:m8', name='tens', labels=("motor",))
 waxsx = UsaxsMotor(
     '9idcLAX:m58:c0:m4', 
     name='waxsx', 
