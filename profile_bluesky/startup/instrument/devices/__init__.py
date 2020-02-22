@@ -10,6 +10,7 @@ from .general_terms import *
 
 from .amplifiers import *
 from .autosave import *
+from .axis_tuning import *
 from .diagnostics import *
 from .emails import *
 from .filters import *
@@ -31,6 +32,7 @@ from .alta import *
 from .blackfly import *
 from .pilatus import *
 # from .simdetector import *
+
 
 # TODO:
 # 29-axis_tuning.py
