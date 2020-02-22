@@ -32,7 +32,3 @@ from .alta import *
 from .blackfly import *
 from .pilatus import *
 # from .simdetector import *
-
-
-# TODO:
-# 29-axis_tuning.py
