@@ -4,7 +4,14 @@ move the parts of the instrument in and out
 """
 
 __all__ = """
-    mode_USAXS
+    move_SAXSIn
+    move_USAXSIn
+    move_WAXSIn
+
+    move_SAXSOut
+    move_USAXSOut
+    move_WAXSOut
+
     UsaxsSaxsModes
 """.split()
 
