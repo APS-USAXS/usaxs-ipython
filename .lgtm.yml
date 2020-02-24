@@ -1,3 +1,7 @@
+path_classifiers:
+  test:
+    - exclude: profile_default
+    - exclude: profile_bluesky/startup/archive
 extraction:
   python:
     python_setup:
