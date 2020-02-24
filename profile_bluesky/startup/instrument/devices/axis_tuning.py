@@ -58,7 +58,9 @@ These attributes, set internally, are results of the tune scan::
 
 __all__ = [
     'axis_tune_range', 
-    # 'undulator',
+    "TUNE_METHOD_PEAK_CHOICE",
+    "USING_MS_STAGE",
+    "TUNING_DET_SIGNAL",
     ]
 
 from ..session_logs import logger
