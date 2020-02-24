@@ -84,8 +84,8 @@ from ophyd.utils import OrderedDefaultDict
 
 from .aps_source import aps
 from ..framework import RE
-from .scaler import *
-from .scaler import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
+from .scalers import *
+from .scalers import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs

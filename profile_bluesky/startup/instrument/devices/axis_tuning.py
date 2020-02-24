@@ -75,7 +75,7 @@ from .amplifiers import autoscale_amplifiers
 from .amplifiers import I0_controls, I00_controls, upd_controls
 from .general_terms import terms
 from .miscellaneous import usaxs_q_calc
-from .scaler import scaler0, I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL
+from .scalers import scaler0, I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL
 from .shutters import mono_shutter, ti_filter_shutter
 from .stages import m_stage, ms_stage, s_stage, a_stage, as_stage, d_stage
 

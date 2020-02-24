@@ -9,6 +9,11 @@ __all__ = """
     clock  I0  I00  upd2  trd  I000
     scaler2_I000_counts
     scaler2_I000_cps
+
+    I0_SIGNAL
+    I00_SIGNAL
+    UPD_SIGNAL
+    TRD_SIGNAL
     """.split()
 
 from ..session_logs import logger
