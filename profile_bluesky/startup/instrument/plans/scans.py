@@ -23,7 +23,6 @@ import time
 from ..devices import a_stage, as_stage
 from ..devices import ar_start
 from ..devices import autoscale_amplifiers
-from ..devices import upd_controls, I0_controls, I00_controls, trd_controls
 from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter
 from ..devices import constants
 from ..devices import d_stage, s_stage
@@ -38,12 +37,13 @@ from ..devices import saxs_det
 from ..devices import saxs_stage
 from ..devices import scaler0, scaler1
 from ..devices import struck
-from ..devices import suspend_BeamInHutch
 from ..devices import terms
+from ..devices import upd_controls, I0_controls, I00_controls, trd_controls
 from ..devices import usaxs_flyscan
 from ..devices import usaxs_q_calc
 from ..devices import user_data
 from ..devices import waxsx, waxs_det
+from ..devices.suspenders import suspend_BeamInHutch
 from ..framework import RE, specwriter, USERNAME
 from ..utils.cleanup_text import cleanupText
 from .area_detector import areaDetectorAcquire
