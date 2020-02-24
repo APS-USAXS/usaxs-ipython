@@ -15,7 +15,6 @@ from .devices import *
 from .callbacks import *
 from .commands import *
 from .plans import *
-from .utils import *
 
 from apstools.utils import *
 listobjects = show_ophyd_symbols
