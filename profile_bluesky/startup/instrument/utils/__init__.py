@@ -7,6 +7,8 @@ not bluesky plans (no need to execute in RE() wrapper)
 
 from .a2q_q2a import *
 from .cleanup_text import *
+from .derivative import *
 from .motors import *
+from .peak_centers import *
 from .plot_prune import *
 from .reporter import *

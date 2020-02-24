@@ -12,4 +12,5 @@ from .mono_feedback import *
 from .requested_stop import *
 from .resets import *
 from .sample_transmission import *
+from .tune_guard_slits import *
 from .uascan import *
