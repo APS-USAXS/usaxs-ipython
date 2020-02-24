@@ -44,7 +44,8 @@ from ..devices import usaxs_q_calc
 from ..devices import user_data
 from ..devices import waxsx, waxs_det
 from ..devices.suspenders import suspend_BeamInHutch
-from ..framework import RE, specwriter, USERNAME
+from ..framework import RE, specwriter
+from ..framework.metadata import USERNAME
 from ..utils.cleanup_text import cleanupText
 from .area_detector import areaDetectorAcquire
 from .axis_tuning import tune_ar, tune_a2rp, tune_asrp

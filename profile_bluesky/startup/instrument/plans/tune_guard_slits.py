@@ -35,7 +35,8 @@ from ..devices import terms
 from ..devices import ti_filter_shutter
 from ..devices import UPD_SIGNAL
 from ..devices import user_data
-from ..framework import RE, USERNAME
+from ..framework import RE
+from ..framework.metadata import USERNAME
 from ..utils.derivative import numerical_derivative
 from ..utils.peak_centers import peak_center
 from .filters import insertTransmissionFilters
