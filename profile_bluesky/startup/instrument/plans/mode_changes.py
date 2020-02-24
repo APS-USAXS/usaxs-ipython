@@ -32,10 +32,10 @@ from ..devices import plc_protect
 from ..devices import scaler0
 from ..devices import terms
 from ..devices import user_data
-from .filters import insertScanFilters
 from .filters import insertRadiographyFilters
-from .move_instrument import *
+from .filters import insertScanFilters
 from .mono_feedback import DCMfeedbackON
+from .move_instrument import *
 
 
 def confirm_instrument_mode(mode_name):

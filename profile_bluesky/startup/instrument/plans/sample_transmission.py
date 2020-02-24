@@ -19,9 +19,9 @@ import pyRestTable
 from ..devices import a_stage, saxs_stage
 from ..devices import autoscale_amplifiers, I0_controls, trd_controls
 from ..devices import constants
-from ..devices import ti_filter_shutter
 from ..devices import scaler0
 from ..devices import terms
+from ..devices import ti_filter_shutter
 from ..devices import user_data
 from .filters import insertScanFilters, insertTransmissionFilters
 from .mode_changes import mode_SAXS, mode_USAXS
