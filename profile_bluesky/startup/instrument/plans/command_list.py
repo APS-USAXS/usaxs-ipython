@@ -3,9 +3,22 @@
 run batch of scans from command list
 """
 
-__all__ = [
-    'beforeScanComputeOtherStuff',
-]
+__all__ = """
+    beforeScanComputeOtherStuff
+    postCommandsListfile2WWW
+    before_command_list
+    after_command_list
+    before_plan
+    after_plan
+    parse_Excel_command_file
+    parse_text_command_file
+    command_list_as_table
+    get_command_list
+    summarize_command_file
+    run_command_file
+    execute_command_list
+""".split()
+
 
 from ..session_logs import logger
 logger.info(__file__)
