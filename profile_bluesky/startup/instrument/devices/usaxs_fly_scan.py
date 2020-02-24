@@ -3,18 +3,7 @@
 USAXS Fly Scan setup
 """
 
-__all__ = """
-    scaler0
-    scaler1
-    clock  I0  I00  upd2  trd  I000
-    scaler2_I000_counts
-    scaler2_I000_cps
-
-    I0_SIGNAL
-    I00_SIGNAL
-    UPD_SIGNAL
-    TRD_SIGNAL
-    """.split()
+__all__ = ["usaxs_flyscan",]
 
 from ..session_logs import logger
 logger.info(__file__)
@@ -37,8 +26,8 @@ sfs.preliminaryWriteFile()
 sfs.saveFile()
 """
 
-from .amplifiers import upd_controls, AutorangeSettings
 from ..framework import RE, specwriter
+from .amplifiers import upd_controls, AutorangeSettings
 from .general_terms import terms
 from .scalers import use_EPICS_scaler_channels
 from .shutters import ti_filter_shutter
