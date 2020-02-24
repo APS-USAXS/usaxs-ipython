@@ -62,6 +62,9 @@ __all__ = """
 
     controls_list_I0_I00_TRD
     controls_list_UPD_I0_I00_TRD
+
+    autoscale_amplifiers
+    measure_background
     """.split()
 
 
