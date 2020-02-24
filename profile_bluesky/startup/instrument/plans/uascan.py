@@ -1,6 +1,6 @@
 
 """
-Support the different instrument modes
+USAXS step scan
 """
 
 __all__ = [

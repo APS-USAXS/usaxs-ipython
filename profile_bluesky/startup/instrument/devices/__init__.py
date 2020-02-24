@@ -27,6 +27,7 @@ from .stages import *
 from .struck3820 import *
 from .suspenders import *
 from .trajectories import *
+from .usaxs_fly_scan import *
 
 from .alta import *
 from .blackfly import *
