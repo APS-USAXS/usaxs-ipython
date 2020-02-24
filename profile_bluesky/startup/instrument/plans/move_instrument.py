@@ -27,8 +27,8 @@ from ..devices import plc_protect
 from ..devices import terms
 from ..devices import user_data
 from ..devices import waxsx
-from ..utils import angle2q, q2angle
-from ..utils import becplot_prune_fifo
+from ..utils.a2q_q2a import angle2q, q2angle
+from ..utils.plot_prune import becplot_prune_fifo
 
 
 UsaxsSaxsModes = {

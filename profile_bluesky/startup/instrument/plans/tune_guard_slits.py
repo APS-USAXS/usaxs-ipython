@@ -36,8 +36,8 @@ from ..devices import ti_filter_shutter
 from ..devices import UPD_SIGNAL
 from ..devices import user_data
 from ..framework import RE, USERNAME
-from ..utils import numerical_derivative
-from ..utils import peak_center
+from ..utils.derivative import numerical_derivative
+from ..utils.peak_centers import peak_center
 from .filters import insertTransmissionFilters
 from .mode_changes import mode_USAXS
 from .requested_stop import IfRequestedStopBeforeNextScan

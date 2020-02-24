@@ -15,7 +15,7 @@ import time
 
 from ..devices import user_data
 from ..framework import RE
-from ..utils import remaining_time_reporter
+from ..utils.reporter import remaining_time_reporter
 
 
 def areaDetectorAcquire(det, md={}):
