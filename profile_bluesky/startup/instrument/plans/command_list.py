@@ -43,10 +43,6 @@ from .axis_tuning import instrument_default_tune_ranges
 from .axis_tuning import update_EPICS_tuning_widths
 from .axis_tuning import user_defined_settings
 from .mode_changes import mode_SAXS, mode_USAXS, mode_WAXS, mode_Radiography
-from .scans import preSWAXStune
-from .scans import preUSAXStune
-from .scans import SAXS
-from .scans import USAXSscan
 
 
 def beforeScanComputeOtherStuff():
@@ -92,6 +88,8 @@ def before_command_list(md={}, commands=None):
     """
     things to be done before a command list is run
     """
+    from .scans import preUSAXStune
+
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "Starting data collection",
@@ -158,6 +156,8 @@ def before_plan(md={}):
     """
     things to be done before every data collection plan
     """
+    from .scans import preSWAXStune, preUSAXStune
+
     if terms.preUSAXStune.needed:
         # tune at previous sample position
         # don't overexpose the new sample position
@@ -173,6 +173,8 @@ def after_plan(weight=1, md={}):
     """
     things to be done after every data collection plan
     """
+    from .scans import preUSAXStune
+
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
         terms.preUSAXStune.num_scans_last_tune.get() + weight
@@ -379,6 +381,8 @@ def execute_command_list(filename, commands, md={}):
         contents from input file, such as:
         ``SAXS 0 0 0 blank``
     """
+    from .scans import preUSAXStune, SAXS, USAXSscan, WAXS
+
     full_filename = os.path.abspath(filename)
 
     if len(commands) == 0:
