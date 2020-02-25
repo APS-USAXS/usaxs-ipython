@@ -18,7 +18,6 @@ def cleanupText(text):
 
     this is best done with regular expression pattern matching
     """
-    import re
     pattern = "[a-zA-Z0-9_]"
 
     def mapper(c):
