@@ -33,6 +33,7 @@ and then use it with inline dictionaries to pick the right PVs.
 
 
 __all__ = """
+    AutorangeSettings
 
     upd_femto_amplifier
     trd_femto_amplifier
