@@ -3,7 +3,7 @@
 derivative of two vectors: y(x), returns y'(x)
 """
 
-__all__ = ["numerical_derivative",]
+__all__ = ["makeOrderedDictFromTwoLists",]
 
 from ..session_logs import logger
 logger.info(__file__)
