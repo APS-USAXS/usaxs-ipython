@@ -50,8 +50,6 @@ from ..utils.cleanup_text import cleanupText
 from .area_detector import areaDetectorAcquire
 from .axis_tuning import tune_ar, tune_a2rp, tune_asrp
 from .axis_tuning import tune_mr, tune_m2rp, tune_msrp
-from .command_list import after_command_list, before_command_list
-from .command_list import after_plan, before_plan
 from .filters import insertSaxsFilters
 from .filters import insertWaxsFilters
 from .mode_changes import mode_SAXS
@@ -240,6 +238,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     do one USAXS Fly Scan
     """
+    from .command_list import after_plan, before_plan
+
     bluesky_runengine_running = RE.state != "idle"
 
     yield from IfRequestedStopBeforeNextScan()
@@ -450,7 +450,9 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
 def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     collect SAXS data
-     """
+    """
+    from .command_list import after_plan, before_plan
+
     yield from IfRequestedStopBeforeNextScan()
 
     yield from before_plan()    # MUST come before mode_SAXS since it might tune
@@ -606,7 +608,9 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     collect WAXS data
-     """
+    """
+    from .command_list import after_plan, before_plan
+
     yield from IfRequestedStopBeforeNextScan()
 
     logger.debug(f"waxsx start collection ={waxsx.position}")
