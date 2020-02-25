@@ -17,7 +17,7 @@ from ophyd import Component, EpicsSignal, MotorBundle
 from ..framework import sd
 from .general_terms import terms
 from .usaxs_motor_devices import UsaxsMotor
-from ..commands import move_motors
+from ..utils import move_motors
 
 
 class UsaxsSlitDevice(MotorBundle):

@@ -20,14 +20,14 @@ import time
 
 from ..devices import autoscale_amplifiers, upd_controls, I0_controls, I00_controls
 from ..devices import axis_tune_range
-from ..devices import scaler0, I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL
-from ..devices import monochromator
-from ..devices import mono_shutter, ti_filter_shutter
 from ..devices import m_stage, ms_stage, s_stage, a_stage, as_stage, d_stage
+from ..devices import mono_shutter, ti_filter_shutter
+from ..devices import monochromator
+from ..devices import scaler0, I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL
 from ..devices import terms
-from ..devices import USING_MS_STAGE
 from ..devices import TUNE_METHOD_PEAK_CHOICE
 from ..devices import TUNING_DET_SIGNAL
+from ..devices import USING_MS_STAGE
 from ..devices.suspenders import suspend_BeamInHutch
 from ..framework import RE
 from .mode_changes import mode_USAXS

@@ -62,6 +62,9 @@ __all__ = """
 
     controls_list_I0_I00_TRD
     controls_list_UPD_I0_I00_TRD
+
+    autoscale_amplifiers
+    measure_background
     """.split()
 
 
@@ -81,8 +84,8 @@ from ophyd.utils import OrderedDefaultDict
 
 from .aps_source import aps
 from ..framework import RE
-from .scaler import *
-from .scaler import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
+from .scalers import *
+from .scalers import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
 
 
 NUM_AUTORANGE_GAINS = 5     # common to all autorange sequence programs

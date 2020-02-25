@@ -20,13 +20,14 @@ from .linkam import *
 from .miscellaneous import *
 from .monochromator import *
 from .protection_plc import *
-from .scaler import *
+from .scalers import *
 from .shutters import *
 from .slits import *
 from .stages import *
 from .struck3820 import *
 from .suspenders import *
 from .trajectories import *
+from .usaxs_fly_scan import *
 
 from .alta import *
 from .blackfly import *
