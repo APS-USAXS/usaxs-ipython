@@ -3,7 +3,7 @@
 format a dictionary as a table
 """
 
-__all__ = ["peak_center",]
+__all__ = ["dictionary_table",]
 
 from ..session_logs import logger
 logger.info(__file__)
