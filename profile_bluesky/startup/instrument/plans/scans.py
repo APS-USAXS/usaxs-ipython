@@ -8,6 +8,7 @@ __all__ = """
     preUSAXStune
     SAXS
     USAXSscan
+    WAXS
 """.split()
 
 from ..session_logs import logger

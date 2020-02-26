@@ -1,9 +1,14 @@
 # this is a Linkam plan
 
-# get all the symbols from the IPython shell
-import IPython
-globals().update(IPython.get_ipython().user_ns)
+from instrument.session_logs import logger
 logger.info(__file__)
+
+
+from bluesky import plan_stubs as bps
+import time
+
+from instrument.devices import linkam_ci94, linkam_tc1
+from instrument.plans import SAXS, USAXSscan, WAXS
 
 
 def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp2, rate2, md={}):
@@ -34,7 +39,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, temp1, rate1, delay1, temp
             yield from bps.sleep(20)
         else:
             md["title"]=sampleMod
-            yield from Flyscan(pos_X, pos_Y, thickness, sampleMod, md={})
+            yield from USAXSscan(pos_X, pos_Y, thickness, sampleMod, md={})
             sampleMod = setSampleName()
             md["title"]=sampleMod
             yield from SAXS(pos_X, pos_Y, thickness, sampleMod, md={})
