@@ -208,7 +208,6 @@ def preSWAXStune(md={}):
     )
 
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
@@ -216,7 +215,7 @@ def USAXSscan(x, y, thickness_mm, title, md={}):
     """
     general scan macro for fly or step USAXS with 1D or 2D collimation
     """
-    if terms.FlyScan.use_flyscan:
+    if terms.FlyScan.use_flyscan.get():
         yield from Flyscan(x, y, thickness_mm, title, md={})
     else:
         yield from USAXSscanStep(x, y, thickness_mm, title, md={})
