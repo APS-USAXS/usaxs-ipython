@@ -1,9 +1,11 @@
 # this is a warmup instrument plan
 
-# get all the symbols from the IPython shell
-import IPython
-globals().update(IPython.get_ipython().user_ns)
+from instrument.session_logs import logger
 logger.info(__file__)
+
+from bluesky import plan_stubs as bps
+
+from instrument.devices import usaxs_flyscan
 
 
 def warmupInstrument():

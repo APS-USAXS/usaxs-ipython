@@ -1,4 +1,0 @@
-$(P)$(R):tc$(C).DESC
-$(P)$(R):tc$(C).SCAN
-$(P)$(R):temp$(C).DESC
-$(P)$(R):unit$(C).VAL

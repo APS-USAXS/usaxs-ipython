@@ -1,3 +1,0 @@
-grecord(ai,"$(P)") {
-	field(DESC,"$(DESC)")
-}

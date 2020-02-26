@@ -1,4 +1,0 @@
-# FILE... stringout_settings.req
-# USAGE... stringout Record fields autosave'd.
-$(P).DESC
-$(P).VAL

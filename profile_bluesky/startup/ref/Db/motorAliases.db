@@ -1,4 +1,0 @@
-alias("$(P)$(M)", "$(PA)$(MA)")
-alias("$(P)$(M)_able", "$(PA)$(MA)_able")
-alias("$(P)$(M)_vCh", "$(PA)$(MA)_vCh")
-alias("$(P)$(M)_twCh", "$(PA)$(MA)_twCh")

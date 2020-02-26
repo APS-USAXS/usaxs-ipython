@@ -1,6 +1,0 @@
-#$(P)$(Q)adjustTranLinFrac
-file acalcout_settings.req P=$(P)$(Q)acalc1
-file acalcout_settings.req P=$(P)$(Q)acalc2
-file acalcout_settings.req P=$(P)$(Q)acalc3
-file acalcout_settings.req P=$(P)$(Q)acalc4
-file acalcout_settings.req P=$(P)$(Q)acalc5

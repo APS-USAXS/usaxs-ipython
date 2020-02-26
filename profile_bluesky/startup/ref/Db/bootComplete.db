@@ -1,6 +1,0 @@
-grecord(bo,"$(P)bootComplete")
-{
-	field(ZNAM, "not ready")
-	field(ONAM, "boot complete")
-	field(VAL,  "0")
-}
