@@ -21,7 +21,7 @@ user_dir = os.path.join(
             "..",
             "..",
             "..",
-            "bluesky_plans",
+            "user",
         )
     )
 )
