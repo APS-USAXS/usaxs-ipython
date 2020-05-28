@@ -230,8 +230,162 @@ def USAXSscanStep(x, y, thickness_mm, title, md={}):
 
     yield from IfRequestedStopBeforeNextScan()
 
+    yield from mode_USAXS()
+
+    yield from bps.mv(
+        usaxs_slit.v_size, terms.SAXS.usaxs_v_size.get(),
+        usaxs_slit.h_size, terms.SAXS.usaxs_h_size.get(),
+        guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.get(),
+        guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.get(),
+    )
+    yield from before_plan()
+
+    yield from bps.mv(
+        s_stage.x, pos_X,
+        s_stage.y, pos_Y,
+    )
+
+    scan_title_clean = cleanupText(scan_title)
+
+    # SPEC-compatibility symbols
+    SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
+    # use our specwriter to get a pseudo-SPEC file name
+    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.sample_title, scan_title,
+        user_data.state, "starting USAXS step scan",
+        user_data.sample_thickness, thickness,
+        user_data.user_name, USERNAME,
+        user_data.spec_scan, str(SCAN_N),
+        # or terms.FlyScan.order_number.get()
+        user_data.time_stamp, ts,
+        user_data.scan_macro, "uascan",    # note is this the right keyword? 
+    )
+
+    yield from bps.mv(
+        user_data.user_dir, os.getcwd(),
+        user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+    )
+
+    # offset the calc from exact zero so can plot log(|Q|)
+    # q_offset = terms.USAXS.start_offset.get()
+    # angle_offset = q2angle(q_offset, monochromator.dcm.wavelength.get())
+    # ar0_calc_offset = terms.USAXS.ar_val_center.get() + angle_offset
+
+    yield from bps.mv(
+        a_stage.r, terms.USAXS.ar_val_center.get(),
+        # these two were moved by mode_USAXS(), belt & suspenders here
+        d_stage.y, terms.USAXS.diode.dy.get(),
+        a_stage.y, terms.USAXS.AY0.get(),
+    )
+    yield from user_data.set_state_plan("Moving to Q=0")
+    yield from bps.mv(
+        usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.get(),
+    )
+
+    # TODO: what to do with USAXSScanUp?
+    # 2019-01-25, prj+jil: this is probably not used now, only known to SPEC
+    # it's used to cal Finish_in_Angle and START
+    # both of which get passed to EPICS
+    # That happens outside of this code.  completely.
+
+    # measure transmission values using pin diode if desired
+    yield from bps.install_suspender(suspend_BeamInHutch)
+    yield from measure_USAXS_Transmission(md=md)
+
+    yield from bps.mv(
+        monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        )
+
+    # enable asrp link to ar for 2D USAXS
+    if terms.USAXS.is2DUSAXSscan.get():
+        RECORD_SCAN_INDEX_10x_per_second = 9
+        yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
+
+    # we'll reset these after the scan is done
+    old_femto_change_gain_up = upd_controls.auto.gainU.get()
+    old_femto_change_gain_down = upd_controls.auto.gainD.get()
+
+    yield from bps.mv(
+        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.get(),
+        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.get(),
+        ti_filter_shutter, "open",
+    )
+    yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
+
+    # Pause autosave on LAX to prevent delays in PVs processing.
+    yield from bps.mv(
+        lax_autosave.disable, 1,
+        # autosave will restart after this interval (s)
+        lax_autosave.max_time, usaxs_flyscan.scan_time.get()+9,
+        )
+
+    yield from user_data.set_state_plan("Running USAXS step scan")
+
+    SCAN_N = RE.md["scan_id"]+1     # update with next number
+    yield from bps.mv(
+        terms.FlyScan.order_number, terms.FlyScan.order_number.get() + 1,  # increment it
+        user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
+        user_data.spec_scan, str(SCAN_N),
+    )
+
+    _md = {}
+    _md.update(md)
+    _md['plan_name'] = "uascan"
+    _md['plan_args'] = dict(
+        pos_X = pos_X,
+        pos_Y = pos_Y,
+        thickness = thickness,
+        scan_title = scan_title,
+        )
+    #uascan(
+    #    start, reference, finish, minStep,
+    #    exponent, intervals, count_time,
+    #    dy0, SDD_mm, ay0, SAD_mm,
+    #    useDynamicTime=True,
+    #    md={}
+    #): 
+    
+    #class Parameters_USAXS(Device):
+    #"""internal values shared with EPICS"""
+    #AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
+    #DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
+    #ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRcenter")
+    #SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
+    #SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
+    #ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
+    #asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
+    #asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
+    #center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
+    #ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
+    #diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
+    #img_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Img_")
+    #finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
+    #is2DUSAXSscan = Component(EpicsSignal,            "9idcLAX:USAXS:is2DUSAXSscan")
+    #motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
+    #mr_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:MRcenter")
+    #msr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:MSRcenter")
+    #num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
+    #sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
+    #scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
+    #scanning = Component(EpicsSignal,                 "9idcLAX:USAXS:scanning")
+    #start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
+    #uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
+    #usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
+    #usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
+    #useMSstage = Component(Signal,                    value=False)
+    #useSBUSAXS = Component(Signal,                    value=False)
+    #retune_needed = Component(Signal, value=False)     # does not *need* an EPICS PV
+    # TODO: these are particular to the amplifier
+    #setpoint_up = Component(Signal, value=4000)     # decrease range
+    #setpoint_down = Component(Signal, value=650000)    # increase range
+
+    
+    
     # TODO: work-in-progress
-    raise NotImplementedError("need to complete this plan")
+    raise NotImplementedError("need to complete this step scanning plan")
 
 
 def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):

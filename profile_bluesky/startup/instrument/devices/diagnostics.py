@@ -45,8 +45,9 @@ class PSS_Parameters(Device):
         :Plug removed:
           Operations in 9-ID-C are allowed
         """
-        enabled = self.c_shutter_closed_chain_A.get() == "OFF" or \
-           self.c_shutter_closed_chain_A.get() == "OFF"
+        chain_A = self.c_shutter_closed_chain_A
+        chain_B = self.c_shutter_closed_chain_B
+        enabled = chain_A.get() == "OFF" or chain_B.get() == "OFF"
         return enabled
 
 
