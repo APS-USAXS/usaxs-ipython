@@ -11,6 +11,7 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from bluesky import plan_stubs as bps
 from apstools.devices import ApsBssUserInfoDevice
 from apstools.utils import trim_string_for_EPICS
 from ophyd import Component, Device, EpicsSignal
