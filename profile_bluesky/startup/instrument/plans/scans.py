@@ -59,6 +59,8 @@ from .mode_changes import mode_WAXS
 from .requested_stop import IfRequestedStopBeforeNextScan
 from .sample_transmission import measure_SAXS_Transmission
 from .sample_transmission import measure_USAXS_Transmission
+from .uascan import uascan
+from ..utils.a2q_q2a import angle2q, q2angle
 
 
 def preUSAXStune(md={}):
@@ -261,7 +263,7 @@ def USAXSscanStep(x, y, thickness_mm, title, md={}):
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
-        user_data.scan_macro, "uascan",    # note is this the right keyword? 
+        user_data.scan_macro, "uascan",    # TODO: is this the right keyword? 
     )
 
     yield from bps.mv(
@@ -309,18 +311,11 @@ def USAXSscanStep(x, y, thickness_mm, title, md={}):
     old_femto_change_gain_down = upd_controls.auto.gainD.get()
 
     yield from bps.mv(
-        upd_controls.auto.gainU, terms.FlyScan.setpoint_up.get(),
-        upd_controls.auto.gainD, terms.FlyScan.setpoint_down.get(),
+        upd_controls.auto.gainU, terms.USAXS.setpoint_up.get(),
+        upd_controls.auto.gainD, terms.USAXS.setpoint_down.get(),
         ti_filter_shutter, "open",
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
-
-    # Pause autosave on LAX to prevent delays in PVs processing.
-    yield from bps.mv(
-        lax_autosave.disable, 1,
-        # autosave will restart after this interval (s)
-        lax_autosave.max_time, usaxs_flyscan.scan_time.get()+9,
-        )
 
     yield from user_data.set_state_plan("Running USAXS step scan")
 
@@ -340,6 +335,24 @@ def USAXSscanStep(x, y, thickness_mm, title, md={}):
         thickness = thickness,
         scan_title = scan_title,
         )
+        
+    startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
+    endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())  
+    yield from uascan(
+        startAngle,
+        terms.USAXS.ar_val_center.get(),
+        endAngle,
+        terms.USAXS.usaxs_minstep.get(),
+        terms.USAXS.uaterm.get(),
+        terms.USAXS.num_points.get(),
+        terms.USAXS.usaxs_time.get(),
+        terms.USAXS.DY0.get(),
+        terms.USAXS.SDD.get(),
+        terms.USAXS.AY0.get(),
+        terms.USAXS.SAD.get(),
+        useDynamicTime=True,
+        md=_md
+    )
     #uascan(
     #    start, reference, finish, minStep,
     #    exponent, intervals, count_time,
@@ -382,12 +395,43 @@ def USAXSscanStep(x, y, thickness_mm, title, md={}):
     #setpoint_up = Component(Signal, value=4000)     # decrease range
     #setpoint_down = Component(Signal, value=650000)    # increase range
 
-    
-    
-    # TODO: work-in-progress
-    raise NotImplementedError("need to complete this step scanning plan")
+    yield from bps.mv(
+        user_data.scanning, "no",          # for sure, we are not scanning now
+    )
+    yield from bps.remove_suspender(suspend_BeamInHutch)
 
+    yield from user_data.set_state_plan("USAXS step scan finished")
 
+    yield from bps.mv(
+
+        ti_filter_shutter, "close",
+        monochromator.feedback.on, MONO_FEEDBACK_ON,
+
+        scaler0.update_rate, 5,
+        scaler0.auto_count_delay, 0.25,
+        scaler0.delay, 0.05,
+        scaler0.preset_time, 1,
+        scaler0.auto_count_time, 1,
+
+        upd_controls.auto.gainU, old_femto_change_gain_up,
+        upd_controls.auto.gainD, old_femto_change_gain_down,
+        )
+
+    yield from user_data.set_state_plan("Moving USAXS back and saving data")
+    yield from bps.mv(
+        a_stage.r, terms.USAXS.ar_val_center.get(),
+        a_stage.y, terms.USAXS.AY0.get(),
+        d_stage.y, terms.USAXS.DY0.get(),
+        )
+
+    # TODO: make this link for side-bounce
+    # disable asrp link to ar for 2D USAXS
+    # FS_disableASRP
+
+    # measure_USAXS_PD_dark_currents    # used to be here, not now
+    yield from after_plan(weight=3)
+    
+ 
 def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     do one USAXS Fly Scan
