@@ -81,6 +81,8 @@ from .scalers import scaler0, I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL
 from .shutters import mono_shutter, ti_filter_shutter
 from .stages import m_stage, ms_stage, s_stage, a_stage, as_stage, d_stage
 
+# replace the definition from apstools.plans
+from .axis_tuning_patches import UsaxsTuneAxis as TuneAxis
 
 # use center-of-mass, and not peak value: "com"
 TUNE_METHOD_PEAK_CHOICE = "com"
