@@ -27,7 +27,7 @@ from ..devices import autoscale_amplifiers
 from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter
 from ..devices import constants
 from ..devices import d_stage, s_stage
-from ..devices import email_notices
+from ..devices import email_notices, NOTIFY_ON_RESET, NOTIFY_ON_BADTUNE
 from ..devices import flyscan_trajectories
 from ..devices import guard_slit, usaxs_slit
 from ..devices import lax_autosave
@@ -123,6 +123,12 @@ def preUSAXStune(md={}):
         yield from tune(md=md)
         if not axis.tuner.tune_ok:
             logger.warning("!!! tune failed for axis %s !!!", axis.name)
+            if NOTIFY_ON_BADTUNE:
+                email_notices.send(
+                    f"USAXS tune failed for axis {axis.name}",
+                    f"USAXS tune failed for axis {axis.name}"
+                    )
+
         # If we don't wait, the next tune often fails
         # intensity stays flat, statistically
         # We need to wait a short bit to allow EPICS database
