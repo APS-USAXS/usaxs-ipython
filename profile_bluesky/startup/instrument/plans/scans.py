@@ -121,15 +121,13 @@ def preUSAXStune(md={}):
     for axis, tune in tuners.items():
         yield from bps.mv(ti_filter_shutter, "open")
         yield from tune(md=md)
-        if axis.tuner.tune_ok:
-            # If we don't wait, the next tune often fails
-            # intensity stays flat, statistically
-            # We need to wait a short bit to allow EPICS database
-            # to complete processing and report back to us.
-            yield from bps.sleep(1)
-        else:
-            logger.warning("!!! tune failed for axis {axis.name} !!!")
-            break
+        if not axis.tuner.tune_ok:
+            logger.warning("!!! tune failed for axis %s !!!", axis.name)
+        # If we don't wait, the next tune often fails
+        # intensity stays flat, statistically
+        # We need to wait a short bit to allow EPICS database
+        # to complete processing and report back to us.
+        yield from bps.sleep(1)
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
     logger.info("USAXS count time: {terms.USAXS.usaxs_time.get()} second(s)")
