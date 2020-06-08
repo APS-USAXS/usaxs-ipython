@@ -29,3 +29,4 @@ mViewer.log
 
 # Jupyter notebooks
 *.ipynb
+.ipynb_checkpoints/
