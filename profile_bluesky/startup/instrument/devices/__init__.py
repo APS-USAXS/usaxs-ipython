@@ -11,6 +11,7 @@ from .sample_data import *
 from .user_data import *
 
 from .amplifiers import *
+from .autocollect import *
 from .autosave import *
 from .axis_tuning import *
 from .diagnostics import *
