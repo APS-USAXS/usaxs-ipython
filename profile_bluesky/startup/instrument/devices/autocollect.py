@@ -58,14 +58,17 @@ class AutoCollectDataDevice(Device):
                 yield from bps.mv(self.trigger, 0)
 
                 command = self.commands.get()
-                if command == "preUSAXStune":
-                    yield from preUSAXStune()
-                elif command == "useModeRadiography":
-                    yield from useModeRadiography()
-                elif os.path.exists(command):
-                    yield from run_command_file(command)
-                else:
-                    logger.warning("unrecognized command: %s", command)
+                try:
+                    if command == "preUSAXStune":
+                        yield from preUSAXStune()
+                    elif command == "useModeRadiography":
+                        yield from useModeRadiography()
+                    elif os.path.exists(command):
+                        yield from run_command_file(command)
+                    else:
+                        logger.warning("unrecognized command: %s", command)
+                except Exception as exc:
+                    logger.warn("Exception during execution of command %s:\n%s", command, str(exc))
                 logger.info("waiting for next user command")
             else:
                 yield from bps.sleep(self.idle_interval)
