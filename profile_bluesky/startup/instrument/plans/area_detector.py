@@ -10,6 +10,7 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from bluesky import plans as bp
 from bluesky import plan_stubs as bps
 import time
 

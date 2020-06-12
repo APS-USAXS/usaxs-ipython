@@ -12,6 +12,7 @@ logger.info(__file__)
 
 from ophyd import Component, Device, Signal
 from ophyd import EpicsSignal
+import time
 
 from .amplifiers import upd_controls
 from ..framework import sd
