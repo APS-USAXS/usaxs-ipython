@@ -163,6 +163,18 @@ class NeXus_Structure(object):
         arr = [pv.ophyd_signal.connected
                for pv in self.pv_registry.values()]
         return not (False in arr)
+    
+    @property
+    def unconnected_signals(self):
+        """
+        return list of the ophyd EpicsSignal objects that are not connected
+        """
+        disconnects = [
+            pv
+            for pv in self.pv_registry.values()
+            if not pv.ophyd_signal.connected
+            ]
+        return disconnects
 
 
 def getGroupObjectByXmlNode(xml_node, manager):
