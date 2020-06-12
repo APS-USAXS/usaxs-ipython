@@ -10,7 +10,7 @@ logger.info(__file__)
 
 from bluesky import plan_stubs as bps
 
-from ..devices import monochromator, MONO_FEEDBACK_ON
+from ..devices.monochromator import monochromator, MONO_FEEDBACK_ON
 
 def DCMfeedbackON():
     """plan: could send email"""

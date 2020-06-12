@@ -23,15 +23,15 @@ from apstools.devices import SCALER_AUTOCOUNT_MODE
 from bluesky import plan_stubs as bps
 import datetime
 
-from ..devices import a_stage, d_stage, saxs_stage
-from ..devices import aps
-from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter
-from ..devices import guard_slit, usaxs_slit
-from ..devices import monochromator, MONO_FEEDBACK_ON
-from ..devices import plc_protect
-from ..devices import scaler0
-from ..devices import terms
-from ..devices import user_data
+from ..devices.stages import a_stage, d_stage, saxs_stage
+from ..devices.aps_source import aps
+from ..devices.shutters import ccd_shutter, mono_shutter, ti_filter_shutter
+from ..devices.slits import guard_slit, usaxs_slit
+from ..devices.monochromator import monochromator, MONO_FEEDBACK_ON
+from ..devices.protection_plc import plc_protect
+from ..devices.scalers import scaler0
+from ..devices.general_terms import terms
+from ..devices.user_data import user_data
 from .filters import insertRadiographyFilters
 from .filters import insertScanFilters
 from .mono_feedback import DCMfeedbackON

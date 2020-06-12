@@ -16,9 +16,9 @@ logger.info(__file__)
 
 from bluesky import plan_stubs as bps
 
-from ..devices import monochromator
-from ..devices import pf4_AlTi
-from ..devices import terms
+from ..devices.monochromator import monochromator
+from ..devices.filters import pf4_AlTi
+from ..devices.general_terms import terms
 
 
 def _insertFilters_(a, b):

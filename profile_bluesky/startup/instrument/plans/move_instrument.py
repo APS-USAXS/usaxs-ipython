@@ -20,12 +20,12 @@ logger.info(__file__)
 
 from bluesky import plan_stubs as bps
 
-from ..devices import a_stage, d_stage, saxs_stage
-from ..devices import ccd_shutter, ti_filter_shutter
-from ..devices import guard_slit, usaxs_slit
-from ..devices import plc_protect
-from ..devices import terms
-from ..devices import user_data
+from ..devices.stages import a_stage, d_stage, saxs_stage
+from ..devices.shutters import ccd_shutter, ti_filter_shutter
+from ..devices.slits import guard_slit, usaxs_slit
+from ..devices.protection_plc import plc_protect
+from ..devices.general_terms import terms
+from ..devices.user_data import user_data
 from ..devices import waxsx
 from ..utils.a2q_q2a import angle2q, q2angle
 from ..utils.plot_prune import becplot_prune_fifo
@@ -64,8 +64,8 @@ def move_WAXSOut():
     # move the WAXS X away from sample
     yield from bps.mv(waxsx, terms.WAXS.x_out.get())
 
-    yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.get(),
+    waxsx.set_lim(
+        waxsx.low_limit_travel.get(),
         terms.WAXS.x_out.get() + terms.WAXS.x_limit_offset.get())
 
     logger.info("Removed WAXS from beam position")
@@ -88,8 +88,8 @@ def move_WAXSIn():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
-    yield from waxsx.set_lim(
-        waxsx.soft_limit_lo.get(),
+    waxsx.set_lim(
+        waxsx.low_limit_travel.get(),
         terms.WAXS.x_in.get() + terms.WAXS.x_limit_offset.get())
 
     yield from bps.mv(
@@ -118,17 +118,17 @@ def move_SAXSOut():
     # move the pin_z away from sample
     yield from bps.mv(saxs_stage.z, terms.SAXS.z_out.get())
 
-    yield from saxs_stage.z.set_lim(
+    saxs_stage.z.set_lim(
         terms.SAXS.z_out.get() - terms.SAXS.z_limit_offset.get(),
-        saxs_stage.z.soft_limit_hi.get(),  # don't change this value
+        saxs_stage.z.high_limit_travel.get(),  # don't change this value
         )
 
     # move pinhole up to out of beam position
     yield from bps.mv(saxs_stage.y, terms.SAXS.y_out.get())
 
-    yield from saxs_stage.y.set_lim(
+    saxs_stage.y.set_lim(
         terms.SAXS.y_out.get() - terms.SAXS.y_limit_offset.get(),
-        saxs_stage.y.soft_limit_hi.get(),  # don't change this value
+        saxs_stage.y.high_limit_travel.get(),  # don't change this value
         )
 
     logger.info("Removed SAXS from beam position")
@@ -151,9 +151,9 @@ def move_SAXSIn():
     yield from bps.mv(terms.SAXS.UsaxsSaxsMode, UsaxsSaxsModes["dirty"])
 
     # first move USAXS out of way
-    yield from saxs_stage.y.set_lim(
+    saxs_stage.y.set_lim(
         terms.SAXS.y_in.get() - terms.SAXS.y_limit_offset.get(),
-        saxs_stage.y.soft_limit_hi.get(),
+        saxs_stage.y.high_limit_travel.get(),
         )
 
     yield from bps.mv(
@@ -164,9 +164,9 @@ def move_SAXSIn():
         usaxs_slit.h_size, terms.SAXS.h_size.get(),
     )
 
-    yield from saxs_stage.z.set_lim(
+    saxs_stage.z.set_lim(
         terms.SAXS.z_in.get() - terms.SAXS.z_limit_offset.get(),
-        saxs_stage.z.soft_limit_hi.get()   # do NOT change the hi value
+        saxs_stage.z.high_limit_travel.get()   # do NOT change the hi value
         )
 
     # move Z _AFTER_ the others finish moving
@@ -194,11 +194,11 @@ def move_USAXSOut():
 
     # now Main stages are out of place,
     # so we can now set the limits and then move pinhole in place.
-    yield from a_stage.x.set_lim(
+    a_stage.x.set_lim(
         terms.SAXS.ax_out.get() - terms.SAXS.ax_limit_offset.get(),
-        a_stage.x.soft_limit_hi.get())
-    yield from d_stage.x.set_lim(
-        d_stage.x.soft_limit_lo.get(),
+        a_stage.x.high_limit_travel.get())
+    d_stage.x.set_lim(
+        d_stage.x.low_limit_travel.get(),
         terms.SAXS.dx_out.get() + terms.SAXS.dx_limit_offset.get())
 
     logger.info("Removed USAXS from beam position")
@@ -222,11 +222,11 @@ def move_USAXSIn():
 
     # move USAXS in the beam
     # set the limits so we can move pinhole in place.
-    yield from a_stage.x.set_lim(
+    a_stage.x.set_lim(
         terms.SAXS.ax_in.get() - terms.SAXS.ax_limit_offset.get(),
-        a_stage.x.soft_limit_hi.get())
-    yield from d_stage.x.set_lim(
-        d_stage.x.soft_limit_lo.get(),
+        a_stage.x.high_limit_travel.get())
+    d_stage.x.set_lim(
+        d_stage.x.low_limit_travel.get(),
         terms.SAXS.dx_in.get() + terms.SAXS.dx_limit_offset.get())
 
     yield from bps.mv(
