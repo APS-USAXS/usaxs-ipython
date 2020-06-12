@@ -18,6 +18,7 @@ import datetime
 import os
 
 from .initialize import RE, callback_db
+from ..utils.check_file_exists import filename_exists
 
 # write scans to SPEC data file
 specwriter = apstools.filewriters.SpecWriterCallback()
@@ -47,8 +48,8 @@ def newSpecFile(title, scan_id=1):
     mmdd = str(datetime.datetime.now()).split()[0][5:].replace("-", "_")
     clean = apstools.utils.cleanupText(title)
     fname = "%s_%s.dat" % (mmdd, clean)
-    if os.path.exists(fname):
-        logger.warning(f">>> file already exists: {fname} <<<")
+    if filename_exists(fname):
+        logger.warning(">>> file already exists: %s <<<", fname)
         specwriter.newfile(fname, RE=RE)
         handled = "appended"
         
