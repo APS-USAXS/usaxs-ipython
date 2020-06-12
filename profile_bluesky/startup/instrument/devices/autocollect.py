@@ -20,12 +20,12 @@ from ophyd import Component, Device, EpicsSignal, EpicsSignalRO
 import os
 
 from ..plans import preUSAXStune
-from ..plans import useModeRadiography
+from ..plans import mode_Radiography
 from ..plans import run_command_file
 
 
 class AutoCollectDataDevice(Device):
-    trigger = Component(EpicsSignal, "Start", string=True)
+    trigger_signal = Component(EpicsSignal, "Start", string=True)
     commands = Component(EpicsSignal, "StrInput", string=True)
     permit = Component(EpicsSignal, "Permit", string=True)
     idle_interval = 2       # seconds
@@ -40,8 +40,8 @@ class AutoCollectDataDevice(Device):
         * user types `^C` twice (user types `RE.abort()` then)
         * unhandled exception
 
-        The plan will collect data when `trigger` goes to "start" or 1.
-        `trigger` immediately goes back to "stop" or 0.
+        The plan will collect data when `trigger_signal` goes to "start" or 1.
+        `trigger_signal` immediately goes back to "stop" or 0.
 
         The command to be run is in `commands` which is:
 
@@ -53,16 +53,16 @@ class AutoCollectDataDevice(Device):
 
         logger.info("waiting for user commands")
         while self.permit.get() in (1, "enable"):
-            if self.trigger.get() in (1, "start"):
+            if self.trigger_signal.get() in (1, "start"):
                 logger.debug("starting user commands")
-                yield from bps.mv(self.trigger, 0)
+                yield from bps.mv(self.trigger_signal, 0)
 
                 command = self.commands.get()
                 try:
                     if command == "preUSAXStune":
                         yield from preUSAXStune()
                     elif command == "useModeRadiography":
-                        yield from useModeRadiography()
+                        yield from mode_Radiography()
                     elif os.path.exists(command):
                         yield from run_command_file(command)
                     else:
