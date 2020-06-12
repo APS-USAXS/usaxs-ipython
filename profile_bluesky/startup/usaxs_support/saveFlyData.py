@@ -188,7 +188,7 @@ class SaveFlyScan(object):
                     break       # seems to take about 60-70 ms with current XML file
                 time.sleep(0.01)
 
-        connect_timeout = 3.0
+        connect_timeout = 15.0
         while not self.mgr.connected:
             if time.time() - t0 > connect_timeout:
                 raise EpicsNotConnected()
