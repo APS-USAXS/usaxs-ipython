@@ -11,6 +11,7 @@ __all__ = [
     'a_stage',      # analyzer
     'as_stage',     # side-reflecting A
     'saxs_stage',   # SAXS detector
+    'waxsx',        # WAXS detector X translation
 ]
 
 from ..session_logs import logger
@@ -99,3 +100,8 @@ a_stage    = UsaxsAnalyzerStageDevice('', name='a_stage')
 as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='as_stage')
 
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
+
+waxsx = UsaxsMotor(
+    '9idcLAX:m58:c0:m4', 
+    name='waxsx', 
+    labels=("waxs", "motor"))  # WAXS X

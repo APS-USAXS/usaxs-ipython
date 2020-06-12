@@ -11,7 +11,6 @@ __all__ = [
     'tension',
     'usaxs_q_calc',
     'userCalcs_lax',
-    'waxsx',
     ]
 
 from ..session_logs import logger
@@ -23,10 +22,6 @@ from .usaxs_motor_devices import UsaxsMotor
 camy = UsaxsMotor('9idcLAX:m58:c1:m7', name='camy', labels=("motor",))
 tcam = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam', labels=("motor",))
 tension = UsaxsMotor('9idcLAX:m58:c1:m8', name='tens', labels=("motor",))
-waxsx = UsaxsMotor(
-    '9idcLAX:m58:c0:m4', 
-    name='waxsx', 
-    labels=("waxs", "motor"))  # WAXS X
 
 fuel_spray_bit = EpicsSignal(
     "9idcLAX:bit1", 
