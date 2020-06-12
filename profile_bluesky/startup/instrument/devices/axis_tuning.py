@@ -73,6 +73,7 @@ from ophyd import Kind
 from ophyd import EpicsScaler
 from ophyd.scaler import ScalerCH
 
+logger.debug("before instrument imports")
 from .amplifiers import autoscale_amplifiers
 from .amplifiers import I0_controls, I00_controls, upd_controls
 from .general_terms import terms
