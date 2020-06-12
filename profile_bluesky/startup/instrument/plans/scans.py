@@ -199,8 +199,8 @@ def preSWAXStune(md={}):
             # to complete processing and report back to us.
             yield from bps.sleep(1)
         else:
-            logger.warning("!!! tune failed for axis {axis.name} !!!")
-            break
+            logger.warning("!!! tune failed for axis %s !!!", axis.name)
+            # break
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
     logger.info("USAXS count time: {terms.USAXS.usaxs_time.get()} second(s)")
@@ -228,12 +228,15 @@ def USAXSscan(x, y, thickness_mm, title, md={}):
         yield from USAXSscanStep(x, y, thickness_mm, title, md={})
 
 
-def USAXSscanStep(x, y, thickness_mm, title, md={}):
+def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
     """
     general scan macro for step USAXS for both 1D & 2D collimation
     """
-    bluesky_runengine_running = RE.state != "idle"
+ 
+    from .command_list import after_plan, before_plan
 
+    bluesky_runengine_running = RE.state != "idle"
+ 
     yield from IfRequestedStopBeforeNextScan()
 
     yield from mode_USAXS()
