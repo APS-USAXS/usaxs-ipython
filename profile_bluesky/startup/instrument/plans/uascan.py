@@ -130,7 +130,7 @@ def uascan(
         obj.user_setpoint.kind = "omitted"
         obj.user_readback.kind = "omitted"
 
-    if terms.USAXS.useSBUSAXS.value:
+    if terms.USAXS.useSBUSAXS.get():
         read_devices.append(as_stage.rp)
         scan_cmd = "sb" + scan_cmd
         # TODO: anything else?
@@ -145,7 +145,7 @@ def uascan(
     _md['plan_args'] = plan_args
     _md['uascan_factor'] = ar_series.factor
     _md['uascan_direction'] = ar_series.sign
-    _md['useSBUSAXS'] = str(terms.USAXS.useSBUSAXS.value)
+    _md['useSBUSAXS'] = str(terms.USAXS.useSBUSAXS.get())
     _md['start'] = start
     _md['center'] = reference
     _md['finish'] = finish
@@ -166,7 +166,7 @@ def uascan(
     def _scan_():
         count_time = count_time_base
 
-        ar0 = terms.USAXS.center.AR.value
+        ar0 = terms.USAXS.center.AR.get()
         sy0 = s_stage.y.position
         for i, target_ar in enumerate(ar_series.stepper()):
 
@@ -183,7 +183,7 @@ def uascan(
             target_dy = dy0 + _triangulate_(target_ar-ar0, SDD_mm)
 
             # re-position the sample before each step
-            target_sy = sy0 + i*terms.USAXS.sample_y_step.value
+            target_sy = sy0 + i*terms.USAXS.sample_y_step.get()
 
             moves = [
                 a_stage.r, target_ar,
@@ -193,7 +193,7 @@ def uascan(
                 scaler0.preset_time, count_time
             ]
 
-            if terms.USAXS.useSBUSAXS.value:
+            if terms.USAXS.useSBUSAXS.get():
                 # adjust the ASRP piezo on the AS side-bounce stage
                 tanBragg = math.tan(reference*math.pi/180)
                 cosScatAngle = math.cos((reference-target_ar)*math.pi/180)
@@ -207,7 +207,7 @@ def uascan(
                     ## verified experimentally - higher voltage on piezo = lower Bragg angle...
                 ## and we need to INCREASE the Bragg Angle with increasing Q, to correct for tilt down...
 
-                asrp_vdc = asrp0 - diff/terms.usaxs.asrp_degrees_per_VDC.value
+                asrp_vdc = asrp0 - diff/terms.usaxs.asrp_degrees_per_VDC.get()
                 moves += [as_stage.rp, asrp_vdc]
 
             # added for fuel spray users as indication that we are counting...
@@ -257,7 +257,7 @@ def uascan(
             a_stage.y, prescan_positions["ay"],
             a_stage.r, prescan_positions["ar"],
         ]
-        if terms.USAXS.useSBUSAXS.value:
+        if terms.USAXS.useSBUSAXS.get():
             motor_resets += [as_stage.rp, prescan_positions["asrp"]]
         yield from bps.mv(*motor_resets)  # all at once
         
