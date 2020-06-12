@@ -16,13 +16,22 @@ def filename_exists(fname, case_insensitive=True):
     """
     test if a file name exists, even case-insensitive
     """
-    exists = os.path.exists(fname)
+    if os.path.exists(fname):
+        return True
     if not case_insensitive:
-        return exists
+        return False
 
-    # TODO: check all filenames for case-insensitive match
+    # check all filenames for case-insensitive match
     # see: https://github.com/APS-USAXS/ipython-usaxs/issues/343
     path, filename = os.path.split(fname)
-    fn_lower = fname.lower
+    if path == "":
+        path = "."
+    if not os.path.exists(path):
+        return False
 
-    return exists
+    fn_lower = filename.lower()
+    for item in os.listdir(path):
+        if fn_lower == item.lower():
+            return True
+
+    return False
