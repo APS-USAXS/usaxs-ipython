@@ -11,17 +11,12 @@ logger.info(__file__)
 # TODO: generalize NXWriterBase for any bluesky run
 # TODO: let caller control the output file name
 
-import datetime
-import h5py
-import numpy as np
-import yaml
-
 from .nxwriter_base import NXWriterBase
 
 
 class NXWriterUascan(NXWriterBase):
     """
-    should go into USAXS instrument package
+    write raw uascan data to a NeXus/HDF5 file, no specific application definition
     """
     # TODO: identify what additional data is needed to collect
     # Need to know from documents what data is signal and axes.
@@ -40,3 +35,10 @@ class NXWriterUascan(NXWriterBase):
             return
 
         super().writer()
+
+    def write_root(self, filename):
+        """
+        root of the HDF5 file
+        """
+        self.root.attrs[u'instrument'] = u'APS 9-ID-C USAXS'
+        super().write_root()
