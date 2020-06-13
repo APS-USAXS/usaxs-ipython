@@ -22,6 +22,11 @@ class NXWriterUascan(NXWriterBase):
     # Need to know from documents what data is signal and axes.
 
     supported_plans = ("uascan", )
+    nxdata_signal = "PD_USAXS"
+    nxdata_signal_axes = ["a_stage_r",]
+
+    # positioners have these strings in their PV names
+    positioner_ids = ":aero: :m58:".split()
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"
@@ -41,4 +46,4 @@ class NXWriterUascan(NXWriterBase):
         root of the HDF5 file
         """
         self.root.attrs[u'instrument'] = u'APS 9-ID-C USAXS'
-        super().write_root()
+        super().write_root(filename)

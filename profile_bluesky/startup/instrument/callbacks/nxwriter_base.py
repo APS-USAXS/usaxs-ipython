@@ -25,9 +25,13 @@ class NXWriterBase(FileWriterCallbackBase):
     """
     """
     # TODO: identify what additional data is needed to collect
-    # Need to know from documents what data is signal and axes.
 
-    root = None
+    root = None                 # instance of h5py.File
+    nxdata_signal = None        # name of dataset for Y axis on plot
+    nxdata_signal_axes = None   # name of dataset for X axis on plot
+
+    # positioners have these strings in their PV names
+    positioner_ids = []
 
     def writer(self):
         filename = 'test_raw_usaxs.h5'      # TODO: let caller configure this
@@ -63,15 +67,11 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         decide if a signal in the primary stream is a detector or a positioner
         """
-        # TODO: generalize, this is specific to USAXS
         primary = self.root["/entry/instrument/bluesky_streams/primary"]
-
-        # positioners have these strings in their PV names
-        positioner_ids = ":aero: :m58:".split()
 
         def is_positioner(item):
             source = item["value"].attrs["source"].decode()
-            return max([source.find(s) for s in positioner_ids]) >= 0
+            return max([source.find(s) for s in self.positioner_ids]) >= 0
 
         xref = {True: "positioner", False: "detector"}
         for v in primary.values():
@@ -80,32 +80,47 @@ class NXWriterBase(FileWriterCallbackBase):
             v["value"].attrs["signal_type"] = signal_type   # dataset
 
     def create_NX_group(self, parent, specification):
+        """
+        create an h5 group with named NeXus class (specification)
+        """
         local_address, nx_class = specification.split(":")
         if not nx_class.startswith("NX"):
             raise ValueError(f"NeXus base class must start with 'NX', received {nx_class}")
         group = parent.create_group(local_address)
         group.attrs["NX_class"] = nx_class
+        group.attrs["target"] = group.name      # for use as NeXus link
         return group
 
     def get_stream_link(self, signal, stream=None, ref=None):
+        """
+        return the h5 object for ``signal``
+
+        DEFAULTS
+
+        ``stream`` : ``baseline``
+        ``key`` : ``value_start``
+        """
         stream = stream or "baseline"
         ref = ref or "value_start"
         h5_addr = f"/entry/instrument/bluesky_streams/{stream}/{signal}/{ref}"
         # return the h5 object, to make a link
         return self.root[h5_addr]
-
+    
     def write_data(self, parent):
         """
         group: /entry/data:NXdata
         """
         nxdata = self.create_NX_group(parent, "data:NXdata")
-        nxdata.attrs["signal"] = "PD_USAXS"
-        nxdata.attrs["axes"] = ["a_stage_r",]
+        if self.nxdata_signal is not None:
+            # TODO: check that these actually exist
+            nxdata.attrs["signal"] = self.nxdata_signal
+            if self.nxdata_signal_axes is not None:
+                nxdata.attrs["axes"] = self.nxdata_signal_axes
         primary = parent["instrument/bluesky_streams/primary"]
         for k in primary.keys():
             nxdata[k] = primary[k+"/value"]
         
-        # pick the timestamps from one of the datasets
+        # pick the timestamps from one of the datasets (the last one)
         nxdata["EPOCH"] = primary[k+"/time"]
         
         return nxdata
@@ -114,10 +129,12 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         group: /entry/instrument/detectors:NXnote/DETECTOR:NXdetector
         """
-        group = self.create_NX_group(parent, f"detectors:NXnote")
         primary = parent["/entry/instrument/bluesky_streams/primary"]
+        # TODO: only proceed if len(detectors)>0
+
+        group = self.create_NX_group(parent, f"detectors:NXnote")
         for k, v in primary.items():
-            if v.attrs["signal_type"] != "detector":
+            if v.attrs.get("signal_type") != "detector":
                 continue
             nxdetector = self.create_NX_group(group, f"{k}:NXdetector")
             nxdetector["data"] = v
@@ -152,6 +169,8 @@ class NXWriterBase(FileWriterCallbackBase):
         # apply links
         nxentry.attrs["default"] = nxdata.name.split("/")[-1]
         nxentry["run_cycle"] = self.get_stream_link("aps_aps_cycle")
+        
+        # TODO: generalize: this is specific to USAXS
         nxentry["title"] = self.get_stream_link("user_data_sample_title")
 
         return nxentry
@@ -196,6 +215,7 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         nxmonochromator = self.create_NX_group(parent, "monochromator:NXmonochromator")
 
+        # TODO: generalize
         nxmonochromator.create_dataset("type", data="undulator")
 
         keys = """wavelength energy theta y_offset mode""".split()
@@ -214,11 +234,11 @@ class NXWriterBase(FileWriterCallbackBase):
         group: /entry/instrument/positioners:NXnote/POSITIONER:NXpositioner
         """
         primary = parent["/entry/instrument/bluesky_streams/primary"]
-        if len(primary) == 0:
-            return
+        # TODO: only proceed if len(positioners)>0
+
         group = self.create_NX_group(parent, f"positioners:NXnote")
         for k, v in primary.items():
-            if v.attrs["signal_type"] != "positioner":
+            if v.attrs.get("signal_type") != "positioner":
                 continue
             nxpositioner = self.create_NX_group(group, f"{k}:NXpositioner")
             nxpositioner["value"] = v
@@ -232,7 +252,7 @@ class NXWriterBase(FileWriterCallbackBase):
         self.root.attrs["file_name"] = filename
         self.root.attrs["file_time"] = datetime.datetime.now().isoformat()
         self.root.attrs[u'creator'] = self.__class__.__name__
-        self.root.attrs[u'NeXus_version'] = 'v2020.1'
+        self.root.attrs[u'NeXus_version'] = 'v2020.1'   # TODO: generalize
         self.root.attrs[u'HDF5_Version'] = h5py.version.hdf5_version
         self.root.attrs[u'h5py_version'] = h5py.version.version
         self.root.attrs["default"] = "entry"
@@ -271,6 +291,7 @@ class NXWriterBase(FileWriterCallbackBase):
         group: /entry/instrument/slits:NXnote/SLIT:NXslit
         """
         group = self.create_NX_group(parent, f"slits:NXnote")
+        # TODO: generalize: USAXS-specific
         pre = "guard_slit"
         for pre in "guard_slit usaxs_slit".split():
             slit = self.create_NX_group(group, f"{pre}:NXslit")
@@ -282,6 +303,8 @@ class NXWriterBase(FileWriterCallbackBase):
     def write_source(self, parent):
         """
         group: /entry/instrument/source:NXsource
+
+        Note: this is specific to the APS
         """
         nxsource = self.create_NX_group(parent, "source:NXsource")
 
@@ -372,6 +395,7 @@ class NXWriterBase(FileWriterCallbackBase):
             harmonic_value 
             device location version
         """.split()
+        # TODO: generalize: beamline-specific
         pre = "undulator_downstream"
         for key in keys:
             undulator[key] = self.get_stream_link(f"{pre}_{key}")
