@@ -9,9 +9,6 @@ from ..session_logs import logger
 logger.info(__file__)
 
 # TODO: add to apstools if/when this becomes sufficiently general
-# TODO: generalize NXWriterBase for any bluesky run
-# TODO: let caller control the output file name (move this to superclass)
-# TODO: move all USAXS-specific content to module nxwrite_usaxs
 
 import datetime
 import h5py
@@ -23,29 +20,45 @@ from .file_writer_base import FileWriterCallbackBase
 
 class NXWriterBase(FileWriterCallbackBase):
     """
-    """
-    # TODO: identify what additional data is needed to collect
+    base class for writing HDF5/NeXus file (using only NeXus base classes)
 
+    METHODS
+
+    .. autosummary::
+       
+       ~writer
+       ~h5string
+       ~add_dataset_attributes
+       ~assign_signal_type
+       ~create_NX_group
+       ~get_sample_title
+       ~get_stream_link
+       ~write_data
+       ~write_detector
+       ~write_entry
+       ~write_instrument
+       ~write_metadata
+       ~write_monochromator
+       ~write_positioner
+       ~write_root
+       ~write_sample
+       ~write_slits
+       ~write_source
+       ~write_streams
+       ~write_undulator
+       ~write_user
+    """
     root = None                 # instance of h5py.File
+    nexus_release = 'v2020.1'   # NeXus release to which this file is written
     nxdata_signal = None        # name of dataset for Y axis on plot
     nxdata_signal_axes = None   # name of dataset for X axis on plot
+
+    file_extension = "h5"
 
     # positioners have these strings in their PV names
     positioner_ids = []
 
-    def writer(self):
-        filename = 'test_raw_usaxs.h5'      # TODO: let caller configure this
-        with h5py.File(filename, "w") as self.root:
-            self.write_root(filename)
-
-        self.root = None
-        logger.info(f"wrote NeXus file: {filename}")
-
-    def h5string(self, text):
-        if isinstance(text, (tuple, list)):
-            return [self.h5string(t) for t in text]
-        text = text or ""
-        return text.encode("utf8")
+    instrument_name = None
 
     def add_dataset_attributes(self, ds, v, long_name=None):
         """
@@ -91,6 +104,14 @@ class NXWriterBase(FileWriterCallbackBase):
         group.attrs["target"] = group.name      # for use as NeXus link
         return group
 
+    def get_sample_title(self):
+        """
+        return the title for this sample
+
+        default title: {plan_name}-S{scan_id}-{short_uid}
+        """
+        return f"{self.plan_name}-S{self.scan_id:04d}-{self.uid[:7]}"
+
     def get_stream_link(self, signal, stream=None, ref=None):
         """
         return the h5 object for ``signal``
@@ -105,7 +126,25 @@ class NXWriterBase(FileWriterCallbackBase):
         h5_addr = f"/entry/instrument/bluesky_streams/{stream}/{signal}/{ref}"
         # return the h5 object, to make a link
         return self.root[h5_addr]
-    
+
+    def h5string(self, text):
+        "format string for h5py interface"
+        if isinstance(text, (tuple, list)):
+            return [self.h5string(t) for t in text]
+        text = text or ""
+        return text.encode("utf8")
+
+    def writer(self):
+        """
+        write collected data to HDF5/NeXus data file
+        """
+        fname = self.file_name or self.make_file_name()
+        with h5py.File(fname, "w") as self.root:
+            self.write_root(fname)
+
+        self.root = None
+        logger.info(f"wrote NeXus file: {fname}")
+
     def write_data(self, parent):
         """
         group: /entry/data:NXdata
@@ -170,8 +209,7 @@ class NXWriterBase(FileWriterCallbackBase):
         nxentry.attrs["default"] = nxdata.name.split("/")[-1]
         nxentry["run_cycle"] = self.get_stream_link("aps_aps_cycle")
         
-        # TODO: generalize: this is specific to USAXS
-        nxentry["title"] = self.get_stream_link("user_data_sample_title")
+        nxentry["title"] = self.get_sample_title()
 
         return nxentry
 
@@ -215,10 +253,7 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         nxmonochromator = self.create_NX_group(parent, "monochromator:NXmonochromator")
 
-        # TODO: generalize
-        nxmonochromator.create_dataset("type", data="undulator")
-
-        keys = """wavelength energy theta y_offset mode""".split()
+        keys = "wavelength energy theta y_offset mode".split()
         pre = "monochromator_dcm"
         for key in keys:
             nxmonochromator[key] = self.get_stream_link(f"{pre}_{key}")
@@ -251,8 +286,10 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         self.root.attrs["file_name"] = filename
         self.root.attrs["file_time"] = datetime.datetime.now().isoformat()
+        if self.instrument_name is not None:
+            self.root.attrs[u'instrument'] = self.instrument_name
         self.root.attrs[u'creator'] = self.__class__.__name__
-        self.root.attrs[u'NeXus_version'] = 'v2020.1'   # TODO: generalize
+        self.root.attrs[u'NeXus_version'] = self.nexus_release
         self.root.attrs[u'HDF5_Version'] = h5py.version.hdf5_version
         self.root.attrs[u'h5py_version'] = h5py.version.version
         self.root.attrs["default"] = "entry"
@@ -289,16 +326,11 @@ class NXWriterBase(FileWriterCallbackBase):
     def write_slits(self, parent):
         """
         group: /entry/instrument/slits:NXnote/SLIT:NXslit
+
+        override in subclass to store content, name patterns
+        vary with each instrument
         """
-        group = self.create_NX_group(parent, f"slits:NXnote")
-        # TODO: generalize: USAXS-specific
-        pre = "guard_slit"
-        for pre in "guard_slit usaxs_slit".split():
-            slit = self.create_NX_group(group, f"{pre}:NXslit")
-            slit["x_gap"] = self.get_stream_link(f"{pre}_h_size")
-            slit["y_gap"] = self.get_stream_link(f"{pre}_v_size")
-            for key in "x y".split():
-                slit[key] = self.get_stream_link(f"{pre}_{key}")
+        # group = self.create_NX_group(parent, f"slits:NXnote")
 
     def write_source(self, parent):
         """
@@ -395,7 +427,6 @@ class NXWriterBase(FileWriterCallbackBase):
             harmonic_value 
             device location version
         """.split()
-        # TODO: generalize: beamline-specific
         pre = "undulator_downstream"
         for key in keys:
             undulator[key] = self.get_stream_link(f"{pre}_{key}")

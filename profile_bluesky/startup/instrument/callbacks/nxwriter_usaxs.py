@@ -8,9 +8,6 @@ __all__ = ["NXWriterUascan",]
 from ..session_logs import logger
 logger.info(__file__)
 
-# TODO: generalize NXWriterBase for any bluesky run
-# TODO: let caller control the output file name
-
 from .nxwriter_base import NXWriterBase
 
 
@@ -27,6 +24,13 @@ class NXWriterUascan(NXWriterBase):
 
     # positioners have these strings in their PV names
     positioner_ids = ":aero: :m58:".split()
+    instrument_name = 'APS 9-ID-C USAXS'
+
+    def get_sample_title(self):
+        """
+        return the title for this sample
+        """
+        return self.get_stream_link("user_data_sample_title")
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"
@@ -41,9 +45,15 @@ class NXWriterUascan(NXWriterBase):
 
         super().writer()
 
-    def write_root(self, filename):
+    def write_slits(self, parent):
         """
-        root of the HDF5 file
+        group: /entry/instrument/slits:NXnote/SLIT:NXslit
         """
-        self.root.attrs[u'instrument'] = u'APS 9-ID-C USAXS'
-        super().write_root(filename)
+        group = self.create_NX_group(parent, f"slits:NXnote")
+        pre = "guard_slit"
+        for pre in "guard_slit usaxs_slit".split():
+            slit = self.create_NX_group(group, f"{pre}:NXslit")
+            slit["x_gap"] = self.get_stream_link(f"{pre}_h_size")
+            slit["y_gap"] = self.get_stream_link(f"{pre}_v_size")
+            for key in "x y".split():
+                slit[key] = self.get_stream_link(f"{pre}_{key}")

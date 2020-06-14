@@ -8,12 +8,45 @@ __all__ = ["FileWriterCallbackBase",]
 from ..session_logs import logger
 logger.info(__file__)
 
+import datetime
+import os
+
 # TODO: contribute FileWriterCallbackBase to apstools.filewriters
 
 class FileWriterCallbackBase:
     """
     applications should subclass and rewrite the ``writer()`` method
+
+    User Interface methods
+
+    .. autosummary::
+       
+       ~receiver
+
+    Internal methods
+
+    .. autosummary::
+       
+       ~clear
+       ~make_file_name
+       ~writer
+
+    Document Handler methods
+
+    .. autosummary::
+       
+       ~bulk_events
+       ~datum
+       ~descriptor
+       ~event
+       ~resource
+       ~start
+       ~stop
     """
+
+    file_extension = "dat"
+    file_name = None
+    file_path = None
 
     def __init__(self, *args, **kwargs):
         self.clear()
@@ -43,6 +76,7 @@ class FileWriterCallbackBase:
         self.acquisitions = {}
         self.exit_status = None
         self.metadata = {}
+        self.plan_name = None
         self.scanning = False
         self.scan_id = None
         self.streams = {}
@@ -50,16 +84,35 @@ class FileWriterCallbackBase:
         self.stop_reason = None
         self.stop_time = None
         self.uid = None
-   
+
+    def make_file_name(self):
+        """
+        generate a file name to be used as default
+
+        default format: {ymd}-{hms}-S{scan_id}-{short_uid}.{ext}
+        where: 
+        
+        * ymd = {year:4d}{month:02d}{day:02d}
+        * hms = {hour:02d}{minute:02d}{second:02d}
+
+        override in subclass to change
+        """
+        fname = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        fname += f"-S{self.scan_id}"
+        fname += f"-{self.uid[:7]}.{self.file_extension}"
+        path = os.path.abspath(self.file_path or os.getcwd())
+        return os.path.join(path, fname)
+
     def writer(self):
         """
         print summary of run as diagnostic
 
         override this method in subclass to write a file
         """
-        print("write to file now.")
+        fname = self.file_name or self.make_file_name()
+        print(f"print to console (would write: {fname}")
 
-        keys = "scan_id exit_status start_time stop_reason stop_time uid".split()
+        keys = "plan_name scan_id exit_status start_time stop_reason stop_time uid".split()
         for k in sorted(keys):
             print(f"{k} = {getattr(self, k)}")
 
@@ -125,9 +178,9 @@ class FileWriterCallbackBase:
     def event(self, doc):
         if not self.scanning:
             return
-        uid = doc["uid"]
+        # uid = doc["uid"]
         descriptor_uid = doc["descriptor"]
-        seq_num = doc["seq_num"]
+        # seq_num = doc["seq_num"]
         
         # gather the data by streams
         descriptor = self.acquisitions.get(descriptor_uid)
@@ -146,6 +199,7 @@ class FileWriterCallbackBase:
 
     def start(self, doc):
         self.clear()
+        self.plan_name = doc["plan_name"]
         self.scanning = True
         self.scan_id = doc["scan_id"] or 0
         self.start_time = doc["time"]
