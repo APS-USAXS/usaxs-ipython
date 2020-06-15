@@ -265,7 +265,7 @@ class FileWriterCallbackBase:
         self.scan_id = doc["scan_id"] or 0
         self.start_time = doc["time"]
         self.uid = doc["uid"]
-        self.detectors = doc.get("detectors")
+        self.detectors = doc.get("detectors", [])
         self.positioners = doc.get("positioners") or doc.get("motors") or []
 
         # gather the metadata

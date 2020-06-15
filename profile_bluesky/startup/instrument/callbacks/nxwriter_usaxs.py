@@ -5,10 +5,12 @@ define a custom NeXus file writer base for uascan raw data files
 
 __all__ = ["NXWriterUascan",]
 
-from ..session_logs import logger
+# from ..session_logs import logger
+from instrument.session_logs import logger
 logger.info(__file__)
 
-from .nxwriter_base import NXWriterAps
+# from .nxwriter_base import NXWriterAps
+from nxwriter_base import NXWriterAps
 
 
 class NXWriterUascan(NXWriterAps):
