@@ -17,6 +17,10 @@ class FileWriterCallbackBase:
     """
     applications should subclass and rewrite the ``writer()`` method
 
+    The local buffers are cleared when a start document is received.
+    Content is collected here from each document until the stop document.
+    The content is written once the stop document is received.
+
     User Interface methods
 
     .. autosummary::
@@ -48,6 +52,8 @@ class FileWriterCallbackBase:
     file_name = None
     file_path = None
 
+    # convention: methods written in alphabetical order
+
     def __init__(self, *args, **kwargs):
         self.clear()
         self.xref = dict(
@@ -74,9 +80,11 @@ class FileWriterCallbackBase:
  
     def clear(self):
         self.acquisitions = {}
+        self.detectors = []
         self.exit_status = None
         self.metadata = {}
         self.plan_name = None
+        self.positioners = []
         self.scanning = False
         self.scan_id = None
         self.streams = {}
@@ -90,15 +98,16 @@ class FileWriterCallbackBase:
         generate a file name to be used as default
 
         default format: {ymd}-{hms}-S{scan_id}-{short_uid}.{ext}
-        where: 
+        where the time (the run start time): 
         
         * ymd = {year:4d}{month:02d}{day:02d}
         * hms = {hour:02d}{minute:02d}{second:02d}
 
         override in subclass to change
         """
-        fname = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        fname += f"-S{self.scan_id}"
+        start_time = datetime.datetime.fromtimestamp(self.start_time)
+        fname = start_time.strftime("%Y%m%d-%H%M%S")
+        fname += f"-S{self.scan_id:04d}"
         fname += f"-{self.uid[:7]}.{self.file_extension}"
         path = os.path.abspath(self.file_path or os.getcwd())
         return os.path.join(path, fname)
@@ -141,10 +150,16 @@ class FileWriterCallbackBase:
     def bulk_events(self, doc):
         if not self.scanning:
             return
+        logger.info("bulk_events")
+        logger.info("doc")
+        logger.info("-"*40)
 
     def datum(self, doc):
         if not self.scanning:
             return
+        logger.info("datum")
+        logger.info("doc")
+        logger.info("-"*40)
 
     def descriptor(self, doc):
         if not self.scanning:
@@ -196,6 +211,9 @@ class FileWriterCallbackBase:
     def resource(self, doc):
         if not self.scanning:
             return
+        logger.info("resource")
+        logger.info("doc")
+        logger.info("-"*40)
 
     def start(self, doc):
         self.clear()
@@ -204,6 +222,8 @@ class FileWriterCallbackBase:
         self.scan_id = doc["scan_id"] or 0
         self.start_time = doc["time"]
         self.uid = doc["uid"]
+        self.detectors = doc.get("detectors")
+        self.positioners = doc.get("positioners") or doc.get("motors") or []
 
         # gather the metadata
         for k, v in doc.items():

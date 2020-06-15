@@ -8,29 +8,35 @@ __all__ = ["NXWriterUascan",]
 from ..session_logs import logger
 logger.info(__file__)
 
-from .nxwriter_base import NXWriterBase
+from .nxwriter_base import NXWriterAps
 
 
-class NXWriterUascan(NXWriterBase):
+class NXWriterUascan(NXWriterAps):
     """
     write raw uascan data to a NeXus/HDF5 file, no specific application definition
     """
     # TODO: identify what additional data is needed to collect
-    # Need to know from documents what data is signal and axes.
+    # add RE.md["detectors"] = list : first item is for NXdata @signal attribute
+    # add RE.md["positioners"] = list : entire list is for NXdata @axes attribute
 
-    supported_plans = ("uascan", )
+    instrument_name = 'APS 9-ID-C USAXS'
     nxdata_signal = "PD_USAXS"
     nxdata_signal_axes = ["a_stage_r",]
+    supported_plans = ("uascan", )
 
-    # positioners have these strings in their PV names
-    positioner_ids = ":aero: :m58:".split()
-    instrument_name = 'APS 9-ID-C USAXS'
+    # convention: methods written in alphabetical order
 
     def get_sample_title(self):
         """
         return the title for this sample
         """
         return self.get_stream_link("user_data_sample_title")
+
+    def make_file_name(self):
+        """
+        this is the place to decide how to name data files
+        """
+        return super().make_file_name()     # default technique
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"

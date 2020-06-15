@@ -3,7 +3,7 @@
 define a NeXus file writer base for custom NeXus files
 """
 
-__all__ = ["NXWriterBase",]
+__all__ = ["NXWriterBase", "NXWriterAps",]
 
 from ..session_logs import logger
 logger.info(__file__)
@@ -48,17 +48,14 @@ class NXWriterBase(FileWriterCallbackBase):
        ~write_undulator
        ~write_user
     """
-    root = None                 # instance of h5py.File
+    file_extension = "hdf"      # use this file extension for the output
+    instrument_name = None      # name of this instrument
     nexus_release = 'v2020.1'   # NeXus release to which this file is written
     nxdata_signal = None        # name of dataset for Y axis on plot
     nxdata_signal_axes = None   # name of dataset for X axis on plot
+    root = None                 # instance of h5py.File
 
-    file_extension = "h5"
-
-    # positioners have these strings in their PV names
-    positioner_ids = []
-
-    instrument_name = None
+    # convention: methods written in alphabetical order
 
     def add_dataset_attributes(self, ds, v, long_name=None):
         """
@@ -75,20 +72,19 @@ class NXWriterBase(FileWriterCallbackBase):
                     ds.attrs[key] = v[key]
             cautious_set("lower_ctrl_limit")
             cautious_set("upper_ctrl_limit")
-
+ 
     def assign_signal_type(self):
         """
         decide if a signal in the primary stream is a detector or a positioner
         """
         primary = self.root["/entry/instrument/bluesky_streams/primary"]
-
-        def is_positioner(item):
-            source = item["value"].attrs["source"].decode()
-            return max([source.find(s) for s in self.positioner_ids]) >= 0
-
-        xref = {True: "positioner", False: "detector"}
-        for v in primary.values():
-            signal_type = xref[is_positioner(v)]
+        for k, v in primary.items():
+            if k in self.detectors:
+                signal_type = "detector"
+            elif k in self.positioners:
+                signal_type = "positioner"
+            else:
+                signal_type = "other"
             v.attrs["signal_type"] = signal_type            # group
             v["value"].attrs["signal_type"] = signal_type   # dataset
 
@@ -124,6 +120,8 @@ class NXWriterBase(FileWriterCallbackBase):
         stream = stream or "baseline"
         ref = ref or "value_start"
         h5_addr = f"/entry/instrument/bluesky_streams/{stream}/{signal}/{ref}"
+        if h5_addr not in self.root:
+            raise KeyError(f"HDF5 address {h5_addr} not found.")
         # return the h5 object, to make a link
         return self.root[h5_addr]
 
@@ -150,17 +148,42 @@ class NXWriterBase(FileWriterCallbackBase):
         group: /entry/data:NXdata
         """
         nxdata = self.create_NX_group(parent, "data:NXdata")
-        if self.nxdata_signal is not None:
-            # TODO: check that these actually exist
-            nxdata.attrs["signal"] = self.nxdata_signal
-            if self.nxdata_signal_axes is not None:
-                nxdata.attrs["axes"] = self.nxdata_signal_axes
+
         primary = parent["instrument/bluesky_streams/primary"]
         for k in primary.keys():
             nxdata[k] = primary[k+"/value"]
         
         # pick the timestamps from one of the datasets (the last one)
         nxdata["EPOCH"] = primary[k+"/time"]
+
+        signal_attribute = self.nxdata_signal
+        if signal_attribute is None:
+            if len(self.detectors) > 0:
+                signal_attribute = self.detectors[0]     # arbitrary but consistent choice
+        axes_attribute = self.nxdata_signal_axes
+        if axes_attribute is None:
+            if len(self.positioners) > 0:
+                axes_attribute = self.positioners        # TODO: what if wrong shape here?
+
+        # TODO: simplify; this code is convoluted (like the selection logic)
+        if signal_attribute is not None:
+            if signal_attribute in nxdata:
+                nxdata.attrs["signal"] = signal_attribute
+                
+                axes = []
+                for ax in axes_attribute or []:
+                    if ax in nxdata:
+                        axes.append(ax)
+                    else:
+                        logger.warning(
+                            "Cannot set %s as axes attribute, no such dataset", 
+                            ax)
+                if axes_attribute is not None:
+                    nxdata.attrs["axes"] = axes_attribute
+            else:
+                logger.warning(
+                    "Cannot set %s as signal attribute, no such dataset", 
+                    signal_attribute)
         
         return nxdata
 
@@ -168,8 +191,11 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         group: /entry/instrument/detectors:NXnote/DETECTOR:NXdetector
         """
+        if len(self.detectors) == 0:
+            logger.info("No detectors identified.")
+            return
+
         primary = parent["/entry/instrument/bluesky_streams/primary"]
-        # TODO: only proceed if len(detectors)>0
 
         group = self.create_NX_group(parent, f"detectors:NXnote")
         for k, v in primary.items():
@@ -178,7 +204,7 @@ class NXWriterBase(FileWriterCallbackBase):
             nxdetector = self.create_NX_group(group, f"{k}:NXdetector")
             nxdetector["data"] = v
 
-        return nxdetector
+        return group
 
     def write_entry(self):
         """
@@ -207,7 +233,11 @@ class NXWriterBase(FileWriterCallbackBase):
 
         # apply links
         nxentry.attrs["default"] = nxdata.name.split("/")[-1]
-        nxentry["run_cycle"] = self.get_stream_link("aps_aps_cycle")
+        h5_addr = "/entry/instrument/source/cycle"
+        if h5_addr in self.root:
+            nxentry["run_cycle"] = self.root[h5_addr]
+        else:
+            logger.warning("No data for /entry/run_cycle")
         
         nxentry["title"] = self.get_sample_title()
 
@@ -237,13 +267,18 @@ class NXWriterBase(FileWriterCallbackBase):
         metadata from the bluesky start document
         """
         bluesky = self.create_NX_group(parent, "bluesky_metadata:NXnote")
+        is_yaml = False
         for k, v in self.metadata.items():
             if isinstance(v, (dict, tuple, list)):
                 # fallback technique: save complicated structures as YAML text
                 v = yaml.dump(v)
+                is_yaml = True
             if isinstance(v, str):
                 v = self.h5string(v)
-            bluesky.create_dataset(k, data=v)
+            ds = bluesky.create_dataset(k, data=v)
+            ds.attrs["target"] = ds.name
+            if is_yaml:
+                ds.attrs["text_format"] = "yaml"
 
         return bluesky
 
@@ -251,25 +286,39 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         group: /entry/instrument/monochromator:NXmonochromator
         """
-        nxmonochromator = self.create_NX_group(parent, "monochromator:NXmonochromator")
-
-        keys = "wavelength energy theta y_offset mode".split()
         pre = "monochromator_dcm"
-        for key in keys:
-            nxmonochromator[key] = self.get_stream_link(f"{pre}_{key}")
-        
-        key = "feedback_on"
-        pre = "monochromator"
-        nxmonochromator[key] = self.get_stream_link(f"{pre}_{key}")
+        keys = "wavelength energy theta y_offset mode".split()
 
+        try:
+            links = {
+                key: self.get_stream_link(f"{pre}_{key}")
+                for key in keys
+            }
+        except KeyError as exc:
+            logger.warning("%s -- not creating monochromator group", str(exc))
+            return
+
+        pre = "monochromator"
+        key = "feedback_on"
+        try:
+            links[key] = self.get_stream_link(f"{pre}_{key}")
+        except KeyError as exc:
+            logger.warning("%s -- feedback signal not found", str(exc))
+
+        nxmonochromator = self.create_NX_group(parent, "monochromator:NXmonochromator")
+        for k, v in links.items():
+            nxmonochromator[k] = v
         return nxmonochromator
 
     def write_positioner(self, parent):
         """
         group: /entry/instrument/positioners:NXnote/POSITIONER:NXpositioner
         """
+        if len(self.positioners) == 0:
+            logger.info("No positioners identified.")
+            return
+
         primary = parent["/entry/instrument/bluesky_streams/primary"]
-        # TODO: only proceed if len(positioners)>0
 
         group = self.create_NX_group(parent, f"positioners:NXnote")
         for k, v in primary.items():
@@ -278,7 +327,7 @@ class NXWriterBase(FileWriterCallbackBase):
             nxpositioner = self.create_NX_group(group, f"{k}:NXpositioner")
             nxpositioner["value"] = v
 
-        return nxpositioner
+        return group
 
     def write_root(self, filename):
         """
@@ -297,29 +346,41 @@ class NXWriterBase(FileWriterCallbackBase):
         self.write_entry()
 
     def write_sample(self, parent):
+        """
+        group: /entry/sample:NXsample
+        """
+        pre = "sample_data"
+        keys = """
+            chemical_formula
+            concentration
+            description
+            electric_field
+            magnetic_field
+            rotation_angle
+            scattering_length_density
+            stress_field
+            temperature
+            volume_fraction
+            x_translation
+        """.split()
+
+        links = {}
+        for key in keys:
+            try:
+                links[key] = self.get_stream_link(f"{pre}_{key}")
+            except KeyError as exc:
+                logger.warning("%s", str(exc))
+        if len(links) == 0:
+            logger.warning("no sample data found, not creating sample group")
+            return
 
         nxsample = self.create_NX_group(parent, "sample:NXsample")
-        # TODO: Is all this content available, in general?
+        for k, v in links.items():
+            nxsample[k] = v
 
-        keys = """
-            chemical_formula:NX_CHAR
-            concentration:NX_FLOAT[n_comp]
-            description:NX_CHAR
-            electric_field:NX_FLOAT[n_eField]
-            magnetic_field:NX_FLOAT[n_mField]
-            rotation_angle:NX_FLOAT
-            scattering_length_density:NX_FLOAT[n_comp]
-            stress_field:NX_FLOAT[n_sField]
-            temperature:NX_FLOAT[n_Temp]
-            volume_fraction:NX_FLOAT[n_comp]
-            x_translation:NX_FLOAT
-        """.split()
-        pre = "sample_data"
-        for key in keys:
-            key = key.split(":")[0]
-            ds = nxsample[key] = self.get_stream_link(f"{pre}_{key}")
-            if key in "electric_field magnetic_field stress_field".split():
-                ds.attrs["direction"] = self.get_stream_link(f"{pre}_{key}_dir")[()].lower()
+        for key in "electric_field magnetic_field stress_field".split():
+            ds = nxsample[key]
+            ds.attrs["direction"] = self.get_stream_link(f"{pre}_{key}_dir")[()].lower()
 
         return nxsample
 
@@ -336,20 +397,14 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         group: /entry/instrument/source:NXsource
 
-        Note: this is specific to the APS
+        Note: this is (somewhat) generic, override for a different source
         """
         nxsource = self.create_NX_group(parent, "source:NXsource")
 
-        ds = nxsource.create_dataset("name", data="Advanced Photon Source")
-        ds.attrs["short_name"] = "APS"
+        ds = nxsource.create_dataset("name", data="Bluesky framework")
+        ds.attrs["short_name"] = "bluesky"
         nxsource.create_dataset("type", data="Synchrotron X-ray Source")
         nxsource.create_dataset("probe", data="x-ray")
-        ds = nxsource.create_dataset("energy", data=6)
-        ds.attrs["units"] = "GeV"
-        
-        nxsource["current"] = self.get_stream_link("aps_current")
-        nxsource["cycle"] = self.get_stream_link("aps_aps_cycle")
-        nxsource["fill_number"] = self.get_stream_link("aps_fill_number")
 
         return nxsource
 
@@ -416,33 +471,97 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         group: /entry/instrument/undulator:NXinsertion_device
         """
-        undulator = self.create_NX_group(parent, "undulator:NXinsertion_device")
-
-        undulator.create_dataset("type", data="undulator")
-
-        keys = """
-            gap gap_taper 
-            energy energy_taper 
-            total_power
-            harmonic_value 
-            device location version
-        """.split()
         pre = "undulator_downstream"
-        for key in keys:
-            undulator[key] = self.get_stream_link(f"{pre}_{key}")
+        keys = """
+            device location
+            energy
+            energy_taper 
+            gap
+            gap_taper 
+            harmonic_value 
+            total_power
+            version
+        """.split()
 
+        try:
+            links = {
+                key:self.get_stream_link(f"{pre}_{key}")
+                for key in keys
+            }
+        except KeyError as exc:
+            logger.warning("%s -- not creating undulator group", str(exc))
+            return
+
+        undulator = self.create_NX_group(parent, "undulator:NXinsertion_device")
+        undulator.create_dataset("type", data="undulator")
+        for k, v in links.items():
+            undulator[k] = v
         return undulator
 
     def write_user(self, parent):
         """
         group: /entry/contact:NXuser
         """
+        pre = "aps"
+        keymap = dict(
+            name = "bss_user_info_contact",
+            affiliation = "bss_user_info_institution",
+            email = "bss_user_info_email",
+            facility_user_id = "bss_user_info_badge",
+        )
+
+        try:
+            links = {
+                k: self.get_stream_link(v)
+                for k, v in keymap.items()
+            }
+        except KeyError as exc:
+            logger.warning("%s -- not creating source group", str(exc))
+            return
+
         nxuser = self.create_NX_group(parent, "contact:NXuser")
-
         nxuser.create_dataset("role", data="contact")
-        nxuser["name"] = self.get_stream_link("bss_user_info_contact")
-        nxuser["affiliation"] = self.get_stream_link("bss_user_info_institution")
-        nxuser["email"] = self.get_stream_link("bss_user_info_email")
-        nxuser["facility_user_id"] = self.get_stream_link("bss_user_info_badge")
-
+        for k, v in links.items():
+            nxuser[k] = v
         return nxuser
+
+
+class NXWriterAps(NXWriterBase):
+    """
+    includes APS-specific content
+    """
+
+    # convention: methods written in alphabetical order
+
+    def write_source(self, parent):
+        """
+        group: /entry/instrument/source:NXsource
+
+        Note: this is specific to the APS, override for a different source
+        """
+        pre = "aps"
+        keys = "current aps_cycle fill_number".split()
+
+        try:
+            links = {
+                key:self.get_stream_link(f"{pre}_{key}")
+                for key in keys
+            }
+        except KeyError as exc:
+            logger.warning("%s -- not creating source group", str(exc))
+            return
+        links["cycle"] = links["aps_cycle"]
+        del links["aps_cycle"]
+
+        nxsource = self.create_NX_group(parent, "source:NXsource")
+        for k, v in links.items():
+            nxsource[k] = v
+
+        ds = nxsource.create_dataset("name", data="Advanced Photon Source")
+        ds.attrs["short_name"] = "APS"
+        nxsource.create_dataset("type", data="Synchrotron X-ray Source")
+        nxsource.create_dataset("probe", data="x-ray")
+        ds = nxsource.create_dataset("energy", data=6)
+        ds.attrs["units"] = "GeV"
+
+        return nxsource
