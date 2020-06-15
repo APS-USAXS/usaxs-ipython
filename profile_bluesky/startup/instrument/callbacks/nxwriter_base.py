@@ -5,7 +5,8 @@ define a NeXus file writer base for custom NeXus files
 
 __all__ = ["NXWriterBase", "NXWriterAps",]
 
-from ..session_logs import logger
+#from ..session_logs import logger
+from instrument.session_logs import logger
 logger.info(__file__)
 
 # TODO: add to apstools if/when this becomes sufficiently general
@@ -15,7 +16,8 @@ import h5py
 import numpy as np
 import yaml
 
-from .file_writer_base import FileWriterCallbackBase
+# from .file_writer_base import FileWriterCallbackBase
+from file_writer_base import FileWriterCallbackBase
 
 
 class NXWriterBase(FileWriterCallbackBase):

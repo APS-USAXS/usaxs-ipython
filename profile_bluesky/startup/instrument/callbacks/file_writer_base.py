@@ -5,7 +5,8 @@ define a base for file writer callbacks
 
 __all__ = ["FileWriterCallbackBase",]
 
-from ..session_logs import logger
+# from ..session_logs import logger
+from instrument.session_logs import logger
 logger.info(__file__)
 
 import datetime
@@ -79,12 +80,16 @@ class FileWriterCallbackBase:
         # - - - - - - - - - - - - - - -
  
     def clear(self):
+        """
+        delete any saved data from the cache and reinitialize
+        """
         self.acquisitions = {}
         self.detectors = []
         self.exit_status = None
         self.metadata = {}
         self.plan_name = None
         self.positioners = []
+        self.resources = {}
         self.scanning = False
         self.scan_id = None
         self.streams = {}
@@ -143,25 +148,51 @@ class FileWriterCallbackBase:
                 msg = f"stream:{k} num_vars={num_vars} num_values={num_values}"
                 print(msg)
 
+        for k, v in self.resources.items():
+            print("resource", k, v)
+
         print(f"elapsed scan time: {self.stop_time-self.start_time:.3f}s")
 
     # - - - - - - - - - - - - - - -
     
     def bulk_events(self, doc):
+        "-tba-"
         if not self.scanning:
             return
-        logger.info("bulk_events")
-        logger.info("doc")
+        logger.info("not handled yet")
+        logger.info(doc)
         logger.info("-"*40)
 
     def datum(self, doc):
+        """
+        like an event, but for data recorded outside of bluesky
+
+        Datum
+        =====
+        datum_id        : 621caa0f-70f1-4e3d-8718-b5123d434502/0  
+        datum_kwargs    :
+          HDF5_file_name  : /mnt/usaxscontrol/USAXS_data/2020-06/06_10_Minjee_waxs/AGIX3N1_0699.hdf
+          point_number    : 0                                       
+        resource        : 621caa0f-70f1-4e3d-8718-b5123d434502    
+        """
         if not self.scanning:
             return
-        logger.info("datum")
-        logger.info("doc")
-        logger.info("-"*40)
+        # logger.info(doc)
+        # logger.info("-"*40)
+        uid = doc["datum_id"]
+        res_id = doc["resource"]
+        if res_id in self.resources:
+            self.resources[res_id]["data"].append(dict(doc["datum_kwargs"]))
+        else:
+            logger.warning(
+                "Ignoring datum %s, resource %s not found",
+                uid, res_id
+            )
 
     def descriptor(self, doc):
+        """
+        description of the data stream to be acquired
+        """
         if not self.scanning:
             return
         stream = doc["name"]
@@ -191,6 +222,9 @@ class FileWriterCallbackBase:
             dd["time"] = []    # entry time stamps here
 
     def event(self, doc):
+        """
+        a single "row" of data
+        """
         if not self.scanning:
             return
         # uid = doc["uid"]
@@ -209,13 +243,22 @@ class FileWriterCallbackBase:
                     data["time"].append(doc["timestamps"][k])
 
     def resource(self, doc):
+        """
+        like a descriptor, but for data recorded outside of bluesky
+        """
         if not self.scanning:
             return
-        logger.info("resource")
-        logger.info("doc")
-        logger.info("-"*40)
+        # logger.info(doc)
+        # logger.info("-"*40)
+        uid = doc["uid"]
+        logger.debug("resource: uid |%s|", uid)
+        self.resources[uid] = dict(doc)
+        self.resources[uid].update(dict(data=[]))
 
     def start(self, doc):
+        """
+        beginning of a run, clear cache and collect metadata
+        """
         self.clear()
         self.plan_name = doc["plan_name"]
         self.scanning = True
@@ -232,6 +275,9 @@ class FileWriterCallbackBase:
             self.metadata[k] = v
 
     def stop(self, doc):
+        """
+        end of the run, end collection and initiate the ``writer()`` method
+        """
         if not self.scanning:
             return
         self.status = doc["exit_status"]
