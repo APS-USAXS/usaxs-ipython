@@ -24,6 +24,37 @@ from file_writer_base import FileWriterCallbackBase
 class NXWriterBase(FileWriterCallbackBase):
     """
     base class for writing HDF5/NeXus file (using only NeXus base classes)
+    
+    Metadata
+    
+    Almost all metadata keys (additional attributes added to the run's
+    ``start`` document) are completely optional.  Certain keys are
+    specified by the RunEngine, some keys are specified by the plan
+    (or plan support methods), and other keys are supplied by the 
+    user or the instrument team.
+    
+    These are the keys used by this callback to help guide how
+    information is stored in a NeXus HDF5 file structure.
+    
+    =========== ============= ===================================================
+    key         creator       how is it used
+    =========== ============= ===================================================
+    detectors   inconsistent  name(s) of the signals used as plottable values
+    motors      inconsistent  synonym for ``positioners``
+    plan_args   inconsistent  parameters (arguments) given
+    plan_name   inconsistent  name of the plan used to collect data
+    positioners inconsistent  name(s) of the positioners used for plotting
+    scan_id     RunEngine     incrementing number of the run, user can reset
+    subtitle    user          -tba-
+    title       user          /entry/title
+    uid         RunEngine     unique identifier of the run
+    versions    instrument    documents the software versions used to collect data
+    =========== ============= ===================================================
+    
+    Notes:
+    
+    1. ``detectors[0]`` will be used as the ``/entry/data@signal`` attribute
+    2. the *complete* list in ``positioners`` will be used as the ``/entry/data@axes`` attribute
 
     METHODS
 

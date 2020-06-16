@@ -37,22 +37,15 @@ class FileWriterCallbackBase:
     =========== ============= ===================================================
     key         creator       how is it used
     =========== ============= ===================================================
-    uid         RunEngine     unique identifier of the run
-    scan_id     RunEngine     incrementing number of the run, user can reset
-    plan_name   inconsistent  name of the plan used to collect data
-    plan_args   inconsistent  parameters (arguments) given
-    versions    instrument    documents the software versions used to collect data
-    detectors   inconsistent  name(s) of the signals used as plottable values
-    positioners inconsistent  name(s) of the positioners used for plotting
+    detectors   inconsistent  name(s) of the signals used as detectors
     motors      inconsistent  synonym for ``positioners``
-    title       user          /entry/title
-    subtitle    user          -tba-
+    plan_args   inconsistent  parameters (arguments) given
+    plan_name   inconsistent  name of the plan used to collect data
+    positioners inconsistent  name(s) of the signals used as positioners
+    scan_id     RunEngine     incrementing number of the run, user can reset
+    uid         RunEngine     unique identifier of the run
+    versions    instrument    documents the software versions used to collect data
     =========== ============= ===================================================
-    
-    Notes:
-    
-    1. ``detectors[0]`` will be used as the ``/entry/data@signal`` attribute
-    2. the *complete* list in ``positioners`` will be used as the ``/entry/data@axes`` attribute
 
     User Interface methods
 
