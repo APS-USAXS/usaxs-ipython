@@ -20,6 +20,12 @@ mViewer.log
 # SPEC data files (default naming convention)
 20*.dat
 
+# HDF and NeXus files
+*.h5
+*.hdf
+*.hdf5
+*.nxs
+
 # logging
 .ipython_*.log*
 .logs/
