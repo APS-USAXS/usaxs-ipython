@@ -11,6 +11,7 @@ logger.info(__file__)
 
 import datetime
 import os
+import pyRestTable
 
 # TODO: contribute FileWriterCallbackBase to apstools.filewriters
 
@@ -21,6 +22,37 @@ class FileWriterCallbackBase:
     The local buffers are cleared when a start document is received.
     Content is collected here from each document until the stop document.
     The content is written once the stop document is received.
+    
+    Metadata
+    
+    Almost all metadata keys (additional attributes added to the run's
+    ``start`` document) are completely optional.  Certain keys are
+    specified by the RunEngine, some keys are specified by the plan
+    (or plan support methods), and other keys are supplied by the 
+    user or the instrument team.
+    
+    These are the keys used by this callback to help guide how
+    information is stored in a NeXus HDF5 file structure.
+    
+    =========== ============= ===================================================
+    key         creator       how is it used
+    =========== ============= ===================================================
+    uid         RunEngine     unique identifier of the run
+    scan_id     RunEngine     incrementing number of the run, user can reset
+    plan_name   inconsistent  name of the plan used to collect data
+    plan_args   inconsistent  parameters (arguments) given
+    versions    instrument    documents the software versions used to collect data
+    detectors   inconsistent  name(s) of the signals used as plottable values
+    positioners inconsistent  name(s) of the positioners used for plotting
+    motors      inconsistent  synonym for ``positioners``
+    title       user          /entry/title
+    subtitle    user          -tba-
+    =========== ============= ===================================================
+    
+    Notes:
+    
+    1. ``detectors[0]`` will be used as the ``/entry/data@signal`` attribute
+    2. the *complete* list in ``positioners`` will be used as the ``/entry/data@axes`` attribute
 
     User Interface methods
 
@@ -86,10 +118,10 @@ class FileWriterCallbackBase:
         self.acquisitions = {}
         self.detectors = []
         self.exit_status = None
+        self.externals = {}
         self.metadata = {}
         self.plan_name = None
         self.positioners = []
-        self.resources = {}
         self.scanning = False
         self.scan_id = None
         self.streams = {}
@@ -112,7 +144,7 @@ class FileWriterCallbackBase:
         """
         start_time = datetime.datetime.fromtimestamp(self.start_time)
         fname = start_time.strftime("%Y%m%d-%H%M%S")
-        fname += f"-S{self.scan_id:04d}"
+        fname += f"-S{self.scan_id:05d}"
         fname += f"-{self.uid[:7]}.{self.file_extension}"
         path = os.path.abspath(self.file_path or os.getcwd())
         return os.path.join(path, fname)
@@ -123,16 +155,34 @@ class FileWriterCallbackBase:
 
         override this method in subclass to write a file
         """
-        fname = self.file_name or self.make_file_name()
-        print(f"print to console (would write: {fname}")
+        import yaml
+        # logger.debug("acquisitions: %s", yaml.dump(self.acquisitions))
 
+        fname = self.file_name or self.make_file_name()
+        print("print to console")
+        print(f"suggested file name: {fname}")
+
+        tbl = pyRestTable.Table()
+        tbl.labels = "key value".split()
         keys = "plan_name scan_id exit_status start_time stop_reason stop_time uid".split()
         for k in sorted(keys):
-            print(f"{k} = {getattr(self, k)}")
+            tbl.addRow((k, getattr(self, k)))
+        print(tbl)
 
+        def trim(value, length=60):
+            text = str(value)
+            if len(text) > length:
+                text = text[:length-3] + "..."
+            return text
+
+        tbl = pyRestTable.Table()
+        tbl.labels = "metadata_key value".split()
         for k, v in sorted(self.metadata.items()):
-            print(f"metadata {k}: {v}")
+            tbl.addRow((k, trim(v)))
+        print(tbl)
 
+        tbl = pyRestTable.Table()
+        tbl.labels = "stream num_vars num_values".split()
         for k, v in sorted(self.streams.items()):
             if len(v) != 1:
                 print("expecting only one descriptor in stream %s, found %s" % (k, len(v)))
@@ -144,12 +194,14 @@ class FileWriterCallbackBase:
                     num_values = 0
                 else:
                     num_values = len(data[symbol]["data"])
-                # msg = f"stream:{k} uids={v} num_vars={num_vars} num_values={num_values}"
-                msg = f"stream:{k} num_vars={num_vars} num_values={num_values}"
-                print(msg)
+                tbl.addRow((k, num_vars, num_values))
+        print(tbl)
 
-        for k, v in self.resources.items():
-            print("resource", k, v)
+        tbl = pyRestTable.Table()
+        tbl.labels = "external_key type value".split()
+        for k, v in self.externals.items():
+            tbl.addRow((k, v["_document_type_"], trim(v)))
+        print(tbl)
 
         print(f"elapsed scan time: {self.stop_time-self.start_time:.3f}s")
 
@@ -177,17 +229,9 @@ class FileWriterCallbackBase:
         """
         if not self.scanning:
             return
-        # logger.info(doc)
-        # logger.info("-"*40)
-        uid = doc["datum_id"]
-        res_id = doc["resource"]
-        if res_id in self.resources:
-            self.resources[res_id]["data"].append(dict(doc["datum_kwargs"]))
-        else:
-            logger.warning(
-                "Ignoring datum %s, resource %s not found",
-                uid, res_id
-            )
+        # stash the whole thing (sort this out in the writer)
+        ext = self.externals[doc["datum_id"]] = dict(doc)
+        ext["_document_type_"] = "datum"
 
     def descriptor(self, doc):
         """
@@ -209,6 +253,7 @@ class FileWriterCallbackBase:
             )
         data = self.acquisitions[uid]["data"]
         for k, entry in doc["data_keys"].items():
+            # logger.debug("entry %s: %s", k, entry)
             dd = data[k] = {}
             dd["source"] = entry.get("source", 'local')
             dd["dtype"] = entry.get("dtype", '')
@@ -220,6 +265,8 @@ class FileWriterCallbackBase:
             dd["object_name"] = entry.get("object_name", k)
             dd["data"] = []    # entry data goes here
             dd["time"] = []    # entry time stamps here
+            dd["external"] = entry.get("external") is not None
+            # logger.debug("dd %s: %s", k, data[k])
 
     def event(self, doc):
         """
@@ -248,12 +295,9 @@ class FileWriterCallbackBase:
         """
         if not self.scanning:
             return
-        # logger.info(doc)
-        # logger.info("-"*40)
-        uid = doc["uid"]
-        logger.debug("resource: uid |%s|", uid)
-        self.resources[uid] = dict(doc)
-        self.resources[uid].update(dict(data=[]))
+        # stash the whole thing (sort this out in the writer)
+        ext = self.externals[doc["uid"]] = dict(doc)
+        ext["_document_type_"] = "resource"
 
     def start(self, doc):
         """
@@ -280,7 +324,7 @@ class FileWriterCallbackBase:
         """
         if not self.scanning:
             return
-        self.status = doc["exit_status"]
+        self.exit_status = doc["exit_status"]
         self.stop_reason  = doc["reason"]
         self.stop_time = doc["time"]
 

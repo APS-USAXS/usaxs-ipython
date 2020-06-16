@@ -14,6 +14,7 @@ logger.info(__file__)
 import datetime
 import h5py
 import numpy as np
+import os
 import yaml
 
 # from .file_writer_base import FileWriterCallbackBase
@@ -81,6 +82,8 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         primary = self.root["/entry/instrument/bluesky_streams/primary"]
         for k, v in primary.items():
+            # logger.debug(v.name)
+            # logger.debug(v.keys())
             if k in self.detectors:
                 signal_type = "detector"
             elif k in self.positioners:
@@ -88,7 +91,10 @@ class NXWriterBase(FileWriterCallbackBase):
             else:
                 signal_type = "other"
             v.attrs["signal_type"] = signal_type            # group
-            v["value"].attrs["signal_type"] = signal_type   # dataset
+            try:
+                v["value"].attrs["signal_type"] = signal_type   # dataset
+            except KeyError:
+                logger.warning("Could not assign %s as signal type %s", k, signal_type)
 
     def create_NX_group(self, parent, specification):
         """
@@ -167,7 +173,9 @@ class NXWriterBase(FileWriterCallbackBase):
             if len(self.positioners) > 0:
                 axes_attribute = self.positioners        # TODO: what if wrong shape here?
 
-        # TODO: simplify; this code is convoluted (like the selection logic)
+        # TODO: rabbit-hole alert!  simplify
+        # this code is convoluted (like the selection logic)
+        # Is there a library to help? databroker? event_model? area_detector_handlers?
         if signal_attribute is not None:
             if signal_attribute in nxdata:
                 nxdata.attrs["signal"] = signal_attribute
@@ -419,39 +427,86 @@ class NXWriterBase(FileWriterCallbackBase):
         bluesky = self.create_NX_group(parent, "bluesky_streams:NXnote")
         for stream_name, uids in self.streams.items():
             if len(uids) != 1:
-                raise ValueError(f"stream {len(uids)} has descriptors, expecting only 1")
+                raise ValueError(
+                    f"stream {len(uids)} has descriptors, expecting only 1"
+                )
             group = self.create_NX_group(bluesky, stream_name+":NXnote")
-            group.attrs["uid"] = uids[0]
-            for k, v in self.acquisitions[uids[0]]["data"].items():
+            uid0 = uids[0]      # just get the one descriptor uid
+            group.attrs["uid"] = uid0
+            acquisition = self.acquisitions[uid0]    # just get the one descriptor
+            for k, v in acquisition["data"].items():
+                d = v["data"]
                 # NXlog is for time series data but NXdata makes an automatic plot
                 subgroup = self.create_NX_group(group, k+":NXdata")
-                subgroup.attrs["signal"] = "value"
-                subgroup.attrs["axes"] = ["time",]
 
-                d = v["data"]
-                if isinstance(d, list) and len(d) > 0:
-                    if v["dtype"] in ("string",):
-                        d = self.h5string(d)
-                    elif v["dtype"] in ("integer", "number"):
-                        d = np.array(d)
-                try:
-                    ds = subgroup.create_dataset("value", data=d)
+                if v["external"]:
+                    # FIXME: rabbit-hole alert! simplify
+                    # lots of variations possible
+                    
+                    # count number of unique resources (expect only 1)
+                    resource_id_list = []
+                    for datum_id in d:
+                        resource_id = self.externals[datum_id]["resource"]
+                        if resource_id not in resource_id_list:
+                            resource_id_list.append(resource_id)
+                    if len(resource_id_list) != 1:
+                        raise ValueError(
+                            f"{len(resource_id_list)}"
+                            f" unique resource UIDs: {resource_id_list}"
+                        )
+
+                    # reject unsupported specifications
+                    resource = self.externals[resource_id]
+                    if resource["spec"] not in ('AD_HDF5',):
+                        # HDF5-specific implementation for now
+                        raise ValueError(
+                            f'{k}: spec {resource["spec"]} not handled'
+                        )
+
+                    # logger.debug("%s: resource\n%s", k, yaml.dump(resource))
+                    fname = os.path.join(
+                        resource["root"],
+                        resource["resource_path"],
+                    )
+                    with h5py.File(fname, "r") as ad_h5:
+                        h5_obj = ad_h5["/entry/data/data"]
+                        ds = subgroup.create_dataset(
+                            "value", 
+                            data=h5_obj[()], 
+                            compression="lzf")
+                        ds.attrs["target"] = ds.name
+                        ds.attrs["source_file"] = fname
+                        ds.attrs["source_address"] = h5_obj.name
+                        ds.attrs["resource_id"] = resource_id
+                        ds.attrs["units"] = ""
+
+                    subgroup.attrs["signal"] = "value"
+                else:
+                    subgroup.attrs["signal"] = "value"
+                    subgroup.attrs["axes"] = ["time",]
+                    if isinstance(d, list) and len(d) > 0:
+                        if v["dtype"] in ("string",):
+                            d = self.h5string(d)
+                        elif v["dtype"] in ("integer", "number"):
+                            d = np.array(d)
                     try:
+                        ds = subgroup.create_dataset("value", data=d)
+                        ds.attrs["target"] = ds.name
+                        try:
+                            self.add_dataset_attributes(ds, v, k)
+                        except Exception as exc:
+                            logger.error("%s %s %s %s", v["dtype"], type(d), k, exc)
+                    except TypeError as exc:
+                        logger.error("%s %s %s %s", v["dtype"], k, f"TypeError({exc})", v["data"])
+                    if stream_name == "baseline":
+                        # make it easier to pick single values
+                        # identify start/end of acquisition
+                        ds = subgroup.create_dataset("value_start", data=d[0])
                         self.add_dataset_attributes(ds, v, k)
-                    except Exception as exc:
-                        logger.error(v["dtype"], type(d), k, exc)
-                except TypeError as exc:
-                    logger.error(v["dtype"], k, f"TypeError({exc})", v["data"])
-                ds.attrs["target"] = ds.name
-                if stream_name == "baseline":
-                    # make it easier to pick single values
-                    # identify start/end of acquisition
-                    ds = subgroup.create_dataset("value_start", data=d[0])
-                    self.add_dataset_attributes(ds, v, k)
-                    ds.attrs["target"] = ds.name
-                    ds = subgroup.create_dataset("value_end", data=d[-1])
-                    self.add_dataset_attributes(ds, v, k)
-                    ds.attrs["target"] = ds.name
+                        ds.attrs["target"] = ds.name
+                        ds = subgroup.create_dataset("value_end", data=d[-1])
+                        self.add_dataset_attributes(ds, v, k)
+                        ds.attrs["target"] = ds.name
 
                 t = np.array(v["time"])
                 ds = subgroup.create_dataset("EPOCH", data=t)
@@ -466,6 +521,11 @@ class NXWriterBase(FileWriterCallbackBase):
                 ds.attrs["target"] = ds.name
                 ds.attrs["start_time"] = t_start
                 ds.attrs["start_time_iso"] = datetime.datetime.fromtimestamp(t_start).isoformat()
+
+            # link images to parent names
+            for k in group:
+                if k.endswith("_image") and k[:-6] not in group:
+                    group[k[:-6]] = group[k]
 
         return bluesky
 
