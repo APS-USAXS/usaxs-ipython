@@ -139,6 +139,27 @@ class NXWriterBase(FileWriterCallbackBase):
         group.attrs["target"] = group.name      # for use as NeXus link
         return group
 
+    def getResourceFile(self, resource_id):
+        """
+        full path to the resource file specified by uid ``resource_id``
+
+        override in subclass as needed
+        """
+        # reject unsupported specifications
+        resource = self.externals[resource_id]
+        if resource["spec"] not in ('AD_HDF5',):
+            # HDF5-specific implementation for now
+            raise ValueError(
+                f'{k}: spec {resource["spec"]} not handled'
+            )
+
+        logger.debug("%s: resource\n%s", k, yaml.dump(resource))
+        fname = os.path.join(
+            resource["root"],
+            resource["resource_path"],
+        )
+        return fname
+
     def get_sample_title(self):
         """
         return the title for this sample
@@ -486,21 +507,9 @@ class NXWriterBase(FileWriterCallbackBase):
                             f" unique resource UIDs: {resource_id_list}"
                         )
 
-                    # reject unsupported specifications
-                    resource = self.externals[resource_id]
-                    if resource["spec"] not in ('AD_HDF5',):
-                        # HDF5-specific implementation for now
-                        raise ValueError(
-                            f'{k}: spec {resource["spec"]} not handled'
-                        )
-
-                    # logger.debug("%s: resource\n%s", k, yaml.dump(resource))
-                    fname = os.path.join(
-                        resource["root"],
-                        resource["resource_path"],
-                    )
-                    with h5py.File(fname, "r") as ad_h5:
-                        h5_obj = ad_h5["/entry/data/data"]
+                    fname = self.getResourceFile(resource_id)
+                    with h5py.File(fname, "r") as hdf_image_file_root:
+                        h5_obj = hdf_image_file_root["/entry/data/data"]
                         ds = subgroup.create_dataset(
                             "value", 
                             data=h5_obj[()], 
