@@ -23,3 +23,5 @@ from .plans.move_instrument import *
 
 # ensure nothing clobbered our logger
 from .session_logs import logger
+
+logger.info("bluesky startup is complete")
