@@ -147,6 +147,9 @@ class NXWriterUascan(NXWriterAps):
         if doc.get("plan_name") in self.supported_plans:
             # pay attention to this run of documents
             super().start(doc)
+            self.scanning = True
+        else:
+            self.scanning = False
 
     def writer(self):
         plan = self.metadata.get("plan_name")

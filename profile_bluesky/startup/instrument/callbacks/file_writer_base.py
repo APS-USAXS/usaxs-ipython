@@ -320,5 +320,6 @@ class FileWriterCallbackBase:
         self.exit_status = doc["exit_status"]
         self.stop_reason  = doc["reason"]
         self.stop_time = doc["time"]
+        self.scanning = False
 
         self.writer()
