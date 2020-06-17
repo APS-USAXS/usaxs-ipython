@@ -153,7 +153,7 @@ class NXWriterBase(FileWriterCallbackBase):
                 f'{k}: spec {resource["spec"]} not handled'
             )
 
-        logger.debug("%s: resource\n%s", k, yaml.dump(resource))
+        # logger.debug(yaml.dump(resource))
         fname = os.path.join(
             resource["root"],
             resource["resource_path"],
@@ -202,6 +202,7 @@ class NXWriterBase(FileWriterCallbackBase):
 
         self.root = None
         logger.info(f"wrote NeXus file: {fname}")
+        self.output_nexus_file = fname
 
     def write_data(self, parent):
         """
@@ -329,8 +330,8 @@ class NXWriterBase(FileWriterCallbackBase):
         metadata from the bluesky start document
         """
         bluesky = self.create_NX_group(parent, "bluesky_metadata:NXnote")
-        is_yaml = False
         for k, v in self.metadata.items():
+            is_yaml = False
             if isinstance(v, (dict, tuple, list)):
                 # fallback technique: save complicated structures as YAML text
                 v = yaml.dump(v)
@@ -508,6 +509,7 @@ class NXWriterBase(FileWriterCallbackBase):
                         )
 
                     fname = self.getResourceFile(resource_id)
+                    logger.info("reading %s from EPICS AD data file: %s", k, fname)
                     with h5py.File(fname, "r") as hdf_image_file_root:
                         h5_obj = hdf_image_file_root["/entry/data/data"]
                         ds = subgroup.create_dataset(
