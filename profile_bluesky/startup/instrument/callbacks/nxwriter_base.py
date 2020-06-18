@@ -5,8 +5,7 @@ define a NeXus file writer base for custom NeXus files
 
 __all__ = ["NXWriterBase", "NXWriterAps",]
 
-#from ..session_logs import logger
-from instrument.session_logs import logger
+from ..session_logs import logger
 logger.info(__file__)
 
 # TODO: add to apstools if/when this becomes sufficiently general
@@ -18,7 +17,7 @@ import os
 import yaml
 
 # from .file_writer_base import FileWriterCallbackBase
-from file_writer_base import FileWriterCallbackBase
+from .file_writer_base import FileWriterCallbackBase
 
 
 class NXWriterBase(FileWriterCallbackBase):
@@ -111,7 +110,13 @@ class NXWriterBase(FileWriterCallbackBase):
         """
         decide if a signal in the primary stream is a detector or a positioner
         """
-        primary = self.root["/entry/instrument/bluesky_streams/primary"]
+        try:
+            primary = self.root["/entry/instrument/bluesky_streams/primary"]
+        except KeyError:
+            raise KeyError(
+                f"no primary data stream in "
+                f"scan {self.scan_id} ({self.uid[:7]})"
+                )
         for k, v in primary.items():
             # logger.debug(v.name)
             # logger.debug(v.keys())
@@ -290,12 +295,16 @@ class NXWriterBase(FileWriterCallbackBase):
         nxentry.create_dataset("program_name", data="bluesky")
 
         self.write_instrument(nxentry)   # also writes streams and metadata
-        nxdata = self.write_data(nxentry)
+        try:
+            nxdata = self.write_data(nxentry)
+            nxentry.attrs["default"] = nxdata.name.split("/")[-1]
+        except KeyError as exc:
+            logger.warn(exc)
+        
         self.write_sample(nxentry)
         self.write_user(nxentry)
 
         # apply links
-        nxentry.attrs["default"] = nxdata.name.split("/")[-1]
         h5_addr = "/entry/instrument/source/cycle"
         if h5_addr in self.root:
             nxentry["run_cycle"] = self.root[h5_addr]
@@ -303,6 +312,8 @@ class NXWriterBase(FileWriterCallbackBase):
             logger.warning("No data for /entry/run_cycle")
         
         nxentry["title"] = self.get_sample_title()
+        nxentry["plan_name"] = self.root[
+            "/entry/instrument/bluesky_metadata/plan_name"]
 
         return nxentry
 
@@ -313,13 +324,22 @@ class NXWriterBase(FileWriterCallbackBase):
         nxinstrument = self.create_NX_group(parent, "instrument:NXinstrument")
         self.write_metadata(nxinstrument)
         self.write_streams(nxinstrument)
-        self.assign_signal_type()
+        try:
+            self.assign_signal_type()
+        except KeyError as exc:
+            logger.warn(exc)
 
         self.write_slits(nxinstrument)
-        self.write_detector(nxinstrument)
+        try:
+            self.write_detector(nxinstrument)
+        except KeyError as exc:
+            logger.warn(exc)
         self.write_undulator(nxinstrument)
         self.write_monochromator(nxinstrument)
-        self.write_positioner(nxinstrument)
+        try:
+            self.write_positioner(nxinstrument)
+        except KeyError as exc:
+            logger.warn(exc)
         self.write_source(nxinstrument)
         return nxinstrument
 
