@@ -5,8 +5,7 @@ define a base for file writer callbacks
 
 __all__ = ["FileWriterCallbackBase",]
 
-# from ..session_logs import logger
-from instrument.session_logs import logger
+from ..session_logs import logger
 logger.info(__file__)
 
 import datetime
