@@ -6,8 +6,9 @@ define a custom NeXus file writer base for uascan raw data files
 # TODO: needs a newFile function, similar to instrument.framework.callbacks.newSpecFile()
 
 __all__ = [
-    # "NXWriterAD", 
+    # "NXWriterFlyScan",
     "NXWriterUascan",
+    # "NXWriterSaxsWaxs",
     ]
 
 # from ..session_logs import logger
@@ -19,10 +20,62 @@ from .nxwriter_base import NXWriterAps
 import os
 
 
-class NXWriterAD(NXWriterAps):
+class OurCustomNXWriterBase(NXWriterAps):
+
+    instrument_name = 'APS 9-ID-C USAXS'
+    supported_plans = ("name", "the", "supported", "plans")
+
+    def get_sample_title(self):
+        """
+        return the title for this sample
+        """
+        return self.get_stream_link("user_data_sample_title")
+
+    def make_file_name(self):
+        """
+        this is the place to decide how to name data files
+        """
+        return super().make_file_name()     # default technique
+
+    def start(self, doc):
+        "ensure we only collect data for plans we are prepared to handle"
+        if doc.get("plan_name") in self.supported_plans:
+            # pay attention to this run of documents
+            super().start(doc)
+            self.scanning = True
+        else:
+            self.scanning = False
+
+    def writer(self):
+        "write the data if this plan is supported"
+        plan = self.metadata.get("plan_name")
+        if plan not in self.supported_plans:
+            return
+
+        super().writer()
+
+
+class NXWriterFlyScan(OurCustomNXWriterBase):
+
+    supported_plans = ("Flyscan", )
+
+    def write_streams(self, parent):
+        "write all bluesky document streams in this run"
+        bluesky = super().write_streams(parent)
+
+        if 'primary' not in bluesky and 'mca' in bluesky:
+            # link the two
+            bluesky['primary'] = bluesky['mca']
+
+        return bluesky
+
+
+class NXWriterSaxsWaxs(OurCustomNXWriterBase):
     """
     writes NeXus data file from USAXS instrument SAXS & WAXS area detector scans
     """
+
+    supported_plans = ("SAXS", "WAXS",)
 
     def getResourceFile(self, resource_id):
         """
@@ -42,7 +95,7 @@ class NXWriterAD(NXWriterAps):
         return fname
 
 
-class NXWriterUascan(NXWriterAps):
+class NXWriterUascan(OurCustomNXWriterBase):
     """
     write raw uascan data to a NeXus/HDF5 file, no specific application definition
 
@@ -128,40 +181,11 @@ class NXWriterUascan(NXWriterAps):
     # add RE.md["detectors"] = list : first item is for NXdata @signal attribute
     # add RE.md["positioners"] = list : entire list is for NXdata @axes attribute
 
-    instrument_name = 'APS 9-ID-C USAXS'
     nxdata_signal = "PD_USAXS"
     nxdata_signal_axes = ["a_stage_r",]
     supported_plans = ("uascan", )
 
     # convention: methods written in alphabetical order
-
-    def get_sample_title(self):
-        """
-        return the title for this sample
-        """
-        return self.get_stream_link("user_data_sample_title")
-
-    def make_file_name(self):
-        """
-        this is the place to decide how to name data files
-        """
-        return super().make_file_name()     # default technique
-
-    def start(self, doc):
-        "ensure we only collect data for plans we are prepared to handle"
-        if doc.get("plan_name") in self.supported_plans:
-            # pay attention to this run of documents
-            super().start(doc)
-            self.scanning = True
-        else:
-            self.scanning = False
-
-    def writer(self):
-        plan = self.metadata.get("plan_name")
-        if plan not in self.supported_plans:
-            return
-
-        super().writer()
 
     def write_slits(self, parent):
         """
