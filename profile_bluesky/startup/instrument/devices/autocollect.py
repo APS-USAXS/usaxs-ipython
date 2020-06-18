@@ -27,12 +27,16 @@ from ..plans import run_command_file
 class AutoCollectDataDevice(Device):
     trigger_signal = Component(EpicsSignal, "Start", string=True)
     commands = Component(EpicsSignal, "StrInput", string=True)
-    permit = Component(EpicsSignal, "Permit", string=True)
+    # TODO: permit = Component(EpicsSignal, "Permit", string=True)
     idle_interval = 2       # seconds
 
     def remote_ops(self, *args, **kwargs):
         """
         Bluesky plan to enable PV-directed data collection
+
+        To start the automatic data collection plan:
+
+            RE(auto_collect.remote_ops())
 
         The plan will exit when:
 
@@ -48,11 +52,12 @@ class AutoCollectDataDevice(Device):
         * a named command defined here
         * a command file in the present working directory
         """
-        yield from bps.mv(self.permit, "enable")
+        # TODO: yield from bps.mv(self.permit, "enable")
         yield from bps.sleep(1)
 
         logger.info("waiting for user commands")
-        while self.permit.get() in (1, "enable"):
+        # TODO: while self.permit.get() in (1, "enable"):
+        while True:
             if self.trigger_signal.get() in (1, "start"):
                 logger.debug("starting user commands")
                 yield from bps.mv(self.trigger_signal, 0)
@@ -75,5 +80,5 @@ class AutoCollectDataDevice(Device):
 
 
 auto_collect = AutoCollectDataDevice(
-    "9idcLAX:AutoCollection", 
+    "9idcLAX:AutoCollection",   # NOTE: no trailing colon here!
     name="auto_collect")
