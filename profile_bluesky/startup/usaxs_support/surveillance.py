@@ -55,7 +55,6 @@ def _write_archive_dict_(archive_dict):
                 fp.write(f"{v}\n")
             fp.write("\n")
         logger.debug("Archive: %s", archive_file)
-        print(f"Archive: {archive_file}")
     return archive_dict
 
 
@@ -72,9 +71,9 @@ def _create_archive_dict_(frame, text):
         if os.path.exists(frame.filename):
             with open(frame.filename, "r") as fp:
                 archive["source_contents"] = fp.readlines()
-            logger.debug(f"source code file: {frame.filename}")
+            logger.debug("source code file: %s", frame.filename)
         else:
-            logger.debug(f"FileNotFound: {frame.filename}")
+            logger.debug("FileNotFound: %s", frame.filename)
             archive["source_contents"] = "source not found"
     return archive
 
@@ -86,7 +85,7 @@ def instrument_archive(text=None):
     Any text supplied by the caller will be written at the start of the archive.
     """
     frameinfo = inspect.getouterframes(inspect.currentframe(), 2)
-    logger.debug(f"instrument_archive() called from: {frameinfo[1].filename}")
+    logger.debug("instrument_archive() called from: %s", frameinfo[1].filename)
     
     # archive text and caller source file
     _write_archive_dict_(
