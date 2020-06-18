@@ -54,7 +54,8 @@ def _write_archive_dict_(archive_dict):
             else:
                 fp.write(f"{v}\n")
             fp.write("\n")
-        logger.debug(f"Archive: {archive_file}")
+        logger.debug("Archive: %s", archive_file)
+        print(f"Archive: {archive_file}")
     return archive_dict
 
 
@@ -86,9 +87,14 @@ def instrument_archive(text=None):
     """
     frameinfo = inspect.getouterframes(inspect.currentframe(), 2)
     logger.debug(f"instrument_archive() called from: {frameinfo[1].filename}")
-    archive = _create_archive_dict_(frameinfo[1], text or "")
-    archive = _write_archive_dict_(archive)
-    return archive
+    
+    # archive text and caller source file
+    _write_archive_dict_(
+        _create_archive_dict_(frameinfo[1], text or "")
+    )
+
+    # only return the text
+    return text or ""
 
 
 def looky():
