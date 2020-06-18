@@ -46,7 +46,13 @@ class UserDataDevice(Device):
     def set_state_blocking(self, msg):
         """ophyd: tell EPICS about what we are doing"""
         msg = trim_string_for_EPICS(msg)
-        self.state.put(msg)
+        try:
+            self.state.put(msg)
+        except Exception as exc:
+            logger.error(
+                "Could not put message (%s) to USAXS state PV: %s",
+                msg,
+                exc)
 
 
 bss_user_info = ApsBssUserInfoDevice(
