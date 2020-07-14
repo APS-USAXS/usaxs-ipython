@@ -4,6 +4,7 @@ EPICS data about the user
 """
 
 __all__ = [
+    'apsbss',
     'bss_user_info',
     'user_data',
     ]
@@ -13,6 +14,8 @@ logger.info(__file__)
 
 from bluesky import plan_stubs as bps
 from apstools.devices import ApsBssUserInfoDevice
+from apstools.beamtime.apsbss_ophyd import EpicsBssDevice
+from apstools.plans import addDeviceDataAsStream
 from apstools.utils import trim_string_for_EPICS
 from ophyd import Component, Device, EpicsSignal
 
@@ -54,10 +57,18 @@ class UserDataDevice(Device):
                 msg,
                 exc)
 
-
 bss_user_info = ApsBssUserInfoDevice(
     "9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
+
+# eventually, apsbss will replace bss_user_info
+class MyBssDevice(EpicsBssDevice):
+    def addDeviceDataAsStream(self, stream_name=None):
+        """write the data as streams"""
+        stream_name = stream_name or "apsbss"
+        yield from addDeviceDataAsStream(self, stream_name)
+
+apsbss = MyBssDevice("9idc:bss:", name="apsbss")
 
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)
