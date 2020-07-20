@@ -9,6 +9,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.synApps.busy import BusyStatus
+from apstools.plans import addDeviceDataAsStream
 from apstools.utils import run_in_thread
 from bluesky import plan_stubs as bps
 from collections import OrderedDict
@@ -33,7 +34,7 @@ from .scalers import use_EPICS_scaler_channels
 from .shutters import ti_filter_shutter
 from .stages import a_stage, d_stage
 from .struck3820 import struck
-from .user_data import user_data
+from .user_data import apsbss, user_data
 
 
 FALLBACK_DIR = "/share1/USAXS_data"
@@ -174,7 +175,7 @@ class UsaxsFlyScanDevice(Device):
         _md.update(md or {})
         _md["hdf5_file"] = self.saveFlyData_HDF5_file
         _md["hdf5_path"] = self.saveFlyData_HDF5_dir
-        
+
         yield from bps.open_run(md=_md)
         specwriter._cmt("start", "start USAXS Fly scan")
         yield from bps.mv(
@@ -224,27 +225,13 @@ class UsaxsFlyScanDevice(Device):
             ti_filter_shutter, "close",
             )
 
-
-        def addDeviceDataAsStream(devices, label):
-            """
-            fixes bug in apstools.plans.addDeviceDataAsStream
-
-            * https://github.com/BCDA-APS/apstools/issues/255
-            * https://github.com/APS-USAXS/ipython-usaxs/issues/307
-            """
-            yield from bps.create(name=label)
-            if not isinstance(devices, list):     # just in case...
-                devices = [devices]
-            for d in devices:
-                yield from bps.read(d)
-            yield from bps.save()
-
-        # add an event with our MCA data in the "mca" stream
-        # TODO: yield from APS_plans.addDeviceDataAsStream(
         yield from addDeviceDataAsStream(
             [struck.mca1, struck.mca2, struck.mca3], "mca")
-
         logger.debug(f"after return: {time.time() - self.t0}s")
+
+        # save experiment metadata
+        yield from apsbss.addDeviceDataAsStream("apsbss")
+
         yield from user_data.set_state_plan("fly scan finished")
         yield from bps.close_run()
 

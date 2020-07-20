@@ -25,7 +25,7 @@ from ..devices import scaler0, I0, I00, I000, upd2, trd
 from ..devices import terms
 from ..devices import ti_filter_shutter
 from ..devices import upd_controls, I0_controls, I00_controls, trd_controls
-from ..devices import user_data
+from ..devices import apsbss, user_data
 
 
 ### notes for preliminary testing
@@ -165,6 +165,7 @@ def uascan(
     @bpp.run_decorator(md=_md)
     def _scan_():
         count_time = count_time_base
+        yield from apsbss.addDeviceDataAsStream("apsbss")
 
         ar0 = terms.USAXS.center.AR.get()
         sy0 = s_stage.y.position

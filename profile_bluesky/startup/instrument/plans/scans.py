@@ -22,6 +22,7 @@ import os
 import time
 
 from ..devices import a_stage, as_stage
+from ..devices import apsbss
 from ..devices import ar_start
 from ..devices import autoscale_amplifiers
 from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter
@@ -235,7 +236,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
  
     from .command_list import after_plan, before_plan
 
-    bluesky_runengine_running = RE.state != "idle"
+    # bluesky_runengine_running = RE.state != "idle"
  
     yield from IfRequestedStopBeforeNextScan()
 
@@ -254,12 +255,12 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
         s_stage.y, pos_Y,
     )
 
-    scan_title_clean = cleanupText(scan_title)
+    scan_title_clean = cleanupText(scan_title)  # TODO: why unused?
 
     # SPEC-compatibility symbols
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
     # use our specwriter to get a pseudo-SPEC file name
-    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
+    DATAFILE = os.path.split(specwriter.spec_filename)[-1]  # TODO: why unused?
 
     ts = str(datetime.datetime.now())
     yield from bps.mv(
