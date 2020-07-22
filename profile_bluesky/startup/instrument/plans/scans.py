@@ -22,6 +22,7 @@ import os
 import time
 
 from ..devices import a_stage, as_stage
+from ..devices import apsbss
 from ..devices import ar_start
 from ..devices import autoscale_amplifiers
 from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter
@@ -218,20 +219,22 @@ def preSWAXStune(md={}):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def USAXSscan(x, y, thickness_mm, title, md={}):
+def USAXSscan(x, y, thickness_mm, title, md=None):
     """
     general scan macro for fly or step USAXS with 1D or 2D collimation
     """
+    _md = apsbss.update_MD(md or {})
     if terms.FlyScan.use_flyscan.get():
-        yield from Flyscan(x, y, thickness_mm, title, md={})
+        yield from Flyscan(x, y, thickness_mm, title, md=_md)
     else:
-        yield from USAXSscanStep(x, y, thickness_mm, title, md={})
+        yield from USAXSscanStep(x, y, thickness_mm, title, md=_md)
 
 
-def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
+def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     general scan macro for step USAXS for both 1D & 2D collimation
     """
+    _md = apsbss.update_MD(md or {})
  
     from .command_list import after_plan, before_plan
 
@@ -302,7 +305,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
 
     # measure transmission values using pin diode if desired
     yield from bps.install_suspender(suspend_BeamInHutch)
-    yield from measure_USAXS_Transmission(md=md)
+    yield from measure_USAXS_Transmission(md=_md)
 
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
@@ -333,8 +336,6 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
         user_data.spec_scan, str(SCAN_N),
     )
 
-    _md = {}
-    _md.update(md)
     _md['plan_name'] = "uascan"
     _md['plan_args'] = dict(
         pos_X = pos_X,
@@ -439,10 +440,11 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md={}):
     yield from after_plan(weight=3)
     
  
-def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
+def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     do one USAXS Fly Scan
     """
+    _md = apsbss.update_MD(md or {})
     from .command_list import after_plan, before_plan
 
     bluesky_runengine_running = RE.state != "idle"
@@ -523,7 +525,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
     yield from bps.install_suspender(suspend_BeamInHutch)
-    yield from measure_USAXS_Transmission(md=md)
+    yield from measure_USAXS_Transmission(md=_md)
 
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
@@ -652,10 +654,11 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md={}):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
+def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect SAXS data
     """
+    _md = apsbss.update_MD(md or {})
     from .command_list import after_plan, before_plan
 
     yield from IfRequestedStopBeforeNextScan()
@@ -778,13 +781,11 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler1.count, 1,
     )
 
-    _md = OrderedDict()
-    _md.update(md or {})
     _md['plan_name'] = "SAXS"
     _md["hdf5_file"] = SAXS_file_name
     _md["hdf5_path"] = SAXSscan_path
 
-    yield from areaDetectorAcquire(saxs_det, _md)
+    yield from areaDetectorAcquire(saxs_det, md=_md)
     ts = str(datetime.datetime.now())
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
@@ -810,10 +811,11 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md={}):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
+def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect WAXS data
     """
+    _md = apsbss.update_MD(md or {})
     from .command_list import after_plan, before_plan
 
     yield from IfRequestedStopBeforeNextScan()
@@ -938,8 +940,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md={}):
         scaler1.count, 1,
     )
 
-    _md = OrderedDict()
-    _md.update(md or {})
     _md['plan_name'] = "WAXS"
     _md["hdf5_file"] = WAXS_file_name
     _md["hdf5_path"] = WAXSscan_path
