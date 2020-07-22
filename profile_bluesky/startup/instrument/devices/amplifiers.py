@@ -5,10 +5,10 @@ detectors, amplifiers, and related support
 #            Define local PD address:
  if(Use_DLPCA300){
      PDstring = "pd01:seq02"
-     UPD_PV    =    "9idcUSX:pd01:seq02"    
+     UPD_PV    =    "9idcUSX:pd01:seq02"
   }else{
      PDstring = "pd01:seq01"
-     UPD_PV    =    "9idcUSX:pd01:seq01"  
+     UPD_PV    =    "9idcUSX:pd01:seq01"
   }
 
 ========  =================  ====================  ===================  ===========
@@ -22,9 +22,9 @@ I000      9idcLAX:vsc:c0.S6  9idcRIO:fem04:seq01:  None
 TRD       9idcLAX:vsc:c0.S5  9idcRIO:fem05:seq01:  9idcLAX:pd05:seq01:
 ========  =================  ====================  ===================  ===========
 
-A PV (``9idcLAX:femto:model``) tells which UPD amplifier and sequence 
-programs we're using now.  This PV is read-only since it is set when 
-IOC boots, based on a soft link that configures the IOC.  The soft 
+A PV (``9idcLAX:femto:model``) tells which UPD amplifier and sequence
+programs we're using now.  This PV is read-only since it is set when
+IOC boots, based on a soft link that configures the IOC.  The soft
 link may be changed using the ``use200pd``  or  ``use300pd`` script.
 
 We only need to get this once, get it via one-time call with PyEpics
@@ -84,7 +84,7 @@ from ophyd.scaler import ScalerCH, ScalerChannel
 from ophyd.utils import OrderedDefaultDict
 
 from .aps_source import aps
-from ..framework import RE
+from ..framework import RE, sd
 from .scalers import *
 from .scalers import I0_SIGNAL, I00_SIGNAL, UPD_SIGNAL, TRD_SIGNAL
 
@@ -115,7 +115,7 @@ class CurrentAmplifierDevice(Device):
 class FemtoAmplifierDevice(CurrentAmplifierDevice):
     gainindex = Component(EpicsSignal, "gainidx", kind="omitted")
     description = Component(EpicsSignal, "femtodesc", kind="omitted")
-    
+
     # gain settling time for the device is <150ms
     settling_time = Component(Signal, value=0.08)
 
@@ -125,11 +125,11 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
         self._gain_info_known = False
         self.num_gains = 0
         self.acceptable_gain_values = ()
-        
+
     def __init_gains__(self, enum_strs):
         """
         learn range (gain) values from EPICS database
-        
+
         provide a list of acceptable gain values for later use
         """
         acceptable = [s for s in enum_strs if s != 'UNDEF']
@@ -147,23 +147,23 @@ class FemtoAmplifierDevice(CurrentAmplifierDevice):
             # verify all gains use same suffix text
             msg = f"gainindex[{i}] = {s}, expected ending '{self.gain_suffix}'"
             assert s[s.find(" "):] == self.gain_suffix, msg
-        
+
         self._gain_info_known = True
 
     def setGain(self, target):
         """
         set the gain on the amplifier
-        
-        Since the gain values are available from EPICS, 
-        we use that to provide a method that can set the 
+
+        Since the gain values are available from EPICS,
+        we use that to provide a method that can set the
         gain by any of these values:
-        
+
         * gain text value (from EPICS)
         * integer index number
         * desired gain floating-point value
-        
+
         Assumptions:
-        
+
         * gain label (from EPICS) is ALWAYS: "{float} V/A"
         * float mantissa is always one digit
         """
@@ -224,7 +224,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     lurate = Component(EpicsSignalRO, "lurate")
     lucurrent = Component(EpicsSignalRO, "lucurrent")
     updating = Component(EpicsSignalRO, "updating")
-    
+
     max_count_rate = Component(Signal, value=950000)
 
     def __init__(self, prefix, **kwargs):
@@ -238,7 +238,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
     def __init_gains__(self, enum_strs):
         """
         learn range (gain) values from EPICS database
-        
+
         provide a list of acceptable gain values for later use
         """
         acceptable = list(enum_strs)
@@ -248,7 +248,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
         acceptable += range(num_gains)
         self.num_gains = num_gains
         self.acceptable_gain_values = acceptable
-        
+
         # assume gain labels are formatted "{float} {other_text}"
         s = acceptable[0]
         self.gain_suffix = s[s.find(" "):]
@@ -256,23 +256,23 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
             # verify all gains use same suffix text
             msg = f"reqrange[{i}] = {s}, expected ending: '{self.gain_suffix}'"
             assert s[s.find(" "):] == self.gain_suffix, msg
-        
+
         self._gain_info_known = True
 
     def setGain(self, target):
         """
         plan: set the gain on the autorange controls
-        
-        Since the gain values are available from EPICS, 
-        we use that to provide a method that can request the 
+
+        Since the gain values are available from EPICS,
+        we use that to provide a method that can request the
         gain by any of these values:
-        
+
         * gain text value (from EPICS)
         * integer index number
         * desired gain floating-point value
-        
+
         Assumptions:
-        
+
         * gain label (from EPICS) is ALWAYS: "{float} {self.gain_suffix}"
         * float mantissa is always one digit
         """
@@ -319,7 +319,7 @@ class AmplifierAutoDevice(CurrentAmplifierDevice):
 class DetectorAmplifierAutorangeDevice(Device):
     """
     Coordinate the different objects that control a diode or ion chamber
-    
+
     This is a convenience intended to simplify tasks such
     as measuring simultaneously the backgrounds of all channels.
     """
@@ -341,7 +341,7 @@ class DetectorAmplifierAutorangeDevice(Device):
 def group_controls_by_scaler(controls):
     """
     return dictionary of [controls] keyed by common scaler support
-    
+
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
@@ -363,7 +363,7 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
     """plan: internal: measure amplifier backgrounds for signals sharing a common scaler"""
     scaler = control_list[0].scaler
     signals = [c.signal for c in control_list]
-    
+
     stage_sigs = {}
     stage_sigs["scaler"] = scaler.stage_sigs   # benign
     original = {}
@@ -384,21 +384,21 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             yield from control.auto.setGain(n)
             settling_time = max(settling_time, control.femto.settling_time.get())
         yield from bps.sleep(settling_time)
-        
+
         def getScalerChannelPvname(scaler_channel):
             try:
                 return scaler_channel.pvname        # EpicsScaler channel
             except AttributeError:
                 return scaler_channel.chname.get()  # ScalerCH channel
-        
+
         # readings is a PV-keyed dictionary
         readings = {getScalerChannelPvname(s): [] for s in signals}
-        
+
         for m in range(num_readings):
             yield from bps.sleep(0.05)  # allow amplifier to stabilize on gain
             # count and wait to complete
             yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
-            
+
             for s in signals:
                 pvname = getScalerChannelPvname(s)
                 value = s.get()     # EpicsScaler channel value or ScalerCH ScalerChannelTuple
@@ -406,7 +406,7 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
                     value = s.s.get()     # ScalerCH channel value
                 # logger.debug(f"scaler reading {m+1}: value: {value}")
                 readings[pvname].append(value)
-    
+
         s_range_name = f"gain{n}"
         for control in control_list:
             g = getattr(control.auto.ranges, s_range_name)
@@ -420,8 +420,8 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
             msg += f" range={n}"
             msg += f" gain={ _gain_to_str_(control.auto.gain.get())}"
             msg += f" bkg={g.background.get()}"
-            msg += f" +/- {g.background_error.get()}" 
-                
+            msg += f" +/- {g.background_error.get()}"
+
             logger.info(msg)
 
     scaler.stage_sigs = stage_sigs["scaler"]
@@ -434,13 +434,13 @@ def _scaler_background_measurement_(control_list, count_time=0.2, num_readings=8
 def measure_background(controls, shutter=None, count_time=0.2, num_readings=5):
     """
     plan: measure detector backgrounds simultaneously
-    
+
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
     assert isinstance(controls, (tuple, list)), "controls must be a list"
     scaler_dict = group_controls_by_scaler(controls)
-    
+
     if shutter is not None:
         yield from bps.mv(shutter, "close")
 
@@ -481,26 +481,26 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
             yield from control.auto.setGain(gain)
         last_gain_dict[control.auto.gain.name] = control.auto.gain.get()
         settling_time = max(settling_time, control.femto.settling_time.get())
-    
+
     yield from bps.sleep(settling_time)
 
     # Autoscale has converged if no gains change
     # Also, make sure no detector count rates are stuck at max
-    
+
     complete = False
     for iteration in range(max_iterations):
         converged = []      # append True is convergence criteria is satisfied
         yield from bps.trigger(scaler, wait=True)        #timeout=count_time+1.0)
-        
+
         # amplifier sequence program (in IOC) will adjust the gain now
-        
+
         for control in controls:
             # any gains changed?
             gain_now = control.auto.gain.get()
             gain_previous = last_gain_dict[control.auto.gain.name]
             converged.append(gain_now == gain_previous)
             last_gain_dict[control.auto.gain.name] = gain_now
-        
+
             # are we topped up on any detector?
             max_rate = control.auto.max_count_rate.get()
             if isinstance(control.signal, ScalerChannel):   # ophyd.ScalerCH
@@ -512,7 +512,7 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
                 raise ValueError(f"unexpected control.signal: {control.signal}")
             converged.append(actual_rate <= max_rate)
             logger.debug(f"gain={gain_now}  rate: {actual_rate}  max: {max_rate}  converged={converged}")
-        
+
         if False not in converged:      # all True?
             complete = True
             for control in controls:
@@ -538,13 +538,13 @@ def _scaler_autoscale_(controls, count_time=0.05, max_iterations=9):
 def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations=9):
     """
     bluesky plan: autoscale detector amplifiers simultaneously
-    
+
     controls [obj]
         list (or tuple) of ``DetectorAmplifierAutorangeDevice``
     """
     assert isinstance(controls, (tuple, list)), "controls must be a list"
     scaler_dict = group_controls_by_scaler(controls)
-    
+
     if shutter is not None:
         yield from bps.mv(shutter, "open")
 
@@ -555,8 +555,8 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
             logger.info(msg)
             try:
                 yield from _scaler_autoscale_(
-                    control_list, 
-                    count_time=count_time, 
+                    control_list,
+                    count_time=count_time,
                     max_iterations=max_iterations)
             except AutoscaleError as exc:
                 emsg = f"{exc} - will continue despite warning"
@@ -585,6 +585,12 @@ trd_autorange_controls = AmplifierAutoDevice("9idcLAX:pd05:seq01:", name="trd_au
 I0_autorange_controls = AmplifierAutoDevice("9idcLAX:pd02:seq01:", name="I0_autorange_controls")
 I00_autorange_controls = AmplifierAutoDevice("9idcLAX:pd03:seq01:", name="I00_autorange_controls")
 
+# record at start and end of each scan
+sd.baseline.append(upd_autorange_controls)
+sd.baseline.append(trd_autorange_controls)
+sd.baseline.append(I0_autorange_controls)
+sd.baseline.append(I00_autorange_controls)
+
 upd_controls = DetectorAmplifierAutorangeDevice(
     "PD_USAXS",
     scaler0,
@@ -596,7 +602,7 @@ upd_controls = DetectorAmplifierAutorangeDevice(
 #upd_photocurrent = ComputedScalerAmplifierSignal(
 #    name="upd_photocurrent", parent=upd_controls)
 upd_photocurrent_calc = SwaitRecord(
-    "9idcLAX:USAXS:upd", 
+    "9idcLAX:USAXS:upd",
     name="upd_photocurrent_calc")
 upd_photocurrent = upd_photocurrent_calc.get()
 
@@ -611,7 +617,7 @@ trd_controls = DetectorAmplifierAutorangeDevice(
 #trd_photocurrent = ComputedScalerAmplifierSignal(
 #    name="trd_photocurrent", parent=trd_controls)
 trd_photocurrent_calc = SwaitRecord(
-    "9idcLAX:USAXS:trd", 
+    "9idcLAX:USAXS:trd",
     name="trd_photocurrent_calc")
 trd_photocurrent = trd_photocurrent_calc.get()
 
@@ -626,7 +632,7 @@ I0_controls = DetectorAmplifierAutorangeDevice(
 #I0_photocurrent = ComputedScalerAmplifierSignal(
 #    name="I0_photocurrent", parent=I0_controls)
 I0_photocurrent_calc = SwaitRecord(
-    "9idcLAX:USAXS:I0", 
+    "9idcLAX:USAXS:I0",
     name="I0_photocurrent_calc")
 I0_photocurrent = I0_photocurrent_calc.get()
 
@@ -641,13 +647,13 @@ I00_controls = DetectorAmplifierAutorangeDevice(
 #I00_photocurrent = ComputedScalerAmplifierSignal(
 #    name="I00_photocurrent", parent=I00_controls)
 I00_photocurrent_calc = SwaitRecord(
-    "9idcLAX:USAXS:I00", 
+    "9idcLAX:USAXS:I00",
     name="I00_photocurrent_calc")
 I00_photocurrent = I00_photocurrent_calc.get()
 
 
 I000_photocurrent_calc = SwaitRecord(
-    "9idcLAX:USAXS:I000", 
+    "9idcLAX:USAXS:I000",
     name="I000_photocurrent_calc")
 I000_photocurrent = I000_photocurrent_calc.get()
 
