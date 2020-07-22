@@ -56,12 +56,28 @@ class UserDataDevice(Device):
                 msg,
                 exc)
 
+
+class CustomEpicsBssDevice(EpicsBssDevice):
+
+    def get_PI(self):
+        """return last name of principal investigator or 1st user"""
+        if self.proposal.number_users_in_pvs.get() == 0:
+            return "no users listed"
+        else:
+            for i in range(9):
+                user = getattr(self.proposal, f"user{i+1}")
+                if user.pi_flag.get() in ('ON', 1):
+                    return user.last_name.get()
+
+
 bss_user_info = ApsBssUserInfoDevice(
     "9id_bss:", name="bss_user_info")
 sd.baseline.append(bss_user_info)
 
 # eventually, apsbss will replace bss_user_info
-apsbss = ApsBssUserInfoDevice("9idc:bss:", name="apsbss")
+apsbss = CustomEpicsBssDevice("9idc:bss:", name="apsbss")
+sd.baseline.append(apsbss.proposal.raw)
+sd.baseline.append(apsbss.esaf.raw)
 
 user_data = UserDataDevice(name="user_data")
 sd.baseline.append(user_data)
