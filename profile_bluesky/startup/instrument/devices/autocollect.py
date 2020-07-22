@@ -27,7 +27,7 @@ from ..plans import run_command_file
 class AutoCollectDataDevice(Device):
     trigger_signal = Component(EpicsSignal, "Start", string=True)
     commands = Component(EpicsSignal, "StrInput", string=True)
-    # TODO: permit = Component(EpicsSignal, "Permit", string=True)
+    permit = Component(EpicsSignal, "Permit", string=True)
     idle_interval = 2       # seconds
 
     def remote_ops(self, *args, **kwargs):
@@ -52,12 +52,11 @@ class AutoCollectDataDevice(Device):
         * a named command defined here
         * a command file in the present working directory
         """
-        # TODO: yield from bps.mv(self.permit, "enable")
+        yield from bps.mv(self.permit, "enable")
         yield from bps.sleep(1)
 
         logger.info("waiting for user commands")
-        # TODO: while self.permit.get() in (1, "enable"):
-        while True:
+        while self.permit.get() in (1, "enable"):
             if self.trigger_signal.get() in (1, "start"):
                 logger.debug("starting user commands")
                 yield from bps.mv(self.trigger_signal, 0)
