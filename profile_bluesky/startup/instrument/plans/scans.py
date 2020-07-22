@@ -22,7 +22,6 @@ import os
 import time
 
 from ..devices import a_stage, as_stage
-from ..devices import apsbss
 from ..devices import ar_start
 from ..devices import autoscale_amplifiers
 from ..devices import ccd_shutter, mono_shutter, ti_filter_shutter

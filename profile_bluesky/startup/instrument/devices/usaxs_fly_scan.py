@@ -34,7 +34,7 @@ from .scalers import use_EPICS_scaler_channels
 from .shutters import ti_filter_shutter
 from .stages import a_stage, d_stage
 from .struck3820 import struck
-from .user_data import apsbss, user_data
+from .user_data import user_data
 
 
 FALLBACK_DIR = "/share1/USAXS_data"
@@ -228,9 +228,6 @@ class UsaxsFlyScanDevice(Device):
         yield from addDeviceDataAsStream(
             [struck.mca1, struck.mca2, struck.mca3], "mca")
         logger.debug(f"after return: {time.time() - self.t0}s")
-
-        # save experiment metadata
-        yield from apsbss.addDeviceDataAsStream("apsbss")
 
         yield from user_data.set_state_plan("fly scan finished")
         yield from bps.close_run()
