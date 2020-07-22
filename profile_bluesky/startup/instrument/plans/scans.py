@@ -224,6 +224,8 @@ def USAXSscan(x, y, thickness_mm, title, md=None):
     general scan macro for fly or step USAXS with 1D or 2D collimation
     """
     _md = apsbss.update_MD(md or {})
+    _md["sample_thickness_mm"] = thickness_mm
+    _md["title"] = title
     if terms.FlyScan.use_flyscan.get():
         yield from Flyscan(x, y, thickness_mm, title, md=_md)
     else:
@@ -235,11 +237,13 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     general scan macro for step USAXS for both 1D & 2D collimation
     """
     _md = apsbss.update_MD(md or {})
- 
+    _md["sample_thickness_mm"] = thickness
+    _md["title"] = scan_title
+
     from .command_list import after_plan, before_plan
 
     # bluesky_runengine_running = RE.state != "idle"
- 
+
     yield from IfRequestedStopBeforeNextScan()
 
     yield from mode_USAXS()
@@ -273,7 +277,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
-        user_data.scan_macro, "uascan",    # TODO: is this the right keyword? 
+        user_data.scan_macro, "uascan",    # TODO: is this the right keyword?
     )
 
     yield from bps.mv(
@@ -343,9 +347,9 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         thickness = thickness,
         scan_title = scan_title,
         )
-        
+
     startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
-    endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())  
+    endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())
     yield from uascan(
         startAngle,
         terms.USAXS.ar_val_center.get(),
@@ -367,8 +371,8 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     #    dy0, SDD_mm, ay0, SAD_mm,
     #    useDynamicTime=True,
     #    md={}
-    #): 
-    
+    #):
+
     #class Parameters_USAXS(Device):
     #"""internal values shared with EPICS"""
     #AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
@@ -438,13 +442,16 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     # measure_USAXS_PD_dark_currents    # used to be here, not now
     yield from after_plan(weight=3)
-    
- 
+
+
 def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     do one USAXS Fly Scan
     """
     _md = apsbss.update_MD(md or {})
+    _md["sample_thickness_mm"] = thickness
+    _md["title"] = scan_title
+
     from .command_list import after_plan, before_plan
 
     bluesky_runengine_running = RE.state != "idle"
@@ -659,6 +666,9 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     collect SAXS data
     """
     _md = apsbss.update_MD(md or {})
+    _md["sample_thickness_mm"] = thickness
+    _md["title"] = scan_title
+
     from .command_list import after_plan, before_plan
 
     yield from IfRequestedStopBeforeNextScan()
@@ -816,6 +826,9 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     collect WAXS data
     """
     _md = apsbss.update_MD(md or {})
+    _md["sample_thickness_mm"] = thickness
+    _md["title"] = scan_title
+
     from .command_list import after_plan, before_plan
 
     yield from IfRequestedStopBeforeNextScan()
