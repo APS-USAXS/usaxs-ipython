@@ -564,6 +564,18 @@ Additionally, you can check this file for validity and that all PVs exist with t
 					<PV label="BSS_timestamp" 		pvname="9id_bss:timestamp" string="true" />
 					<PV label="BSS_title" 			pvname="9id_bss:title" string="true" />
 
+					<!-- apsbss experiment metadata  -->
+                    <PV label="ESAF_number" 		pvname="9idc:bss:esaf:id" string="true" />
+                    <PV label="ESAF_title" 		    pvname="9idc:bss:esaf:title" string="true" />
+                    <PV label="ESAF_raw" 		    pvname="9idc:bss:esaf:raw" string="true">
+                        <attribute name="text_format" value="yaml" />
+                    </PV>
+                    <PV label="Proposal_number" 	pvname="9idc:bss:proposal:id" string="true" />
+                    <PV label="Proposal_title" 		pvname="9idc:bss:proposal:title" string="true" />
+                    <PV label="Proposal_raw" 		pvname="9idc:bss:proposal:raw" string="true">
+                        <attribute name="text_format" value="yaml" />
+                    </PV>
+
                     <!-- Temperatures  -->
                     <PV label="Hutch_Temperature_C" pvname="9idcLAX:adam1:rtd0" />
                     <PV label="RTD1_Temperature_C" pvname="9idcLAX:adam1:rtd1" />
