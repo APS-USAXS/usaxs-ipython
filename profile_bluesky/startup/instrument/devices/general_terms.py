@@ -74,6 +74,7 @@ class GeneralUsaxsParametersDiode(Device):
     "part of GeneralParameters Device"
     dx = Component(EpicsSignal, "Diode_dx")
     dy = Component(EpicsSignal, "DY0")
+    upd_size = Component(EpicsSignal, "UPDsize")
 
 
 class GeneralUsaxsParametersCenters(Device):
