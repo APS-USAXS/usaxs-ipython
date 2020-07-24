@@ -359,16 +359,16 @@ def developer():
 
 
 def developer2():
-    """this is what USAXS FlyScan uses"""
+    """Bluesky USAXS FlyScan uses this algorithm"""
     sfs = SaveFlyScan("/tmp/sfs.h5", XML_CONFIGURATION_FILE)
     sfs.preliminaryWriteFile()
     sfs.saveFile()
 
 
 if __name__ == '__main__':
-    # main()  # production system
+    main()  # production system - SPEC uses this
     # developer()
-    developer2()
+    # developer2()
 
 
 '''
