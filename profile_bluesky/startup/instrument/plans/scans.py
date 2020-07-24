@@ -448,6 +448,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     do one USAXS Fly Scan
     """
+    plan_name = "Flyscan"
     _md = apsbss.update_MD(md or {})
     _md["sample_thickness_mm"] = thickness
     _md["title"] = scan_title
@@ -485,7 +486,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     if not os.path.exists(flyscan_path) and bluesky_runengine_running:
         # must create this directory if not exists
         os.mkdir(flyscan_path)
-    flyscan_file_name = "%s_%04d.h5" % (scan_title_clean, terms.FlyScan.order_number.get())
+    flyscan_file_name = (
+        f"{scan_title_clean}"
+        "_{plan_name}"
+        f"_{terms.FlyScan.order_number.get():04d}"
+        ".h5"
+    )
 
     usaxs_flyscan.saveFlyData_HDF5_dir = flyscan_path
     usaxs_flyscan.saveFlyData_HDF5_file = flyscan_file_name
@@ -595,7 +601,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     _md = {}
     _md.update(md)
-    _md['plan_name'] = "Flyscan"
+    _md['plan_name'] = plan_name
     _md['plan_args'] = dict(
         pos_X = pos_X,
         pos_Y = pos_Y,
