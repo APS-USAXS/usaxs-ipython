@@ -62,15 +62,11 @@ class SaveFlyScan(object):
         wait until the data is ready, then save it
 
         note: not for production use in bluesky
-              this routine is used for development code
-
-        TODO: consider refactor to BS plan (subscribe, status objects, ...)
+              this routine is used by SPEC and for development code
         """
         import epics
-        logger.warning("import epics : refactor for bluesky/ophyd")
-        logger.warning("make this a bluesky plan")
-        raise RuntimeWarning("Need to refactor as BS plan")
-        def keep_waiting():         # lgtm [py/unreachable-statement]
+
+        def keep_waiting():
             triggered = self.trigger.get() in self.trigger_accepted_values
             return not triggered
 
@@ -87,7 +83,7 @@ class SaveFlyScan(object):
         epics.caput(self.flyScanNotSaved_pv, 0)
 
     def preliminaryWriteFile(self):
-        '''write all preliminary data to the file while fly scan is running'''
+        """write all preliminary data to the file while fly scan is running"""
         for pv_spec in self.mgr.pv_registry.values():
             if pv_spec.acquire_after_scan:
                 continue
@@ -117,14 +113,12 @@ class SaveFlyScan(object):
                     continue
                 self._attachEpicsAttributes(ds, pv_spec)
                 addAttributes(ds, **pv_spec.attrib)
-            #except Exception as e:
             except IOError as e:
                 logger.debug("preliminaryWriteFile():")
-                logger.debug(f"ERROR: pv_spec.label={pv_spec.label}, value={value}")
-                logger.debug("MESSAGE: ", e)
+                logger.debug("ERROR: pv_spec.label=%s, value=%s", pv_spec.label, str(value))
+                logger.debug("MESSAGE: %s", e)
                 logger.debug("RESOLUTION: writing as error message string")
                 makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
-                #raise
 
     def saveFile(self):
         '''write all desired data to the file and exit this code'''
@@ -159,11 +153,10 @@ class SaveFlyScan(object):
                 addAttributes(ds, **pv_spec.attrib)
             except Exception as e:
                 logger.debug("saveFile():")
-                logger.debug("ERROR: ", pv_spec.label, value)
-                logger.debug("MESSAGE: ", e)
+                logger.debug("ERROR: pv_spec.label=%s, value=%s", pv_spec.label, str(value))
+                logger.debug("MESSAGE: %s", e)
                 logger.debug("RESOLUTION: writing as error message string")
                 makeDataset(hdf5_parent, pv_spec.label, [str(e).encode('utf8')])
-                #raise
 
         # as the final step, make all the links as directed
         for _k, v in self.mgr.link_registry.items():
@@ -330,7 +323,7 @@ def get_CLI_options():
 def main():
     cli_options = get_CLI_options()
     dataFile = cli_options.data_file
-    path = os.path.split(dataFile)[0]
+    path = os.path.dirname(dataFile)
     if len(path) > 0 and not os.path.exists(path):
         msg = 'directory for that file does not exist: ' + dataFile
         raise RuntimeError(msg)
