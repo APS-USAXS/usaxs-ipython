@@ -11,16 +11,15 @@ __all__ = [
     # "NXWriterSaxsWaxs",    # not yet tested
     ]
 
-# from ..session_logs import logger
-from instrument.session_logs import logger
+from ..session_logs import logger
+# from instrument.session_logs import logger
 logger.info(__file__)
 
-from .nxwriter_base import NXWriterAps
-
+from apstools.filewriters import NXWriterAPS
 import os
 
 
-class OurCustomNXWriterBase(NXWriterAps):
+class OurCustomNXWriterBase(NXWriterAPS):
     """
     customize the NXWriter for this instrument
 
