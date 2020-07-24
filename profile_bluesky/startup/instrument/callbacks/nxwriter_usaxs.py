@@ -54,6 +54,7 @@ class OurCustomNXWriterBase(NXWriterAPS):
 
     instrument_name = 'APS 9-ID-C USAXS'
     supported_plans = ("name", "the", "supported", "plans")
+    file_extension = "h5"       # no dot
 
     def get_sample_title(self):
         """
