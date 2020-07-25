@@ -12,7 +12,6 @@ __all__ = [
     ]
 
 from ..session_logs import logger
-# from instrument.session_logs import logger
 logger.info(__file__)
 
 from apstools.filewriters import NXWriterAPS
@@ -59,7 +58,10 @@ class OurCustomNXWriterBase(NXWriterAPS):
 
     def write_entry(self):
         nxentry = super().write_entry()     # default technique
+
         nxentry["program_name"].attrs["config_version"] = self.config_version
+        nxentry["sample/thickness"] = self.get_stream_link("user_data_sample_thickness")
+        nxentry["sample/name"] = self.get_sample_title()
 
     def get_sample_title(self):
         """
@@ -70,8 +72,14 @@ class OurCustomNXWriterBase(NXWriterAPS):
     def make_file_name(self):
         """
         this is the place to decide how to name data files
+
+        insert the plan name after the scan number
         """
-        return super().make_file_name()     # default technique
+        path, fname = os.path.split(super().make_file_name())     # default technique
+        parts = fname.split("-")
+        parts.insert(3, self.plan_name)
+        fname = "-".join(parts)
+        return os.path.join(path, fname)
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"
