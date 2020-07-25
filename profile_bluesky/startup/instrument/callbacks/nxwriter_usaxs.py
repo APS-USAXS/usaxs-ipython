@@ -55,11 +55,11 @@ class OurCustomNXWriterBase(NXWriterAPS):
     instrument_name = 'APS 9-ID-C USAXS'
     supported_plans = ("name", "the", "supported", "plans")
     file_extension = "h5"       # no dot
-    creator_version = "1.0"
+    config_version = "1.0"
 
     def write_entry(self):
         nxentry = super().write_entry()     # default technique
-        self.root.attrs["creator_version"] = self.creator_version
+        nxentry["program_name"].attrs["config_version"] = self.config_version
 
     def get_sample_title(self):
         """
