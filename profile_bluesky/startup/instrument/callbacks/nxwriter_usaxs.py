@@ -25,7 +25,7 @@ class OurCustomNXWriterBase(NXWriterAPS):
 
     Structure of the NeXus/HDF5 file
 
-    The HDF5 files are written according to the NeXus structure, 
+    The HDF5 files are written according to the NeXus structure,
     using only NeXus base classes.  Here is a tree view of
     the structure, edited from an example uascan run::
 
@@ -55,6 +55,11 @@ class OurCustomNXWriterBase(NXWriterAPS):
     instrument_name = 'APS 9-ID-C USAXS'
     supported_plans = ("name", "the", "supported", "plans")
     file_extension = "h5"       # no dot
+    creator_version = "1.0"
+
+    def write_entry(self):
+        nxentry = super().write_entry()     # default technique
+        self.root.attrs["creator_version"] = self.creator_version
 
     def get_sample_title(self):
         """
