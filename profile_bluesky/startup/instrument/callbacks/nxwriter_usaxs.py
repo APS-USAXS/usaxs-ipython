@@ -61,6 +61,7 @@ class OurCustomNXWriterBase(NXWriterAPS):
         nxentry = super().write_entry()     # default technique
 
         nxentry["program_name"].attrs["config_version"] = self.config_version
+        nxentry["SPEC_data_file"] = self.get_stream_link("user_data_spec_file")
         nxentry["sample/thickness"] = self.get_stream_link("user_data_sample_thickness")
         nxentry["sample/name"] = self.get_sample_title()
         self.root.attrs["creator_version"] = apstools.__version__
