@@ -25,9 +25,12 @@ import h5py
 
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
-from . import nexus
-# import nexus    # when testing this module directly
-
+try:
+    # when used as a package
+    from . import nexus
+except ImportError:
+    # when run standalone
+    import nexus
 
 path = os.path.dirname(__file__)
 XML_CONFIGURATION_FILE = os.path.join(path, 'saveFlyData.xml')
