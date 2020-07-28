@@ -40,7 +40,7 @@ class AutoCollectDataDevice(Device):
 
         The plan will exit when:
 
-        * `permit` is not "enable" or 1
+        * `permit` is not "yes" or 1
         * user types `^C` twice (user types `RE.abort()` then)
         * unhandled exception
 
@@ -52,11 +52,11 @@ class AutoCollectDataDevice(Device):
         * a named command defined here
         * a command file in the present working directory
         """
-        yield from bps.mv(self.permit, "enable")
+        yield from bps.mv(self.permit, "yes")
         yield from bps.sleep(1)
 
         logger.info("waiting for user commands")
-        while self.permit.get() in (1, "enable"):
+        while self.permit.get() in (1, "yes"):
             if self.trigger_signal.get() in (1, "start"):
                 logger.debug("starting user commands")
                 yield from bps.mv(self.trigger_signal, 0)
