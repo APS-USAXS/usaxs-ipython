@@ -46,7 +46,7 @@ from ..devices import usaxs_q_calc
 from ..devices import user_data
 from ..devices import waxsx, waxs_det
 from ..devices.suspenders import suspend_BeamInHutch
-from ..framework import RE, specwriter
+from ..framework import bec, RE, specwriter
 from ..framework.metadata import USERNAME
 from ..utils.cleanup_text import cleanupText
 from .area_detector import areaDetectorAcquire
@@ -277,7 +277,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
-        user_data.scan_macro, "uascan",    # TODO: is this the right keyword?
+        user_data.scan_macro, "uascan",
     )
 
     yield from bps.mv(
@@ -350,6 +350,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
     endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())
+    bec.disable_plots()
     yield from uascan(
         startAngle,
         terms.USAXS.ar_val_center.get(),
@@ -365,6 +366,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         useDynamicTime=True,
         md=_md
     )
+    bec.enable_plots()
     #uascan(
     #    start, reference, finish, minStep,
     #    exponent, intervals, count_time,
