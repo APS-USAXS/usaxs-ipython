@@ -367,47 +367,6 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         md=_md
     )
     bec.enable_plots()
-    #uascan(
-    #    start, reference, finish, minStep,
-    #    exponent, intervals, count_time,
-    #    dy0, SDD_mm, ay0, SAD_mm,
-    #    useDynamicTime=True,
-    #    md={}
-    #):
-
-    #class Parameters_USAXS(Device):
-    #"""internal values shared with EPICS"""
-    #AY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:AY0")
-    #DY0 = Component(EpicsSignal,                      "9idcLAX:USAXS:DY0")
-    #ASRP0 = Component(EpicsSignal,                    "9idcLAX:USAXS:ASRcenter")
-    #SAD = Component(EpicsSignal,                      "9idcLAX:USAXS:SAD")
-    #SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
-    #ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
-    #asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
-    #asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
-    #center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
-    #ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
-    #diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
-    #img_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Img_")
-    #finish = Component(EpicsSignal,                   "9idcLAX:USAXS:Finish")
-    #is2DUSAXSscan = Component(EpicsSignal,            "9idcLAX:USAXS:is2DUSAXSscan")
-    #motor_prescaler_wait = Component(EpicsSignal,     "9idcLAX:USAXS:Prescaler_Wait")
-    #mr_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:MRcenter")
-    #msr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:MSRcenter")
-    #num_points = Component(EpicsSignal,               "9idcLAX:USAXS:NumPoints")
-    #sample_y_step = Component(EpicsSignal,            "9idcLAX:USAXS:Sample_Y_Step")
-    #scan_filters = Component(Parameters_Al_Ti_Filters, "9idcLAX:USAXS:Scan_")
-    #scanning = Component(EpicsSignal,                 "9idcLAX:USAXS:scanning")
-    #start_offset = Component(EpicsSignal,             "9idcLAX:USAXS:StartOffset")
-    #uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
-    #usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
-    #usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
-    #useMSstage = Component(Signal,                    value=False)
-    #useSBUSAXS = Component(Signal,                    value=False)
-    #retune_needed = Component(Signal, value=False)     # does not *need* an EPICS PV
-    # TODO: these are particular to the amplifier
-    #setpoint_up = Component(Signal, value=4000)     # decrease range
-    #setpoint_down = Component(Signal, value=650000)    # increase range
 
     yield from bps.mv(
         user_data.scanning, "no",          # for sure, we are not scanning now
