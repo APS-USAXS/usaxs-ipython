@@ -449,7 +449,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         os.mkdir(flyscan_path)
     flyscan_file_name = (
         f"{scan_title_clean}"
-        f"_{plan_name}"
+        #f"_{plan_name}"
         f"_{terms.FlyScan.order_number.get():04d}"
         ".h5"
     )
