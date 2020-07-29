@@ -72,17 +72,18 @@ class OurCustomNXWriterBase(NXWriterAPS):
         """
         return self.get_stream_link("user_data_sample_title")
 
-    def make_file_name(self):
-        """
-        this is the place to decide how to name data files
+    # 2020-07-29, prj - removed on request of jil
+    # def make_file_name(self):
+    #     """
+    #     this is the place to decide how to name data files
 
-        insert the plan name after the scan number
-        """
-        path, fname = os.path.split(super().make_file_name())     # default technique
-        parts = fname.split("-")
-        parts.insert(3, self.plan_name)
-        fname = "-".join(parts)
-        return os.path.join(path, fname)
+    #     insert the plan name after the scan number
+    #     """
+    #     path, fname = os.path.split(super().make_file_name())     # default technique
+    #     parts = fname.split("-")
+    #     parts.insert(3, self.plan_name)
+    #     fname = "-".join(parts)
+    #     return os.path.join(path, fname)
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"
