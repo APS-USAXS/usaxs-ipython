@@ -403,7 +403,9 @@ def execute_command_list(filename, commands, md={}):
         _md["full_filename"] = full_filename
         _md["filename"] = filename
         _md["line_number"] = i
-        _md["action"] = action
+        # _md["action"] = action    # https://github.com/APS-USAXS/ipython-usaxs/issues/369
+        # TODO: find a different way to report `archive` 
+        #       but so it does not cause problems in the SPEC file
         _md["parameters"] = args    # args is shorter than parameters, means the same thing here
         _md["archive"] = archive
         _md["iso8601"] = datetime.datetime.now().isoformat(" ")
