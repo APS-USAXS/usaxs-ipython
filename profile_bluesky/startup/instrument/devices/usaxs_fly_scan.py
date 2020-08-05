@@ -134,7 +134,7 @@ class UsaxsFlyScanDevice(Device):
                 msg = f"File {_s_} exists.  Will not overwrite."
                 s = datetime.datetime.isoformat(datetime.datetime.now(), sep="_").split(".")[0]
                 s = s.replace(":", "").replace("-", "")
-                s = "flyscan_" + s + ".h5"
+                # s = "flyscan_" + s + ".h5"
                 _s_ = os.path.join(fname, s)
                 msg += f"  Using fallback file name {_s_}"
                 logger.error(msg)
