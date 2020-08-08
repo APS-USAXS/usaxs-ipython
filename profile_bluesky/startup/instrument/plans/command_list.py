@@ -161,9 +161,9 @@ def before_plan(md={}):
     if terms.preUSAXStune.needed:
         # tune at previous sample position
         # don't overexpose the new sample position
-        # select between positions 
+        # select between positions
         mode_now = terms.SAXS.UsaxsSaxsMode.get(as_string=True)
-        if mode_now == "USAXS in beam" : 
+        if mode_now == "USAXS in beam" :
             yield from preUSAXStune(md=md)
         else:
             yield from preSWAXStune(md=md)
@@ -403,12 +403,12 @@ def execute_command_list(filename, commands, md={}):
         _md["full_filename"] = full_filename
         _md["filename"] = filename
         _md["line_number"] = i
-        # _md["action"] = action    # https://github.com/APS-USAXS/ipython-usaxs/issues/369
-        # TODO: find a different way to report `archive` 
-        #       but so it does not cause problems in the SPEC file
-        # _md["action"] = str(action).splitlines()
+        _md["action"] = action
         _md["parameters"] = args    # args is shorter than parameters, means the same thing here
-        _md["archive"] = archive
+        # TODO: find a different way to report `archive`
+        #       but so it does not cause problems in the SPEC file
+        # _md["archive"] = str(action).splitlines()
+        # _md["archive"] = archive    # https://github.com/APS-USAXS/ipython-usaxs/issues/369
         _md["iso8601"] = datetime.datetime.now().isoformat(" ")
 
         _md.update(md or {})      # overlay with user-supplied metadata
