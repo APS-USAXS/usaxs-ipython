@@ -392,6 +392,8 @@ def execute_command_list(filename, commands, md={}):
     text = f"Command file: {filename}\n"
     text += str(command_list_as_table(commands))
     logger.info(text)
+
+    # TODO: save the command list as a separate Bluesky run for documentation purposes
     archive = instrument_archive(text)
 
     yield from before_command_list(md=md, commands=commands)
@@ -405,10 +407,6 @@ def execute_command_list(filename, commands, md={}):
         _md["line_number"] = i
         _md["action"] = action
         _md["parameters"] = args    # args is shorter than parameters, means the same thing here
-        # TODO: find a different way to report `archive`
-        #       but so it does not cause problems in the SPEC file
-        # _md["archive"] = str(action).splitlines()
-        # _md["archive"] = archive    # https://github.com/APS-USAXS/ipython-usaxs/issues/369
         _md["iso8601"] = datetime.datetime.now().isoformat(" ")
 
         _md.update(md or {})      # overlay with user-supplied metadata
