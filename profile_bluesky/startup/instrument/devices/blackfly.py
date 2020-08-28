@@ -22,13 +22,11 @@ from ophyd.areadetector import ADComponent
 from .area_detector_common import _validate_AD_FileWriter_path_
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import DATABROKER_ROOT_PATH
-from .area_detector_common import EpicsDefinesHDF5FileNames
 from .area_detector_common import EpicsDefinesJpegFileNames
 
 
-ORIGINAL_CAMERA = 'PointGrey BlackFly'                      # 9idFLY1:
+RADIOGRAPHY_CAMERA = 'PointGrey BlackFly'                   # 9idFLY1:
 OPTICAL_CAMERA = 'PointGrey BlackFly Optical'               # 9idFLY2:
-RADIOGRAPHY_CAMERA = 'PointGrey BlackFly Radiography'       # 9idFLY:
 
 
 # path for image files (as seen by EPICS area detector writer plugin)
@@ -49,18 +47,6 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
     image = ADComponent(ImagePlugin, "image1:")
 
 
-class MyPointGreyDetectorHDF5(MyPointGreyDetector):
-    """Variation to write image as HDF5"""
-
-    hdf1 = ADComponent(
-        EpicsDefinesHDF5FileNames,
-        suffix = "HDF1:",
-        root = DATABROKER_ROOT_PATH,
-        write_path_template = WRITE_IMAGE_FILE_PATH,
-        read_path_template = READ_IMAGE_FILE_PATH,
-        )
-
-
 class MyPointGreyDetectorJPEG(MyPointGreyDetector):
     """Variation to write image as JPEG"""
 
@@ -74,7 +60,7 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector):
 
 
 try:
-    nm = ORIGINAL_CAMERA
+    nm = RADIOGRAPHY_CAMERA
     prefix = area_detector_EPICS_PV_prefix[nm]
     blackfly_det = MyPointGreyDetector(
         prefix, name="blackfly_det",
@@ -96,16 +82,3 @@ except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
     blackfly_optical = None
-
-
-try:
-    nm = RADIOGRAPHY_CAMERA
-    prefix = area_detector_EPICS_PV_prefix[nm]
-    blackfly_radiography = MyPointGreyDetectorHDF5(
-        prefix, name="blackfly_radiography",
-        labels=["camera", "area_detector"])
-    blackfly_radiography.read_attrs.append("hdf1")
-except TimeoutError as exc_obj:
-    msg = f"Timeout connecting with {nm} ({prefix})"
-    logger.warning(msg)
-    blackfly_radiography = None
