@@ -31,21 +31,21 @@ WRITE_HDF5_FILE_PATH_PILATUS = "/mnt/usaxscontrol/USAXS_data/test/pilatus/%Y/%m/
 READ_HDF5_FILE_PATH_PILATUS = "/share1/USAXS_data/test/pilatus/%Y/%m/%d/"
 
 _validate_AD_HDF5_path_(WRITE_HDF5_FILE_PATH_PILATUS, DATABROKER_ROOT_PATH)
-    
+
 
 class MyPilatusHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
     """adapt HDF5 plugin for Pilatus detector"""
-    
+
 
 class MyPilatusDetector(SingleTrigger, AreaDetector):
     """Pilatus detector(s) as used by 9-ID-C USAXS"""
-    
+
     cam = ADComponent(PilatusDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
-    
+
     hdf1 = ADComponent(
-        EpicsDefinesHDF5FileNames, 
-        suffix = "HDF1:", 
+        EpicsDefinesHDF5FileNames,
+        suffix = "HDF1:",
         root = DATABROKER_ROOT_PATH,
         write_path_template = WRITE_HDF5_FILE_PATH_PILATUS,
         read_path_template = READ_HDF5_FILE_PATH_PILATUS,

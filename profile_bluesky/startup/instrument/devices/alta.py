@@ -4,7 +4,7 @@ Apogee Alta area detector
 """
 
 __all__ = [
-    'alta_det', 
+    'alta_det',
     ]
 
 from ..session_logs import logger
@@ -40,13 +40,13 @@ class MyAltaCam(CamBase):
 
 class MyAltaDetector(SingleTrigger, AreaDetector):
     """Alta detector as used by 9-ID-C USAXS Imaging"""
-    
+
     cam = ADComponent(MyAltaCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
-    
+
     hdf1 = ADComponent(
         EpicsDefinesHDF5FileNames,
-        suffix = "HDF1:", 
+        suffix = "HDF1:",
         root = DATABROKER_ROOT_PATH,
         write_path_template = WRITE_HDF5_FILE_PATH_ALTA,
         read_path_template = READ_HDF5_FILE_PATH_ALTA,

@@ -4,7 +4,7 @@ ADsimdetector area detector
 """
 
 __all__ = [
-    'adsimdet', 
+    'adsimdet',
     ]
 
 from ..session_logs import logger
@@ -35,12 +35,12 @@ _validate_AD_HDF5_path_(READ_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
 
 class MySimDetector(SingleTrigger, AreaDetector):
     """ADSimDetector instance used by 9-ID-C USAXS"""
-    
+
     cam = ADComponent(SimDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
     hdf1 = ADComponent(
-        EpicsDefinesHDF5FileNames, 
-        suffix = "HDF1:", 
+        EpicsDefinesHDF5FileNames,
+        suffix = "HDF1:",
         root = DATABROKER_ROOT_PATH,
         write_path_template = WRITE_HDF5_FILE_PATH_ADSIMDET,
         read_path_template = READ_HDF5_FILE_PATH_ADSIMDET,
