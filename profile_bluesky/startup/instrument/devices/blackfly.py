@@ -8,7 +8,6 @@ note: this is one of the easiest area detector setups in Ophyd
 __all__ = [
     'blackfly_det',
     'blackfly_optical',
-    'blackfly_radiography',
     ]
 
 from ..session_logs import logger
@@ -47,8 +46,18 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
     image = ADComponent(ImagePlugin, "image1:")
 
 
-class MyPointGreyDetectorJPEG(MyPointGreyDetector):
-    """Variation to write image as JPEG"""
+class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
+    """
+    Variation to write image as JPEG
+
+    To save an image (using existing configuration)::
+
+        blackfly_optical.stage()
+        blackfly_optical.trigger()
+        blackfly_optical.unstage()
+
+
+    """
 
     jpeg1 = ADComponent(
         EpicsDefinesJpegFileNames,
