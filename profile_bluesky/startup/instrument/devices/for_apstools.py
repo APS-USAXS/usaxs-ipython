@@ -7,6 +7,7 @@ support that _will_ move into apstools, eventually
 __all__ = [
     "AD_EpicsJpegFileName",
     "AD_plugin_primed",
+    "AD_prime_plugin",
     ]
 
 from ..session_logs import logger
@@ -30,6 +31,10 @@ def AD_plugin_primed(detector_plugin):
         *obj* :
         area detector plugin to be *primed* (such as ``detector.hdf1``)
 
+    EXAMPLE::
+
+        AD_plugin_primed(detector.hdf1)
+
     Works around an observed issue: #598
     https://github.com/NSLS-II/ophyd/issues/598#issuecomment-414311372
 
@@ -49,6 +54,43 @@ def AD_plugin_primed(detector_plugin):
     detector_plugin.capture.put(old_capture)
     detector_plugin.file_write_mode.put(old_file_write_mode)
     return verdict
+
+
+def AD_prime_plugin(detector, detector_plugin):
+    """
+    Prime this area detector's file writer plugin.
+
+    Collect and push an NDarray to the file writer plugin.
+
+    Works with HDF and JPEG file writers, maybe others.
+
+    PARAMETERS
+
+    detector
+        *obj* :
+        area detector (such as ``detector``)
+
+    detector_plugin
+        *obj* :
+        area detector plugin to be *primed* (such as ``detector.hdf1``)
+
+    EXAMPLE::
+
+        AD_prime_plugin(detector, detector.hdf1)
+    """
+    old_enable = detector_plugin.enable.get()
+    old_mode = detector_plugin.file_write_mode.get()
+
+    detector_plugin.enable.put(1)
+    # next step is important:   
+    # SET the write mode to "Single" (0) or plugin's Capture=1 won't stay
+    detector_plugin.file_write_mode.put(0)
+    detector_plugin.jpeg1.capture.put(1)
+    detector.cam.acquire.put(1)
+
+    # reset things
+    detector_plugin.file_write_mode.put(old_mode)
+    detector_plugin.enable.put(old_enable)
 
 
 class AD_EpicsJpegFileName(FileStorePluginBase):    # lgtm [py/missing-call-to-init]
