@@ -92,6 +92,7 @@ def preUSAXStune(md={}):
 
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "pre-USAXS optics tune",
+        user_data.collection_in_progress, 1,
 
         # Is this covered by user_mode, "USAXS"?
         usaxs_slit.v_size,  terms.SAXS.usaxs_v_size.get(),
@@ -141,6 +142,7 @@ def preUSAXStune(md={}):
     yield from bps.mv(
         scaler0.preset_time,        terms.USAXS.usaxs_time.get(),
         user_data.time_stamp,       str(datetime.datetime.now()),
+        user_data.collection_in_progress, 0,
         user_data.state,            "pre-USAXS optics tuning done",
 
         terms.preUSAXStune.num_scans_last_tune, 0,
