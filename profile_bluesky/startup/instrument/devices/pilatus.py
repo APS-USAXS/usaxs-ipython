@@ -55,7 +55,8 @@ class MyPilatusDetector(SingleTrigger, AreaDetector):
 try:
     nm = "Pilatus 100k"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    saxs_det = MyPilatusDetector(prefix, name="saxs_det")
+    saxs_det = MyPilatusDetector(
+        prefix, name="saxs_det", labels=["camera", "area_detector"])
     saxs_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
@@ -65,7 +66,8 @@ except TimeoutError as exc_obj:
 try:
     nm = "Pilatus 200kw"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    waxs_det = MyPilatusDetector(prefix, name="waxs_det")
+    waxs_det = MyPilatusDetector(
+        prefix, name="waxs_det", labels=["camera", "area_detector"])
     waxs_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"

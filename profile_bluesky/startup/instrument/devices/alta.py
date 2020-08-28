@@ -56,7 +56,9 @@ class MyAltaDetector(SingleTrigger, AreaDetector):
 try:
     nm = "Alta"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    alta_det = MyAltaDetector(prefix, name="alta_det")
+    alta_det = MyAltaDetector(
+        prefix, name="alta_det",
+        labels=["camera", "area_detector"])
     alta_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"

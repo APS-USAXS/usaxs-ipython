@@ -50,7 +50,9 @@ class MySimDetector(SingleTrigger, AreaDetector):
 try:
     nm = "SimDetector"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    adsimdet = MySimDetector(prefix, name="adsimdet")
+    adsimdet = MySimDetector(
+        prefix, name="adsimdet",
+        labels=["camera", "area_detector"])
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
