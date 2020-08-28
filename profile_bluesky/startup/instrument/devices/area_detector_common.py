@@ -33,7 +33,9 @@ DATABROKER_ROOT_PATH = "/"
 area_detector_EPICS_PV_prefix = {
     'Pilatus 100k' : 'usaxs_pilatus1:',
     'Pilatus 200kw' : 'usaxs_pilatus2:',
+    'PointGrey BlackFly Radiography' : '9idFLY:',
     'PointGrey BlackFly' : '9idFLY1:',
+    'PointGrey BlackFly Optical' : '9idFLY2:',
     'Alta' : '9idalta:',
     'SimDetector' : '9idcSIM1:',
 }
