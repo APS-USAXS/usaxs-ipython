@@ -246,6 +246,7 @@ def mode_Radiography():
         user_data.time_stamp, ts,
         user_data.macro_file_time, ts,
         user_data.scanning, 0,
+        user_data.collection_in_progress, 1,    # TODO: at odds with previous line?
         )
 
     yield from user_data.set_state_plan("Radiography Mode")
