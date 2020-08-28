@@ -223,6 +223,7 @@ def mode_Radiography():
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         ccd_shutter, "close",
+        user_data.collection_in_progress, 1,
     )
   
     yield from bps.mv(
@@ -246,7 +247,6 @@ def mode_Radiography():
         user_data.time_stamp, ts,
         user_data.macro_file_time, ts,
         user_data.scanning, 0,
-        user_data.collection_in_progress, 1,    # TODO: at odds with previous line?
         )
 
     yield from user_data.set_state_plan("Radiography Mode")
@@ -254,6 +254,7 @@ def mode_Radiography():
     if aps.shutter_permit.get() in (1, 'PERMIT'):
         yield from bps.mv(
             mono_shutter, "open",
+            user_data.collection_in_progress, 0,
         )
 
     if mono_shutter.state == "open":
