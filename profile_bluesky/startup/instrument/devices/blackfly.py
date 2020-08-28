@@ -56,7 +56,6 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         blackfly_optical.trigger()
         blackfly_optical.unstage()
 
-
     """
 
     jpeg1 = ADComponent(
