@@ -64,7 +64,7 @@ class MyPointGreyDetectorHDF5(MyPointGreyDetector):
 class MyPointGreyDetectorJPEG(MyPointGreyDetector):
     """Variation to write image as JPEG"""
 
-    jpeg = ADComponent(
+    jpeg1 = ADComponent(
         EpicsDefinesJpegFileNames,
         suffix = "JPEG1:",
         root = DATABROKER_ROOT_PATH,
@@ -91,6 +91,7 @@ try:
     blackfly_optical = MyPointGreyDetectorJPEG(
         prefix, name="blackfly_optical",
         labels=["camera", "area_detector"])
+    blackfly_optical.read_attrs.append("jpeg1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
@@ -103,6 +104,7 @@ try:
     blackfly_radiography = MyPointGreyDetectorHDF5(
         prefix, name="blackfly_radiography",
         labels=["camera", "area_detector"])
+    blackfly_radiography.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
