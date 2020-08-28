@@ -24,9 +24,12 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from .for_apstools import AD_EpicsJpegFileName
 from apstools.devices import AD_EpicsHdf5FileName
 from ophyd import HDF5Plugin
+from ophyd import JPEGPlugin
 from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
+
 
 DATABROKER_ROOT_PATH = "/"
 
@@ -52,3 +55,8 @@ def _validate_AD_FileWriter_path_(path, root_path):
 class myHdf5EpicsIterativeWriter(AD_EpicsHdf5FileName, FileStoreIterativeWrite): ...
 class myHDF5FileNames(HDF5Plugin, myHdf5EpicsIterativeWriter): ...
 class EpicsDefinesHDF5FileNames(HDF5Plugin, myHdf5EpicsIterativeWriter): ...
+
+# custom support is in AD_EpicsJpegFileName
+class myJpegEpicsIterativeWriter(AD_EpicsJpegFileName, FileStoreIterativeWrite): ...
+class myJpegFileNames(JPEGPlugin, myJpegEpicsIterativeWriter): ...
+class EpicsDefinesJpegFileNames(JPEGPlugin, myJpegEpicsIterativeWriter): ...
