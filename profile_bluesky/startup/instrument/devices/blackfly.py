@@ -86,6 +86,7 @@ try:
         prefix, name="blackfly_optical",
         labels=["camera", "area_detector"])
     blackfly_optical.read_attrs.append("jpeg1")
+    blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
