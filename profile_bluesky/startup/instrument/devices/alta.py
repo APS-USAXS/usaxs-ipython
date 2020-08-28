@@ -19,7 +19,7 @@ from ophyd.areadetector import ADComponent
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import DATABROKER_ROOT_PATH
 from .area_detector_common import EpicsDefinesHDF5FileNames
-from .area_detector_common import _validate_AD_HDF5_path_
+from .area_detector_common import _validate_AD_FileWriter_path_
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
@@ -29,8 +29,8 @@ WRITE_HDF5_FILE_PATH_ALTA = "/mnt/share1/USAXS_data/test/alta/%Y/%m/%d/"
 READ_HDF5_FILE_PATH_ALTA = "/share1/USAXS_data/test/alta/%Y/%m/%d/"
 
 
-_validate_AD_HDF5_path_(WRITE_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH)
-_validate_AD_HDF5_path_(READ_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH)
+_validate_AD_FileWriter_path_(WRITE_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH)
+_validate_AD_FileWriter_path_(READ_HDF5_FILE_PATH_ALTA, DATABROKER_ROOT_PATH)
 
 class MyAltaCam(CamBase):
     """support for Apogee Alta detector"""

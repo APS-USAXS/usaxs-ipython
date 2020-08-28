@@ -21,7 +21,7 @@ from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import DATABROKER_ROOT_PATH
 from .area_detector_common import EpicsDefinesHDF5FileNames
-from .area_detector_common import _validate_AD_HDF5_path_
+from .area_detector_common import _validate_AD_FileWriter_path_
 
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
@@ -30,7 +30,7 @@ WRITE_HDF5_FILE_PATH_PILATUS = "/mnt/usaxscontrol/USAXS_data/test/pilatus/%Y/%m/
 # path seen by databroker
 READ_HDF5_FILE_PATH_PILATUS = "/share1/USAXS_data/test/pilatus/%Y/%m/%d/"
 
-_validate_AD_HDF5_path_(WRITE_HDF5_FILE_PATH_PILATUS, DATABROKER_ROOT_PATH)
+_validate_AD_FileWriter_path_(WRITE_HDF5_FILE_PATH_PILATUS, DATABROKER_ROOT_PATH)
 
 
 class MyPilatusHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):

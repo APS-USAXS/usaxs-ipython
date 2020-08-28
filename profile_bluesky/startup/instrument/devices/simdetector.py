@@ -20,7 +20,7 @@ from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import DATABROKER_ROOT_PATH
 from .area_detector_common import EpicsDefinesHDF5FileNames
-from .area_detector_common import _validate_AD_HDF5_path_
+from .area_detector_common import _validate_AD_FileWriter_path_
 
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
@@ -29,8 +29,8 @@ WRITE_HDF5_FILE_PATH_ADSIMDET = "/share1/USAXS_data/test/adsimdet/%Y/%m/%d/"
 # path seen by databroker
 READ_HDF5_FILE_PATH_ADSIMDET = WRITE_HDF5_FILE_PATH_ADSIMDET
 
-_validate_AD_HDF5_path_(WRITE_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
-_validate_AD_HDF5_path_(READ_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
+_validate_AD_FileWriter_path_(WRITE_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
+_validate_AD_FileWriter_path_(READ_HDF5_FILE_PATH_ADSIMDET, DATABROKER_ROOT_PATH)
 
 
 class MySimDetector(SingleTrigger, AreaDetector):

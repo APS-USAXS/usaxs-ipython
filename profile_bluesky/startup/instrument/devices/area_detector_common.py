@@ -18,7 +18,7 @@ __all__ = [
     'EpicsDefinesHDF5FileNames',
     'myHdf5EpicsIterativeWriter',
     'myHDF5FileNames',
-    '_validate_AD_HDF5_path_',
+    '_validate_AD_FileWriter_path_',
     ]
 
 from ..session_logs import logger
@@ -41,7 +41,7 @@ area_detector_EPICS_PV_prefix = {
 }
 
 
-def _validate_AD_HDF5_path_(path, root_path):
+def _validate_AD_FileWriter_path_(path, root_path):
     if not path.startswith(root_path):
         raise ValueError((
             f"error in file {__file__}:\n"
