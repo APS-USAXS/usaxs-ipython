@@ -82,7 +82,7 @@ def AD_prime_plugin(detector, detector_plugin):
     old_mode = detector_plugin.file_write_mode.get()
 
     detector_plugin.enable.put(1)
-    # next step is important:   
+    # next step is important:
     # SET the write mode to "Single" (0) or plugin's Capture=1 won't stay
     detector_plugin.file_write_mode.put(0)
     detector_plugin.jpeg1.capture.put(1)
