@@ -45,14 +45,13 @@ def _pick_esaf(user, now, cycle):
     def esafSorter(obj):
         return obj["experimentStartDate"]
 
+    get_esafs = apstools.beamtime.apsbss.getCurrentEsafs
     esafs = [
         esaf["esafId"]
-        for esaf in sorted(
-            apstools.beamtime.apsbss.getCurrentEsafs(APSBSS_SECTOR),
-            key=esafSorter
-        )
+        for esaf in sorted(get_esafs(APSBSS_SECTOR), key=esafSorter)
         # pick those that have not yet expired
         if esaf["experimentEndDate"] > now
+        # and match user last name
         if user in [
             entry["lastName"]
             for entry in esaf["experimentUsers"]
@@ -90,16 +89,16 @@ def _pick_proposal(user, now, cycle):
     def proposalSorter(obj):
         return obj["startTime"]
 
+    get_proposals = apstools.beamtime.apsbss.api_bss.listProposals
     proposals = [
         p["id"]
         for p in sorted(
-            apstools.beamtime.apsbss.api_bss.listProposals(
-                beamlineName=APSBSS_BEAMLINE,
-                runName=cycle),
+            get_proposals(beamlineName=APSBSS_BEAMLINE, runName=cycle),
             key=proposalSorter
             )
         # pick those that have not yet expired
         if p["endTime"] > now
+        # and match user last name
         if user in [
             entry["lastName"]
             for entry in p["experimenters"]
