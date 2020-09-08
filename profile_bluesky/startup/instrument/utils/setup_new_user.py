@@ -113,9 +113,9 @@ def matchUserInApsbss(user):
             "Is Mail-in?" : apsbss_object.proposal.mail_in_flag,
         }
         table = pyRestTable.Table()
-        table.labels="key PV value".split()
+        table.labels="key value PV".split()
         for k, v in contents.items():
-            table.addRow((k, v.pvname, v.get()))
+            table.addRow((k, v.get(), v.pvname))
         logger.info("ESAF & Proposal Overview:\n%s", str(table))
     else:
         logger.warning("APSBSS not updated.")
