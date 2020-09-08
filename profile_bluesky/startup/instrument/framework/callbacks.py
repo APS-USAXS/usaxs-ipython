@@ -30,7 +30,7 @@ callback_db['specwriter'] = RE.subscribe(specwriter.receiver)
 logger.info(f"writing to SPEC file: {specwriter.spec_filename}")
 logger.info("   >>>>   Using default SPEC file name   <<<<")
 logger.info("   file will be created when bluesky ends its next scan")
-logger.info(f"   to change SPEC file, use command:   newSpecFile('title')")
+logger.info(f"   to change SPEC file, use command:   newUser(user)")
 
 
 def spec_comment(comment, doc=None):
