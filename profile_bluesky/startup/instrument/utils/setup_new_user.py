@@ -28,16 +28,23 @@ APSBSS_SECTOR = "09"
 APSBSS_BEAMLINE = "9-ID-B,C"
 
 
-def matchUserInApsbss(user):
+def _pick_esaf(user, now, cycle):
     """
-    pull information from apsbss matching on user name and date
-    """
-    dt = datetime.datetime.now()
-    now = str(dt)
-    cycle = apstools.beamtime.apsbss.getCurrentCycle()
+    Pick the first matching ESAF
 
+    Criteria:
+
+    * match user name
+    * has not yet expired
+    * earliest start
+
+    RETURNS
+
+    esaf_id or None
+    """
     def esafSorter(obj):
         return obj["experimentStartDate"]
+
     esafs = [
         esaf["esafId"]
         for esaf in sorted(
@@ -52,8 +59,37 @@ def matchUserInApsbss(user):
         ]
     ]
 
+    if len(esafs) == 0:
+        logger.warning(
+            "No unexpired ESAFs found that match user %s",
+            user
+        )
+        return None
+    elif len(esafs) > 1:
+        logger.warning(
+            "ESAF(s) %s match user %s at this time, picking first one",
+            str(esafs), user)
+
+    return str(esafs[0])
+
+
+def _pick_proposal(user, now, cycle):
+    """
+    Pick the first matching proposal
+
+    Criteria:
+
+    * match user name
+    * has not yet expired
+    * earliest start
+
+    RETURNS
+
+    proposal_id or None
+    """
     def proposalSorter(obj):
         return obj["startTime"]
+
     proposals = [
         p["id"]
         for p in sorted(
@@ -70,20 +106,58 @@ def matchUserInApsbss(user):
         ]
     ]
 
-    if len(esafs) > 1:
+    if len(proposals) == 0:
         logger.warning(
-            "ESAF(s) %s match user %s at this time, picking first one",
-            str(esafs), user)
-        esafs = [esafs[0]]
-    if len(proposals) > 1:
+            "No unexpired proposals found that match user %s",
+            user
+        )
+        return None
+    elif len(proposals) > 1:
         logger.warning(
             "proposal(s) %s match user %s at this time, picking first one",
             str(proposals), user)
-        proposals = [proposals[0]]
-    if len(esafs) == 1 and len(proposals) == 1:
+
+    return str(proposals[0])
+
+
+def _apsbss_summary_table(apsbss_object):
+    """return a table of apsbss local PVs"""
+    contents = {
+        "ESAF number" : apsbss_object.esaf.esaf_id,
+        "ESAF title" : apsbss_object.esaf.title,
+        "ESAF names" : apsbss_object.esaf.user_last_names,
+        "ESAF start" : apsbss_object.esaf.start_date,
+        "ESAF end" : apsbss_object.esaf.end_date,
+        "Proposal number" : apsbss_object.proposal.proposal_id,
+        "Proposal title" : apsbss_object.proposal.title,
+        "Proposal names" : apsbss_object.proposal.user_last_names,
+        "Proposal start" : apsbss_object.proposal.start_date,
+        "Proposal end" : apsbss_object.proposal.end_date,
+        "Mail-in flag" : apsbss_object.proposal.mail_in_flag,
+    }
+    table = pyRestTable.Table()
+    table.labels="key value PV".split()
+    for k, v in contents.items():
+        table.addRow((k, v.get(), v.pvname))
+
+    return table
+
+
+def matchUserInApsbss(user):
+    """
+    pull information from apsbss matching on user name and date
+    """
+    dt = datetime.datetime.now()
+    now = str(dt)
+    cycle = apstools.beamtime.apsbss.getCurrentCycle()
+
+    esaf_id = _pick_esaf(user, now, cycle)
+    proposal_id = _pick_proposal(user, now, cycle)
+
+    if esaf_id is not None or proposal_id is not None:
         # update the local apsbss PVs
-        logger.info("ESAF %s", str(esafs[0]))
-        logger.info("Proposal %s", str(proposals[0]))
+        logger.info("ESAF %s", esaf_id)
+        logger.info("Proposal %s", proposal_id)
 
         prefix = apsbss_object.prefix
         apstools.beamtime.apsbss.epicsSetup(
@@ -93,29 +167,13 @@ def matchUserInApsbss(user):
             )
         apstools.beamtime.apsbss.epicsClear(prefix)
 
-        apsbss_object.esaf.esaf_id.put(str(esafs[0]))
-        apsbss_object.proposal.proposal_id.put(str(proposals[0]))
+        apsbss_object.esaf.esaf_id.put(esaf_id or "")
+        apsbss_object.proposal.proposal_id.put(proposal_id or "")
 
         logger.info("APSBSS PVs updated from APS Oracle databases.")
         apstools.beamtime.apsbss.epicsUpdate(prefix)
 
-        contents = {
-            "ESAF number" : apsbss_object.esaf.esaf_id,
-            "ESAF title" : apsbss_object.esaf.title,
-            "ESAF names" : apsbss_object.esaf.user_last_names,
-            "ESAF start" : apsbss_object.esaf.start_date,
-            "ESAF end" : apsbss_object.esaf.end_date,
-            "Proposal number" : apsbss_object.proposal.proposal_id,
-            "Proposal title" : apsbss_object.proposal.title,
-            "Proposal names" : apsbss_object.proposal.user_last_names,
-            "Proposal start" : apsbss_object.proposal.start_date,
-            "Proposal end" : apsbss_object.proposal.end_date,
-            "Is Mail-in?" : apsbss_object.proposal.mail_in_flag,
-        }
-        table = pyRestTable.Table()
-        table.labels="key value PV".split()
-        for k, v in contents.items():
-            table.addRow((k, v.get(), v.pvname))
+        table = _apsbss_summary_table(apsbss_object)
         logger.info("ESAF & Proposal Overview:\n%s", str(table))
     else:
         logger.warning("APSBSS not updated.")
