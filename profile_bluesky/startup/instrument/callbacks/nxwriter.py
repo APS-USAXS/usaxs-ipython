@@ -1,9 +1,10 @@
 
 """
 Install a NeXus file writer for uascan raw data files
-"""
 
-# TODO: needs a newFile function, similar to instrument.framework.callbacks.newSpecFile()
+See ``instrument.utils.setup_new_user.newFile()``
+to replace ``instrument.framework.callbacks.newSpecFile()``
+"""
 
 __all__ = [
     "nxwriter",
