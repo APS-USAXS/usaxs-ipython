@@ -16,6 +16,7 @@ from .check_file_exists import filename_exists
 from .initialize import RE
 import datetime
 import os
+from apstools.utils import cleanupText
 
 
 def newUser(user, scan_id=1, month=None, day=None):
@@ -45,7 +46,8 @@ def newUser(user, scan_id=1, month=None, day=None):
     month = month or dt.month
     day = day or dt.day
 
-    stub = f"{month:02d}_{day:02d}_{user}"
+    clean = cleanupText(user)
+    stub = f"{month:02d}_{day:02d}_{clean}"
     path = os.path.join(os.getcwd(), stub)
 
     if not os.path.exists(path):
