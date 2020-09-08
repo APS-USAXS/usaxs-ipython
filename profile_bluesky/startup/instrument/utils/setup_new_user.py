@@ -26,6 +26,7 @@ import pyRestTable
 
 APSBSS_SECTOR = "09"
 APSBSS_BEAMLINE = "9-ID-B,C"
+DATA_DIR_BASE = os.path.join("/", "share1", "USAXS_data")
 
 
 def _pick_esaf(user, now, cycle):
@@ -185,8 +186,7 @@ def _setSpecFileName(path, scan_id=1):
     SPEC file name
     """
     stub = os.path.basename(path)
-    # TODO: full path?
-    fname = f"{stub}.dat"
+    fname = f"{stub}.dat"       # NO path
     if filename_exists(fname):
         logger.warning(">>> file already exists: %s <<<", fname)
         specwriter.newfile(fname, RE=RE)
@@ -198,12 +198,12 @@ def _setSpecFileName(path, scan_id=1):
     logger.info(f"File will be {handled} at end of next bluesky scan.")
 
 
-def newUser(user, scan_id=1, month=None, day=None):
+def newUser(user, scan_id=1, year=None, month=None, day=None):
     """
     setup for a new user
 
     Create (if necessary) new user directory in
-    current working directory with month, day, and
+    standard directory with month, day, and
     given user name as shown in the following table.
     Each technique (SAXS, USAXS, WAXS) will be
     reponsible for creating its subdirectory
@@ -218,25 +218,31 @@ def newUser(user, scan_id=1, month=None, day=None):
     folder - USAXS          <CWD>/MM_DD_USER/MM_DD_USER_usaxs/
     AD folder - WAXS        <CWD>/MM_DD_USER/MM_DD_USER_waxs/
     ======================  ========================
+
+    CWD = usaxscontrol:/share1/USAXS_data/YYYY-MM
     """
     global specwriter
 
     dt = datetime.datetime.now()
+    year = year or dt.year
     month = month or dt.month
     day = day or dt.day
 
     clean = cleanupText(user)
-    stub = f"{month:02d}_{day:02d}_{clean}"
-    path = os.path.join(os.getcwd(), stub)
+    path = os.path.join(
+        DATA_DIR_BASE,
+        f"{year:04d}-{month:02d}",
+        f"{month:02d}_{day:02d}_{clean}",
+        )
 
     if not os.path.exists(path):
         logger.info("Creating user directory: %s", path)
-        os.mkdir(path)
+        os.makedirs(path)
+    logger.info("Change working directory to %s", path)
+    os.chdir(path)
     user_data.user_dir.put(path)    # set in the PV
 
-    # SPEC file name
-    _setSpecFileName(path, scan_id=scan_id)
-
+    _setSpecFileName(path, scan_id=scan_id)    # SPEC file name
     matchUserInApsbss(user)     # update ESAF & Proposal, if available
 
     return path
