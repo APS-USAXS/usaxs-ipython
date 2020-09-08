@@ -34,7 +34,7 @@ def matchUserInApsbss(user):
     now = str(dt)
     cycle = apstools.beamtime.apsbss.getCurrentCycle()
     esafs = [
-        esaf
+        esaf["esafId"]
         for esaf in apstools.beamtime.apsbss.getCurrentEsafs(
             APSBSS_SECTOR)
         if esaf["experimentStartDate"] <= now <= esaf["experimentEndDate"]
@@ -44,9 +44,9 @@ def matchUserInApsbss(user):
         ]
     ]
     proposals = [
-        p
+        p["id"]
         for p in apstools.beamtime.apsbss.api_bss.listProposals(
-            beamlineName=APSBSS_BEAMLINE, 
+            beamlineName=APSBSS_BEAMLINE,
             runName=cycle)
         if p["startTime"] <= now <= p["endTime"]
         if user in [
@@ -57,12 +57,12 @@ def matchUserInApsbss(user):
 
     if len(esafs) > 2:
         logger.warning(
-            "%d ESAF(s) match user %s at this time",
-            len(esafs), user)
+            "ESAF(s) %s match user %s at this time",
+            str(esafs), user)
     if len(proposals) > 2:
         logger.warning(
-            "%d proposal(s) match user %s at this time",
-            len(proposals), user)
+            "proposal(s) %s match user %s at this time",
+            str(proposals), user)
     if len(esafs) == 1 and len(proposals) == 1:
         # update the local apsbss PVs
         logger.info("ESAF %s", str(esafs[0]))
@@ -76,10 +76,13 @@ def matchUserInApsbss(user):
             )
         apstools.beamtime.apsbss.epicsClear(prefix)
 
-        apsbss_object.esaf.esaf_id.put(esafs[0]["esafId"])
-        apsbss_object.proposal.proposal_id.put(proposals[0]["id"])
+        apsbss_object.esaf.esaf_id.put(esafs[0])
+        apsbss_object.proposal.proposal_id.put(proposals[0])
 
+        logger.info("APSBSS updated.")
         apstools.beamtime.apsbss.epicsUpdate(prefix)
+    else:
+        logger.warning("APSBSS not updated.")
 
 
 def _setSpecFileName(path, scan_id=1):
