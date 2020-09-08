@@ -19,6 +19,24 @@ import datetime
 import os
 
 
+def _setSpecFileName(path, scan_id=1):
+    """
+    SPEC file name
+    """
+    stub = os.path.basename(path)
+    # TODO: full path?
+    fname = f"{stub}.dat"
+    if filename_exists(fname):
+        logger.warning(">>> file already exists: %s <<<", fname)
+        specwriter.newfile(fname, RE=RE)
+        handled = "appended"
+    else:
+        specwriter.newfile(fname, scan_id=scan_id, RE=RE)
+        handled = "created"
+    logger.info(f"SPEC file name : {specwriter.spec_filename}")
+    logger.info(f"File will be {handled} at end of next bluesky scan.")
+
+
 def newUser(user, scan_id=1, month=None, day=None):
     """
     setup for a new user
@@ -55,19 +73,11 @@ def newUser(user, scan_id=1, month=None, day=None):
         os.mkdir(path)
 
     # SPEC file name
-    fname = f"{stub}.dat"
-    if filename_exists(fname):
-        logger.warning(">>> file already exists: %s <<<", fname)
-        specwriter.newfile(fname, RE=RE)
-        handled = "appended"
-    else:
-        specwriter.newfile(fname, scan_id=scan_id, RE=RE)
-        handled = "created"
-    logger.info(f"SPEC file name : {specwriter.spec_filename}")
-    logger.info(f"File will be {handled} at end of next bluesky scan.")
+    _setSpecFileName(path, scan_id=scan_id)
 
-    # TODO: where to save this for general use?
-    # TODO: What about log files?
+    # TODO: where to save this path for general use?
+    # TODO: pull info from apsbss matching user name (#360)
+
     return path
 
 
