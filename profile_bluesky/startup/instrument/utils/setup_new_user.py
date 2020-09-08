@@ -14,9 +14,31 @@ logger.info(__file__)
 from ..callbacks import specwriter
 from .check_file_exists import filename_exists
 from .initialize import RE
+from apstools.beamtime import apsbss
 from apstools.utils import cleanupText
 import datetime
 import os
+
+
+APSBSS_SECTOR = "09"
+APSBSS_BEAMLINE = "9-ID-B,C"
+
+
+def matchUserInApsbss(user):
+    """
+    pull information from apsbss matching on user name and date
+    """
+    dt = datetime.datetime.now()
+    cycle = apsbss.getCurrentCycle()
+    esafs = apsbss.getCurrentEsafs(APSBSS_SECTOR)
+    proposals = apsbss.api_bss.listProposals(
+        beamlineName=APSBSS_BEAMLINE, 
+        runName=cycle)
+    # TODO: search for user and match date
+    # TODO: report if not unique
+    # TODO: get unique esaf_id
+    # TODO: get unique proposal_id
+    # TODO: if unique both, update the local apsbss PVs
 
 
 def _setSpecFileName(path, scan_id=1):
@@ -77,6 +99,7 @@ def newUser(user, scan_id=1, month=None, day=None):
 
     # TODO: where to save this path for general use?
     # TODO: pull info from apsbss matching user name (#360)
+    matchUserInApsbss(user)
 
     return path
 
