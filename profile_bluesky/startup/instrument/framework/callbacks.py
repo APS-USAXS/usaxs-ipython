@@ -41,8 +41,10 @@ def spec_comment(comment, doc=None):
 def newSpecFile(title, scan_id=1):
     """
     user choice of the SPEC file name
-    
+
     cleans up title, prepends month and day and appends file extension
+
+    NOTE: Now part of ``instrument.utils.setup_new_user.newFile()``
     """
     raise RuntimeError("DEPRECATED: use ``newFile()``")
     # global specwriter
@@ -53,7 +55,7 @@ def newSpecFile(title, scan_id=1):
     #     logger.warning(">>> file already exists: %s <<<", fname)
     #     specwriter.newfile(fname, RE=RE)
     #     handled = "appended"
-        
+
     # else:
     #     specwriter.newfile(fname, scan_id=scan_id, RE=RE)
     #     handled = "created"
