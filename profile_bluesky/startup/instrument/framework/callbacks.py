@@ -44,18 +44,19 @@ def newSpecFile(title, scan_id=1):
     
     cleans up title, prepends month and day and appends file extension
     """
-    global specwriter
-    mmdd = str(datetime.datetime.now()).split()[0][5:].replace("-", "_")
-    clean = apstools.utils.cleanupText(title)
-    fname = "%s_%s.dat" % (mmdd, clean)
-    if filename_exists(fname):
-        logger.warning(">>> file already exists: %s <<<", fname)
-        specwriter.newfile(fname, RE=RE)
-        handled = "appended"
+    raise RuntimeError("DEPRECATED: use ``newFile()``")
+    # global specwriter
+    # dt = datetime.datetime.now()
+    # clean = apstools.utils.cleanupText(title)
+    # fname = f"{dt.month:02d}_{dt.day:02d}_{clean}.dat"
+    # if filename_exists(fname):
+    #     logger.warning(">>> file already exists: %s <<<", fname)
+    #     specwriter.newfile(fname, RE=RE)
+    #     handled = "appended"
         
-    else:
-        specwriter.newfile(fname, scan_id=scan_id, RE=RE)
-        handled = "created"
+    # else:
+    #     specwriter.newfile(fname, scan_id=scan_id, RE=RE)
+    #     handled = "created"
 
-    logger.info(f"SPEC file name : {specwriter.spec_filename}")
-    logger.info(f"File will be {handled} at end of next bluesky scan.")
+    # logger.info(f"SPEC file name : {specwriter.spec_filename}")
+    # logger.info(f"File will be {handled} at end of next bluesky scan.")
