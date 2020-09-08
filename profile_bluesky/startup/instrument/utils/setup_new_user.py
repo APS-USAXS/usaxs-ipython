@@ -13,6 +13,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from ..devices import apsbss as apsbss_object
+from ..devices import user_data
 from ..framework import RE
 from ..framework import specwriter
 from .check_file_exists import filename_exists
