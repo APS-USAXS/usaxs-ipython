@@ -4,6 +4,7 @@ manage the user foler
 """
 
 __all__ = [
+    "matchUserInApsbss",
     "newUser",
     "techniqueSubdirectory"
 ]
@@ -11,11 +12,12 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from ..callbacks import specwriter
+from ..devices import apsbss as apsbss_object
+from ..framework import RE
+from ..framework import specwriter
 from .check_file_exists import filename_exists
-from .initialize import RE
-from apstools.beamtime import apsbss
 from apstools.utils import cleanupText
+import apstools.beamtime.apsbss
 import datetime
 import os
 
@@ -29,16 +31,55 @@ def matchUserInApsbss(user):
     pull information from apsbss matching on user name and date
     """
     dt = datetime.datetime.now()
-    cycle = apsbss.getCurrentCycle()
-    esafs = apsbss.getCurrentEsafs(APSBSS_SECTOR)
-    proposals = apsbss.api_bss.listProposals(
-        beamlineName=APSBSS_BEAMLINE, 
-        runName=cycle)
-    # TODO: search for user and match date
-    # TODO: report if not unique
-    # TODO: get unique esaf_id
-    # TODO: get unique proposal_id
-    # TODO: if unique both, update the local apsbss PVs
+    now = str(dt)
+    cycle = apstools.beamtime.apsbss.getCurrentCycle()
+    esafs = [
+        esaf
+        for esaf in apstools.beamtime.apsbss.getCurrentEsafs(
+            APSBSS_SECTOR)
+        if esaf["experimentStartDate"] <= now <= esaf["experimentEndDate"]
+        if user in [
+            entry["lastName"]
+            for entry in esaf["experimentUsers"]
+        ]
+    ]
+    proposals = [
+        p
+        for p in apstools.beamtime.apsbss.api_bss.listProposals(
+            beamlineName=APSBSS_BEAMLINE, 
+            runName=cycle)
+        if p["startTime"] <= now <= p["endTime"]
+        if user in [
+            entry["lastName"]
+            for entry in p["experimenters"]
+        ]
+    ]
+
+    if len(esafs) > 2:
+        logger.warning(
+            "%d ESAF(s) match user %s at this time",
+            len(esafs), user)
+    if len(proposals) > 2:
+        logger.warning(
+            "%d proposal(s) match user %s at this time",
+            len(proposals), user)
+    if len(esafs) == 1 and len(proposals) == 1:
+        # update the local apsbss PVs
+        logger.info("ESAF %s", str(esafs[0]))
+        logger.info("Proposal %s", str(proposals[0]))
+
+        prefix = apsbss_object.prefix
+        apstools.beamtime.apsbss.epicsSetup(
+            prefix,
+            APSBSS_BEAMLINE,
+            cycle
+            )
+        apstools.beamtime.apsbss.epicsClear(prefix)
+
+        apsbss_object.esaf.esaf_id.put(esafs[0]["esafId"])
+        apsbss_object.proposal.proposal_id.put(proposals[0]["id"])
+
+        apstools.beamtime.apsbss.epicsUpdate(prefix)
 
 
 def _setSpecFileName(path, scan_id=1):
@@ -98,7 +139,6 @@ def newUser(user, scan_id=1, month=None, day=None):
     _setSpecFileName(path, scan_id=scan_id)
 
     # TODO: where to save this path for general use?
-    # TODO: pull info from apsbss matching user name (#360)
     matchUserInApsbss(user)
 
     return path
