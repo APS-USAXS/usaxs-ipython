@@ -4,7 +4,7 @@ manage the user foler
 """
 
 __all__ = [
-    "newFile",
+    "newUser",
     "techniqueSubdirectory"
 ]
 
