@@ -14,9 +14,9 @@ logger.info(__file__)
 from ..callbacks import specwriter
 from .check_file_exists import filename_exists
 from .initialize import RE
+from apstools.utils import cleanupText
 import datetime
 import os
-from apstools.utils import cleanupText
 
 
 def newUser(user, scan_id=1, month=None, day=None):
