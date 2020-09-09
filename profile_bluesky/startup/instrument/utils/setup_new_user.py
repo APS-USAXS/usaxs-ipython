@@ -246,7 +246,7 @@ def newUser(user, scan_id=1, year=None, month=None, day=None):
     _setSpecFileName(path, scan_id=scan_id)    # SPEC file name
     matchUserInApsbss(user)     # update ESAF & Proposal, if available
 
-    return path
+    return os.path.abspath(path)
 
 
 def techniqueSubdirectory(technique):
@@ -263,4 +263,4 @@ def techniqueSubdirectory(technique):
         logger.info("Creating technique directory: %s", path)
         os.mkdir(path)
 
-    return path
+    return os.path.abspath(path)
