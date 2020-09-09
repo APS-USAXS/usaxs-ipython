@@ -47,8 +47,8 @@ from ..devices import user_data
 from ..devices import waxsx, waxs_det
 from ..devices.suspenders import suspend_BeamInHutch
 from ..framework import bec, RE, specwriter
-from ..framework.metadata import USERNAME
 from ..utils.cleanup_text import cleanupText
+from ..utils.setup_new_user import techniqueSubdirectory
 from .area_detector import areaDetectorAcquire
 from .axis_tuning import tune_ar, tune_a2rp, tune_asrp
 from .axis_tuning import tune_mr, tune_m2rp, tune_msrp
@@ -265,17 +265,14 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     scan_title_clean = cleanupText(scan_title)  # TODO: why unused?
 
-    # SPEC-compatibility symbols
+    # SPEC-compatibility
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
-    # use our specwriter to get a pseudo-SPEC file name
-    DATAFILE = os.path.split(specwriter.spec_filename)[-1]  # TODO: why unused?
 
     ts = str(datetime.datetime.now())
     yield from bps.mv(
         user_data.sample_title, scan_title,
         user_data.state, "starting USAXS step scan",
         user_data.sample_thickness, thickness,
-        user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
@@ -439,13 +436,10 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
+    # SPEC-compatibility
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
-    # use our specwriter to get a pseudo-SPEC file name
-    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
 
-    # directory is pwd + DATAFILE + "_usaxs"
-    flyscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_usaxs")
+    flyscan_path = techniqueSubdirectory("usaxs")
     if not os.path.exists(flyscan_path) and bluesky_runengine_running:
         # must create this directory if not exists
         os.mkdir(flyscan_path)
@@ -464,7 +458,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
-        user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
@@ -664,18 +657,15 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
+    # SPEC-compatibility
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
-    # use our specwriter to get a pseudo-SPEC file name
-    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
 
     # these two templates match each other, sort of
     ad_file_template = "%s%s_%4.4d.hdf"
     local_file_template = "%s_%04d.hdf"
 
-    # directory is pwd + DATAFILE + "_usaxs"
     # path on local file system
-    SAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_saxs")
+    SAXSscan_path = techniqueSubdirectory("saxs")
     SAXS_file_name = local_file_template % (scan_title_clean, saxs_det.hdf1.file_number.get())
     # NFS-mounted path as the Pilatus detector sees it
     pilatus_path = os.path.join("/mnt/usaxscontrol", *SAXSscan_path.split(os.path.sep)[2:])
@@ -698,13 +688,12 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
-        user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
    )
 
@@ -828,18 +817,15 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
 
     scan_title_clean = cleanupText(scan_title)
 
-    # SPEC-compatibility symbols
+    # SPEC-compatibility
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
-    # use our specwriter to get a pseudo-SPEC file name
-    DATAFILE = os.path.split(specwriter.spec_filename)[-1]
 
     # these two templates match each other, sort of
     ad_file_template = "%s%s_%4.4d.hdf"
     local_file_template = "%s_%04d.hdf"
 
-    # directory is pwd + DATAFILE + "_usaxs"
     # path on local file system
-    WAXSscan_path = os.path.join(os.getcwd(), os.path.splitext(DATAFILE)[0] + "_waxs")
+    WAXSscan_path = techniqueSubdirectory("waxs")
     WAXS_file_name = local_file_template % (scan_title_clean, waxs_det.hdf1.file_number.get())
     # NFS-mounted path as the Pilatus detector sees it
     pilatus_path = os.path.join("/mnt/usaxscontrol", *WAXSscan_path.split(os.path.sep)[2:])
@@ -862,13 +848,12 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
-        user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),        # TODO: watch out for string too long for EPICS! (make it an EPICS waveform string)
+        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
    )
 

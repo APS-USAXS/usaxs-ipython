@@ -20,6 +20,7 @@ from apstools.utils import *
 listobjects = show_ophyd_symbols
 
 from .plans.move_instrument import *
+from .utils.setup_new_user import *
 
 # ensure nothing clobbered our logger
 from .session_logs import logger

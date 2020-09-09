@@ -1,9 +1,10 @@
 
 """
 define a custom NeXus file writer base for uascan raw data files
-"""
 
-# TODO: needs a newFile function, similar to instrument.framework.callbacks.newSpecFile()
+See ``instrument.utils.setup_new_user.newFile()``
+to replace ``instrument.framework.callbacks.newSpecFile()``
+"""
 
 __all__ = [
     # "NXWriterFlyScan",    # not yet tested
@@ -71,19 +72,6 @@ class OurCustomNXWriterBase(NXWriterAPS):
         return the title for this sample
         """
         return self.get_stream_link("user_data_sample_title")
-
-    # 2020-07-29, prj - removed on request of jil
-    # def make_file_name(self):
-    #     """
-    #     this is the place to decide how to name data files
-
-    #     insert the plan name after the scan number
-    #     """
-    #     path, fname = os.path.split(super().make_file_name())     # default technique
-    #     parts = fname.split("-")
-    #     parts.insert(3, self.plan_name)
-    #     fname = "-".join(parts)
-    #     return os.path.join(path, fname)
 
     def start(self, doc):
         "ensure we only collect data for plans we are prepared to handle"
