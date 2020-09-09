@@ -9,6 +9,7 @@ syntax or passed to the bluesky RunEngine such as ``RE(plan())``.
 from .area_detector import *
 from .axis_tuning import *
 from .command_list import *
+from .doc_run import *
 from .filters import *
 from .mode_changes import *
 from .mono_feedback import *
