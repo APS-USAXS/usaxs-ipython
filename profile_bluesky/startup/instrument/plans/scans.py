@@ -47,7 +47,6 @@ from ..devices import user_data
 from ..devices import waxsx, waxs_det
 from ..devices.suspenders import suspend_BeamInHutch
 from ..framework import bec, RE, specwriter
-# from ..framework.metadata import USERNAME
 from ..utils.cleanup_text import cleanupText
 from .area_detector import areaDetectorAcquire
 from .axis_tuning import tune_ar, tune_a2rp, tune_asrp
@@ -275,7 +274,6 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting USAXS step scan",
         user_data.sample_thickness, thickness,
-        # user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
@@ -464,7 +462,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting USAXS Flyscan",
         user_data.sample_thickness, thickness,
-        # user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
@@ -698,7 +695,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting SAXS collection",
         user_data.sample_thickness, thickness,
-        # user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
@@ -862,7 +858,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_title, scan_title,
         user_data.state, "starting WAXS collection",
         user_data.sample_thickness, thickness,
-        # user_data.user_name, USERNAME,
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
