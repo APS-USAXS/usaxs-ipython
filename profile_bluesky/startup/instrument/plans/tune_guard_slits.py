@@ -36,7 +36,7 @@ from ..devices import ti_filter_shutter
 from ..devices import UPD_SIGNAL
 from ..devices import user_data
 from ..framework import RE
-from ..framework.metadata import USERNAME
+# from ..framework.metadata import USERNAME
 from ..utils.derivative import numerical_derivative
 from ..utils.peak_centers import peak_center
 from .filters import insertTransmissionFilters
@@ -59,7 +59,7 @@ def tune_GslitsCenter():
     yield from bps.mv(
         user_data.sample_title, title,
         user_data.state, "tune Guard slits center",
-        user_data.user_name, USERNAME,
+        # user_data.user_name, USERNAME,
         # user_data.user_dir, ZZZZZZZZZZZ,
         user_data.spec_scan, str(RE.md["scan_id"]+1+1),     # TODO: Why SCAN_N+1?
         user_data.time_stamp, ts,
