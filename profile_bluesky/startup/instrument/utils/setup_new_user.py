@@ -230,11 +230,10 @@ def newUser(user, scan_id=1, year=None, month=None, day=None):
     month = month or dt.month
     day = day or dt.day
 
-    clean = cleanupText(user)
     path = os.path.join(
         DATA_DIR_BASE,
         f"{year:04d}-{month:02d}",
-        f"{month:02d}_{day:02d}_{clean}",
+        f"{month:02d}_{day:02d}_{cleanupText(user)}",
         )
 
     if not os.path.exists(path):
