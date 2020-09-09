@@ -25,6 +25,7 @@ from ..devices import ti_filter_shutter
 from ..devices import user_data
 from .filters import insertScanFilters, insertTransmissionFilters
 from .mode_changes import mode_SAXS, mode_USAXS
+from .no_run import no_run_trigger_and_wait
 
 
 def measure_USAXS_Transmission(md={}):
@@ -50,21 +51,21 @@ def measure_USAXS_Transmission(md={}):
         )
         md["plan_name"] = "measure_USAXS_Transmission"
         scaler0.select_channels(["I0_USAXS", "TR diode"])
-        yield from bp.count([scaler0], md=md)
+        yield from no_run_trigger_and_wait([scaler0])
         scaler0.select_channels(None)
         s = scaler0.read()
         secs = s["scaler0_time"]["value"]
         _tr_diode = s["TR diode"]["value"]
         _I0 = s["I0_USAXS"]["value"]
-        
+
         if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"]  or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
             yield from autoscale_amplifiers([I0_controls, trd_controls])
-            
+
             yield from bps.mv(
                 scaler0.preset_time, trmssn.count_time.get()
             )
             scaler0.select_channels(["I0_USAXS", "TR diode"])
-            yield from bp.count([scaler0], md=md)
+            yield from no_run_trigger_and_wait([scaler0])
             scaler0.select_channels(None)
             s = scaler0.read()
 
@@ -97,7 +98,7 @@ def measure_USAXS_Transmission(md={}):
             trmssn.I0_gain, 0,
         )
         logger.info("Did not measure USAXS transmission.")
-    
+
 
 def measure_SAXS_Transmission(md={}):
     """
@@ -111,40 +112,40 @@ def measure_SAXS_Transmission(md={}):
     piny_target = terms.SAXS.y_in.get() + constants["SAXS_TR_PINY_OFFSET"]
     # z has to move before y can move.
     yield from bps.mv(saxs_stage.z, pinz_target)
-    #now y can put diode in the beam, open shutter... 
+    #now y can put diode in the beam, open shutter...
     yield from bps.mv(
         saxs_stage.y, piny_target,
         ti_filter_shutter, "open",
     )
- 
+
     yield from autoscale_amplifiers([I0_controls, trd_controls])
     yield from bps.mv(
         scaler0.preset_time, constants["SAXS_TR_TIME"],
     )
     md["plan_name"] = "measure_SAXS_Transmission"
-    yield from bp.count([scaler0], md=md)
+    yield from no_run_trigger_and_wait([scaler0])
     s = scaler0.read()
     secs = s["scaler0_time"]["value"]
     _tr_diode = s["TR diode"]["value"]
     _I0 = s["I0_USAXS"]["value"]
-    
+
     if _tr_diode > secs*constants["TR_MAX_ALLOWED_COUNTS"] or _I0 > secs*constants["TR_MAX_ALLOWED_COUNTS"] :
         yield from autoscale_amplifiers([I0_controls, trd_controls])
-        
+
         yield from bps.mv(
             scaler0.preset_time, constants["SAXS_TR_TIME"],
         )
-        yield from bp.count([scaler0], md=md)
+        yield from no_run_trigger_and_wait([scaler0])
         s = scaler0.read()
 
-    # y has to move before z, close shutter... 
+    # y has to move before z, close shutter...
     yield from bps.mv(
         saxs_stage.y, terms.SAXS.y_in.get(),
         ti_filter_shutter, "close",
     )
     # z can move.
     yield from bps.mv(saxs_stage.z, terms.SAXS.z_in.get())
-    
+
     yield from insertScanFilters()
     yield from bps.mv(
         terms.SAXS_WAXS.diode_transmission, s["TR diode"]["value"],
