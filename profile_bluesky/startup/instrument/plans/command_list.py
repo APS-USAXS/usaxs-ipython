@@ -42,6 +42,7 @@ from ..utils.quoted_line import split_quoted_line
 from .axis_tuning import instrument_default_tune_ranges
 from .axis_tuning import update_EPICS_tuning_widths
 from .axis_tuning import user_defined_settings
+from .doc_run import documentation_run
 from .mode_changes import mode_SAXS, mode_USAXS, mode_WAXS, mode_Radiography
 
 
@@ -393,8 +394,10 @@ def execute_command_list(filename, commands, md={}):
     text += str(command_list_as_table(commands))
     logger.info(text)
 
-    # TODO: save the command list as a separate Bluesky run for documentation purposes
-    archive = instrument_archive(text)
+    # save the command list as a separate Bluesky run for documentation purposes
+    yield from documentation_run(text)
+
+    instrument_archive(text)
 
     yield from before_command_list(md=md, commands=commands)
     for command in commands:
