@@ -21,7 +21,7 @@ def build_unit(unit_num):
     unit.append('    <attribute name="canSAS_class" value="SASuser" />')
     for k, v in xref.items():
         pvname = f"9idc:bss:proposal:user{unit_num}:{v}"
-        unit.append(f'    <PV label="{k}" pvname="{pvname}" />')
+        unit.append(f'    <PV label="{k}" pvname="{pvname}" string="true" />')
     unit.append('</group>')
     return unit
 

@@ -74,102 +74,102 @@ Additionally, you can check this file for validity and that all PVs exist with t
 
                 <group name="user1" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user1:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user1:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user1:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user1:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user1:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user1:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user1:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user1:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user1:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user1:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user1:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user1:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user1:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user1:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user1:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user1:piFlag" string="true" />
                 </group>
                 <group name="user2" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user2:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user2:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user2:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user2:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user2:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user2:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user2:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user2:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user2:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user2:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user2:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user2:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user2:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user2:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user2:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user2:piFlag" string="true" />
                 </group>
                 <group name="user3" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user3:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user3:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user3:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user3:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user3:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user3:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user3:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user3:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user3:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user3:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user3:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user3:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user3:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user3:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user3:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user3:piFlag" string="true" />
                 </group>
                 <group name="user4" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user4:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user4:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user4:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user4:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user4:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user4:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user4:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user4:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user4:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user4:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user4:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user4:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user4:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user4:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user4:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user4:piFlag" string="true" />
                 </group>
                 <group name="user5" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user5:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user5:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user5:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user5:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user5:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user5:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user5:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user5:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user5:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user5:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user5:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user5:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user5:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user5:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user5:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user5:piFlag" string="true" />
                 </group>
                 <group name="user6" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user6:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user6:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user6:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user6:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user6:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user6:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user6:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user6:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user6:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user6:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user6:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user6:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user6:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user6:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user6:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user6:piFlag" string="true" />
                 </group>
                 <group name="user7" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user7:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user7:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user7:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user7:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user7:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user7:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user7:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user7:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user7:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user7:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user7:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user7:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user7:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user7:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user7:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user7:piFlag" string="true" />
                 </group>
                 <group name="user8" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user8:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user8:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user8:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user8:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user8:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user8:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user8:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user8:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user8:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user8:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user8:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user8:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user8:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user8:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user8:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user8:piFlag" string="true" />
                 </group>
                 <group name="user9" class="NXuser">
                     <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="last_name" pvname="9idc:bss:proposal:user9:lastName" />
-                    <PV label="first_name" pvname="9idc:bss:proposal:user9:firstName" />
-                    <PV label="user_id" pvname="9idc:bss:proposal:user9:userId" />
-                    <PV label="badge_number" pvname="9idc:bss:proposal:user9:badgeNumber" />
-                    <PV label="email" pvname="9idc:bss:proposal:user9:email" />
-                    <PV label="institution" pvname="9idc:bss:proposal:user9:institution" />
-                    <PV label="institution_id" pvname="9idc:bss:proposal:user9:instId" />
-                    <PV label="pi_flag" pvname="9idc:bss:proposal:user9:piFlag" />
+                    <PV label="last_name" pvname="9idc:bss:proposal:user9:lastName" string="true" />
+                    <PV label="first_name" pvname="9idc:bss:proposal:user9:firstName" string="true" />
+                    <PV label="user_id" pvname="9idc:bss:proposal:user9:userId" string="true" />
+                    <PV label="badge_number" pvname="9idc:bss:proposal:user9:badgeNumber" string="true" />
+                    <PV label="email" pvname="9idc:bss:proposal:user9:email" string="true" />
+                    <PV label="institution" pvname="9idc:bss:proposal:user9:institution" string="true" />
+                    <PV label="institution_id" pvname="9idc:bss:proposal:user9:instId" string="true" />
+                    <PV label="pi_flag" pvname="9idc:bss:proposal:user9:piFlag" string="true" />
                 </group>
 
                 <group name="sample" class="NXsample">
