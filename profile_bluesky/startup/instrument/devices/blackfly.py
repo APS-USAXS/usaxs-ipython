@@ -13,7 +13,10 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from bluesky import plan_stubs as bps
+
 from ophyd import AreaDetector
+from ophyd import Component, EpicsSignal
 from ophyd import PointGreyDetectorCam
 from ophyd import SingleTrigger, ImagePlugin
 from ophyd.areadetector import ADComponent
@@ -65,6 +68,15 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         write_path_template = WRITE_IMAGE_FILE_PATH,
         read_path_template = READ_IMAGE_FILE_PATH,
         )
+    should_save_jpeg = Component(
+        EpicsSignal,
+        "9idcLAX:saveFLY2Image",
+        string=True)
+
+    def take_image(self):
+        yield from bps.stage(self)
+        yield from bps.trigger(self, wait=True)
+        yield from bps.unstage(self)
 
 
 try:
