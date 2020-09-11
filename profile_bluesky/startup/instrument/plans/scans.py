@@ -59,6 +59,7 @@ from .mode_changes import mode_SAXS
 from .mode_changes import mode_USAXS
 from .mode_changes import mode_WAXS
 from .requested_stop import IfRequestedStopBeforeNextScan
+from .sample_imaging import record_sample_image_on_demand
 from .sample_transmission import measure_SAXS_Transmission
 from .sample_transmission import measure_USAXS_Transmission
 from .uascan import uascan
@@ -351,18 +352,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
     endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())
     bec.disable_plots()
-    if blackfly_optical.should_save_jpeg:
-        uascan_path = techniqueSubdirectory("usaxs")
-        yield from bps.mv(
-            blackfly_optical.jpeg1.file_path,
-            "/mnt" + os.path.abspath(uascan_path) + "/"  # MUST end with "/"
-            )
-        yield from blackfly_optical.take_image()
-        jpeg_name = blackfly_optical.jpeg1.full_file_name.get()
-        if jpeg_name.startswith("/mnt/share1"):
-            jpeg_name = jpeg_name[4:]
-        if os.path.exists(jpeg_name):
-            _md["sample_image_jpeg"] = jpeg_name
+    yield from record_sample_image_on_demand("usaxs", _md)
     yield from uascan(
         startAngle,
         terms.USAXS.ar_val_center.get(),
