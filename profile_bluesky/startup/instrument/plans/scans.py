@@ -265,7 +265,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         s_stage.y, pos_Y,
     )
 
-    scan_title_clean = cleanupText(scan_title)  # TODO: why unused?
+    scan_title_clean = cleanupText(scan_title)
 
     # SPEC-compatibility
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
@@ -352,7 +352,9 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
     endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())
     bec.disable_plots()
-    yield from record_sample_image_on_demand("usaxs", _md)
+
+    yield from record_sample_image_on_demand("usaxs", scan_title_clean, _md)
+
     yield from uascan(
         startAngle,
         terms.USAXS.ar_val_center.get(),

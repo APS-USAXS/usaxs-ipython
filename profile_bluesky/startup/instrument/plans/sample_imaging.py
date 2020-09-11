@@ -15,7 +15,7 @@ from bluesky import plan_stubs as bps
 import os
 
 
-def record_sample_image_on_demand(technique_name, _md):
+def record_sample_image_on_demand(technique_name, title, _md):
     """
     take an image of the sample
 
@@ -37,7 +37,7 @@ def record_sample_image_on_demand(technique_name, _md):
             blackfly_optical.jpeg1.file_path,
             "/mnt" + os.path.abspath(uascan_path) + "/",  # MUST end with "/"
             
-            # TODO: blackfly_optical.jpeg1.file_name, "sample_image",
+            blackfly_optical.jpeg1.file_name, title,
             blackfly_optical.jpeg1.file_number, terms.FlyScan.order_number,
             )
         yield from blackfly_optical.take_image()
