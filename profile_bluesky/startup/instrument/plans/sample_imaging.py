@@ -32,16 +32,19 @@ def record_sample_image_on_demand(technique_name, title, _md):
         Metadata dictionary additions from the calling plan.
     """
     if blackfly_optical.should_save_jpeg:
+        det = blackfly_optical  # define once here, in case it ever changes
         uascan_path = techniqueSubdirectory(technique_name)
         yield from bps.mv(
-            blackfly_optical.jpeg1.file_path,
+            det.jpeg1.file_path,
             "/mnt" + os.path.abspath(uascan_path) + "/",  # MUST end with "/"
-            
-            blackfly_optical.jpeg1.file_name, title,
-            blackfly_optical.jpeg1.file_number, terms.FlyScan.order_number,
+
+            det.jpeg1.file_name, title,
+            det.jpeg1.file_number, terms.FlyScan.order_number,
             )
-        yield from blackfly_optical.take_image()
-        jpeg_name = blackfly_optical.jpeg1.full_file_name.get()
+
+        yield from det.take_image()
+
+        jpeg_name = det.jpeg1.full_file_name.get()
         if jpeg_name.startswith("/mnt/share1"):
             jpeg_name = jpeg_name[4:]
         if os.path.exists(jpeg_name):
