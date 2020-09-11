@@ -37,7 +37,8 @@ def record_sample_image_on_demand(technique_name, _md):
             blackfly_optical.jpeg1.file_path,
             "/mnt" + os.path.abspath(uascan_path) + "/",  # MUST end with "/"
             
-            blackfly_optical.jpeg1.file_number, terms.FlyScan.order_number
+            # TODO: blackfly_optical.jpeg1.file_name, "sample_image",
+            blackfly_optical.jpeg1.file_number, terms.FlyScan.order_number,
             )
         yield from blackfly_optical.take_image()
         jpeg_name = blackfly_optical.jpeg1.full_file_name.get()
