@@ -33,13 +33,13 @@ def record_sample_image_on_demand(technique_name, title, _md):
     """
     if blackfly_optical.should_save_jpeg:
         det = blackfly_optical  # define once here, in case it ever changes
-        uascan_path = techniqueSubdirectory(technique_name)
+        path = techniqueSubdirectory(technique_name)
         yield from bps.mv(
             det.jpeg1.file_path,
-            "/mnt" + os.path.abspath(uascan_path) + "/",  # MUST end with "/"
+            "/mnt" + os.path.abspath(path) + "/",  # MUST end with "/"
 
             det.jpeg1.file_name, title,
-            det.jpeg1.file_number, terms.FlyScan.order_number,
+            det.jpeg1.file_number, terms.FlyScan.order_number.get(),
             )
 
         yield from det.take_image()
