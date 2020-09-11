@@ -68,10 +68,14 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         write_path_template = WRITE_IMAGE_FILE_PATH,
         read_path_template = READ_IMAGE_FILE_PATH,
         )
-    should_save_jpeg = Component(
+    save_jpeg_flag = Component(
         EpicsSignal,
         "9idcLAX:saveFLY2Image",
         string=True)
+
+    @property
+    def should_save_jpeg(self):
+        return self.save_jpeg_flag.get() in (1, "Yes")
 
     def take_image(self):
         yield from bps.stage(self)

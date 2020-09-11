@@ -351,7 +351,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     startAngle = terms.USAXS.ar_val_center.get()- q2angle(terms.USAXS.start_offset.get(),monochromator.dcm.wavelength.get())
     endAngle = terms.USAXS.ar_val_center.get()-q2angle(terms.USAXS.finish.get(),monochromator.dcm.wavelength.get())
     bec.disable_plots()
-    if blackfly_optical.should_save_jpeg.get() in (1, "Yes"):
+    if blackfly_optical.should_save_jpeg:
         uascan_path = techniqueSubdirectory("usaxs")
         yield from bps.mv(
             blackfly_optical.jpeg1.file_path,
