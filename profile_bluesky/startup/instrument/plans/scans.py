@@ -575,6 +575,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         #'num_intervals': num_intervals,
         #'hints': {}
 
+    yield from record_sample_image_on_demand("usaxs", scan_title_clean, _md)
+
     yield from usaxs_flyscan.plan(md=_md)        # DO THE FLY SCAN
 
     yield from bps.mv(
@@ -758,6 +760,8 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     _md["hdf5_file"] = SAXS_file_name
     _md["hdf5_path"] = SAXSscan_path
 
+    yield from record_sample_image_on_demand("saxs", scan_title_clean, _md)
+
     yield from areaDetectorAcquire(saxs_det, md=_md)
     ts = str(datetime.datetime.now())
     yield from bps.remove_suspender(suspend_BeamInHutch)
@@ -917,6 +921,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     _md["hdf5_path"] = WAXSscan_path
 
     logger.debug(f"waxsx before Image collection={waxsx.position}")
+
+    yield from record_sample_image_on_demand("waxs", scan_title_clean, _md)
 
     yield from areaDetectorAcquire(waxs_det, md=_md)
     ts = str(datetime.datetime.now())
