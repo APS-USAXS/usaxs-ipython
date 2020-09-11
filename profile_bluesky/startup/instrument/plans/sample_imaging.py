@@ -3,7 +3,7 @@
 take an image of the sample
 """
 
-__all__ = ["no_run_trigger_and_wait",]
+__all__ = ["record_sample_image_on_demand",]
 
 from ..session_logs import logger
 logger.info(__file__)
