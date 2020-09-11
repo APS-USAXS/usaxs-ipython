@@ -68,14 +68,10 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         write_path_template = WRITE_IMAGE_FILE_PATH,
         read_path_template = READ_IMAGE_FILE_PATH,
         )
-    save_jpeg_flag = Component(
-        EpicsSignal,
-        "9idcLAX:saveFLY2Image",
-        string=True)
 
     @property
     def should_save_jpeg(self):
-        return self.save_jpeg_flag.get() in (1, "Yes")
+        return _flag_save_sample_image_jpeg_.get() in (1, "Yes")
 
     def take_image(self):
         yield from bps.stage(self)
@@ -93,6 +89,13 @@ except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
     blackfly_det = None
+
+
+_flag_save_sample_image_jpeg_ = EpicsSignal(
+    "9idcLAX:saveFLY2Image",
+    string=True,
+    name="_flag_save_sample_image_jpeg_",
+    )
 
 
 try:
