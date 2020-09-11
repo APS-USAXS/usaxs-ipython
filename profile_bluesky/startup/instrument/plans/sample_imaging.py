@@ -17,6 +17,18 @@ import os
 def record_sample_image_on_demand(technique_name, _md):
     """
     take an image of the sample
+
+    If a sample image is taken, the full path to the image
+    is added to the (RunEngine) metadata.
+
+    PARAMETERS
+
+    technique_name
+        *str* :
+        Used to pick the subdirectory.  One of "saxs", "usaxs", or "waxs"
+    _md
+        *dict* :
+        Metadata dictionary additions from the calling plan.
     """
     if blackfly_optical.should_save_jpeg:
         uascan_path = techniqueSubdirectory(technique_name)
