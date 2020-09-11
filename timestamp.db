@@ -1,0 +1,37 @@
+
+# file: timestamp.db
+
+#  MACRO  meaning
+#  A      source PV to be watched (no field!)
+#  CALC   calculation to be used
+#  P      IOC prefix to use: $(P)$(D)
+#  D      database instance prefix to use: $(P)$(D)
+#  OOPT   When to write output (see calcout .OOPT field)
+
+# Use of the .TSEL fields propagates the source PV's time stamp
+
+# softIoc -m A=9idFLY2:cam1:Acquire,CALC="A>0.5",P=tst:,D=ts:,OOPT="Transition To Non-zero" -d timestamp.db
+
+
+record(calcout, "$(P)$(D)_calc") {
+    field(DESC, "watches $(A)")
+    #field(TSEL, "$(A).TIME")
+    field(INPA, "$(A)")
+    field(CALC, "$(CALC)")      # such as "A>0.5"
+    field(SCAN, ".1 second")
+    field(OUT, "$(P)$(D)_buffer PP")
+    field(OOPT, "$(OOPT)")  # such as "Transition To Non-zero"
+}
+
+record(ao, "$(P)$(D)_buffer") {
+    field(TSEL, "$(P)$(D)_calc.TIME")
+    field(FLNK, "$(P)$(D)started")
+}
+
+record(stringin, "$(P)$(D)started") {
+    field(DESC, "when acquire started")
+    field(DTYP, "Soft Timestamp")
+    field(INP,  "@%Y-%m-%d %H:%M:%S.%03f")
+    field(SCAN, "Passive")
+    field(TSEL, "$(P)$(D)_buffer.TIME")
+}
