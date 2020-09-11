@@ -25,11 +25,11 @@ record(calcout, "$(P)$(D)_calc") {
 
 record(ao, "$(P)$(D)_buffer") {
     field(TSEL, "$(P)$(D)_calc.TIME")
-    field(FLNK, "$(P)$(D)started")
+    field(FLNK, "$(P)$(D)timestamp")
 }
 
-record(stringin, "$(P)$(D)started") {
-    field(DESC, "when acquire started")
+record(stringin, "$(P)$(D)timestamp") {
+    field(DESC, "$(A) timestamp")
     field(DTYP, "Soft Timestamp")
     field(INP,  "@%Y-%m-%d %H:%M:%S.%03f")
     field(SCAN, "Passive")
