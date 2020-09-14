@@ -1,10 +1,10 @@
 
 """
-use this code to build new entries for #362
+use this code to build new entries for #382 (related to #362)
 
-https://github.com/APS-USAXS/ipython-usaxs/issues/362
+https://github.com/APS-USAXS/ipython-usaxs/issues/382
 
-updates into file: /share1/AreaDetectorConfig/FlyScan_config/saveFlyData.xml
+updates into files: /share1/AreaDetectorConfig/*_config/attributes.xml
 
 don't forget non-user info for both ESAF & proposal:
     title
@@ -16,22 +16,28 @@ don't forget non-user info for both ESAF & proposal:
 
 def build_unit(unit_num):
     xref = dict(
-        last_name = "lastName",
-        first_name = "firstName",
-        user_id = "userId",
-        badge_number = "badgeNumber",
-        email = "email",
-        institution = "institution",
-        institution_id = "instId",
-        pi_flag = "piFlag",
+        last_name = ["lastName", "family name"],
+        first_name = ["firstName", "given name"],
+        user_id = ["userId", "database user ID"],
+        badge_number = ["badgeNumber", "ANL badge number"],
+        email = ["email", "email address"],
+        institution = ["institution", "institution name"],
+        institution_id = ["instId", "APS insitution index ID"],
+        pi_flag = ["piFlag", "Principal Investigator?"],
     )
     unit = []
-    unit.append(f'<group name="user{unit_num}" class="NXuser">')
-    unit.append('    <attribute name="canSAS_class" value="SASuser" />')
     for k, v in xref.items():
-        pvname = f"9idc:bss:proposal:user{unit_num}:{v}"
-        unit.append(f'    <PV label="{k}" pvname="{pvname}" string="true" />')
-    unit.append('</group>')
+        pvname = f"9idc:bss:proposal:user{unit_num}:{v[0]}"
+        entry = (
+            '<Attribute'
+            f' name="APSBSS_user{unit_num}_{k}"'
+            ' type="EPICS_PV"'
+            f' source="{pvname}"'
+            ' dbrtype="DBR_STRING"'
+            f' description="{v[1]}"'
+            ' />'
+        )
+        unit.append(entry)
     return unit
 
 for i in range(9):
@@ -40,10 +46,7 @@ for i in range(9):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 """XML
-                <group name="user" class="NXuser">
-                    <attribute name="canSAS_class" value="SASuser" />
-                    <PV label="name" pvname="9idcLAX:UserName" />
-                </group>
+    <Attribute name="BSS_activity"	type="EPICS_PV"	source="9id_bss:activity"	dbrtype="DBR_STRING"     description="Activity code"/>
 """
 
 """NXuser structure

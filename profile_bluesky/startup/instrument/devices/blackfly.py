@@ -13,7 +13,10 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from bluesky import plan_stubs as bps
+
 from ophyd import AreaDetector
+from ophyd import Component, EpicsSignal
 from ophyd import PointGreyDetectorCam
 from ophyd import SingleTrigger, ImagePlugin
 from ophyd.areadetector import ADComponent
@@ -66,6 +69,15 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         read_path_template = READ_IMAGE_FILE_PATH,
         )
 
+    @property
+    def should_save_jpeg(self):
+        return _flag_save_sample_image_jpeg_.get() in (1, "Yes")
+
+    def take_image(self):
+        yield from bps.stage(self)
+        yield from bps.trigger(self, wait=True)
+        yield from bps.unstage(self)
+
 
 try:
     nm = RADIOGRAPHY_CAMERA
@@ -77,6 +89,13 @@ except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
     logger.warning(msg)
     blackfly_det = None
+
+
+_flag_save_sample_image_jpeg_ = EpicsSignal(
+    "9idcLAX:saveFLY2Image",
+    string=True,
+    name="_flag_save_sample_image_jpeg_",
+    )
 
 
 try:
