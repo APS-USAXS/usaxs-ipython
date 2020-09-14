@@ -10,7 +10,7 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from apstools.suspenders import SuspendWhenChanged
+from bluesky.suspenders import SuspendWhenChanged
 from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal
 import time
