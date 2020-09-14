@@ -109,7 +109,7 @@ class SaveFlyScan(object):
 
             hdf5_parent = pv_spec.group_parent.hdf5_group
             try:
-                logger.debug(f"preliminaryWriteFile(name=\"{pv_spec.label}\", data={value})")
+                logger.debug('preliminaryWriteFile(name="%s", data=%s)', pv_spec.label, value)
                 ds = makeDataset(hdf5_parent, pv_spec.label, value)
                 if ds is None:
                     logger.debug(f"Could not create {pv_spec.label}")
@@ -187,6 +187,8 @@ class SaveFlyScan(object):
         connect_timeout = 15.0
         while not self.mgr.connected:
             if time.time() - t0 > connect_timeout:
+                for item in self.mgr.unconnected_signals:
+                    logging.error("Not connected PV=%s  ophyd=%s", item.pv, item.ophyd_signal)
                 raise EpicsNotConnected()
             time.sleep(0.1)
 
