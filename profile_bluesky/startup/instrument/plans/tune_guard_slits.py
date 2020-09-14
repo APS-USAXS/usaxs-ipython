@@ -1,13 +1,6 @@
 
 """
 tune the guard slits
-
-Note:
-
-* Issue #306 reports these routines are not working.
-* https://github.com/APS-USAXS/ipython-usaxs/issues/306
-* Issue #253 reports *guard slit motors sometimes stuck in MOVING state
-* https://github.com/APS-USAXS/ipython-usaxs/issues/253
 """
 
 __all__ = """
