@@ -1,6 +1,8 @@
 
 # file: timestamp.db
 
+# RESULT:  $(P)$(D)timestamp
+
 #  MACRO  meaning
 #  A      source PV to be watched (no field!)
 #  CALC   calculation to be used
