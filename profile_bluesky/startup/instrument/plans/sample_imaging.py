@@ -39,7 +39,7 @@ def record_sample_image_on_demand(technique_name, title, _md):
             "/mnt" + os.path.abspath(path) + "/",  # MUST end with "/"
 
             det.jpeg1.file_name, title,
-            det.jpeg1.file_number, terms.FlyScan.order_number.get(),
+            det.jpeg1.file_number, terms.FlyScan.order_number.get()-1,
             )
 
         yield from det.take_image()
