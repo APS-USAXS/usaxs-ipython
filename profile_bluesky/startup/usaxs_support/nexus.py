@@ -21,9 +21,12 @@ INTERNAL
 """
 
 import logging
+import os
+# ensure we have a location for the libca (& libCom) library
+os.environ["PYEPICS_LIBCA"] = "/APSshare/epics/base-7.0.3/lib/linux-x86_64/libca.so"
+
 from lxml import etree as lxml_etree
 from ophyd import Component, EpicsSignal
-import os
 import socket
 import time
 
@@ -36,9 +39,6 @@ path = os.path.dirname(__file__)
 XML_CONFIGURATION_FILE = os.path.join(path, 'saveFlyData.xml')
 XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 TRIGGER_POLL_INTERVAL_s = 0.1
-
-# FIXME: absolute gotta-make-it-work-today hack
-# os.environ["PYEPICS_LIBCA"] = "/APSshare/epics/base-3.14.12.7/lib/linux-x86_64/libca.so"
 
 manager = None # singleton instance of NeXus_Structure
 
