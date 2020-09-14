@@ -328,7 +328,7 @@ def _USAXS_tune_guardSlits():
         guard_slit.h_sync_proc, 1,
         guard_slit.v_sync_proc, 1,
         )
-    yield from guard_slit.status_update()
+    yield from guard_slit.process_motor_records()
 
 
 def tune_GslitsSize():
