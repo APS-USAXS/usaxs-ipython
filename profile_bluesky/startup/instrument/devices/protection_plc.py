@@ -78,7 +78,7 @@ class PlcProtectionDevice(Device):
                 user_data.collection_in_progress, 0,     # notify the GUI and others
             )
             if self.suspender is not None:
-                msg += f"\n P.S. Can resume Bluesky scan: {suspender.allow_resume}\n"
+                msg += f"\n P.S. Can resume Bluesky scan: {self.suspender.allow_resume}\n"
 
             # send email to staff ASAP!!!
             msg += f"\n P.S. Can resume Bluesky scan: {suspend_plc_protect.allow_resume}\n"
