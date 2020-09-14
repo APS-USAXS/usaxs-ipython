@@ -20,6 +20,7 @@ from ophyd import Component, EpicsSignal
 from ophyd import PointGreyDetectorCam
 from ophyd import SingleTrigger, ImagePlugin
 from ophyd.areadetector import ADComponent
+from ophyd.areadetector.plugins import TransformPlugin
 
 from .area_detector_common import _validate_AD_FileWriter_path_
 from .area_detector_common import area_detector_EPICS_PV_prefix
@@ -49,13 +50,6 @@ class MyPointGreyDetector(SingleTrigger, AreaDetector):
     image = ADComponent(ImagePlugin, "image1:")
 
 
-class TransformPlugin(Device):
-    """
-    local interface to the Transform plugin
-    """
-    transform_type = Component(EpicsSignalWithRBV, "Type", kind='config')
-
-
 class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
     """
     Variation to write image as JPEG
@@ -75,7 +69,7 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         write_path_template = WRITE_IMAGE_FILE_PATH,
         read_path_template = READ_IMAGE_FILE_PATH,
         )
-    trans1 = ADComponent(TransformPlugin, suffix = "Trans1:",)
+    trans1 = ADComponent(TransformPlugin, "Trans1:")
 
     @property
     def should_save_jpeg(self):
