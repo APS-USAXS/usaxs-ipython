@@ -42,7 +42,7 @@ class GuardSlitTuneError(RuntimeError): ...    # custom error
 def tune_GslitsCenter():
     """
     plan: optimize the guard slits' position
-    
+
     tune to the peak centers
     """
     yield from IfRequestedStopBeforeNextScan()
@@ -55,7 +55,7 @@ def tune_GslitsCenter():
         user_data.time_stamp, ts,
         user_data.scan_macro, "tune_GslitCenter",
         )
- 
+
     yield from mode_USAXS()
     yield from bps.mv(
         usaxs_slit.v_size, terms.SAXS.usaxs_v_size.get(),
@@ -69,7 +69,7 @@ def tune_GslitsCenter():
         )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
     yield from bps.mv(user_data.state, title)
-    
+
     old_preset_time = scaler0.preset_time.get()
     yield from bps.mv(scaler0.preset_time, 0.2)
 
@@ -81,7 +81,7 @@ def tune_GslitsCenter():
         x_c = motor.position
         x_0 = x_c - abs(width)/2
         x_n = x_c + abs(width)/2
-        
+
         scaler0.select_channels([UPD_SIGNAL.chname.get()])
         scaler0.channels.chan01.kind = Kind.config
 
@@ -89,7 +89,7 @@ def tune_GslitsCenter():
         yield from tuner.tune(width=-width, num=steps+1)
 
         bluesky_runengine_running = RE.state != "idle"
-        
+
         if bluesky_runengine_running:
             found = tuner.peak_detected()
             center = tuner.peaks.com    # center of mass
@@ -133,22 +133,22 @@ def tune_GslitsCenter():
     # Here is the MAIN EVENT
     yield from tune_guard_slit_motor(guard_slit.y, 2, 50)
     yield from tune_guard_slit_motor(guard_slit.x, 4, 20)
-    
+
     yield from bps.mv(scaler0.preset_time, old_preset_time)
-    
+
     yield from bps.mv(ti_filter_shutter, "close")
 
 
 def _USAXS_tune_guardSlits():
     """
     plan: (internal) this performs the guard slit scan
-    
+
     Called from tune_GslitsSize()
     """
-    # # define proper counters and set the geometry... 
+    # # define proper counters and set the geometry...
     # plotselect upd2
     # counters cnt_num(I0) cnt_num(upd2)
-    
+
     # remember original motor positons
     original_position = dict(
         top = guard_slit.top.position,
@@ -156,6 +156,13 @@ def _USAXS_tune_guardSlits():
         out = guard_slit.outb.position,
         inb = guard_slit.inb.position,
         )
+    h_step_away = guard_slit.h_step_away
+    v_step_away = guard_slit.v_step_away
+    # h_step_into = guard_slit.h_step_into
+    # v_step_into = guard_slit.v_step_into
+    h_step_into = 2 * guard_slit.top.position
+    v_step_into = 2 * guard_slit.outb.position
+
     table = pyRestTable.Table()
     table.addLabel("guard slit blade")
     table.addLabel("starting position")
@@ -167,16 +174,16 @@ def _USAXS_tune_guardSlits():
 
     # Now move all guard slit motors back a bit
     yield from bps.mv(
-        guard_slit.top, original_position["top"] + guard_slit.v_step_into,
-        guard_slit.bot, original_position["bot"] - guard_slit.v_step_into,
+        guard_slit.top, original_position["top"] + v_step_into,
+        guard_slit.bot, original_position["bot"] - v_step_into,
         )
     # do in two steps
     # -- we locked up all four motor records when we did it all at the same time
     yield from bps.mv(
-        guard_slit.outb, original_position["out"] + guard_slit.h_step_into,
-        guard_slit.inb, original_position["inb"] - guard_slit.h_step_into,
+        guard_slit.outb, original_position["out"] + h_step_into,
+        guard_slit.inb, original_position["inb"] - h_step_into,
         )
-    
+
     yield from bps.mv(user_data.state, "autoranging the PD")
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
 
@@ -209,7 +216,7 @@ def _USAXS_tune_guardSlits():
 
         tuner = TuneAxis([scaler0], axis, signal_name=UPD_SIGNAL.chname.get())
         yield from tuner.tune(width=scan_width, num=steps+1)
-        
+
         diff = abs(tuner.peaks.y_data[0] - tuner.peaks.y_data[-1])
         if diff < guard_slit.tuning_intensity_threshold:
             msg = f"{axis.name}: Not enough intensity change from first to last point."
@@ -217,7 +224,7 @@ def _USAXS_tune_guardSlits():
             msg += "  Did the guard slit move far enough to move into/out of the beam?"
             msg += "  Not tuning this axis."
             yield from cleanup(msg)
-        
+
         x, y = numerical_derivative(tuner.peaks.x_data, tuner.peaks.y_data)
         position, width = peak_center(x, y)
         width *= guard_slit.scale_factor   # expand a bit
@@ -226,7 +233,7 @@ def _USAXS_tune_guardSlits():
         # not necessary and makes this code fail
         # if tuner.peaks.y_data[0] > tuner.peaks.y_data[-1]:
         #     width *= -1     # flip the sign
-        
+
         if position < min(start, end):
             msg = f"{axis.name}: Computed tune position {position} < {min(start, end)}."
             msg += "  Not tuning this axis."
@@ -238,50 +245,52 @@ def _USAXS_tune_guardSlits():
 
         logger.info(f"{axis.name}: will be tuned to {position}")
         logger.info(f"{axis.name}: width = {width}")
-        # TODO: SPEC comments, too
+
         yield from bps.mv(
             scaler0.preset_time, old_ct_time,
             axis, old_position,             # reset position for other scans
             )
-        
+
         results["width"] = width
         results["position"] = position
-  
+
     tunes = defaultdict(dict)
+    count_time = 0.2
+    num_points = 100
     logger.info("*** 1. tune top guard slits")
     yield from tune_blade_edge(
-        guard_slit.top, 
-        original_position["top"] + guard_slit.v_step_away, 
-        original_position["top"] - guard_slit.v_step_into, 
-        60, 
-        0.25, 
+        guard_slit.top,
+        original_position["top"] + v_step_away,
+        original_position["top"] - v_step_into,
+        num_points,
+        count_time,
         tunes["top"])
 
     logger.info("*** 2. tune bottom guard slits")
     yield from tune_blade_edge(
-        guard_slit.bot, 
-        original_position["bot"] - guard_slit.v_step_away, 
-        original_position["bot"] + guard_slit.v_step_into, 
-        60, 
-        0.25, 
+        guard_slit.bot,
+        original_position["bot"] - v_step_away,
+        original_position["bot"] + v_step_into,
+        num_points,
+        count_time,
         tunes["bot"])
 
     logger.info("*** 3. tune outboard guard slits")
     yield from tune_blade_edge(
-        guard_slit.outb, 
-        original_position["out"] + guard_slit.h_step_away, 
-        original_position["out"] - guard_slit.h_step_into, 
-        60, 
-        0.25, 
+        guard_slit.outb,
+        original_position["out"] + h_step_away,
+        original_position["out"] - h_step_into,
+        num_points,
+        count_time,
         tunes["out"])
 
     logger.info("*** 4. tune inboard guard slits")
     yield from tune_blade_edge(
-        guard_slit.inb, 
-        original_position["inb"] - guard_slit.h_step_away, 
-        original_position["inb"] + guard_slit.h_step_into, 
-        60, 
-        0.25, 
+        guard_slit.inb,
+        original_position["inb"] - h_step_away,
+        original_position["inb"] + h_step_into,
+        num_points,
+        count_time,
         tunes["inb"])
 
     # Tuning is done, now move the motors to the center of the beam found
@@ -291,7 +300,7 @@ def _USAXS_tune_guardSlits():
         guard_slit.outb, tunes["out"]["position"],
         guard_slit.inb, tunes["inb"]["position"],
         )
-    
+
     # redefine the motor positions so the centers are 0
     def redefine(axis, pos):
         """set motor record's user coordinate to `pos`"""
@@ -327,7 +336,7 @@ def _USAXS_tune_guardSlits():
 def tune_GslitsSize():
     """
     plan: optimize the guard slits' gap
-    
+
     tune to the slit edges (peak of the derivative of diode vs. position)
     """
     yield from IfRequestedStopBeforeNextScan()
