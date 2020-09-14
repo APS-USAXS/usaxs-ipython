@@ -23,7 +23,7 @@
 # It is suggested to run this in a screen session.
 # 
 # softIoc \
-#   -m A=9idFLY2:cam1:Acquire,CALC="A>0.5",P=tst:,D=ts:,OOPT="Transition To Non-zero" \
+#   -m A=9idFLY2:cam1:Acquire,CALC="A>0.5",P=9idFLY2:,D=acquire_started:,OOPT="Transition To Non-zero" \
 #   -d timestamp.db
 
 
