@@ -95,8 +95,11 @@ class GSlitDevice(MotorBundle):
         return self.h_gap_ok and self.v_h_gap_ok
 
     def status_update(self):
-        # FIXME: Did this code cause the following exception?
+        # This code triggers a later exception when this code is called the next time.
+        # It times out since writing 1 to this PV results in the PV ending up at 0.
+        # The status object waits until it gets to 1.
         # TODO: If we .put to these fields, can we can avoid the dropped status timeouts?
+        # That would need a special plan that does the .put()s
         yield from bps.abs_set(self.top.status_update, 1)
         yield from bps.sleep(0.05)
         yield from bps.abs_set(self.bot.status_update, 1)
