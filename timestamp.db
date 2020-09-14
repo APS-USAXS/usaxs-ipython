@@ -1,5 +1,10 @@
 
 # file: timestamp.db
+# see: https://github.com/APS-USAXS/ipython-usaxs/issues/385
+# purpose: Database to get ISO8601-formatted timestamp PV
+#          for the start time of a detector.
+#          Generalized to watch a PV for some transition
+#          that can be measured with a CALC.
 
 # RESULT:  $(P)$(D)timestamp
 
@@ -12,7 +17,14 @@
 
 # Use of the .TSEL fields propagates the source PV's time stamp
 
-# softIoc -m A=9idFLY2:cam1:Acquire,CALC="A>0.5",P=tst:,D=ts:,OOPT="Transition To Non-zero" -d timestamp.db
+# EXAMPLE
+#
+# Watch an area detector and record when it STARTS to acquire an image.
+# It is suggested to run this in a screen session.
+# 
+# softIoc \
+#   -m A=9idFLY2:cam1:Acquire,CALC="A>0.5",P=tst:,D=ts:,OOPT="Transition To Non-zero" \
+#   -d timestamp.db
 
 
 record(calcout, "$(P)$(D)_calc") {
