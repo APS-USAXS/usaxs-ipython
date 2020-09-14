@@ -37,7 +37,12 @@ XML_CONFIGURATION_FILE = os.path.join(path, 'saveFlyData.xml')
 XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 TRIGGER_POLL_INTERVAL_s = 0.1
 
+# FIXME: absolute gotta-make-it-work-today hack
+# os.environ["PYEPICS_LIBCA"] = "/APSshare/epics/base-3.14.12.7/lib/linux-x86_64/libca.so"
+
 manager = None # singleton instance of NeXus_Structure
+
+    
 
 
 class EpicsSignalDesc(EpicsSignal):

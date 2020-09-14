@@ -12,6 +12,7 @@ import numpy
 import os
 import sys
 import time
+# from importlib import import_module
 
 # logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(os.path.split(__file__)[-1])
@@ -26,11 +27,15 @@ import h5py
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
 try:
-    # when used as a package
+    # lib = import_module("nexus", package=".")
     from . import nexus
-except ImportError:
-    # when run standalone
-    import nexus
+# except ImportError:
+except Exception as exc:
+    logger.info("fallback import handling due to %s", exc)
+    import nexus    # when run standalone
+# else:
+#     globals()["nexus"] = lib
+
 
 path = os.path.dirname(__file__)
 XML_CONFIGURATION_FILE = os.path.join(path, 'saveFlyData.xml')
