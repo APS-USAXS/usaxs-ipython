@@ -5,11 +5,23 @@ Bluesky plans to tune various axes and stages
 NOTE:  Don't use blocking calls here
 """
 
-__all__ = [
-    'tune_mr',
-    'tune_m2rp',
-    'tune_ar',
-    ]
+__all__ = """
+    empty_plan
+    instrument_default_tune_ranges
+    tune_a2rp
+    tune_after_imaging
+    tune_ar
+    tune_asrp
+    tune_diode
+    tune_dx
+    tune_dy
+    tune_m2rp
+    tune_mr
+    tune_msrp
+    tune_saxs_optics
+    tune_usaxs_optics
+    update_EPICS_tuning_widths
+    """.split()
 
 from ..session_logs import logger
 logger.info(__file__)
@@ -162,7 +174,7 @@ def tune_diode(md={}):
 def tune_usaxs_optics(side=False, md={}):
     """
     tune all the instrument optics currently in configuration
-    
+
     This plan is for staff use.
     Users are advised to use preUSAXStune() instead.
     """
