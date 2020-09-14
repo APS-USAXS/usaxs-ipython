@@ -23,7 +23,7 @@ from ..utils import move_motors
 class UsaxsSlitDevice(MotorBundle):
     """
     USAXS slit just before the sample
-    
+
     * center of slit: (x, y)
     * aperture: (h_size, v_size)
     """
@@ -31,7 +31,7 @@ class UsaxsSlitDevice(MotorBundle):
     x      = Component(UsaxsMotor, '9idcLAX:m58:c2:m6', labels=("uslit",))
     v_size = Component(UsaxsMotor, '9idcLAX:m58:c2:m7', labels=("uslit",))
     y      = Component(UsaxsMotor, '9idcLAX:m58:c2:m5', labels=("uslit",))
-    
+
     def set_size(self, *args, h=None, v=None):
         """move the slits to the specified size"""
         if h is None:
@@ -63,7 +63,7 @@ class GSlitDevice(MotorBundle):
 
     h_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1H:sync.PROC')
     v_sync_proc = Component(EpicsSignal, '9idcLAX:GSlit1V:sync.PROC')
-    
+
     gap_tolerance = 0.02        # actual must be this close to desired
     scale_factor = 1.2    # 1.2x the size of the beam should be good guess for guard slits.
     h_step_away = 0.2     # 0.2mm step away from beam
@@ -71,7 +71,7 @@ class GSlitDevice(MotorBundle):
     h_step_into = 1.1     # 1.1mm step into the beam (blocks the beam)
     v_step_into = 0.4     # 0.4mm step into the beam (blocks the beam)
     tuning_intensity_threshold = 500
-    
+
     def set_size(self, *args, h=None, v=None):
         """move the slits to the specified size"""
         if h is None:
@@ -79,24 +79,24 @@ class GSlitDevice(MotorBundle):
         if v is None:
             raise ValueError("must define vertical size")
         move_motors(self.h_size, h, self.v_size, v)
-    
+
     @property
     def h_gap_ok(self):
         gap = self.outb.position - self.inb.position
         return abs(gap - terms.SAXS.guard_h_size.get()) <= self.gap_tolerance
-    
+
     @property
     def v_h_gap_ok(self):
         gap = self.top.position - self.bot.position
         return abs(gap - terms.SAXS.guard_v_size.get()) <= self.gap_tolerance
-    
+
     @property
     def gap_ok(self):
         return self.h_gap_ok and self.v_h_gap_ok
-    
+
     def status_update(self):
-        # TODO: Did this code cause the following exception?
-        #  RuntimeError: Another set() call is still in progress
+        # FIXME: Did this code cause the following exception?
+        # TODO: If we .put to these fields, can we can avoid the dropped status timeouts?
         yield from bps.abs_set(self.top.status_update, 1)
         yield from bps.sleep(0.05)
         yield from bps.abs_set(self.bot.status_update, 1)
@@ -105,6 +105,16 @@ class GSlitDevice(MotorBundle):
         yield from bps.sleep(0.05)
         yield from bps.abs_set(self.inb.status_update, 1)
         yield from bps.sleep(0.05)
+
+        # clear a problem for now (removes the dropped status message)
+        #  RuntimeError: Another set() call is still in progress
+        # TODO: fix the root cause
+        # https://github.com/APS-USAXS/ipython-usaxs/issues/253#issuecomment-678503301
+        # https://github.com/bluesky/ophyd/issues/757#issuecomment-678524271
+        self.top.status_update._set_thread = None
+        self.bot.status_update._set_thread = None
+        self.outb.status_update._set_thread = None
+        self.inb.status_update._set_thread = None
 
 
 guard_slit = GSlitDevice('', name='guard_slit')
