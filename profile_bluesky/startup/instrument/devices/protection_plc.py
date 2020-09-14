@@ -24,8 +24,8 @@ from .user_data import user_data
 class PlcProtectionDevice(Device):
     """
     Detector Protection PLC interface
-    
-    motion limit switches: 
+
+    motion limit switches:
     * SAXS_Y, WAXS_X, AX
     * zero when OFF
     * two limits must be ON to allow safe move of the third
@@ -33,9 +33,9 @@ class PlcProtectionDevice(Device):
     SAXS_Y = Component(EpicsSignal, 'X11')
     WAXS_X = Component(EpicsSignal, 'X12')
     AX = Component(EpicsSignal, 'X13')
-    
+
     operations_status = Component(EpicsSignal, 'Y0')     # 0=not good, 1=good
-    
+
     SLEEP_POLL_s = 0.1
     _tripped_message = None
 
@@ -48,14 +48,14 @@ class PlcProtectionDevice(Device):
 
     """
     suspender = None
-    
+
     @property
     def interlocked(self):
         return not 0 in (
-            self.SAXS_Y.get(), 
-            self.WAXS_X.get(), 
+            self.SAXS_Y.get(),
+            self.WAXS_X.get(),
             self.AX.get())
-    
+
     def wait_for_interlock(self, verbose=True):
         t0 = time.time()
         msg = "Waiting %g for PLC interlock, check limit switches"
@@ -65,7 +65,7 @@ class PlcProtectionDevice(Device):
                 elapsed = time.time()-t0
                 logger.info(msg, elapsed)
         yield from bps.null()   # always yield at least one Msg
-    
+
     def stop_if_tripped(self, verbose=True):
         if self.operations_status.get() == 1:
             self._tripped_message = None
@@ -84,7 +84,7 @@ class PlcProtectionDevice(Device):
             msg += f"\n P.S. Can resume Bluesky scan: {suspend_plc_protect.allow_resume}\n"
             self._tripped_message = msg
             email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
-    
+
     def stop_in_suspender(self):
         if self.operations_status.get() == 1:
             msg = None
@@ -100,17 +100,17 @@ class PlcProtectionDevice(Device):
 class PlcProtectSuspendWhenChanged(SuspendWhenChanged):
     """
     Customize for PLC that protects against detector collisions
-    
-    Watch the PLC's Y0 bit that signals if the PLC internal checks 
+
+    Watch the PLC's Y0 bit that signals if the PLC internal checks
     are active and OK.  Suspend the RunEngine if this ever goes bad.
     Force the user to quit the bluesky session and call the staff
     to resolve the problem.
-    
+
     See the simulation test here:
     https://github.com/APS-USAXS/ipython-usaxs/blob/master/profile_bluesky/startup/notebooks/2018-12-05-USAXS-sim-plc-protect.ipynb
     """
-    
-    justification_text = """. 
+
+    justification_text = """.
     Significant equipment problem.  Do these steps:
     1. ^C twice      # interrupt the ipython kernel
     2. RE.abort()    # finalize current data streams (if any)
@@ -118,7 +118,7 @@ class PlcProtectSuspendWhenChanged(SuspendWhenChanged):
     4. call beamline scientists
 
     """
-    
+
     def _get_justification(self):
         """override default method to call plc_protect.stop_if_tripped()"""
         if not self.tripped:
@@ -141,8 +141,7 @@ plc_protect = PlcProtectionDevice('9idcLAX:plc:', name='plc_protect')
 # Important for routine operations
 # see: https://github.com/APS-USAXS/ipython-usaxs/issues/82#issuecomment-444187217
 suspend_plc_protect = PlcProtectSuspendWhenChanged(
-    plc_protect.operations_status, 
+    plc_protect.operations_status,
     expected_value=1)
 # this will suspend whenever PLC Y0 = 0 ("not good") -- we want that!
 RE.install_suspender(suspend_plc_protect)
-
