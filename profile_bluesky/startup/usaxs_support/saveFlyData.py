@@ -27,14 +27,9 @@ import h5py
 # matches IOC for big arrays
 os.environ['EPICS_CA_MAX_ARRAY_BYTES'] = '1280000'    # was 200000000
 try:
-    # lib = import_module("nexus", package=".")
-    from . import nexus
-# except ImportError:
-except Exception as exc:
-    logger.info("fallback import handling due to %s", exc)
-    import nexus    # when run standalone
-# else:
-#     globals()["nexus"] = lib
+    import nexus        # when run standalone
+except ImportError:
+    from . import nexus # when imported in a package
 
 
 path = os.path.dirname(__file__)
@@ -193,7 +188,8 @@ class SaveFlyScan(object):
         while not self.mgr.connected:
             if time.time() - t0 > connect_timeout:
                 for item in self.mgr.unconnected_signals:
-                    logging.error("Not connected PV=%s  ophyd=%s", item.pv, item.ophyd_signal)
+                    logging.error("Not connected PV=%s  ophyd=%s",
+                    item.pv, item.ophyd_signal.name)
                 raise EpicsNotConnected()
             time.sleep(0.1)
 
