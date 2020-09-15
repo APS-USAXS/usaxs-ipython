@@ -42,8 +42,6 @@ def record_sample_image_on_demand(technique_name, title, _md):
             waxs = waxs_det.hdf1.file_number,
         )
         order_number = xref.get(technique_name, xref["usaxs"]).get()
-        if technique_name == "usaxs":
-            order_number -= 1
 
         yield from bps.mv(
             det.jpeg1.file_path,
