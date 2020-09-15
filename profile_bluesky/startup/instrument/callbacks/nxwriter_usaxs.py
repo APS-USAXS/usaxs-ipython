@@ -15,6 +15,10 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from ..devices import terms
+from ..devices.user_data import user_data
+from ..utils.cleanup_text import cleanupText
+from ..utils.setup_new_user import techniqueSubdirectory
 from apstools.filewriters import NXWriterAPS
 import os
 
@@ -60,6 +64,7 @@ class OurCustomNXWriterBase(NXWriterAPS):
     def write_entry(self):
         import apstools
         nxentry = super().write_entry()     # default technique
+        logger.debug("write_entry of file: %s", self.root.attrs["file_name"])
 
         nxentry["program_name"].attrs["config_version"] = self.config_version
         nxentry["SPEC_data_file"] = self.get_stream_link("user_data_spec_file")
@@ -79,8 +84,16 @@ class OurCustomNXWriterBase(NXWriterAPS):
             # pay attention to this run of documents
             super().start(doc)
             self.scanning = True
+            path = techniqueSubdirectory("usaxs")
+            fname = (
+                f"{cleanupText(user_data.sample_title.get())}"
+                f"_{terms.FlyScan.order_number.get():04d}"
+                ".h5"
+            )
+            self.file_name = os.path.join(path, fname)
         else:
             self.scanning = False
+            self.file_name = None
 
     def writer(self):
         "write the data if this plan is supported"
