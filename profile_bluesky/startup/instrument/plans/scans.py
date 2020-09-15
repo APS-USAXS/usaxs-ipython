@@ -395,6 +395,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         )
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
+    # file writing is handled by the nxwriter callback, by a RE subscription
     yield from bps.mv(
         a_stage.r, terms.USAXS.ar_val_center.get(),
         a_stage.y, terms.USAXS.AY0.get(),
