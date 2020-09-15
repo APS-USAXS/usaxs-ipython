@@ -335,8 +335,8 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from user_data.set_state_plan("Running USAXS step scan")
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
+    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
-        terms.FlyScan.order_number, terms.FlyScan.order_number.get() + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
     )
@@ -554,8 +554,8 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
+    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
-        terms.FlyScan.order_number, terms.FlyScan.order_number.get() + 1,  # increment it
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
     )
