@@ -71,7 +71,7 @@ class CustomEpicsBssDevice(EpicsBssDevice):
                 esaf_id=apsbss.esaf.esaf_id.get(),
                 esaf_title=apsbss.esaf.title.get(),
                 mail_in_flag=apsbss.proposal.mail_in_flag.get(),
-                principal_user=apsbss.get_PI(),
+                principal_user=apsbss.get_PI() or "not identified",
                 proposal_id=apsbss.proposal.proposal_id.get(),
                 proposal_title=apsbss.proposal.title.get(),
                 proprietary_flag=apsbss.proposal.proprietary_flag.get(),
