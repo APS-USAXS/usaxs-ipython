@@ -335,7 +335,6 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from user_data.set_state_plan("Running USAXS step scan")
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
-    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
@@ -379,8 +378,8 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from user_data.set_state_plan("USAXS step scan finished")
 
+    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
-
         ti_filter_shutter, "close",
         monochromator.feedback.on, MONO_FEEDBACK_ON,
 
@@ -555,7 +554,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
-    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
@@ -597,6 +595,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from user_data.set_state_plan("Flyscan finished")
 
+    yield from bps.mvr(terms.FlyScan.order_number, 1)  # increment it
     yield from bps.mv(
         lax_autosave.disable, 0,    # enable
         lax_autosave.max_time, 0,   # start right away
