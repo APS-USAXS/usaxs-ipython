@@ -9,6 +9,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from ..devices import blackfly_optical
+from ..devices import saxs_det, waxs_det
 from ..devices import terms
 from ..utils.setup_new_user import techniqueSubdirectory
 from bluesky import plan_stubs as bps
