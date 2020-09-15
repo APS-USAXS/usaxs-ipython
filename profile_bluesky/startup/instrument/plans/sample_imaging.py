@@ -53,10 +53,7 @@ def record_sample_image_on_demand(technique_name, title, _md):
 
         yield from det.take_image()
 
-        jpeg_name = det.jpeg1.full_file_name.get()
-        if jpeg_name.startswith("/mnt/share1"):
-            jpeg_name = jpeg_name[4:]
-        if os.path.exists(jpeg_name):
-            _md["sample_image_jpeg"] = jpeg_name
+        # expect this file to be written
+        jpeg_name = os.path.join(path, f"{title}_{order_number:04d}.jpg")
     else:
         yield from bps.null()

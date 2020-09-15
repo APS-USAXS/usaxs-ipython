@@ -13,10 +13,12 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+import apstools.utils
+
 from bluesky import plan_stubs as bps
 
 from ophyd import AreaDetector
-from ophyd import Component, EpicsSignal
+from ophyd import Component, DeviceStatus, EpicsSignal
 from ophyd import PointGreyDetectorCam
 from ophyd import SingleTrigger, ImagePlugin
 from ophyd.areadetector import ADComponent
@@ -76,9 +78,14 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         return _flag_save_sample_image_jpeg_.get() in (1, "Yes")
 
     def take_image(self):
-        yield from bps.stage(self)
-        yield from bps.trigger(self, wait=True)
-        yield from bps.unstage(self)
+        @apstools.utils.run_in_thread
+        def _snapshot():
+            self.stage()
+            self.trigger()
+            self.unstage()
+
+        _snapshot()
+        yield from bps.null()
 
 
 try:
