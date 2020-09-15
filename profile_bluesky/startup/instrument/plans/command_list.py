@@ -17,6 +17,7 @@ __all__ = """
     summarize_command_file
     run_command_file
     execute_command_list
+    sync_order_numbers
 """.split()
 
 
@@ -117,21 +118,7 @@ def before_command_list(md={}, commands=None):
         yield from preUSAXStune(md=md)
 
     if constants["SYNC_ORDER_NUMBERS"]:
-        order_number = max([
-            terms.FlyScan.order_number.get(),
-            saxs_det.hdf1.file_number.get(),
-            waxs_det.hdf1.file_number.get(),
-        ])
-
-    try:
-        yield from bps.mv(saxs_det.hdf1.file_number, order_number)
-    except NameError:
-        pass
-    try:
-        yield from bps.mv(waxs_det.hdf1.file_number, order_number)
-    except NameError:
-        pass
-    yield from bps.mv(terms.FlyScan.order_number, order_number)
+        yield from sync_order_numbers()
 
     if commands is not None:
         postCommandsListfile2WWW(commands)
@@ -458,3 +445,23 @@ def execute_command_list(filename, commands, md={}):
             logger.info(f"no handling for line {i}: {raw_command}")
 
     yield from after_command_list(md=md)
+
+
+def sync_order_numbers():
+    """
+    synchronize the order numbers between the various detectors
+
+    Pick the maximum order number from each detector (or
+    supported scan technique) and set them all to that number.
+    """
+    order_number = max(
+        terms.FlyScan.order_number.get(),
+        saxs_det.hdf1.file_number.get(),
+        waxs_det.hdf1.file_number.get(),
+    )
+    logger.info("Synchronizing detector order numbers to %d", order_number)
+    yield from bps.mv(
+        terms.FlyScan.order_number, order_number,
+        saxs_det.hdf1.file_number, order_number,
+        waxs_det.hdf1.file_number, order_number,
+    )
