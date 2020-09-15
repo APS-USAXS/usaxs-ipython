@@ -3,11 +3,12 @@
 manage the user folder
 """
 
-__all__ = [
-    "matchUserInApsbss",
-    "newUser",
-    "techniqueSubdirectory"
-]
+__all__ = """
+    get_data_dir
+    matchUserInApsbss
+    newUser
+    techniqueSubdirectory
+    """.split()
 
 from ..session_logs import logger
 logger.info(__file__)
@@ -239,8 +240,7 @@ def newUser(user, scan_id=1, year=None, month=None, day=None):
     if not os.path.exists(path):
         logger.info("Creating user directory: %s", path)
         os.makedirs(path)
-    logger.info("Change working directory to %s", path)
-    os.chdir(path)
+    logger.info("Change working directory is still %s", os.getcwd())
     user_data.user_dir.put(path)    # set in the PV
 
     _setSpecFileName(path, scan_id=scan_id)    # SPEC file name
@@ -249,15 +249,27 @@ def newUser(user, scan_id=1, year=None, month=None, day=None):
     return os.path.abspath(path)
 
 
+def get_data_dir():
+    """
+    Get the data directory from EPICS.
+
+    The directory MUST exist or raises a FileNotFoundError exception.
+    """
+    data_path = user_data.user_dir.get()
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Cannot find user directory: {data_path}")
+    return data_path
+
+
 def techniqueSubdirectory(technique):
     """
     Create a technique-based subdirectory per table in ``newUser()``.
 
     NOTE: Assumes CWD is now the directory returned by ``newFile()``
     """
-    pwd = os.getcwd()
-    stub = os.path.basename(pwd)
-    path = os.path.join(pwd, f"{stub}_{technique}")
+    data_path = get_data_dir()
+    stub = os.path.basename(data_path)
+    path = os.path.join(data_path, f"{stub}_{technique}")
 
     if not os.path.exists(path):
         logger.info("Creating technique directory: %s", path)

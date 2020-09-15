@@ -282,7 +282,6 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     )
 
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
     )
 
@@ -469,7 +468,6 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.scan_macro, "FlyScan",    # note camel-case
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
     )
 
@@ -700,7 +698,6 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
    )
 
@@ -862,7 +859,6 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
     )
     yield from bps.mv(
-        user_data.user_dir, os.getcwd(),
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
    )
 
