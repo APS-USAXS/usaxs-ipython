@@ -239,8 +239,7 @@ def newUser(user, scan_id=1, year=None, month=None, day=None):
     if not os.path.exists(path):
         logger.info("Creating user directory: %s", path)
         os.makedirs(path)
-    logger.info("Change working directory to %s", path)
-    os.chdir(path)
+    logger.info("Change working directory is still %s", os.getcwd())
     user_data.user_dir.put(path)    # set in the PV
 
     _setSpecFileName(path, scan_id=scan_id)    # SPEC file name
