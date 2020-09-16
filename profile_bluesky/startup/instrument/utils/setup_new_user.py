@@ -186,8 +186,7 @@ def _setSpecFileName(path, scan_id=1):
     """
     SPEC file name
     """
-    stub = os.path.basename(path)
-    fname = f"{stub}.dat"       # NO path
+    fname = os.path.join(path, f"{os.path.basename(path)}.dat")
     if filename_exists(fname):
         logger.warning(">>> file already exists: %s <<<", fname)
         specwriter.newfile(fname, RE=RE)
