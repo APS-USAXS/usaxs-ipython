@@ -177,6 +177,7 @@ def preSWAXStune(md={}):
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "pre-SWAXS optics tune",
+        user_data.collection_in_progress, 1,
 
         scaler0.preset_time,  0.1,
     )
@@ -213,6 +214,7 @@ def preSWAXStune(md={}):
         scaler0.preset_time,        terms.USAXS.usaxs_time.get(),
         user_data.time_stamp,       str(datetime.datetime.now()),
         user_data.state,            "pre-SWAXS optics tuning done",
+        user_data.collection_in_progress, 0,
 
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.run_tune_next,       0,
@@ -279,6 +281,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
         user_data.scan_macro, "uascan",
+        user_data.collection_in_progress, 1,
     )
 
     yield from bps.mv(
@@ -381,6 +384,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from bps.mv(
         ti_filter_shutter, "close",
         monochromator.feedback.on, MONO_FEEDBACK_ON,
+        user_data.collection_in_progress, 0,
 
         scaler0.update_rate, 5,
         scaler0.auto_count_delay, 0.25,
@@ -466,6 +470,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         # or terms.FlyScan.order_number.get()
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
+        user_data.collection_in_progress, 1,
     )
     yield from bps.mv(
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
@@ -600,6 +605,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
         ti_filter_shutter, "close",
         monochromator.feedback.on, MONO_FEEDBACK_ON,
+        user_data.collection_in_progress, 0,
 
         scaler0.update_rate, 5,
         scaler0.auto_count_delay, 0.25,
@@ -653,6 +659,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         saxs_stage.z, pinz_target,      # MUST move before sample stage moves!
         user_data.sample_thickness, thickness,
         terms.SAXS.collecting, 1,
+        user_data.collection_in_progress, 1,
     )
 
     yield from bps.mv(
@@ -777,6 +784,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         terms.SAXS.collecting, 0,
         user_data.state, "Done SAXS",
         user_data.time_stamp, ts,
+        user_data.collection_in_progress, 0,
     )
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
     yield from after_plan()
@@ -814,6 +822,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         guard_slit.h_size, terms.SAXS.guard_h_size.get(),
         user_data.sample_thickness, thickness,
         terms.WAXS.collecting, 1,
+        user_data.collection_in_progress, 1,
     )
 
     yield from bps.mv(
@@ -942,6 +951,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         terms.WAXS.collecting, 0,
         user_data.state, "Done WAXS",
         user_data.time_stamp, ts,
+        user_data.collection_in_progress, 0,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
