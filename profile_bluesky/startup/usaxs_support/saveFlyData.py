@@ -40,6 +40,9 @@ XSD_SCHEMA_FILE = os.path.join(path, 'saveFlyData.xsd')
 class TimeoutException(Exception): pass
 class EpicsNotConnected(Exception): pass
 
+NOT_CONNECTED_TEXT = "not connected"
+NO_DATA_TEXT = "no data"
+
 
 class SaveFlyScan(object):
     '''watch trigger PV, save data to NeXus file after scan is done'''
@@ -87,15 +90,23 @@ class SaveFlyScan(object):
 
     def preliminaryWriteFile(self):
         """write all preliminary data to the file while fly scan is running"""
+        not_connected_PVs = self.mgr.unconnected_signals
         for pv_spec in self.mgr.pv_registry.values():
             if pv_spec.acquire_after_scan:
                 continue
-            if pv_spec.as_string:
+            elif pv_spec in not_connected_PVs:
+                logger.warning(
+                    "preliminaryWriteFile(): PV %s is not connected now",
+                    pv_spec.pvname
+                )
+                value = NOT_CONNECTED_TEXT
+                # continue
+            elif pv_spec.as_string:
                 value = pv_spec.ophyd_signal.get(as_string=True)
             else:
                 value = pv_spec.ophyd_signal.get()
             if value is None:
-                value = 'no data'
+                value = NO_DATA_TEXT
             logger.debug("saveFile(): writing {pv_spec}")
             if not isinstance(value, numpy.ndarray):
                 value = [value]
@@ -131,7 +142,15 @@ class SaveFlyScan(object):
         f.attrs["timestamp"] = timestamp
 
         # note: len(caget(array)) returns NORD (number of useful data)
+        not_connected_PVs = self.mgr.unconnected_signals
         for pv_spec in self.mgr.pv_registry.values():
+            if pv_spec in not_connected_PVs:
+                logger.warning(
+                    "saveFile(): PV %s is not connected now",
+                    pv_spec.pvname
+                )
+                value = NOT_CONNECTED_TEXT
+                # continue
             if not pv_spec.acquire_after_scan:
                 continue
             if pv_spec.as_string:
@@ -139,7 +158,7 @@ class SaveFlyScan(object):
             else:
                 value = pv_spec.ophyd_signal.get()
             if value is None:
-                value = 'no data'
+                value = NO_DATA_TEXT
             if not isinstance(value, numpy.ndarray):
                 value = [value]
             else:
@@ -188,9 +207,11 @@ class SaveFlyScan(object):
         while not self.mgr.connected:
             if time.time() - t0 > connect_timeout:
                 for item in self.mgr.unconnected_signals:
-                    logging.error("Not connected PV=%s  ophyd=%s",
-                    item.pv, item.ophyd_signal.name)
-                raise EpicsNotConnected()
+                    logger.warning(
+                        "Not connected PV=%s  ophyd=%s",
+                        item.pvname, item.ophyd_signal.name)
+                # raise EpicsNotConnected()
+                break
             time.sleep(0.1)
 
         # create the file
@@ -280,7 +301,7 @@ def makeDataset(parent, name, data = None, **attr):
         try:
             if len(data) == 1 and isinstance(data[0], str):
                 data = [numpy.string_(data[0])]
-                logger.debug("converting [string] to [numpy.string_]")
+                # logger.debug("converting [string] to [numpy.string_]")
             logger.debug(f"makeDataset(name='{name}', data={data})")
             obj = parent.create_dataset(name, data=data)
         except TypeError as _exc:
@@ -352,12 +373,12 @@ def main():
     logger.debug('wrote file: ' + dataFile)
 
 
-def developer():
+def developer_bluesky():
     sfs = SaveFlyScan('test.h5', XML_CONFIGURATION_FILE)
     sfs.waitForData()
 
 
-def developer2():
+def developer_spec():
     """Bluesky USAXS FlyScan uses this algorithm"""
     sfs = SaveFlyScan("/tmp/sfs.h5", XML_CONFIGURATION_FILE)
     sfs.preliminaryWriteFile()
@@ -366,8 +387,8 @@ def developer2():
 
 if __name__ == '__main__':
     main()  # production system - SPEC uses this
-    # developer()
-    # developer2()
+    # developer_bluesky()
+    # developer_spec()
 
 
 '''
