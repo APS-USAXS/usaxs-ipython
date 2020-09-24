@@ -211,6 +211,9 @@ class UsaxsFlyScanDevice(Device):
                 # do not fail the scan just because of updating program state
                 emsg = f"Error: {msg} - {exc}"
                 logger.debug(emsg)
+                # FIXME: hack to avoid `Another set() call is still in progress`
+                # see: https://github.com/APS-USAXS/ipython-usaxs/issues/417
+                user_data.state._set_thread = None
             # logger.debug(resource_usage("before saveFlyData.finish_HDF5_file()"))
             finish_HDF5_file()    # finish saving data to HDF5 file (background thread)
             # logger.debug(resource_usage("after saveFlyData.finish_HDF5_file()"))
