@@ -30,4 +30,6 @@ email_notices = EmailNotifications("usaxs@aps.anl.gov")
 email_notices.add_addresses(
     "ilavsky@aps.anl.gov",
     "kuzmenko@aps.anl.gov",
+    # add as FYI for Bluesky support:
+    "jemian@anl.gov",
 )
