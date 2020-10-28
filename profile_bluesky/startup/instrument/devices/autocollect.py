@@ -8,7 +8,7 @@ To start the automatic data collection plan:
 """
 
 __all__ = [
-    'AutoCollectDataDevice', 
+    'AutoCollectDataDevice',
     'auto_collect',
     ]
 
@@ -64,9 +64,13 @@ class AutoCollectDataDevice(Device):
                 command = self.commands.get()
                 try:
                     if command == "preUSAXStune":
+                        yield from bps.mv(user_data.collection_in_progress, 1,)
                         yield from preUSAXStune()
+                        yield from bps.mv(user_data.collection_in_progress, 0,)
                     elif command == "useModeRadiography":
+                        yield from bps.mv(user_data.collection_in_progress, 1,)
                         yield from mode_Radiography()
+                        yield from bps.mv(user_data.collection_in_progress, 0,)
                     elif os.path.exists(command):
                         yield from run_command_file(command)
                     else:
