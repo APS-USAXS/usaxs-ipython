@@ -32,7 +32,7 @@ class UserDataDevice(Device):
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
     spec_scan = Component(EpicsSignal,          "9idcLAX:USAXS:specScan", string=True)
-    state = Component(EpicsSignal,              "9idcLAX:state", string=True)
+    state = Component(EpicsSignal,              "9idcLAX:state", string=True, write_timeout=0.1)
     time_stamp = Component(EpicsSignal,         "9idcLAX:USAXS:timeStamp")
     user_dir = Component(EpicsSignal,           "9idcLAX:userDir", string=True)
     user_name = Component(EpicsSignal,          "9idcLAX:userName", string=True)
