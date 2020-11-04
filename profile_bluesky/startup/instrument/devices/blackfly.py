@@ -109,6 +109,8 @@ try:
     blackfly_optical.read_attrs.append("jpeg1")
     blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
 except TimeoutError as exc_obj:
-    msg = f"Timeout connecting with {nm} ({prefix})"
-    logger.warning(msg)
+    logger.warning(
+        "Timeout connecting with %s (%s): %s",
+        nm, prefix, exc_obj
+    )
     blackfly_optical = None
