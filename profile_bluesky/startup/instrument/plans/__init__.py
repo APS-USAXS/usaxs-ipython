@@ -16,6 +16,7 @@ from .mono_feedback import *
 from .no_run import *
 from .requested_stop import *
 from .resets import *
+from .sample_rotator_plans import *
 from .sample_transmission import *
 from .scans import *
 from .tune_guard_slits import *

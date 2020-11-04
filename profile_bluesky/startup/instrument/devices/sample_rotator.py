@@ -10,7 +10,6 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal
 
 
@@ -36,25 +35,6 @@ class SampleRotator(Device):
 
     speed = Component(EpicsSignal, ".S")
     velocity = Component(EpicsSignal, ".VELO")
-
-    def off(self):
-        """plan: stop rotating in either direction"""
-        yield from bps.mv(self.jog_forward, 0)
-        yield from bps.sleep(1)
-        yield from bps.mv(self.jog_reverse, 0)
-        yield from bps.sleep(1)
-
-    def onF(self):
-        """plan: start rotating in forward direction"""
-        yield from bps.mv(self.home_forward, 1)
-        yield from bps.sleep(10)
-        yield from bps.mv(self.jog_forward, 1)
-
-    def onR(self):
-        """plan: start rotating in reverse direction"""
-        yield from bps.mv(self.home_reverse, 1)
-        yield from bps.sleep(10)
-        yield from bps.mv(self.jog_reverse, 1)
 
 
 pi_c867 = SampleRotator("9idcPI:c867:c0:m1", name="pi_c867")
