@@ -45,6 +45,7 @@ from .axis_tuning import update_EPICS_tuning_widths
 from .axis_tuning import user_defined_settings
 from .doc_run import documentation_run
 from .mode_changes import mode_SAXS, mode_USAXS, mode_WAXS, mode_Radiography
+from .sample_rotator_plans import PI_off, PI_onF, PI_onR
 
 
 def beforeScanComputeOtherStuff():
@@ -440,6 +441,15 @@ def execute_command_list(filename, commands, md={}):
 
         elif action in ("mode_waxs"):
             yield from mode_WAXS()
+
+        elif action in ("PI_off"):
+            yield from PI_off()
+
+        elif action in ("PI_onF"):
+            yield from PI_onF()
+
+        elif action in ("PI_onR"):
+            yield from PI_onR()
 
         else:
             logger.info(f"no handling for line {i}: {raw_command}")
