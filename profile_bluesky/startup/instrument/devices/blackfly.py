@@ -68,6 +68,7 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         root = DATABROKER_ROOT_PATH,
         write_path_template = WRITE_IMAGE_FILE_PATH,
         read_path_template = READ_IMAGE_FILE_PATH,
+        kind="normal",
         )
     trans1 = ADComponent(TransformPlugin, "Trans1:")
 
