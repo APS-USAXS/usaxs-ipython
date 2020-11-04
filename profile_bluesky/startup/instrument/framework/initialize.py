@@ -27,7 +27,25 @@ sys.path.append(
 )
 
 from bluesky import RunEngine
+from bluesky import SupplementalData
+from bluesky.callbacks.best_effort import BestEffortCallback
+from bluesky.magics import BlueskyMagics
+from bluesky.simulators import summarize_plan
 from bluesky.utils import PersistentDict
+from bluesky.utils import ProgressBarManager
+from bluesky.utils import ts_msg_hook
+from databroker import Broker
+from IPython import get_ipython
+from ophyd.signal import EpicsSignalBase
+import ophyd
+import warnings
+
+# convenience imports
+import bluesky.plans as bp
+import bluesky.plan_stubs as bps
+import bluesky.preprocessors as bpp
+import numpy as np
+
 
 def get_md_path():
     md_dir_name = "Bluesky_RunEngine_md"
@@ -45,14 +63,13 @@ old_md = None
 md_path = get_md_path()
 if not os.path.exists(md_path):
     logger.info(
-        "New directory to store RE.md between sessions: %s", 
+        "New directory to store RE.md between sessions: %s",
         md_path)
     os.makedirs(md_path)
     from bluesky.utils import get_history
     old_md = get_history()
 
 # Set up a RunEngine and use metadata backed PersistentDict
-from bluesky.utils import get_history
 RE = RunEngine({})
 RE.md = PersistentDict(md_path)
 if old_md is not None:
@@ -63,7 +80,6 @@ if old_md is not None:
 callback_db = {}
 
 # Set up a Broker.
-from databroker import Broker
 db = Broker.named('mongodb_config')
 
 # Subscribe metadatastore to documents.
@@ -71,22 +87,17 @@ db = Broker.named('mongodb_config')
 callback_db['db'] = RE.subscribe(db.insert)
 
 # Set up SupplementalData.
-from bluesky import SupplementalData
 sd = SupplementalData()
 RE.preprocessors.append(sd)
 
 # Add a progress bar.
-from bluesky.utils import ProgressBarManager
 pbar_manager = ProgressBarManager()
 RE.waiting_hook = pbar_manager
 
 # Register bluesky IPython magics.
-from IPython import get_ipython
-from bluesky.magics import BlueskyMagics
 get_ipython().register_magics(BlueskyMagics)
 
 # Set up the BestEffortCallback.
-from bluesky.callbacks.best_effort import BestEffortCallback
 bec = BestEffortCallback()
 callback_db['bec'] = RE.subscribe(bec)
 peaks = bec.peaks  # just as alias for less typing
@@ -94,32 +105,27 @@ bec.disable_baseline()
 
 # At the end of every run, verify that files were saved and
 # print a confirmation message.
-from bluesky.callbacks.broker import verify_files_saved
+# from bluesky.callbacks.broker import verify_files_saved
 # callback_db['post_run_verify'] = RE.subscribe(post_run(verify_files_saved), 'stop')
 
-# # Make plots update live while scans run.
-# from bluesky.utils import install_kicker
-# install_kicker()
-
-# convenience imports
-# from bluesky.callbacks import *
-# from bluesky.callbacks.broker import *
-# from bluesky.simulators import *
-import bluesky.plans as bp
-import bluesky.plan_stubs as bps
-import bluesky.preprocessors as bpp
-import numpy as np
-
-# Uncomment the following lines to turn on 
+# Uncomment the following lines to turn on
 # verbose messages for debugging.
 # ophyd.logger.setLevel(logging.DEBUG)
 
 # diagnostics
-from bluesky.utils import ts_msg_hook
 #RE.msg_hook = ts_msg_hook
-from bluesky.simulators import summarize_plan
 
 # set default timeout for all EpicsSignal connections & communications
-import ophyd
-from ophyd.signal import EpicsSignalBase
-EpicsSignalBase.set_default_timeout(timeout=10, connection_timeout=5)
+try:
+    EpicsSignalBase.set_defaults(
+        auto_monitor=True,
+        timeout=60,
+        write_timeout=10,
+        connection_timeout=5,
+    )
+except Exception as exc:
+    warnings.warn(
+        "ophyd version is old, upgrade to 1.5.4+ "
+        "to get set_defaults() method"
+        )
+    EpicsSignalBase.set_default_timeout(timeout=10, connection_timeout=5)
