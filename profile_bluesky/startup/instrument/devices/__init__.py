@@ -26,6 +26,7 @@ from .linkam import *
 from .miscellaneous import *
 from .monochromator import *
 from .protection_plc import *
+from .sample_rotator import *
 from .slits import *
 from .struck3820 import *
 from .suspenders import *
