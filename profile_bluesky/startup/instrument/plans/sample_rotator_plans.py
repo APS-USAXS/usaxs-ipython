@@ -4,7 +4,7 @@ rotate the sample with PI C867 motor
 """
 
 __all__ = """
-    PI_off
+    PI_Off
     PI_onF
     PI_onR
 """.split()
@@ -16,7 +16,7 @@ from ..devices import pi_c867
 from bluesky import plan_stubs as bps
 
 
-def PI_off(sleep_time=1):
+def PI_Off(sleep_time=1):
     """plan: stop rotating sample in either direction"""
     yield from bps.mv(pi_c867.jog_forward, 0)
     yield from bps.sleep(sleep_time)
