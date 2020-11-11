@@ -430,6 +430,10 @@ def execute_command_list(filename, commands, md={}):
             _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
+        # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/392
+        # elif action in ("mode_BlackFly"):
+        #     yield from mode_BlackFly()
+
         elif action in ("mode_Radiography"):
             yield from mode_Radiography()
 

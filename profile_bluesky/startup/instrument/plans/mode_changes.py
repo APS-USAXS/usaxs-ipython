@@ -7,6 +7,7 @@ Support the different instrument modes
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
 __all__ = """
+    mode_BlackFly
     mode_imaging
     mode_OpenBeamPath
     mode_Radiography
@@ -49,6 +50,23 @@ def confirm_instrument_mode(mode_name):
     """
     expected_mode = UsaxsSaxsModes[mode_name]
     return terms.SAXS.UsaxsSaxsMode.get() in (expected_mode, mode_name)
+
+
+def mode_BlackFly():
+    """sets to imaging mode, using BlackFly camera"""
+    # TODO: under construction
+    # https://github.com/APS-USAXS/ipython-usaxs/issues/392
+    raise RuntimeError("mode_BlackFly() is not ready for use")
+    # yield from user_data.set_state_plan("Moving BlackFly imaging mode")
+    # yield from insertRadiographyFilters()
+    # yield from mode_imaging()
+    # yield from bps.mv(
+    #     ccd_shutter,        "close",
+    #     d_stage.x, terms.USAXS.diode.dx.get(),
+    #     d_stage.y, terms.USAXS.diode.dy.get(),
+    # )
+    # Has 4 new values - dx, dy, fliterAl, filterTi for Black Fly in radiography.
+    # Will need 4 new PVs.
 
 
 def mode_USAXS():
