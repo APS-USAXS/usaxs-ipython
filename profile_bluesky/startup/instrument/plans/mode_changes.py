@@ -53,7 +53,7 @@ def confirm_instrument_mode(mode_name):
 
 
 def mode_BlackFly():
-    """sets to imaging mode, using BlackFly camera"""
+    """Sets to imaging mode, using BlackFly camera."""
     # TODO: under construction
     # https://github.com/APS-USAXS/ipython-usaxs/issues/392
     raise RuntimeError("mode_BlackFly() is not ready for use")
