@@ -64,11 +64,28 @@ class PreUsaxsTuneParameters(Device):
         return result
 
 
+class Parameters_Al_Ti_Filters(Device):
+    Al = Component(EpicsSignal,  "Al_Filter")
+    Ti = Component(EpicsSignal,  "Ti_Filter")
+
+
+class Parameters_Al_Ti_Filters_Imaging(Device):
+    # because there is one in every crowd!
+    Al = Component(EpicsSignal,  "Al_Filters")
+    Ti = Component(EpicsSignal,  "Ti_Filters")
+
+
 class GeneralParametersCCD(Device):
     "part of GeneralParameters Device"
     dx = Component(EpicsSignal, "dx")
     dy = Component(EpicsSignal, "dy")
 
+
+class GeneralUsaxsParametersBlackfly(Device):
+    """part of GeneralParameters Device"""
+    dx = Component(EpicsSignal, "dx")
+    dy = Component(EpicsSignal, "dy")
+    filters = Component(Parameters_Al_Ti_Filters, "")
 
 class GeneralUsaxsParametersDiode(Device):
     "part of GeneralParameters Device"
@@ -83,17 +100,6 @@ class GeneralUsaxsParametersCenters(Device):
     ASR = Component(EpicsSignal, "ASRcenter")
     MR = Component(EpicsSignal,  "MRcenter")
     MSR = Component(EpicsSignal, "MSRcenter")
-
-
-class Parameters_Al_Ti_Filters(Device):
-    Al = Component(EpicsSignal,  "Al_Filter")
-    Ti = Component(EpicsSignal,  "Ti_Filter")
-
-
-class Parameters_Al_Ti_Filters_Imaging(Device):
-    # because there is one in every crowd!
-    Al = Component(EpicsSignal,  "Al_Filters")
-    Ti = Component(EpicsSignal,  "Ti_Filters")
 
 
 class Parameters_transmission(Device):
@@ -123,7 +129,9 @@ class Parameters_USAXS(Device):
     #  	ASRP_DEGREES_PER_VDC = 0.00059721     # changed by factor of 10 to accomodate new PIUU controller, where we drive directly in V of high voltage. 
     # Measured by JIL on 6/4/2016, average of two measured numbers
     asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
-    
+
+    blackfly = Component(GeneralUsaxsParametersBlackfly, "9idcLAX:USAXS:BlackFly_")
+
     center = Component(GeneralUsaxsParametersCenters, "9idcLAX:USAXS:")
     ccd = Component(GeneralParametersCCD,             "9idcLAX:USAXS:CCD_")
     diode = Component(GeneralUsaxsParametersDiode,    "9idcLAX:USAXS:")
