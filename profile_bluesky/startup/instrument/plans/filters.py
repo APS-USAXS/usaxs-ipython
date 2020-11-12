@@ -4,6 +4,7 @@ plans to control the beam filters
 """
 
 __all__ = """
+    insertBlackflyFilters
     insertRadiographyFilters
     insertSaxsFilters
     insertScanFilters
@@ -25,6 +26,14 @@ def _insertFilters_(a, b):
     """plan: insert the EPICS-specified filters"""
     yield from bps.mv(pf4_AlTi.fPosA, int(a), pf4_AlTi.fPosB, int(b))
     yield from bps.sleep(0.5)       # allow all blades to re-position
+
+
+def insertBlackflyFilters():
+    """plan: insert the EPICS-specified filters"""
+    yield from _insertFilters_(
+        terms.USAXS.blackfly.filters.Al.get(),    # Bank A: Al
+        terms.USAXS.blackfly.filters.Ti.get(),    # Bank B: Ti
+    )
 
 
 def insertRadiographyFilters():
