@@ -64,21 +64,6 @@ def confirm_instrument_mode(mode_name):
 def mode_BlackFly():
     """
     Sets to imaging mode, using BlackFly camera.
-
-    SPEC code does::
-
-        useModeUSAXS
-        DCMfeedbackOFF
-        print "Preparing for BlackFly mode ... please wait ..."
-        moveDetector __FlyDxInPlace __FlyDyInPlace
-        openTiFilterShutter
-        insertPF4filters __FlyAlFilter __FlyTiFilter
-        comment "Ready for BlackFly mode"
-        epics_put ("9idcLAX:USAXS:timeStamp", date())
-        epics_put ("9idcLAX:USAXS:state", "BlackFly camera Mode")
-        epics_put ("9idcLAX:USAXS:macroFileTime", date())
-        epics_put ("9idcLAX:USAXS:scanning", 0)
-        epics_put ("9idFLY1:cam1:Acquire", 1)
     """
     yield from mode_USAXS()
     yield from DCMfeedbackOFF()
@@ -91,10 +76,10 @@ def mode_BlackFly():
         d_stage.x, terms.USAXS.blackfly.dx.get(),
         d_stage.y, terms.USAXS.blackfly.dy.get(),
     )
+    yield from insertBlackflyFilters()
     yield from bps.mv(
         ti_filter_shutter,  "open",
     )
-    yield from insertBlackflyFilters()
 
     yield from user_data.set_state_plan("Ready for BlackFly imaging mode")
     ts = str(datetime.datetime.now())
