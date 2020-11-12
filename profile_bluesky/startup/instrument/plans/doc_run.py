@@ -4,7 +4,7 @@ Save text as a bluesky run.
 """
 
 __all__ = [
-    "documentation_run", 
+    "documentation_run",
     ]
 
 from ..session_logs import logger

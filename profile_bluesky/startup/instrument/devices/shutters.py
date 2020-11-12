@@ -26,17 +26,17 @@ from .permit import operations_in_9idc
 
 if aps.inUserOperations and operations_in_9idc():
     FE_shutter = ApsPssShutterWithStatus(
-        "9ida:rShtrA:", 
-        "PA:09ID:STA_A_FES_OPEN_PL.VAL", 
+        "9ida:rShtrA:",
+        "PA:09ID:STA_A_FES_OPEN_PL.VAL",
         name="FE_shutter")
 
     mono_shutter = ApsPssShutterWithStatus(
-        "9ida:rShtrB:", 
+        "9ida:rShtrB:",
         "PA:09ID:STA_B_SBS_OPEN_PL.VAL",
         name="mono_shutter")
 
     usaxs_shutter = EpicsOnOffShutter(
-        "9idcLAX:userTran3.A", 
+        "9idcLAX:userTran3.A",
         name="usaxs_shutter")
 
 else:

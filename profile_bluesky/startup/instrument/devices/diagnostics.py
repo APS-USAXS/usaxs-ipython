@@ -35,13 +35,13 @@ class PSS_Parameters(Device):
     def c_station_enabled(self):
         """
         look at the switches: are we allowed to operate?
-    
+
         The PSS has a beam plug just before the C station
-        
+
         :Plug in place:
           Cannot use beam in 9-ID-C.
           Should not use FE or mono shutters, monochromator, ti_filter_shutter...
-    
+
         :Plug removed:
           Operations in 9-ID-C are allowed
         """
@@ -59,7 +59,7 @@ class BLEPS_Parameters(Device):
     flow_2 = Component(EpicsSignalRO, "9idBLEPS:FLOW2_CURRENT")
     flow_1_setpoint = Component(EpicsSignalRO, "9idBLEPS:FLOW1_SET_POINT")
     flow_2_setpoint = Component(EpicsSignalRO, "9idBLEPS:FLOW2_SET_POINT")
-    
+
     temperature_1_chopper = Component(EpicsSignalRO, "9idBLEPS:TEMP1_CURRENT")
     temperature_2 = Component(EpicsSignalRO, "9idBLEPS:TEMP2_CURRENT")
     temperature_3 = Component(EpicsSignalRO, "9idBLEPS:TEMP3_CURRENT")
@@ -77,7 +77,7 @@ class BLEPS_Parameters(Device):
     temperature_7_setpoint = Component(EpicsSignalRO, "9idBLEPS:TEMP7_SET_POINT")
     temperature_8_setpoint = Component(EpicsSignalRO, "9idBLEPS:TEMP8_SET_POINT")
     # other signals?
-    
+
     # technically, these come from the FE-EPS IOC, reading signals from the BL-EPS
     shutter_permit = Component(EpicsSignalRO, "EPS:09:ID:BLEPS:SPER", string=True)
     vacuum_permit = Component(EpicsSignalRO, "EPS:09:ID:BLEPS:VACPER", string=True)
@@ -106,7 +106,7 @@ class DiagnosticsParameters(Device):
     PSS = Component(PSS_Parameters)
     BL_EPS = Component(BLEPS_Parameters)
     FE_EPS = Component(FEEPS_Parameters)
-    
+
     @property
     def beam_in_hutch(self):
         return self.beam_in_hutch_swait.val.get() != 0

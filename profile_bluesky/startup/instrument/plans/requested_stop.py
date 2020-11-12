@@ -6,7 +6,7 @@ Scanning will stop between scans at next loop through scan sequence.
 """
 
 __all__ = [
-    'IfRequestedStopBeforeNextScan', 
+    'IfRequestedStopBeforeNextScan',
     ]
 
 from ..session_logs import logger
@@ -30,7 +30,7 @@ def IfRequestedStopBeforeNextScan():
     global RE
     open_the_shutter = False
     t0 = time.time()
-    
+
     RE.pause_msg = bluesky.run_engine.PAUSE_MSG     # sloppy
 
     pv_txt = "Pausing for user for %g s"
@@ -51,16 +51,16 @@ def IfRequestedStopBeforeNextScan():
             user_data.time_stamp, str(datetime.datetime.now()),
             user_data.state, "Aborted data collection",
        )
- 
+
         # RE.pause_msg = "DEBUG: stopped the scans, ignore the (informative) exception trace"
         raise RequestAbort(msg)        # long exception trace?
         # To make the exception trace brief, `%xmode Minimal`
         """
         example:
-        
-        In [8]: def plan(): 
-           ...:     raise RequestAbort("Aborted from plan because user requested") 
-        In [9]: RE(plan())                                                                                                                          
+
+        In [8]: def plan():
+           ...:     raise RequestAbort("Aborted from plan because user requested")
+        In [9]: RE(plan())
         ---------------------------------------------------------------------------
         RequestAbort                              Traceback (most recent call last)
         <ipython-input-9-a6361a080fc0> in <module>
@@ -69,14 +69,14 @@ def IfRequestedStopBeforeNextScan():
         <ipython-input-8-7178eb5f1267> in plan()
               1 def plan():
         ----> 2     raise RequestAbort("Aborted from plan because user requested")
-              3 
-              4 
+              3
+              4
 
         RequestAbort: Aborted from plan because user requested
-        In [12]: %xmode Minimal                                                                                                                     
+        In [12]: %xmode Minimal
         Exception reporting mode: Minimal
 
-        In [13]: RE(plan())                                                                                                                         
+        In [13]: RE(plan())
         RequestAbort: Aborted from plan because user requested
         """
 

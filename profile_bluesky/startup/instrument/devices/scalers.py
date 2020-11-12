@@ -65,22 +65,22 @@ usaxs@usaxscontrol ~/.../startup/spec $ caget 9idcLAX:vsc:c{0,1,2}.NM{1,2,3,4,5,
 9idcLAX:vsc:c0.NM4             PD_USAXS
 9idcLAX:vsc:c0.NM5             TR diode
 9idcLAX:vsc:c0.NM6             I000
-9idcLAX:vsc:c0.NM7             
-9idcLAX:vsc:c0.NM8             
+9idcLAX:vsc:c0.NM7
+9idcLAX:vsc:c0.NM8
 9idcLAX:vsc:c1.NM1             10MHz_ref
 9idcLAX:vsc:c1.NM2             I0
 9idcLAX:vsc:c1.NM3             TR diode
-9idcLAX:vsc:c1.NM4             
-9idcLAX:vsc:c1.NM5             
-9idcLAX:vsc:c1.NM6             
-9idcLAX:vsc:c1.NM7             
-9idcLAX:vsc:c1.NM8             
+9idcLAX:vsc:c1.NM4
+9idcLAX:vsc:c1.NM5
+9idcLAX:vsc:c1.NM6
+9idcLAX:vsc:c1.NM7
+9idcLAX:vsc:c1.NM8
 9idcLAX:vsc:c2.NM1             time
 9idcLAX:vsc:c2.NM2             I000
-9idcLAX:vsc:c2.NM3             
-9idcLAX:vsc:c2.NM4             
-9idcLAX:vsc:c2.NM5             
-9idcLAX:vsc:c2.NM6             
-9idcLAX:vsc:c2.NM7             
-9idcLAX:vsc:c2.NM8             
+9idcLAX:vsc:c2.NM3
+9idcLAX:vsc:c2.NM4
+9idcLAX:vsc:c2.NM5
+9idcLAX:vsc:c2.NM6
+9idcLAX:vsc:c2.NM7
+9idcLAX:vsc:c2.NM8
 """

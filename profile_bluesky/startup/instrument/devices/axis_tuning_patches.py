@@ -43,7 +43,7 @@ class TuningResults(Device):
     max = Component(Signal)
     crossings = Component(Signal)
     peakstats_attrs = "x y cen com fwhm min max crossings".split()
-    
+
     def report(self, title=None, print_enable=True):
         keys = self.peakstats_attrs + "tune_ok center initial_position final_position".split()
         t = pyRestTable.Table()
@@ -57,7 +57,7 @@ class TuningResults(Device):
                 print(title)
             print(t)
         return t
-    
+
     def put_results(self, peaks):
         """copy values from PeakStats"""
         for key in self.peakstats_attrs:
@@ -102,13 +102,13 @@ class UsaxsTuneAxis(TuneAxis):
     def tune(self, width=None, num=None, md=None):
         """
         Bluesky plan to execute one pass through the current scan range
-        
+
         Scan self.axis centered about current position from
         ``-width/2`` to ``+width/2`` with ``num`` observations.
-        If a peak was detected (default check is that max >= 4*min), 
+        If a peak was detected (default check is that max >= 4*min),
         then set ``self.tune_ok = True``.
         PARAMETERS
-    
+
         width : float
             width of the tuning scan in the units of ``self.axis``
             Default value in ``self.width`` (initially 1)
@@ -155,7 +155,7 @@ class UsaxsTuneAxis(TuneAxis):
                'hints': dict(
                    dimensions = [
                        (
-                           [self.axis.name], 
+                           [self.axis.name],
                            'primary')]
                    )
                }
@@ -173,17 +173,17 @@ class UsaxsTuneAxis(TuneAxis):
 
         yield from _scan()
 
-    def multi_pass_tune(self, width=None, step_factor=None, 
+    def multi_pass_tune(self, width=None, step_factor=None,
                         num=None, pass_max=None, snake=None, md=None):
         """
         BlueSky plan for tuning this axis with this signal
-        
+
         Execute multiple passes to refine the centroid determination.
         Each subsequent pass will reduce the width of scan by ``step_factor``.
         If ``snake=True`` then the scan direction will reverse with
         each subsequent pass.
         PARAMETERS
-    
+
         width : float
             width of the tuning scan in the units of ``self.axis``
             Default value in ``self.width`` (initially 1)
@@ -208,7 +208,7 @@ class UsaxsTuneAxis(TuneAxis):
         step_factor = step_factor or self.step_factor
         snake = snake or self.snake
         pass_max = pass_max or self.pass_max
-        
+
         self.stats = []
 
         def _scan(width=1, step_factor=10, num=10, snake=True):
@@ -218,7 +218,7 @@ class UsaxsTuneAxis(TuneAxis):
                        'plan_name': self.__class__.__name__ + '.multi_pass_tune',
                        }
                 _md.update(md or {})
-            
+
                 yield from self.tune(width=width, num=num, md=_md)
 
                 if not self.tune_ok:
@@ -242,15 +242,15 @@ class UsaxsTuneAxis(TuneAxis):
 
         return (
             yield from _scan(
-                width=width, 
+                width=width,
                 step_factor=step_factor,
-                num=num, 
+                num=num,
                 snake=snake))
 
     def peak_detected(self):
         """
         returns True if a peak was detected, otherwise False
-        
+
         The default algorithm identifies a peak when the maximum
         value is four times the minimum value.  Change this routine
         by subclassing :class:`TuneAxis` and override :meth:`peak_detected`.
@@ -262,7 +262,7 @@ class UsaxsTuneAxis(TuneAxis):
         if self.peaks.max is None:
             logger.info("PeakStats : no max reported")
             return False
-        
+
         ymax = self.peaks.max[-1]
         ymin = self.peaks.min[-1]
         ok = ymax > 4*ymin        # this works for USAXS@APS

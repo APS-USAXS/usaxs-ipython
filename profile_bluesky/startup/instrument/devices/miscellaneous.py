@@ -24,7 +24,7 @@ tcam = UsaxsMotor('9idcLAX:m58:c1:m6', name='tcam', labels=("motor",))
 tension = UsaxsMotor('9idcLAX:m58:c1:m8', name='tens', labels=("motor",))
 
 fuel_spray_bit = EpicsSignal(
-    "9idcLAX:bit1", 
+    "9idcLAX:bit1",
     name="fuel_spray_bit")
 
 from apstools.synApps.swait import SwaitRecord, UserCalcsDevice

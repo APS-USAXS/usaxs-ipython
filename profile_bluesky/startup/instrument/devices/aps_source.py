@@ -4,7 +4,7 @@ APS only: connect with facility information
 """
 
 __all__ = [
-    'aps', 
+    'aps',
     'undulator',
     ]
 

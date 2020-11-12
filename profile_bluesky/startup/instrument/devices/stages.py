@@ -26,24 +26,24 @@ from .usaxs_motor_devices import UsaxsMotorTunable
 class UsaxsDetectorStageDevice(MotorBundle):
     """USAXS detector stage"""
     x = Component(
-        UsaxsMotorTunable, 
-        '9idcLAX:m58:c2:m3', 
+        UsaxsMotorTunable,
+        '9idcLAX:m58:c2:m3',
         labels=("detector", "tunable",))
     y = Component(
-        UsaxsMotorTunable, 
-        '9idcLAX:aero:c2:m1', 
+        UsaxsMotorTunable,
+        '9idcLAX:aero:c2:m1',
         labels=("detector", "tunable",))
 
 
 class UsaxsSampleStageDevice(MotorBundle):
     """USAXS sample stage"""
     x = Component(
-        UsaxsMotor, 
-        '9idcLAX:m58:c2:m1', 
+        UsaxsMotor,
+        '9idcLAX:m58:c2:m1',
         labels=("sample",))
     y = Component(
-        UsaxsMotor, 
-        '9idcLAX:m58:c2:m2', 
+        UsaxsMotor,
+        '9idcLAX:m58:c2:m2',
         labels=("sample",))
 
 
@@ -102,6 +102,6 @@ as_stage   = UsaxsAnalyzerSideReflectionStageDevice('', name='as_stage')
 saxs_stage = SaxsDetectorStageDevice('', name='saxs_stage')
 
 waxsx = UsaxsMotor(
-    '9idcLAX:m58:c0:m4', 
-    name='waxsx', 
+    '9idcLAX:m58:c0:m4',
+    name='waxsx',
     labels=("waxs", "motor"))  # WAXS X

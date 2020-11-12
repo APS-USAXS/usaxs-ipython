@@ -50,9 +50,9 @@ class MyEpicsMotor(EpicsMotor):
                 # and ophyd metadata dictionary will update via CA monitor
             else:
                 logger.debug(
-                    "Could not set motor limits to (%f, %f) at position %g", 
-                    lo, 
-                    self.position, 
+                    "Could not set motor limits to (%f, %f) at position %g",
+                    lo,
+                    self.position,
                     hi
                     )
 

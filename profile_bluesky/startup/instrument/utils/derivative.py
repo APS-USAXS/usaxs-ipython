@@ -12,8 +12,8 @@ import numpy as np
 
 def numerical_derivative(x, y):
     """
-    computes first derivative yp(xp) of y(x), returns tuple (xp, yp) 
-    
+    computes first derivative yp(xp) of y(x), returns tuple (xp, yp)
+
     here, xp is at midpoints of x
     """
     if len(x) < 10:

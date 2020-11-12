@@ -42,18 +42,18 @@ class PreUsaxsTuneParameters(Device):
     sx = Component(EpicsSignal, "9idcLAX:preUSAXStuneSX")
     sy = Component(EpicsSignal, "9idcLAX:preUSAXStuneSY")
     use_specific_location = Component(EpicsSignal, "9idcLAX:UseSpecificTuneLocation")
-    
+
     @property
     def needed(self):
         """
         is a tune needed?
-        
+
         EXAMPLE::
-        
+
             if terms.preUSAXStune.needed:
                 yield from preUSAXStune()
                 # TODO: and then reset terms as approriate
-        
+
         """
         result = self.run_tune_next.get()
         # TODO: next test if not in SAXS or WAXS mode
@@ -124,9 +124,9 @@ class Parameters_USAXS(Device):
     SDD = Component(EpicsSignal,                      "9idcLAX:USAXS:SDD")
     ar_val_center = Component(EpicsSignal,            "9idcLAX:USAXS:ARcenter")
     asr_val_center = Component(EpicsSignal,           "9idcLAX:USAXS:ASRcenter")
-    
+
     #	ASRP_DEGREES_PER_VDC = 0.0059721     # measured by JI October 9, 2006 during setup at 32ID. Std Dev 4e-5
-    #  	ASRP_DEGREES_PER_VDC = 0.00059721     # changed by factor of 10 to accomodate new PIUU controller, where we drive directly in V of high voltage. 
+    #  	ASRP_DEGREES_PER_VDC = 0.00059721     # changed by factor of 10 to accomodate new PIUU controller, where we drive directly in V of high voltage.
     # Measured by JIL on 6/4/2016, average of two measured numbers
     asrp_degrees_per_VDC = Component(Signal,          value=(0.000570223 + 0.000585857)/2)
 
@@ -205,7 +205,7 @@ class Parameters_SAXS(Device):
     collecting = Component(EpicsSignal, "9idcLAX:collectingSAXS")
 
 
-class Parameters_SAXS_WAXS(Device): 
+class Parameters_SAXS_WAXS(Device):
     """
     terms used by both SAXS & WAXS
     """

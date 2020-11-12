@@ -26,7 +26,7 @@ def areaDetectorAcquire(det, md=None):
     _md = md or {}
     acquire_time = det.cam.acquire_time.get()
     # Note: AD's HDF File Writer can use up to 5 seconds to finish writing the file
-    
+
     t0 = time.time()
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)

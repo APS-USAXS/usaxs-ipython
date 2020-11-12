@@ -23,7 +23,7 @@ from ..framework import specwriter
 class UsaxsProcessController(ProcessController):
     """
     temporary override
-    
+
     see https://github.com/APS-USAXS/ipython-usaxs/issues/292
     """
 
@@ -50,11 +50,11 @@ class UsaxsProcessController(ProcessController):
             _st._finished(success=True)
         else:
             started = False
-    
+
             def changing_cb(*args, **kwargs):
                 if started and self.settled:
                     _st._finished(success=True)
-    
+
             token = self.signal.subscribe(changing_cb)
             started = True
             report = 0
@@ -87,17 +87,17 @@ class UsaxsProcessController(ProcessController):
 class Linkam_CI94(UsaxsProcessController):
     """
     Linkam model CI94 temperature controller
-    
+
     EXAMPLE::
-    
+
         In [1]: linkam_ci94 = Linkam_CI94("9idcLAX:ci94:", name="ci94")
 
-        In [2]: linkam_ci94.settled                                                                                                                                         
+        In [2]: linkam_ci94.settled
         Out[2]: False
 
-        In [3]: linkam_ci94.settled                                                                                                                                         
+        In [3]: linkam_ci94.settled
         Out[3]: True
-        
+
         linkam_ci94.record_signal()
         yield from (linkam_ci94.set_target(50))
 
@@ -147,9 +147,9 @@ class Linkam_CI94(UsaxsProcessController):
 class Linkam_T96(UsaxsProcessController):
     """
     Linkam model T96 temperature controller
-    
+
     EXAMPLE::
-    
+
         linkam_tc1 = Linkam_T96("9idcLINKAM:tc1:", name="linkam_tc1")
 
     """
@@ -189,7 +189,7 @@ class Linkam_T96(UsaxsProcessController):
     def set_target(self, target, wait=True, timeout=None, timeout_fail=False):
         """change controller to new temperature set point"""
         global specwriter
-        
+
         yield from bps.mv(self.target, target)
         yield from bps.sleep(0.1)   # settling delay for slow IOC
         yield from bps.mv(self.heating, 1)
@@ -197,10 +197,10 @@ class Linkam_T96(UsaxsProcessController):
         msg = f"Set {self.controller_name} to {self.target.setpoint:.2f}{self.units.get()}"
         specwriter._cmt("event", msg)
         logger.info(msg)
-        
+
         if wait:
             yield from self.wait_until_settled(
-                timeout=timeout, 
+                timeout=timeout,
                 timeout_fail=timeout_fail)
 
     # @property

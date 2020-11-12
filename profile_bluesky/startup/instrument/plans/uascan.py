@@ -82,7 +82,7 @@ def uascan(
     )
 
     count_time_base = count_time
-    
+
     # stop scaler, if it is counting
     yield from bps.mv(
         scaler0.count, 0,
@@ -103,7 +103,7 @@ def uascan(
         'ar' : a_stage.r.position,
         'asrp' : asrp0,
         }
-    
+
     # devices which are recorded in the "primary" stream
     read_devices = [
         m_stage.r.user_readback,
@@ -161,7 +161,7 @@ def uascan(
     def _triangulate_(angle, dist):
         """triangulate offset, given angle of rotation"""
         return dist * math.tan(angle*math.pi/180)
-    
+
     @bpp.run_decorator(md=_md)
     def _scan_():
         count_time = count_time_base
@@ -260,7 +260,7 @@ def uascan(
         if terms.USAXS.useSBUSAXS.get():
             motor_resets += [as_stage.rp, prescan_positions["asrp"]]
         yield from bps.mv(*motor_resets)  # all at once
-        
+
         trd.kind = "hinted" # TODO: correct value?
         I00.kind = "hinted" # TODO: correct value?
         I000.kind = "hinted" # TODO: correct value?

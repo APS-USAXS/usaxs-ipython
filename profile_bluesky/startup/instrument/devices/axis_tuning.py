@@ -57,7 +57,7 @@ These attributes, set internally, are results of the tune scan::
 """
 
 __all__ = [
-    'axis_tune_range', 
+    'axis_tune_range',
     "TUNE_METHOD_PEAK_CHOICE",
     "USING_MS_STAGE",
     "TUNING_DET_SIGNAL",

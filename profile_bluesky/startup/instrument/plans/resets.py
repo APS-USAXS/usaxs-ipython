@@ -4,7 +4,7 @@ Reset the instrument.
 """
 
 __all__ = [
-    'reset_USAXS', 
+    'reset_USAXS',
     ]
 
 from ..session_logs import logger
@@ -24,7 +24,7 @@ from ..devices import user_data
 from .mono_feedback import DCMfeedbackON
 
 
-def reset_USAXS():  
+def reset_USAXS():
     """
     bluesky plan to set USAXS instrument in safe configuration
     """
