@@ -24,6 +24,7 @@ from apstools.devices import SCALER_AUTOCOUNT_MODE
 from bluesky import plan_stubs as bps
 import datetime
 
+from ..devices import blackfly_det
 from ..devices.stages import a_stage, d_stage, saxs_stage
 from ..devices.aps_source import aps
 from ..devices.shutters import ccd_shutter, mono_shutter, ti_filter_shutter
@@ -33,10 +34,18 @@ from ..devices.protection_plc import plc_protect
 from ..devices.scalers import scaler0
 from ..devices.general_terms import terms
 from ..devices.user_data import user_data
+from .filters import insertBlackflyFilters
 from .filters import insertRadiographyFilters
 from .filters import insertScanFilters
+from .mono_feedback import DCMfeedbackOFF
 from .mono_feedback import DCMfeedbackON
-from .move_instrument import *
+from .move_instrument import move_SAXSIn
+from .move_instrument import move_SAXSOut
+from .move_instrument import move_USAXSIn
+from .move_instrument import move_USAXSOut
+from .move_instrument import move_WAXSIn
+from .move_instrument import move_WAXSOut
+from .move_instrument import UsaxsSaxsModes
 
 
 def confirm_instrument_mode(mode_name):
@@ -53,20 +62,48 @@ def confirm_instrument_mode(mode_name):
 
 
 def mode_BlackFly():
-    """Sets to imaging mode, using BlackFly camera."""
-    # TODO: under construction
-    # https://github.com/APS-USAXS/ipython-usaxs/issues/392
-    raise RuntimeError("mode_BlackFly() is not ready for use")
-    # yield from user_data.set_state_plan("Moving BlackFly imaging mode")
-    # yield from insertRadiographyFilters()
-    # yield from mode_imaging()
-    # yield from bps.mv(
-    #     ccd_shutter,        "close",
-    #     d_stage.x, terms.USAXS.diode.dx.get(),
-    #     d_stage.y, terms.USAXS.diode.dy.get(),
-    # )
-    # Has 4 new values - dx, dy, fliterAl, filterTi for Black Fly in radiography.
-    # Will need 4 new PVs.
+    """
+    Sets to imaging mode, using BlackFly camera.
+
+    SPEC code does::
+
+        useModeUSAXS
+        DCMfeedbackOFF
+        print "Preparing for BlackFly mode ... please wait ..."
+        moveDetector __FlyDxInPlace __FlyDyInPlace
+        openTiFilterShutter
+        insertPF4filters __FlyAlFilter __FlyTiFilter
+        comment "Ready for BlackFly mode"
+        epics_put ("9idcLAX:USAXS:timeStamp", date())
+        epics_put ("9idcLAX:USAXS:state", "BlackFly camera Mode")
+        epics_put ("9idcLAX:USAXS:macroFileTime", date())
+        epics_put ("9idcLAX:USAXS:scanning", 0)
+        epics_put ("9idFLY1:cam1:Acquire", 1)
+    """
+    yield from mode_USAXS()
+    yield from DCMfeedbackOFF()
+    yield from user_data.set_state_plan(
+        "Preparing for BlackFly imaging mode"
+        )
+
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        d_stage.x, terms.USAXS.blackfly.dx.get(),
+        d_stage.y, terms.USAXS.blackfly.dy.get(),
+    )
+    yield from bps.mv(
+        ti_filter_shutter,  "open",
+    )
+    yield from insertBlackflyFilters()
+
+    yield from user_data.set_state_plan("Ready for BlackFly imaging mode")
+    ts = str(datetime.datetime.now())
+    yield from bps.mv(
+        user_data.time_stamp, ts,
+        user_data.macro_file_time, ts,
+        user_data.scanning, 0,
+        blackfly_det.cam.acquire, 1,
+    )
 
 
 def mode_USAXS():
@@ -296,7 +333,7 @@ def mode_Radiography():
     - if all is OK, try running RE(preUSAXStune()).
     preUSAXStune worked? Run RE(mode_Radiography()). 
     
-    Still not working? Call Jan, Ivan or Matt.
+    Still not working? Call Jan or Ivan.
     """
     print(msg)
 
