@@ -28,7 +28,6 @@ from ..devices.general_terms import terms
 from ..devices.user_data import user_data
 from ..devices import waxsx
 from ..utils.a2q_q2a import angle2q, q2angle
-from ..utils.plot_prune import becplot_prune_fifo
 
 
 UsaxsSaxsModes = {
