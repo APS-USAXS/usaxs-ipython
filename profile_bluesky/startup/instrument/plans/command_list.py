@@ -44,7 +44,11 @@ from .axis_tuning import instrument_default_tune_ranges
 from .axis_tuning import update_EPICS_tuning_widths
 from .axis_tuning import user_defined_settings
 from .doc_run import documentation_run
-from .mode_changes import mode_SAXS, mode_USAXS, mode_WAXS, mode_Radiography
+from .mode_changes import mode_BlackFly
+from .mode_changes import mode_Radiography
+from .mode_changes import mode_SAXS
+from .mode_changes import mode_USAXS
+from .mode_changes import mode_WAXS
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
@@ -430,9 +434,8 @@ def execute_command_list(filename, commands, md={}):
             _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
-        # TODO: https://github.com/APS-USAXS/ipython-usaxs/issues/392
-        # elif action in ("mode_BlackFly"):
-        #     yield from mode_BlackFly()
+        elif action in ("mode_BlackFly"):
+            yield from mode_BlackFly()
 
         elif action in ("mode_Radiography"):
             yield from mode_Radiography()
