@@ -272,17 +272,17 @@ def mode_Radiography():
 
     USAGE:  ``RE(mode_Radiography())``
     """
-    
+
     yield from mode_USAXS()
-    
+
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         ccd_shutter, "close",
         user_data.collection_in_progress, 1,
     )
-  
+
     yield from bps.mv(
-        # move to ccd position 
+        # move to ccd position
         d_stage.x, terms.USAXS.ccd.dx.get(),
         d_stage.y, terms.USAXS.ccd.dy.get(),
         # make sure slits are in place
@@ -291,9 +291,9 @@ def mode_Radiography():
         guard_slit.v_size,  terms.SAXS.usaxs_guard_v_size.get(),
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
     )
-    
+
     yield from insertRadiographyFilters()
-    
+
     # when all that is complete, then ...
     ts = str(datetime.datetime.now())
     yield from bps.mv(
@@ -318,21 +318,21 @@ def mode_Radiography():
         msg = "The mono shutter is closed now.  APS beam dump?"
 
     msg += """
-    
-    But before calling - are you REALLY sure the sample is not blocking the beam? 
+
+    But before calling - are you REALLY sure the sample is not blocking the beam?
        Move sample out and try RE(preUSAXStune()) again.
 
-    If still no image on the CCD, check: 
-    
-    * TV on? Right TV input? 
+    If still no image on the CCD, check:
+
+    * TV on? Right TV input?
     * Camera on (Blue button)?
-    * Beam on? 
-    * Shutters opened? 
-    * Sample/holder out of beam? 
-    
+    * Beam on?
+    * Shutters opened?
+    * Sample/holder out of beam?
+
     - if all is OK, try running RE(preUSAXStune()).
-    preUSAXStune worked? Run RE(mode_Radiography()). 
-    
+    preUSAXStune worked? Run RE(mode_Radiography()).
+
     Still not working? Call Jan or Ivan.
     """
     print(msg)
