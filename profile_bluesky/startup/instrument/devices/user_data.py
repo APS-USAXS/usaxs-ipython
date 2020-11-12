@@ -92,7 +92,7 @@ class CustomEpicsBssDevice(EpicsBssDevice):
 
 bss_user_info = ApsBssUserInfoDevice(
     "9id_bss:", name="bss_user_info")
-sd.baseline.append(bss_user_info)
+# sd.baseline.append(bss_user_info)
 
 # eventually, apsbss will replace bss_user_info
 apsbss = CustomEpicsBssDevice("9idc:bss:", name="apsbss")
