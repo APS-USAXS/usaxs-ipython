@@ -76,9 +76,13 @@ class UsaxsTuneAxis(TuneAxis):
     def width(self):
         return self.width_signal.get()
 
-    @property.setter
+    @width.setter
     def width(self, value):
-        # TODO: should be a plan?
+        """
+        set the width PV value - blocking call, not a plan
+        
+        To set the width PV in a plan, use ``bps.mv(self.width_signal, value)``
+        """
         return self.width_signal.put(value)
 
     def peak_analysis(self, initial_position):
