@@ -95,18 +95,26 @@ TUNING_DET_SIGNAL = {True: I00_SIGNAL, False: I0_SIGNAL}[USING_MS_STAGE]
 class TuneRanges(Device):
     """
     width of tuning for each axis
-
-    TODO: placeholder until #232 is resolved
-    see: https://github.com/APS-USAXS/ipython-usaxs/issues/232
     """
-    ar   = Component(EpicsSignal, "9idcLAX:USAXS:tune_ar_range")
-    a2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_a2rp_range")
-    asrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_asrp_range")
+
+    # in order of optical path
     mr   = Component(EpicsSignal, "9idcLAX:USAXS:tune_mr_range")
-    m2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_m2rp_range")
     msrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_msrp_range")
+    m2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_m2rp_range")
+    ar   = Component(EpicsSignal, "9idcLAX:USAXS:tune_ar_range")
+    asrp = Component(EpicsSignal, "9idcLAX:USAXS:tune_asrp_range")
+    a2rp = Component(EpicsSignal, "9idcLAX:USAXS:tune_a2rp_range")
     dx = Component(EpicsSignal, "9idcLAX:USAXS:tune_dx_range")
     dy = Component(EpicsSignal, "9idcLAX:USAXS:tune_dy_range")
+
+    @property
+    def display(self):
+        return ', '.join(
+            [
+                f"{k}={getattr(self, k).get()}"
+                for k in self.component_names
+            ]
+        )
 
 axis_tune_range = TuneRanges(name="axis_tune_range")
 
@@ -138,7 +146,12 @@ def _getScalerSignalName_(scaler, signal):
     elif isinstance(scaler, EpicsScaler):
         return signal.name
 
-m_stage.r.tuner = TuneAxis([scaler0], m_stage.r, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
+m_stage.r.tuner = TuneAxis(
+    [scaler0],
+    m_stage.r,
+    signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL),
+    width_signal=axis_tune_range.mr,
+)
 m_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r.tuner.num = 31
 m_stage.r.tuner.width = axis_tune_range.mr.get()     # -0.004
@@ -174,7 +187,12 @@ def m2rp_posttune_hook():
 
 
 # use I00 (if MS stage is used, use I0)
-m_stage.r2p.tuner = TuneAxis([scaler0], m_stage.r2p, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
+m_stage.r2p.tuner = TuneAxis(
+    [scaler0],
+    m_stage.r2p,
+    signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL),
+    width_signal=axis_tune_range.m2rp,
+)
 m_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 m_stage.r2p.tuner.num = 21
 m_stage.r2p.tuner.width = axis_tune_range.m2rp.get()     -8
@@ -206,7 +224,12 @@ def msrp_posttune_hook():
 
 
 # use I00 (if MS stage is used, use I0)
-ms_stage.rp.tuner = TuneAxis([scaler0], ms_stage.rp, signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL))
+ms_stage.rp.tuner = TuneAxis(
+    [scaler0],
+    ms_stage.rp,
+    signal_name=_getScalerSignalName_(scaler0, TUNING_DET_SIGNAL),
+    width_signal=axis_tune_range.msrp,
+)
 ms_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 ms_stage.rp.tuner.num = 21
 ms_stage.rp.tuner.width = axis_tune_range.msrp.get()     # 6
@@ -245,7 +268,7 @@ a_stage.r.tuner = TuneAxis(
         [scaler0],
         a_stage.r,
         signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
-        width_signal=axis_tune_range.ar
+        width_signal=axis_tune_range.ar,
 )
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
@@ -278,7 +301,12 @@ def asrp_posttune_hook():
 
 
 # use I00 (if MS stage is used, use I0)
-as_stage.rp.tuner = TuneAxis([scaler0], as_stage.rp, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+as_stage.rp.tuner = TuneAxis(
+    [scaler0],
+    as_stage.rp,
+    signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
+    width_signal=axis_tune_range.asrp,
+)
 as_stage.rp.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 as_stage.rp.tuner.num = 21
 as_stage.rp.tuner.width = axis_tune_range.asrp.get()     # 6
@@ -313,7 +341,12 @@ def a2rp_posttune_hook():
     scaler0.select_channels(None)
 
 
-a_stage.r2p.tuner = TuneAxis([scaler0], a_stage.r2p, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+a_stage.r2p.tuner = TuneAxis(
+    [scaler0],
+    a_stage.r2p,
+    signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
+    width_signal=axis_tune_range.a2rp,
+)
 a_stage.r2p.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r2p.tuner.num = 31
 a_stage.r2p.tuner.width = axis_tune_range.a2rp.get()     # -8
@@ -342,7 +375,12 @@ def dx_posttune_hook():
     scaler0.select_channels(None)
 
 
-d_stage.x.tuner = TuneAxis([scaler0], d_stage.x, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+d_stage.x.tuner = TuneAxis(
+    [scaler0],
+    d_stage.x,
+    signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
+    width_signal=axis_tune_range.dx,
+)
 d_stage.x.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 d_stage.x.tuner.num = 35
 d_stage.x.tuner.width = axis_tune_range.dx.get()     # 10
@@ -372,7 +410,12 @@ def dy_posttune_hook():
     scaler0.select_channels(None)
 
 
-d_stage.y.tuner = TuneAxis([scaler0], d_stage.y, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+d_stage.y.tuner = TuneAxis(
+    [scaler0],
+    d_stage.y,
+    signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
+    width_signal=axis_tune_range.dy,
+)
 d_stage.y.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 d_stage.y.tuner.num = 35
 d_stage.y.tuner.width = axis_tune_range.dx.get()     # 10

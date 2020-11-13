@@ -101,7 +101,9 @@ class UsaxsTuneAxis(TuneAxis):
         """
         Set the width PV value - blocking call, not a plan.
 
-        To set the width PV in a plan, use ``bps.mv(self.width_signal, value)``
+        To set the width PV in a plan, use ``yield from bps.mv(self.width_signal, value)``.
+
+        CAUTION:  Do NOT call this setter from a bluesky plan!
         """
         if self.width_signal is None:
             self._width_default = value
