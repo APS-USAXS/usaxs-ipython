@@ -22,6 +22,7 @@ import os
 from ..plans import preUSAXStune
 from ..plans import mode_Radiography
 from ..plans import run_command_file
+from .user_data import user_data
 
 
 class AutoCollectDataDevice(Device):
