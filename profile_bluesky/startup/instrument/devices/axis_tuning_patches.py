@@ -73,11 +73,11 @@ class UsaxsTuneAxis(TuneAxis):
     width_signal = None     # TODO: defined by caller in __init__()
 
     @property
-    def width():
+    def width(self):
         return self.width_signal.get()
 
     @property.setter
-    def width(value):
+    def width(self, value):
         # TODO: should be a plan?
         return self.width_signal.put(value)
 
