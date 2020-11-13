@@ -99,7 +99,7 @@ class UsaxsTuneAxis(TuneAxis):
     @width.setter
     def width(self, value):
         """
-        set the width PV value - blocking call, not a plan
+        Set the width PV value - blocking call, not a plan.
 
         To set the width PV in a plan, use ``bps.mv(self.width_signal, value)``
         """
