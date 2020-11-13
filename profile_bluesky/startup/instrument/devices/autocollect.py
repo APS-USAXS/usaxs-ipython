@@ -17,11 +17,22 @@ logger.info(__file__)
 
 from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal, EpicsSignalRO
+import datetime
 import os
 
 from ..plans import preUSAXStune
 from ..plans import mode_Radiography
 from ..plans import run_command_file
+from .user_data import user_data
+
+
+def idle_reporter():
+    """Update the console while waiting for next remote command."""
+    ts = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
+    print(
+        f"{ts}: auto_collect is waiting for next command from EPICS ...",
+        end="\r"
+    )
 
 
 class AutoCollectDataDevice(Device):
@@ -55,9 +66,10 @@ class AutoCollectDataDevice(Device):
         yield from bps.mv(self.permit, "yes")
         yield from bps.sleep(1)
 
-        logger.info("waiting for user commands")
+        logger.info("auto_collect is waiting for user commands")
         while self.permit.get() in (1, "yes"):
             if self.trigger_signal.get() in (1, "start"):
+                print()  # next line if emerging from idle_reporter()
                 logger.debug("starting user commands")
                 yield from bps.mv(self.trigger_signal, 0)
 
@@ -80,6 +92,10 @@ class AutoCollectDataDevice(Device):
                 logger.info("waiting for next user command")
             else:
                 yield from bps.sleep(self.idle_interval)
+                idle_reporter()
+
+        print()  # next line if emerging from idle_reporter()
+        logger.info("auto_collect is ending")
 
 
 auto_collect = AutoCollectDataDevice(
