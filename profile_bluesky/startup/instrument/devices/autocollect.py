@@ -26,19 +26,20 @@ from ..plans import run_command_file
 from .user_data import user_data
 
 
+def idle_reporter():
+    """Update the console while waiting for next remote command."""
+    ts = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
+    print(
+        f"{ts}: auto_collect is waiting for next command from EPICS ...",
+        end="\r"
+    )
+
+
 class AutoCollectDataDevice(Device):
     trigger_signal = Component(EpicsSignal, "Start", string=True)
     commands = Component(EpicsSignal, "StrInput", string=True)
     permit = Component(EpicsSignal, "Permit", string=True)
     idle_interval = 2       # seconds
-
-    def idle_reporter(self):
-        """Update the console while waiting for next remote command."""
-        ts = datetime.datetime.now().isoformat(sep=" ", timespec="seconds")
-        print(
-            f"{ts}: auto_collect is waiting for next command from EPICS ...",
-            end="\r"
-        )
 
     def remote_ops(self, *args, **kwargs):
         """
@@ -91,7 +92,7 @@ class AutoCollectDataDevice(Device):
                 logger.info("waiting for next user command")
             else:
                 yield from bps.sleep(self.idle_interval)
-                self.idle_reporter()
+                idle_reporter()
 
         print()  # next line if emerging from idle_reporter()
         logger.info("auto_collect is ending")
