@@ -70,6 +70,17 @@ class TuningResults(Device):
 class UsaxsTuneAxis(TuneAxis):
     """use bp.rel_scan() for the tune()"""
 
+    width_signal = None     # TODO: defined by caller in __init__()
+
+    @property
+    def width():
+        return self.width_signal.get()
+
+    @property.setter
+    def width(value):
+        # TODO: should be a plan?
+        return self.width_signal.put(value)
+
     def peak_analysis(self, initial_position):
         if self.peak_detected():
             self.tune_ok = True
