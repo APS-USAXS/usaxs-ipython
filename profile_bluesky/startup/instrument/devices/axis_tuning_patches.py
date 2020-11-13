@@ -79,15 +79,18 @@ class UsaxsTuneAxis(TuneAxis):
         Adds to the ``apstools.devices.TuneAxis()`` signature
 
         signal_width (obj):
-            instance of `ophyd.EpicsSignal` connected to PV
+            Instance of `ophyd.EpicsSignal` connected to PV
             with default tune width for this axis.
+
+            If undefined (set to ``None``), then a private attribute
+            (``_width_default``) will be used for the value.
         """
         super().__init__(signals, axis, signal_name=signal_name)
         self.width_signal = width_signal
 
     @property
     def width(self):
-        """get default tune width for this axis"""
+        """Get default tune width for this axis."""
         if self.width_signal is None:
             return self._width_default
         else:
