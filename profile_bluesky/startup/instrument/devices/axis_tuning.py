@@ -241,7 +241,12 @@ def ar_posttune_hook():
     scaler0.select_channels(None)
 
 
-a_stage.r.tuner = TuneAxis([scaler0], a_stage.r, signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL))
+a_stage.r.tuner = TuneAxis(
+        [scaler0],
+        a_stage.r,
+        signal_name=_getScalerSignalName_(scaler0, UPD_SIGNAL),
+        width_signal=axis_tune_range.ar
+)
 a_stage.r.tuner.peak_choice = TUNE_METHOD_PEAK_CHOICE
 a_stage.r.tuner.num = 35
 a_stage.r.tuner.width = axis_tune_range.ar.get()     # -0.004
