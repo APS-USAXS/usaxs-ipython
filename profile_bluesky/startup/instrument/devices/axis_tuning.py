@@ -127,7 +127,6 @@ def mr_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1,)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.mr.get()
 
 
 def mr_posttune_hook():
@@ -169,7 +168,6 @@ def m2rp_pretune_hook():
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.m2rp.get()
 
 
 def m2rp_posttune_hook():
@@ -210,7 +208,6 @@ def msrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.msrp.get()
 
 
 def msrp_posttune_hook():
@@ -246,7 +243,6 @@ def ar_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.ar.get()
 
 
 def ar_posttune_hook():
@@ -286,7 +282,6 @@ def asrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.asrp.get()
 
 
 def asrp_posttune_hook():
@@ -324,7 +319,6 @@ def a2rp_pretune_hook():
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.a2rp.get()
 
 
 def a2rp_posttune_hook():
@@ -362,7 +356,6 @@ def dx_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.dx.get()
 
 
 def dx_posttune_hook():
@@ -397,7 +390,6 @@ def dy_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
-    # stage.tuner.width = axis_tune_range.dy.get()
 
 
 def dy_posttune_hook():
