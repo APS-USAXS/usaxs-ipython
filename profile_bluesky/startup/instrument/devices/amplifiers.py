@@ -80,7 +80,8 @@ import numpy as np
 from ophyd import Component, Device, Signal
 from ophyd import EpicsSignal, EpicsSignalRO
 from ophyd import DynamicDeviceComponent, FormattedComponent
-from ophyd.scaler import ScalerCH, ScalerChannel
+# from ophyd.scaler import ScalerCH, ScalerChannel
+from .override_ScalerCH import ScalerCH, ScalerChannel
 from ophyd.utils import OrderedDefaultDict
 
 from .aps_source import aps
@@ -325,6 +326,7 @@ class DetectorAmplifierAutorangeDevice(Device):
     """
 
     def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
+        # TODO: change these asserts into if, not good coding practice.
         assert isinstance(nickname, str)
         assert isinstance(scaler, ScalerCH)      # dropped EpicsScaler
         assert isinstance(signal, ScalerChannel) # dropped EpicsSignalRO

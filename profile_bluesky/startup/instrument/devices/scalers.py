@@ -21,22 +21,22 @@ logger.info(__file__)
 
 from apstools.devices import use_EPICS_scaler_channels
 from ophyd import Component, EpicsSignal, EpicsScaler, EpicsSignalRO
-from ophyd.scaler import ScalerCH
-
+# from ophyd.scaler import ScalerCH
+from .override_ScalerCH import ScalerCH
 
 class myScalerCH(ScalerCH):
     display_rate = Component(EpicsSignal, ".RATE", kind="omitted")
 
 
 scaler0 = myScalerCH('9idcLAX:vsc:c0', name='scaler0')
+scaler0.stage_sigs["count_mode"] = "OneShot"
 scaler1 = myScalerCH('9idcLAX:vsc:c1', name='scaler1')     # used by softGlue for SAXS transmission
 # scaler2 = ScalerCH('9idcLAX:vsc:c2', name='scaler2')     # used by upstream feedback
 scaler2_I000_counts = EpicsSignalRO("9idcLAX:vsc:c2.S2", name="scaler2_I000_counts")
 scaler2_I000_cps = EpicsSignalRO("9idcLAX:vsc:c2_cts1.B", name="scaler2_I000_counts")
 
-
-for s in (scaler0, scaler1):
-    use_EPICS_scaler_channels(s)
+scaler0.select_channels()
+scaler1.select_channels()
 
 I0_SIGNAL = scaler0.channels.chan02
 I00_SIGNAL = scaler0.channels.chan03
