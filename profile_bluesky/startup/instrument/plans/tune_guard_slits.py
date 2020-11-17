@@ -362,17 +362,22 @@ def tune_GslitsSize():
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
     # workaround for issue #425 (#404)
+    logger.info("Applying workaround for 'motor stuck in moving'.")
+    yield from bps.sleep(2)     # activity pause, empirical
     yield from bps.mv(
         guard_slit.h_size, 1,
         guard_slit.v_size, 1,
     )
-    yield from bps.mv(
-        guard_slit.top.process_record, 1,
-        guard_slit.bot.process_record, 1,
-        guard_slit.inb.process_record, 1,
-        guard_slit.outb.process_record, 1,
-    )
-    yield from bps.sleep(2)     # wait for moves to complete
+    yield from bps.mv(guard_slit.top.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.inb.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.bot.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.outb.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    logger.info("Workaround Complete.")
+    # end of workaround
     logger.info(f"Guard slit now: V={guard_slit.v_size.get()} and H={guard_slit.h_size.get()}")
 
 
