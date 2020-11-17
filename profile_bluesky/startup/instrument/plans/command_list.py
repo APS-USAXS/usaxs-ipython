@@ -25,6 +25,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.utils import ExcelDatabaseFileGeneric
+from apstools.utils import rss_mem
 from bluesky import plan_stubs as bps
 from usaxs_support.nexus import reset_manager
 from usaxs_support.surveillance import instrument_archive
@@ -385,6 +386,7 @@ def execute_command_list(filename, commands, md={}):
     text = f"Command file: {filename}\n"
     text += str(command_list_as_table(commands))
     logger.info(text)
+    logger.info("memory report: %s", rss_mem())
 
     # save the command list as a separate Bluesky run for documentation purposes
     yield from documentation_run(text)
@@ -460,8 +462,10 @@ def execute_command_list(filename, commands, md={}):
 
         else:
             logger.info(f"no handling for line {i}: {raw_command}")
+        logger.info("memory report: %s", rss_mem())
 
     yield from after_command_list(md=md)
+    logger.info("memory report: %s", rss_mem())
 
 
 def sync_order_numbers():
