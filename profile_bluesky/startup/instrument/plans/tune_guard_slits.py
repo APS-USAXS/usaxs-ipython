@@ -362,8 +362,10 @@ def _unstick_GslitsSizeMotors():
         m = getattr(guard_slit, axis)
         logger.info("Move %s a little bit.", m.name)
         yield from bps.mvr(m, 0.1)
+        logger.info("...")
         logger.info("Move %s back.", m.name)
         yield from bps.mvr(m, -0.1)
+        logger.info("...")
 
     logger.info("Workaround Complete.")
 
