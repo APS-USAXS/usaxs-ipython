@@ -332,6 +332,23 @@ def _USAXS_tune_guardSlits():
         )
     yield from guard_slit.process_motor_records()
 
+def _unstick_GslitsSizeMotors():
+    """Workaround for issue #425 (and #404)."""
+    logger.info("Applying workaround for 'motor stuck in moving'.")
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(
+        guard_slit.h_size, 1,
+        guard_slit.v_size, 1,
+    )
+    yield from bps.mv(guard_slit.top.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.inb.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.bot.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    yield from bps.mv(guard_slit.outb.process_record, 1)
+    yield from bps.sleep(2)     # activity pause, empirical
+    logger.info("Workaround Complete.")
 
 def tune_GslitsSize():
     """
@@ -361,23 +378,10 @@ def tune_GslitsSize():
         terms.SAXS.guard_v_size, guard_slit.v_size.get(),
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
+
     # workaround for issue #425 (#404)
-    logger.info("Applying workaround for 'motor stuck in moving'.")
-    yield from bps.sleep(2)     # activity pause, empirical
-    yield from bps.mv(
-        guard_slit.h_size, 1,
-        guard_slit.v_size, 1,
-    )
-    yield from bps.mv(guard_slit.top.process_record, 1)
-    yield from bps.sleep(2)     # activity pause, empirical
-    yield from bps.mv(guard_slit.inb.process_record, 1)
-    yield from bps.sleep(2)     # activity pause, empirical
-    yield from bps.mv(guard_slit.bot.process_record, 1)
-    yield from bps.sleep(2)     # activity pause, empirical
-    yield from bps.mv(guard_slit.outb.process_record, 1)
-    yield from bps.sleep(2)     # activity pause, empirical
-    logger.info("Workaround Complete.")
-    # end of workaround
+    yield from _unstick_GslitsSizeMotors()
+
     logger.info(f"Guard slit now: V={guard_slit.v_size.get()} and H={guard_slit.h_size.get()}")
 
 
