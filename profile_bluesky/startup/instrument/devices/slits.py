@@ -43,6 +43,7 @@ class UsaxsSlitDevice(MotorBundle):
 
 class GuardSlitMotor(UsaxsMotor):
     process_record = Component(EpicsSignal, ".PROC")
+    status_update = Component(EpicsSignal, ".STUP")
 
 
 class GSlitDevice(MotorBundle):

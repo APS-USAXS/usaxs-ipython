@@ -15,6 +15,7 @@ logger.info(__file__)
 
 from apstools.plans import TuneAxis
 from bluesky import plan_stubs as bps
+from bluesky.utils import FailedStatus
 from collections import defaultdict
 import datetime
 from ophyd import Kind
@@ -345,8 +346,17 @@ def _unstick_GslitsSizeMotors():
     for axis in "top bot inb outb".split():
         logger.info("Unstick %s.", axis)
         m = getattr(guard_slit, axis)
-        yield from bps.mv(m.process_record, 1)
-        yield from bps.sleep(pause)     # activity pause, empirical
+        # yield from bps.mv(m.process_record, 1)
+        try:
+            yield from bps.abs_set(m.status_update, 1, timeout=.1)
+            # if not m.status_update._status.done:
+            #     m.status_update._status.set_finished()  # force it to be successful
+            yield from bps.sleep(pause)     # activity pause, empirical
+        except FailedStatus:
+            # logger.info("note: FailedStatus received for %s", axis)
+            pass
+        except Exception as exc:
+            logger.error("%s: %s", axis, exc)
     logger.info("Workaround Complete.")
 
 def tune_GslitsSize():
