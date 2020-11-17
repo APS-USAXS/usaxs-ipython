@@ -345,17 +345,18 @@ def _unstick_GslitsSizeMotors():
         guard_slit.v_sync_proc, 1,
     )
 
-    # write the .STUP field on each motor
-    for axis in "top bot inb outb".split():
-        logger.info("Unstick %s.", axis)
-        m = getattr(guard_slit, axis)
-        try:
-            yield from bps.abs_set(m.status_update, 1, timeout=.1)
-            yield from bps.sleep(pause)     # activity pause, empirical
-        except FailedStatus:
-            pass
-        except Exception as exc:
-            logger.error("%s: %s", axis, exc)
+    # NOTE: These steps did not affect the process outcome.
+    # # write the .STUP field on each motor
+    # for axis in "top bot inb outb".split():
+    #     logger.info("Unstick %s.", axis)
+    #     m = getattr(guard_slit, axis)
+    #     try:
+    #         yield from bps.abs_set(m.status_update, 1, timeout=.1)
+    #         yield from bps.sleep(pause)     # activity pause, empirical
+    #     except FailedStatus:
+    #         pass
+    #     except Exception as exc:
+    #         logger.error("%s: %s", axis, exc)
 
     # move each motor *individually*
     for axis in "top bot inb outb".split():
