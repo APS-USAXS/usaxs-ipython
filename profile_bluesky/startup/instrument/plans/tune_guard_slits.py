@@ -338,25 +338,33 @@ def _unstick_GslitsSizeMotors():
     pause = 4
     logger.info("Workaround for Guard Slit 'motor stuck in moving'.")
     yield from bps.sleep(pause)     # activity pause, empirical
-    logger.info("Set slit size to 1x1.")
+
+    logger.info("Sync H&V axes.")
     yield from bps.mv(
-        guard_slit.h_size, 1,
-        guard_slit.v_size, 1,
+        guard_slit.h_sync_proc, 1,
+        guard_slit.v_sync_proc, 1,
     )
+
+    # write the .STUP field on each motor
     for axis in "top bot inb outb".split():
         logger.info("Unstick %s.", axis)
         m = getattr(guard_slit, axis)
-        # yield from bps.mv(m.process_record, 1)
         try:
             yield from bps.abs_set(m.status_update, 1, timeout=.1)
-            # if not m.status_update._status.done:
-            #     m.status_update._status.set_finished()  # force it to be successful
             yield from bps.sleep(pause)     # activity pause, empirical
         except FailedStatus:
-            # logger.info("note: FailedStatus received for %s", axis)
             pass
         except Exception as exc:
             logger.error("%s: %s", axis, exc)
+
+    # move each motor *individually*
+    for axis in "top bot inb outb".split():
+        m = getattr(guard_slit, axis)
+        logger.info("Move %s a little bit.", m.name)
+        yield from bps.mvr(m, 0.1)
+        logger.info("Move %s back.", m.name)
+        yield from bps.mvr(m, -0.1)
+
     logger.info("Workaround Complete.")
 
 def tune_GslitsSize():
