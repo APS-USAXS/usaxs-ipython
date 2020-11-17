@@ -335,20 +335,18 @@ def _USAXS_tune_guardSlits():
 def _unstick_GslitsSizeMotors():
     """Workaround for issue #425 (and #404)."""
     pause = 4
-    logger.info("Applying workaround for 'motor stuck in moving'.")
+    logger.info("Workaround for Guard Slit 'motor stuck in moving'.")
     yield from bps.sleep(pause)     # activity pause, empirical
+    logger.info("Set slit size to 1x1.")
     yield from bps.mv(
         guard_slit.h_size, 1,
         guard_slit.v_size, 1,
     )
-    yield from bps.mv(guard_slit.top.process_record, 1)
-    yield from bps.sleep(pause)     # activity pause, empirical
-    yield from bps.mv(guard_slit.inb.process_record, 1)
-    yield from bps.sleep(pause)     # activity pause, empirical
-    yield from bps.mv(guard_slit.bot.process_record, 1)
-    yield from bps.sleep(pause)     # activity pause, empirical
-    yield from bps.mv(guard_slit.outb.process_record, 1)
-    yield from bps.sleep(pause)     # activity pause, empirical
+    for axis in "top bot inb outb".split():
+        logger.info("Unstick %s.", axis)
+        m = getattr(guard_slit, axis)
+        yield from bps.mv(m.process_record, 1)
+        yield from bps.sleep(pause)     # activity pause, empirical
     logger.info("Workaround Complete.")
 
 def tune_GslitsSize():
