@@ -15,7 +15,7 @@ from bluesky import plan_stubs as bps
 import time
 
 from ..devices import user_data
-from ..framework import RE
+from ..framework import RE, bec
 from ..utils.reporter import remaining_time_reporter
 
 
@@ -40,7 +40,9 @@ def areaDetectorAcquire(det, md=None):
     if RE.state != "idle":
         remaining_time_reporter(_md["plan_name"], acquire_time)
 
+    bec.disable_table()
     yield from bp.count([det], md=_md)          # TODO: SPEC showed users incremental progress (1 Hz updates) #175
+    bec.enable_table()
 
     yield from bps.mv(user_data.scanning, "no",)  # we are done
     elapsed = time.time() - t0

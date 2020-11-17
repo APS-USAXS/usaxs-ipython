@@ -25,7 +25,7 @@ from ophyd.scaler import ScalerCH
 
 
 class myScalerCH(ScalerCH):
-    display_rate = Component(EpicsSignal, ".RATE")
+    display_rate = Component(EpicsSignal, ".RATE", kind="omitted")
 
 
 scaler0 = myScalerCH('9idcLAX:vsc:c0', name='scaler0')
@@ -52,6 +52,7 @@ I000 = scaler0.channels.chan06.s
 
 for item in (clock, I0, I00, upd2, trd, I000):
     item._ophyd_labels_ = set(["channel", "counter",])
+    item._auto_monitor = False
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
