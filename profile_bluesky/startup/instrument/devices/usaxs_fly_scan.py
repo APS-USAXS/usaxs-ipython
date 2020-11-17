@@ -192,7 +192,13 @@ class UsaxsFlyScanDevice(Device):
         specwriter._cmt("start", f"HDF5 configuration file: {self.saveFlyData_config}")
 
         g = uuid.uuid4()
-        yield from bps.abs_set(self.busy, BusyStatus.busy, group=g) # waits until done
+        yield from bps.abs_set(
+            self.busy,
+            BusyStatus.busy,
+            group=g,   # waits until done
+            timeout=self.scan_time.get() + self.timeout_s
+        )
+
         if bluesky_runengine_running:
             progress_reporting()
         yield from bps.abs_set(self.flying, True)
