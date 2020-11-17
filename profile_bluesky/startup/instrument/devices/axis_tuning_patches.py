@@ -70,6 +70,46 @@ class TuningResults(Device):
 class UsaxsTuneAxis(TuneAxis):
     """use bp.rel_scan() for the tune()"""
 
+    width_signal = None
+    _width_default = 1      # fallback default when width_signal is None
+
+    def __init__(self, signals, axis, signal_name=None,
+                 width_signal=None):
+        """
+        Adds to the ``apstools.devices.TuneAxis()`` signature
+
+        signal_width (obj):
+            Instance of `ophyd.EpicsSignal` connected to PV
+            with default tune width for this axis.
+
+            If undefined (set to ``None``), then a private attribute
+            (``_width_default``) will be used for the value.
+        """
+        super().__init__(signals, axis, signal_name=signal_name)
+        self.width_signal = width_signal
+
+    @property
+    def width(self):
+        """Get default tune width for this axis."""
+        if self.width_signal is None:
+            return self._width_default
+        else:
+            return self.width_signal.get()
+
+    @width.setter
+    def width(self, value):
+        """
+        Set the width PV value - blocking call, not a plan.
+
+        To set the width PV in a plan, use ``yield from bps.mv(self.width_signal, value)``.
+
+        CAUTION:  Do NOT call this setter from a bluesky plan!
+        """
+        if self.width_signal is None:
+            self._width_default = value
+        else:
+            self.width_signal.put(value)
+
     def peak_analysis(self, initial_position):
         if self.peak_detected():
             self.tune_ok = True
