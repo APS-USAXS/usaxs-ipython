@@ -49,6 +49,9 @@ class UserDataDevice(Device):
         """ophyd: tell EPICS about what we are doing"""
         msg = trim_string_for_EPICS(msg)
         try:
+            if len(msg) > 39:
+                logger.info("truncating long status message: %s", msg)
+                msg = msg[:35] + " ..."
             self.state.put(msg)
         except Exception as exc:
             logger.error(
