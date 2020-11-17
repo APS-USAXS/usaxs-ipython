@@ -360,12 +360,10 @@ def _unstick_GslitsSizeMotors():
     # move each motor *individually*
     for axis in "top bot inb outb".split():
         m = getattr(guard_slit, axis)
-        logger.info("Move %s a little bit.", m.name)
+        logger.info("Move %s a little bit.\n", m.name)
         yield from bps.mvr(m, 0.1)
-        logger.info("...")
-        logger.info("Move %s back.", m.name)
+        logger.info("Move %s back.\n", m.name)
         yield from bps.mvr(m, -0.1)
-        logger.info("...")
 
     logger.info("Workaround Complete.")
 
