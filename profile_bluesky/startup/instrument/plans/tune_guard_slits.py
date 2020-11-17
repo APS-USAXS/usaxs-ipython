@@ -361,6 +361,18 @@ def tune_GslitsSize():
         terms.SAXS.guard_v_size, guard_slit.v_size.get(),
         monochromator.feedback.on, MONO_FEEDBACK_ON,
     )
+    # workaround for issue #425 (#404)
+    yield from bps.mv(
+        guard_slit.h_size, 1,
+        guard_slit.v_size, 1,
+    )
+    yield from bps.mv(
+        guard_slit.top.process_record, 1,
+        guard_slit.bot.process_record, 1,
+        guard_slit.inb.process_record, 1,
+        guard_slit.outb.process_record, 1,
+    )
+    yield from bps.sleep(2)     # wait for moves to complete
     logger.info(f"Guard slit now: V={guard_slit.v_size.get()} and H={guard_slit.h_size.get()}")
 
 
