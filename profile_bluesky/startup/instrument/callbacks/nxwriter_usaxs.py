@@ -15,12 +15,14 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
+from apstools.filewriters import NXWriterAPS
+import numpy as np
+import os
+
 from ..devices import terms
 from ..devices.user_data import user_data
 from ..utils.cleanup_text import cleanupText
 from ..utils.setup_new_user import techniqueSubdirectory
-from apstools.filewriters import NXWriterAPS
-import os
 
 
 class OurCustomNXWriterBase(NXWriterAPS):
@@ -102,6 +104,40 @@ class OurCustomNXWriterBase(NXWriterAPS):
             return
 
         super().writer()
+
+    def write_stream_internal(self, parent, d, subgroup, stream_name, k, v):
+        subgroup.attrs["signal"] = "value"
+        subgroup.attrs["axes"] = ["time",]
+        if isinstance(d, list) and len(d) > 0:
+            if v["dtype"] in ("string",):
+                d = self.h5string(d)
+            elif v["dtype"] in ("integer", "number"):
+                d = np.array(d)
+        try:
+            ds = subgroup.create_dataset("value", data=d)
+            ds.attrs["target"] = ds.name
+            try:
+                self.add_dataset_attributes(ds, v, k)
+            except Exception as exc:
+                logger.error("%s %s %s %s", v["dtype"], type(d), k, exc)
+        except TypeError as exc:
+            logger.error("%s %s %s %s", v["dtype"], k, f"TypeError({exc})", v["data"])
+        if stream_name == "baseline":
+            # make it easier to pick single values
+            # identify start/end of acquisition
+            for item, key in ((0, "value_start"), (-1, "value_end")):
+                try:
+                    ds = subgroup.create_dataset(key, data=d[item])
+                    self.add_dataset_attributes(ds, v, k)
+                    ds.attrs["target"] = ds.name
+                except TypeError as exc:
+                    raise UnicodeError(
+                        (
+                            "Could not write '%s' to h5py from baseline:"
+                            " k=%s, v=%s, key=%s"
+                        ),
+                        d[item], k, v, key
+                    )
 
 
 class NXWriterFlyScan(OurCustomNXWriterBase):
