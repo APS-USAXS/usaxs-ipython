@@ -737,13 +737,17 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     pilatus_name = os.path.join(pilatus_path, SAXS_file_name)
     logger.info(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
 
+    saxs_det.hdf1.file_path._auto_monitor = False
+    saxs_det.hdf1.file_template._auto_monitor = False
     yield from bps.mv(
         saxs_det.hdf1.file_name, scan_title_clean,
         saxs_det.hdf1.file_path, pilatus_path,
         saxs_det.hdf1.file_template, ad_file_template,
         timeout=MASTER_TIMEOUT,
-        auto_monitor=False,
+        # auto_monitor=False,
     )
+    saxs_det.hdf1.file_path._auto_monitor = True
+    saxs_det.hdf1.file_template._auto_monitor = True
 
     ts = str(datetime.datetime.now())
     yield from bps.mv(
@@ -911,13 +915,17 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     pilatus_name = os.path.join(pilatus_path, WAXS_file_name)
     logger.info(f"Pilatus computer Area Detector HDF5 file: {pilatus_name}")
 
+    waxs_det.hdf1.file_path._auto_monitor = False
+    waxs_det.hdf1.file_template._auto_monitor = False
     yield from bps.mv(
         waxs_det.hdf1.file_name, scan_title_clean,
         waxs_det.hdf1.file_path, pilatus_path,
         waxs_det.hdf1.file_template, ad_file_template,
         timeout=MASTER_TIMEOUT,
-        auto_monitor=False,
+        # auto_monitor=False,
     )
+    waxs_det.hdf1.file_path._auto_monitor = True
+    waxs_det.hdf1.file_template._auto_monitor = True
 
     ts = str(datetime.datetime.now())
     yield from bps.mv(
