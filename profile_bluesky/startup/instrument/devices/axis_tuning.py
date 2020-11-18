@@ -71,7 +71,9 @@ from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal
 from ophyd import Kind
 from ophyd import EpicsScaler
-from ophyd.scaler import ScalerCH
+# from ophyd.scaler import ScalerCH
+from .override_ScalerCH import ScalerCH
+
 
 logger.debug("before instrument imports")
 from .amplifiers import autoscale_amplifiers

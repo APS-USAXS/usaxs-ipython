@@ -60,4 +60,4 @@ class MyEpicsMotor(EpicsMotor):
 class UsaxsMotor(MyEpicsMotor): ...
 
 class UsaxsMotorTunable(AxisTunerMixin, UsaxsMotor):
-    width = Component(Signal, value=0)
+    width = Component(Signal, value=0, kind="config")
