@@ -40,6 +40,12 @@ class UserDataDevice(Device):
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
 
+    _sample_title_handler = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._sample_title_handler = self.default_sample_title_handler
+
     def set_state_plan(self, msg, confirm=True):
         """plan: tell EPICS about what we are doing"""
         msg = trim_string_for_EPICS(msg)
@@ -58,6 +64,43 @@ class UserDataDevice(Device):
                 "Could not put message (%s) to USAXS state PV: %s",
                 msg,
                 exc)
+
+    def default_sample_title_handler(self, title):
+        """Return the sample PV value as the title"""  ,
+        return title
+
+    def register_sample_title_handler(self, handler=None):
+        """
+        Register a function to call when creating the full sample title.
+
+        PARAMETERS
+
+        handler (*obj* or ``None``):
+            Function that returns the full sample title.
+
+        USAGE:
+
+        Define a new handling function and register it::
+
+            def myTitler(title):
+                return f"a {title} longer sample title now"
+
+            user_data.register_sample_title_handler(myTitler)
+
+        Reset to the default handling function::
+
+            user_data.register_sample_title_handler()
+        """
+        self._sample_title_handler = handler
+
+    @property
+    def sample_title_full(self):    # TODO: Can this be a signal instead?
+        if self._sample_title_handler is None:
+            return self.default_sample_title_handler(
+                self.sample_title.get()
+            )
+        else:
+            return self._sample_title_handler(self.sample_title.get())
 
 
 class CustomEpicsBssDevice(EpicsBssDevice):
