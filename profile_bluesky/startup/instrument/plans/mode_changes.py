@@ -237,20 +237,6 @@ def mode_WAXS(md=None):
     )
 
 
-    """
-  comment "Ready for Radiography mode"
-  print "TV should now show Radiography CCD image. If not, check: TV on? Right TV input? Camera on (Blue button)?"
-  print "Beam on? Shutters opened? Sample/holder out of beam? - if all is OK, try running preUSAXStune."
-  print "preUSAXStune worked? Run useModeRadiography. Still not working? Call Jan, Ivan or Matt."
-  print "But before calling - are you REALLY sure the sample is not blocking the beam? Move it out and try preUSAXStune again."
-  epics_put ("9idcLAX:USAXS:timeStamp",   date())
-  epics_put ("9idcLAX:USAXS:state",       "Radiography Mode")
-  epics_put ("9idcLAX:USAXS:macroFileTime",      date())
-  epics_put ("9idcLAX:USAXS:scanning",    0)
-}'
-    """
-
-
 def mode_Radiography(md=None):
     """
     put in USAXS Radiography mode
