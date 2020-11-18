@@ -134,6 +134,7 @@ class UsaxsTuneAxis(TuneAxis):
         results.final_position.put(final_position)
         results.initial_position.put(initial_position)
         if self.peaks is None:
+            logger.info("PeakStats object is None.")
             results.put_results({})
         else:
             results.put_results(self.peaks)
