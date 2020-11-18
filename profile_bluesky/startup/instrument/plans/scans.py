@@ -742,6 +742,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         saxs_det.hdf1.file_path, pilatus_path,
         saxs_det.hdf1.file_template, ad_file_template,
         timeout=MASTER_TIMEOUT,
+        auto_monitor=False,
     )
 
     ts = str(datetime.datetime.now())
@@ -915,6 +916,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         waxs_det.hdf1.file_path, pilatus_path,
         waxs_det.hdf1.file_template, ad_file_template,
         timeout=MASTER_TIMEOUT,
+        auto_monitor=False,
     )
 
     ts = str(datetime.datetime.now())
