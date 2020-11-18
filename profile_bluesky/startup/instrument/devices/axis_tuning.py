@@ -67,6 +67,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.plans import TuneAxis
+from apstools.utils import trim_plot_lines
 from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal
 from ophyd import Kind
@@ -76,6 +77,7 @@ from .override_ScalerCH import ScalerCH
 
 
 logger.debug("before instrument imports")
+from ..framework import bec
 from .amplifiers import autoscale_amplifiers
 from .amplifiers import I0_controls, I00_controls, upd_controls
 from .general_terms import terms
@@ -129,6 +131,7 @@ def mr_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1,)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def mr_posttune_hook():
@@ -170,6 +173,7 @@ def m2rp_pretune_hook():
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def m2rp_posttune_hook():
@@ -210,6 +214,7 @@ def msrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def msrp_posttune_hook():
@@ -245,6 +250,7 @@ def ar_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def ar_posttune_hook():
@@ -284,6 +290,7 @@ def asrp_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def asrp_posttune_hook():
@@ -321,6 +328,7 @@ def a2rp_pretune_hook():
     yield from bps.mv(scaler0.delay, 0.02)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def a2rp_posttune_hook():
@@ -358,6 +366,7 @@ def dx_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def dx_posttune_hook():
@@ -392,6 +401,7 @@ def dy_pretune_hook():
     yield from bps.mv(scaler0.preset_time, 0.1)
     scaler0.select_channels([UPD_SIGNAL.chname.get()])
     scaler0.channels.chan01.kind = Kind.config
+    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def dy_posttune_hook():
