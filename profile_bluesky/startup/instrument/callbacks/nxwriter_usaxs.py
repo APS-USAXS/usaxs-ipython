@@ -132,11 +132,9 @@ class OurCustomNXWriterBase(NXWriterAPS):
                     ds.attrs["target"] = ds.name
                 except TypeError as exc:
                     raise UnicodeError(
-                        (
-                            "Could not write '%s' to h5py from baseline:"
-                            " k=%s, v=%s, key=%s"
-                        ),
-                        d[item], k, v, key
+                        f"Could not write '{d[item]}' to h5py from baseline:"
+                        f" k={k}, v={v}, key={key}"
+                        f"\n{exc}"
                     )
 
 
