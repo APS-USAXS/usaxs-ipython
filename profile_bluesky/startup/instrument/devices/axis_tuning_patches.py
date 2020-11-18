@@ -133,7 +133,10 @@ class UsaxsTuneAxis(TuneAxis):
         results.center.put(self.center)
         results.final_position.put(final_position)
         results.initial_position.put(initial_position)
-        results.put_results(self.peaks)
+        if self.peaks is None:
+            results.put_results({})
+        else:
+            results.put_results(self.peaks)
         self.stats.append(results)
 
         t = results.report(print_enable=False)
