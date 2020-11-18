@@ -67,7 +67,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.plans import TuneAxis
-from apstools.utils import trim_plot_lines
+from apstools.utils import trim_plot_by_name
 from bluesky import plan_stubs as bps
 from ophyd import Component, Device, EpicsSignal
 from ophyd import Kind
@@ -129,9 +129,11 @@ def mr_pretune_hook():
     stage = m_stage.r
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1,)
-    scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
+    y_name = TUNING_DET_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def mr_posttune_hook():
@@ -171,9 +173,11 @@ def m2rp_pretune_hook():
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
-    scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
+    y_name = TUNING_DET_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def m2rp_posttune_hook():
@@ -212,9 +216,11 @@ def msrp_pretune_hook():
     stage = ms_stage.rp
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    scaler0.select_channels([TUNING_DET_SIGNAL.chname.get()])
+    y_name = TUNING_DET_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
 def msrp_posttune_hook():
@@ -248,9 +254,11 @@ def ar_pretune_hook():
     stage = a_stage.r
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    scaler0.select_channels([UPD_SIGNAL.chname.get()])
+    y_name = UPD_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def ar_posttune_hook():
@@ -288,9 +296,11 @@ def asrp_pretune_hook():
     stage = as_stage.rp
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    scaler0.select_channels([UPD_SIGNAL.chname.get()])
+    y_name = UPD_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def asrp_posttune_hook():
@@ -326,9 +336,11 @@ def a2rp_pretune_hook():
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
     yield from bps.mv(scaler0.delay, 0.02)
-    scaler0.select_channels([UPD_SIGNAL.chname.get()])
+    y_name = UPD_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def a2rp_posttune_hook():
@@ -364,9 +376,11 @@ def dx_pretune_hook():
     stage = d_stage.x
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    scaler0.select_channels([UPD_SIGNAL.chname.get()])
+    y_name = UPD_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def dx_posttune_hook():
@@ -399,9 +413,11 @@ def dy_pretune_hook():
     stage = d_stage.y
     logger.info(f"Tuning axis {stage.name}, current position is {stage.position}")
     yield from bps.mv(scaler0.preset_time, 0.1)
-    scaler0.select_channels([UPD_SIGNAL.chname.get()])
+    y_name = UPD_SIGNAL.chname.get()
+    scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
+    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
 def dy_posttune_hook():
