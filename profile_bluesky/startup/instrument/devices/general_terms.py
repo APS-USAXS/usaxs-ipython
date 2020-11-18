@@ -149,6 +149,7 @@ class Parameters_USAXS(Device):
     uaterm = Component(EpicsSignal,                   "9idcLAX:USAXS:UATerm")
     usaxs_minstep = Component(EpicsSignal,            "9idcLAX:USAXS:MinStep")
     usaxs_time = Component(EpicsSignal,               "9idcLAX:USAXS:CountTime")
+    useDynamicTime = Component(Signal,                value=True)
     useMSstage = Component(Signal,                    value=False)
     useSBUSAXS = Component(Signal,                    value=False)
 

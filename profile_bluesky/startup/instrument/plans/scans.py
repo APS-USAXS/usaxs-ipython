@@ -393,7 +393,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         terms.USAXS.SDD.get(),
         terms.USAXS.AY0.get(),
         terms.USAXS.SAD.get(),
-        useDynamicTime=True,
+        useDynamicTime=terms.USAXS.useDynamicTime.get(),
         md=_md
     )
     bec.enable_plots()
