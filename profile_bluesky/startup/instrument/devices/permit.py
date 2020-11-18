@@ -32,7 +32,8 @@ the intensity there down. For that use the other macro (?usaxs_CheckBeamSpecial?
 """
 BeamInHutch = EpicsSignal(
     "9idcLAX:blCalc:userCalc1",
-    name="usaxs_CheckBeamStandard"
+    name="usaxs_CheckBeamStandard",
+    auto_monitor=False,
 )
 
 
@@ -41,5 +42,6 @@ BeamInHutch = EpicsSignal(
 # if there is chance to have beam. Uses also userCalc on lax
 usaxs_CheckBeamSpecial = EpicsSignal(
 	"9idcLAX:blCalc:userCalc2",
-	name="usaxs_CheckBeamSpecial"
+	name="usaxs_CheckBeamSpecial",
+    auto_monitor=False,
 	)
