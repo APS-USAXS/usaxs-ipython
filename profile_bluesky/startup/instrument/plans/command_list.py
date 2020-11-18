@@ -408,6 +408,19 @@ def execute_command_list(filename, commands, md={}):
 
         _md.update(md or {})      # overlay with user-supplied metadata
 
+        simple_actions = dict(
+            # command names MUST be lower case!
+            # TODO: all these should accept a `md` kwarg
+            mode_blackfly = mode_BlackFly,
+            mode_Radiography = mode_Radiography,
+            mode_saxs = mode_SAXS,
+            mode_usaxs = mode_USAXS,
+            mode_waxs = mode_WAXS,
+            pi_off = PI_Off,
+            pi_onf = PI_onF,
+            pi_onr = PI_onR,
+        )
+
         action = action.lower()
         if action == "preusaxstune":
             yield from preUSAXStune(md=_md)
@@ -436,29 +449,8 @@ def execute_command_list(filename, commands, md={}):
             _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
-        elif action in ("mode_BlackFly"):
-            yield from mode_BlackFly()
-
-        elif action in ("mode_Radiography"):
-            yield from mode_Radiography()
-
-        elif action in ("mode_saxs"):
-            yield from mode_SAXS()
-
-        elif action in ("mode_usaxs"):
-            yield from mode_USAXS()
-
-        elif action in ("mode_waxs"):
-            yield from mode_WAXS()
-
-        elif action in ("PI_Off"):
-            yield from PI_Off()
-
-        elif action in ("PI_onF"):
-            yield from PI_onF()
-
-        elif action in ("PI_onR"):
-            yield from PI_onR()
+        elif action in simple_actions:
+            yield from simple_actions[action]()
 
         else:
             logger.info(f"no handling for line {i}: {raw_command}")
