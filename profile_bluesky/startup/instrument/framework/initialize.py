@@ -120,7 +120,7 @@ try:
     EpicsSignalBase.set_defaults(
         auto_monitor=True,
         timeout=60,
-        write_timeout=10,
+        write_timeout=60,
         connection_timeout=5,
     )
 except Exception as exc:
