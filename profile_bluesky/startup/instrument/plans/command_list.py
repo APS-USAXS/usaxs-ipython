@@ -412,7 +412,7 @@ def execute_command_list(filename, commands, md={}):
             # command names MUST be lower case!
             # TODO: all these should accept a `md` kwarg
             mode_blackfly = mode_BlackFly,
-            mode_Radiography = mode_Radiography,
+            mode_radiography = mode_Radiography,
             mode_saxs = mode_SAXS,
             mode_usaxs = mode_USAXS,
             mode_waxs = mode_WAXS,
