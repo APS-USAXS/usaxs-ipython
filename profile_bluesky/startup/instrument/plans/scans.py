@@ -66,6 +66,11 @@ from .uascan import uascan
 from ..utils.a2q_q2a import angle2q, q2angle
 
 
+# these two templates match each other, sort of
+AD_FILE_TEMPLATE = "%s%s_%4.4d.hdf"
+LOCAL_FILE_TEMPLATE = "%s_%04d.hdf"
+MASTER_TIMEOUT = 60
+
 def preUSAXStune(md={}):
     """
     tune the USAXS optics *only* if in USAXS mode
@@ -76,6 +81,7 @@ def preUSAXStune(md={}):
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         mono_shutter, "open",
         ccd_shutter, "close",
+        timeout=MASTER_TIMEOUT,
     )
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
@@ -85,6 +91,7 @@ def preUSAXStune(md={}):
         yield from bps.mv(
             s_stage.x, terms.preUSAXStune.sx.get(),
             s_stage.y, terms.preUSAXStune.sy.get(),
+            timeout=MASTER_TIMEOUT,
             )
 
     yield from bps.mv(
@@ -103,9 +110,10 @@ def preUSAXStune(md={}):
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
 
         scaler0.preset_time,  0.1,
+        timeout=MASTER_TIMEOUT,
     )
     # when all that is complete, then ...
-    yield from bps.mv(ti_filter_shutter, "open")
+    yield from bps.mv(ti_filter_shutter, "open", timeout=MASTER_TIMEOUT)
 
     # TODO: install suspender using usaxs_CheckBeamStandard.get()
 
@@ -123,7 +131,7 @@ def preUSAXStune(md={}):
     # now, tune the desired axes, bail out if a tune fails
     yield from bps.install_suspender(suspend_BeamInHutch)
     for axis, tune in tuners.items():
-        yield from bps.mv(ti_filter_shutter, "open")
+        yield from bps.mv(ti_filter_shutter, "open", timeout=MASTER_TIMEOUT)
         yield from tune(md=md)
         if not axis.tuner.tune_ok:
             logger.warning("!!! tune failed for axis %s !!!", axis.name)
@@ -150,6 +158,7 @@ def preUSAXStune(md={}):
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.run_tune_next,       0,
         terms.preUSAXStune.epoch_last_tune,     time.time(),
+        timeout=MASTER_TIMEOUT,
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -165,6 +174,7 @@ def preSWAXStune(md={}):
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         mono_shutter, "open",
         ccd_shutter, "close",
+        timeout=MASTER_TIMEOUT,
     )
     yield from IfRequestedStopBeforeNextScan()         # stop if user chose to do so.
 
@@ -172,6 +182,7 @@ def preSWAXStune(md={}):
         yield from bps.mv(
             s_stage.x, terms.preUSAXStune.sx.get(),
             s_stage.y, terms.preUSAXStune.sy.get(),
+            timeout=MASTER_TIMEOUT,
             )
 
     yield from bps.mv(
@@ -180,9 +191,10 @@ def preSWAXStune(md={}):
         # user_data.collection_in_progress, 1,
 
         scaler0.preset_time,  0.1,
+        timeout=MASTER_TIMEOUT,
     )
     # when all that is complete, then ...
-    yield from bps.mv(ti_filter_shutter, "open")
+    yield from bps.mv(ti_filter_shutter, "open", timeout=MASTER_TIMEOUT)
 
     # TODO: install suspender using usaxs_CheckBeamStandard.get()
 
@@ -196,7 +208,7 @@ def preSWAXStune(md={}):
     # now, tune the desired axes, bail out if a tune fails
     yield from bps.install_suspender(suspend_BeamInHutch)
     for axis, tune in tuners.items():
-        yield from bps.mv(ti_filter_shutter, "open")
+        yield from bps.mv(ti_filter_shutter, "open", timeout=MASTER_TIMEOUT)
         yield from tune(md=md)
         if axis.tuner.tune_ok:
             # If we don't wait, the next tune often fails
@@ -219,6 +231,7 @@ def preSWAXStune(md={}):
         terms.preUSAXStune.num_scans_last_tune, 0,
         terms.preUSAXStune.run_tune_next,       0,
         terms.preUSAXStune.epoch_last_tune,     time.time(),
+        timeout=MASTER_TIMEOUT,
     )
 
 
@@ -259,12 +272,14 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         usaxs_slit.h_size, terms.SAXS.usaxs_h_size.get(),
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.get(),
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.get(),
+        timeout=MASTER_TIMEOUT,
     )
     yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
+        timeout=MASTER_TIMEOUT,
     )
 
     scan_title_clean = cleanupText(scan_title)
@@ -282,10 +297,12 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.time_stamp, ts,
         user_data.scan_macro, "uascan",
         # user_data.collection_in_progress, 1,
+        timeout=MASTER_TIMEOUT,
     )
 
     yield from bps.mv(
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+        timeout=MASTER_TIMEOUT,
     )
 
     # offset the calc from exact zero so can plot log(|Q|)
@@ -298,10 +315,12 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         # these two were moved by mode_USAXS(), belt & suspenders here
         d_stage.y, terms.USAXS.diode.dy.get(),
         a_stage.y, terms.USAXS.AY0.get(),
+        timeout=MASTER_TIMEOUT,
     )
     yield from user_data.set_state_plan("Moving to Q=0")
     yield from bps.mv(
         usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.get(),
+        timeout=MASTER_TIMEOUT,
     )
 
     # TODO: what to do with USAXSScanUp?
@@ -316,12 +335,16 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        timeout=MASTER_TIMEOUT,
         )
 
     # enable asrp link to ar for 2D USAXS
     if terms.USAXS.is2DUSAXSscan.get():
         RECORD_SCAN_INDEX_10x_per_second = 9
-        yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
+        yield from bps.mv(
+            terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second,
+            timeout=MASTER_TIMEOUT,
+        )
 
     # we'll reset these after the scan is done
     old_femto_change_gain_up = upd_controls.auto.gainU.get()
@@ -331,6 +354,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         upd_controls.auto.gainU, terms.USAXS.setpoint_up.get(),
         upd_controls.auto.gainD, terms.USAXS.setpoint_down.get(),
         ti_filter_shutter, "open",
+        timeout=MASTER_TIMEOUT,
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
 
@@ -340,6 +364,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
+        timeout=MASTER_TIMEOUT,
     )
 
     _md['plan_name'] = "uascan"
@@ -375,6 +400,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from bps.mv(
         user_data.scanning, "no",          # for sure, we are not scanning now
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
@@ -394,6 +420,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
 
         upd_controls.auto.gainU, old_femto_change_gain_up,
         upd_controls.auto.gainD, old_femto_change_gain_down,
+        timeout=MASTER_TIMEOUT,
         )
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
@@ -402,6 +429,7 @@ def USAXSscanStep(pos_X, pos_Y, thickness, scan_title, md=None):
         a_stage.r, terms.USAXS.ar_val_center.get(),
         a_stage.y, terms.USAXS.AY0.get(),
         d_stage.y, terms.USAXS.DY0.get(),
+        timeout=MASTER_TIMEOUT,
         )
 
     # TODO: make this link for side-bounce
@@ -434,12 +462,14 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         usaxs_slit.h_size, terms.SAXS.usaxs_h_size.get(),
         guard_slit.v_size, terms.SAXS.usaxs_guard_v_size.get(),
         guard_slit.h_size, terms.SAXS.usaxs_guard_h_size.get(),
+        timeout=MASTER_TIMEOUT,
     )
     yield from before_plan()
 
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
+        timeout=MASTER_TIMEOUT,
     )
 
     scan_title_clean = cleanupText(scan_title)
@@ -471,9 +501,11 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.time_stamp, ts,
         user_data.scan_macro, "FlyScan",    # note camel-case
         # user_data.collection_in_progress, 1,
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.mv(
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+        timeout=MASTER_TIMEOUT,
     )
 
     # offset the calc from exact zero so can plot log(|Q|)
@@ -486,10 +518,12 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         # these two were moved by mode_USAXS(), belt & suspenders here
         d_stage.y, terms.USAXS.diode.dy.get(),
         a_stage.y, terms.USAXS.AY0.get(),
+        timeout=MASTER_TIMEOUT,
     )
     yield from user_data.set_state_plan("Moving to Q=0")
     yield from bps.mv(
         usaxs_q_calc.channels.B.input_value, terms.USAXS.ar_val_center.get(),
+        timeout=MASTER_TIMEOUT,
     )
 
     # TODO: what to do with USAXSScanUp?
@@ -506,12 +540,16 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_OFF,
+        timeout=MASTER_TIMEOUT,
         )
 
     # enable asrp link to ar for 2D USAXS
     if terms.USAXS.is2DUSAXSscan.get():
         RECORD_SCAN_INDEX_10x_per_second = 9
-        yield from bps.mv(terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second)
+        yield from bps.mv(
+            terms.FlyScan.asrp_calc_SCAN, RECORD_SCAN_INDEX_10x_per_second,
+            timeout=MASTER_TIMEOUT,
+        )
 
     # we'll reset these after the scan is done
     old_femto_change_gain_up = upd_controls.auto.gainU.get()
@@ -521,6 +559,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         upd_controls.auto.gainU, terms.FlyScan.setpoint_up.get(),
         upd_controls.auto.gainD, terms.FlyScan.setpoint_down.get(),
         ti_filter_shutter, "open",
+        timeout=MASTER_TIMEOUT,
     )
     yield from autoscale_amplifiers([upd_controls, I0_controls, I00_controls])
 
@@ -535,6 +574,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         scaler0.auto_count_delay, FlyScanAutoscaleTime,
         scaler0.delay, 0,
         scaler0.count_mode, SCALER_AUTOCOUNT_MODE,
+        timeout=MASTER_TIMEOUT,
         )
 
    # Pause autosave on LAX to prevent delays in PVs processing.
@@ -542,6 +582,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         lax_autosave.disable, 1,
         # autosave will restart after this interval (s)
         lax_autosave.max_time, usaxs_flyscan.scan_time.get()+9,
+        timeout=MASTER_TIMEOUT,
         )
 
     yield from user_data.set_state_plan("Running Flyscan")
@@ -554,12 +595,14 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         ar_start, flyscan_trajectories.ar.get()[0],
         # ay_start, flyscan_trajectories.ay.get()[0],
         # dy_start, flyscan_trajectories.dy.get()[0],
+        timeout=MASTER_TIMEOUT,
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
     yield from bps.mv(
         user_data.scanning, "scanning",          # we are scanning now (or will be very soon)
         user_data.spec_scan, str(SCAN_N),
+        timeout=MASTER_TIMEOUT,
     )
 
     _md = {}
@@ -584,6 +627,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
     yield from bps.mv(
         user_data.scanning, "no",          # for sure, we are not scanning now
         terms.FlyScan.elapsed_time, 0,  # show the users there is no more time
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
 
@@ -615,6 +659,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
 
         upd_controls.auto.gainU, old_femto_change_gain_up,
         upd_controls.auto.gainD, old_femto_change_gain_down,
+        timeout=MASTER_TIMEOUT,
         )
 
     yield from user_data.set_state_plan("Moving USAXS back and saving data")
@@ -622,6 +667,7 @@ def Flyscan(pos_X, pos_Y, thickness, scan_title, md=None):
         a_stage.r, terms.USAXS.ar_val_center.get(),
         a_stage.y, terms.USAXS.AY0.get(),
         d_stage.y, terms.USAXS.DY0.get(),
+        timeout=MASTER_TIMEOUT,
         )
 
     # TODO: make this link for side-bounce
@@ -660,11 +706,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_thickness, thickness,
         terms.SAXS.collecting, 1,
         # user_data.collection_in_progress, 1,
+        timeout=MASTER_TIMEOUT,
     )
 
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
+        timeout=MASTER_TIMEOUT,
     )
 
     scan_title_clean = cleanupText(scan_title)
@@ -673,8 +721,8 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
 
     # these two templates match each other, sort of
-    ad_file_template = "%s%s_%4.4d.hdf"
-    local_file_template = "%s_%04d.hdf"
+    ad_file_template = AD_FILE_TEMPLATE
+    local_file_template = LOCAL_FILE_TEMPLATE
 
     # path on local file system
     SAXSscan_path = techniqueSubdirectory("saxs")
@@ -693,6 +741,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         saxs_det.hdf1.file_name, scan_title_clean,
         saxs_det.hdf1.file_path, pilatus_path,
         saxs_det.hdf1.file_template, ad_file_template,
+        timeout=MASTER_TIMEOUT,
     )
 
     ts = str(datetime.datetime.now())
@@ -703,9 +752,11 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "SAXS",       # match the value in the scan logs
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.mv(
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+        timeout=MASTER_TIMEOUT,
    )
 
     yield from bps.install_suspender(suspend_BeamInHutch)
@@ -719,6 +770,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         saxs_det.cam.num_images, terms.SAXS.num_images.get(),
         saxs_det.cam.acquire_time, terms.SAXS.acquire_time.get(),
         saxs_det.cam.acquire_period, terms.SAXS.acquire_time.get() + 0.004,
+        timeout=MASTER_TIMEOUT,
     )
     old_det_stage_sigs = OrderedDict()
     for k, v in saxs_det.hdf1.stage_sigs.items():
@@ -734,6 +786,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from bps.mv(
         ti_filter_shutter, "close",
+        timeout=MASTER_TIMEOUT,
     )
 
     SCAN_N = RE.md["scan_id"]+1     # update with next number
@@ -753,11 +806,13 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         terms.SAXS_WAXS.start_exposure_time, ts,
         user_data.state, f"SAXS collection for {terms.SAXS.acquire_time.get()} s",
         user_data.spec_scan, str(SCAN_N),
+        timeout=MASTER_TIMEOUT,
     )
 
     yield from bps.mv(
         scaler0.count, 1,
         scaler1.count, 1,
+        timeout=MASTER_TIMEOUT,
     )
 
     _md['plan_name'] = "SAXS"
@@ -785,6 +840,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.state, "Done SAXS",
         user_data.time_stamp, ts,
         # user_data.collection_in_progress, 0,
+        timeout=MASTER_TIMEOUT,
     )
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
     yield from after_plan()
@@ -823,11 +879,13 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.sample_thickness, thickness,
         terms.WAXS.collecting, 1,
         #user_data.collection_in_progress, 1,
+        timeout=MASTER_TIMEOUT,
     )
 
     yield from bps.mv(
         s_stage.x, pos_X,
         s_stage.y, pos_Y,
+        timeout=MASTER_TIMEOUT,
     )
 
     scan_title_clean = cleanupText(scan_title)
@@ -836,8 +894,8 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     SCAN_N = RE.md["scan_id"]+1     # the next scan number (user-controllable)
 
     # these two templates match each other, sort of
-    ad_file_template = "%s%s_%4.4d.hdf"
-    local_file_template = "%s_%04d.hdf"
+    ad_file_template = AD_FILE_TEMPLATE
+    local_file_template = LOCAL_FILE_TEMPLATE
 
     # path on local file system
     WAXSscan_path = techniqueSubdirectory("waxs")
@@ -856,6 +914,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         waxs_det.hdf1.file_name, scan_title_clean,
         waxs_det.hdf1.file_path, pilatus_path,
         waxs_det.hdf1.file_template, ad_file_template,
+        timeout=MASTER_TIMEOUT,
     )
 
     ts = str(datetime.datetime.now())
@@ -866,9 +925,11 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.spec_scan, str(SCAN_N),
         user_data.time_stamp, ts,
         user_data.scan_macro, "WAXS",       # match the value in the scan logs
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.mv(
         user_data.spec_file, os.path.split(specwriter.spec_filename)[-1],
+        timeout=MASTER_TIMEOUT,
    )
 
     #yield from measure_SAXS_Transmission()
@@ -881,6 +942,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         waxs_det.cam.num_images, terms.WAXS.num_images.get(),
         waxs_det.cam.acquire_time, terms.WAXS.acquire_time.get(),
         waxs_det.cam.acquire_period, terms.WAXS.acquire_time.get() + 0.004,
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.install_suspender(suspend_BeamInHutch)
     old_det_stage_sigs = OrderedDict()
@@ -897,6 +959,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
 
     yield from bps.mv(
         ti_filter_shutter, "close",
+        timeout=MASTER_TIMEOUT,
     )
 
     old_delay = scaler0.delay.get()
@@ -913,12 +976,15 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
 
         scaler0.delay, 0,
         terms.SAXS_WAXS.start_exposure_time, ts,
-        user_data.state, f"WAXS collection for {terms.WAXS.acquire_time.get()} s",
+        user_data.state,
+            f"WAXS collection for {terms.WAXS.acquire_time.get()} s",
+        timeout=MASTER_TIMEOUT,
     )
 
     yield from bps.mv(
         scaler0.count, 1,
         scaler1.count, 1,
+        timeout=MASTER_TIMEOUT,
     )
 
     _md['plan_name'] = "WAXS"
@@ -952,6 +1018,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
         user_data.state, "Done WAXS",
         user_data.time_stamp, ts,
         #user_data.collection_in_progress, 0,
+        timeout=MASTER_TIMEOUT,
     )
     yield from bps.remove_suspender(suspend_BeamInHutch)
     logger.info(f"I0 value: {terms.SAXS_WAXS.I0.get()}")
