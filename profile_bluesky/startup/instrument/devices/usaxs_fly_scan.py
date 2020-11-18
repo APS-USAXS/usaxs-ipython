@@ -215,8 +215,11 @@ class UsaxsFlyScanDevice(Device):
                 yield from user_data.set_state_plan("writing fly scan HDF5 file")
             except Exception as exc:
                 # do not fail the scan just because of updating program state
-                emsg = f"Error: {msg} - {exc}"
-                logger.debug(emsg)
+                logger.warning(
+                    "Non-fatal error while %s\n%s\nPlan continues", 
+                    msg, 
+                    exc
+                )
                 # FIXME: hack to avoid `Another set() call is still in progress`
                 # see: https://github.com/APS-USAXS/ipython-usaxs/issues/417
                 user_data.state._set_thread = None
