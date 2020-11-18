@@ -124,8 +124,8 @@ class OurCustomNXWriterBase(NXWriterAPS):
             logger.error("%s %s %s %s", v["dtype"], k, f"TypeError({exc})", v["data"])
         if stream_name == "baseline":
             # make it easier to pick single values
-            # identify start/end of acquisition
-            for item, key in ((0, "value_start"), (-1, "value_end")):
+            # identify start&end of acquisition individually
+            for key, item in dict(value_start=0, value_end=-1).items():
                 try:
                     ds = subgroup.create_dataset(key, data=d[item])
                     self.add_dataset_attributes(ds, v, k)
