@@ -132,7 +132,7 @@ def mr_pretune_hook():
     y_name = TUNING_DET_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
@@ -176,7 +176,7 @@ def m2rp_pretune_hook():
     y_name = TUNING_DET_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
@@ -219,7 +219,7 @@ def msrp_pretune_hook():
     y_name = TUNING_DET_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, TUNING_DET_SIGNAL)
 
 
@@ -257,7 +257,7 @@ def ar_pretune_hook():
     y_name = UPD_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
@@ -299,7 +299,7 @@ def asrp_pretune_hook():
     y_name = UPD_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
@@ -339,7 +339,7 @@ def a2rp_pretune_hook():
     y_name = UPD_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
@@ -379,7 +379,7 @@ def dx_pretune_hook():
     y_name = UPD_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
@@ -416,7 +416,7 @@ def dy_pretune_hook():
     y_name = UPD_SIGNAL.chname.get()
     scaler0.select_channels([y_name])
     scaler0.channels.chan01.kind = Kind.config
-    trim_plot_by_name(n=5, f"{y_name} vs {stage.name}")
+    trim_plot_by_name(n=5)
     # trim_plot_lines(bec, 5, stage, UPD_SIGNAL)
 
 
