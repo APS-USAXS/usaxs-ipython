@@ -419,13 +419,11 @@ def execute_command_list(filename, commands, md={}):
             pi_off = PI_Off,
             pi_onf = PI_onF,
             pi_onr = PI_onR,
+            preusaxstune = preUSAXStune,
         )
 
         action = action.lower()
-        if action == "preusaxstune":
-            yield from preUSAXStune(md=_md)
-
-        elif action in ("flyscan", "usaxsscan"):
+        if action in ("flyscan", "usaxsscan"):
             sx = float(args[0])
             sy = float(args[1])
             sth = float(args[2])
@@ -450,7 +448,7 @@ def execute_command_list(filename, commands, md={}):
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
         elif action in simple_actions:
-            yield from simple_actions[action]()
+            yield from simple_actions[action](md=_md)
 
         else:
             logger.info(f"no handling for line {i}: {raw_command}")

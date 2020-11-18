@@ -61,7 +61,7 @@ def confirm_instrument_mode(mode_name):
     return terms.SAXS.UsaxsSaxsMode.get() in (expected_mode, mode_name)
 
 
-def mode_BlackFly():
+def mode_BlackFly(md=None):
     """
     Sets to imaging mode, using BlackFly camera.
     """
@@ -91,7 +91,7 @@ def mode_BlackFly():
     )
 
 
-def mode_USAXS():
+def mode_USAXS(md=None):
     # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to USAXS mode")
     yield from bps.mv(
@@ -151,7 +151,7 @@ def mode_USAXS():
 mode_SBUSAXS = mode_USAXS       # for now
 
 
-def mode_SAXS():
+def mode_SAXS(md=None):
     # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to SAXS mode")
     yield from bps.mv(
@@ -178,7 +178,7 @@ def mode_SAXS():
     )
 
 
-def mode_WAXS():
+def mode_WAXS(md=None):
     # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to WAXS mode")
     yield from bps.mv(
@@ -251,7 +251,7 @@ def mode_WAXS():
     """
 
 
-def mode_Radiography():
+def mode_Radiography(md=None):
     """
     put in USAXS Radiography mode
 
@@ -323,7 +323,7 @@ def mode_Radiography():
     print(msg)
 
 
-def mode_imaging():
+def mode_imaging(md=None):
     """
     prepare the instrument for USAXS imaging
     """
@@ -333,7 +333,7 @@ def mode_imaging():
     yield from mode_USAXS()
 
 
-def mode_OpenBeamPath():
+def mode_OpenBeamPath(md=None):
     # plc_protect.stop_if_tripped()
     yield from user_data.set_state_plan("Moving USAXS to OpenBeamPath mode")
     yield from bps.mv(
