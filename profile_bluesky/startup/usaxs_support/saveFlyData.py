@@ -149,7 +149,7 @@ class SaveFlyScan(object):
                     "saveFile(): PV %s is not connected now",
                     pv_spec.pvname
                 )
-                value = NOT_CONNECTED_TEXT
+                # value = NOT_CONNECTED_TEXT  # unused assignment
                 # continue
             if not pv_spec.acquire_after_scan:
                 continue
