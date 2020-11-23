@@ -21,13 +21,75 @@ from ophyd import Component, Device, EpicsSignal
 from ..framework import sd
 
 
+
+
+class EpicsSampleNameDevice(EpicsSignal):
+    """
+    Enable the user to supply a function that modifies
+    the sample name during execution of a plan.
+
+    see: https://github.com/APS-USAXS/ipython-usaxs/issues/428
+
+    EXAMPLE:
+
+        >>> def handler(title):
+        ...     return f"USAXS sample: {title}"
+
+        >>> user_data.sample_title.register_handler(handler)
+
+        >>> RE(bps.mv(user_data.sample_title, "Glassy Carbon"))
+        >>> user_data.sample_title.get()
+        USAXS sample: Glassy Carbon
+
+    """
+
+    _handler = None
+
+    def set(self, value, **kwargs):
+        """Modify value per user function before setting the PV"""
+        logger.info("self._handler: %s", self._handler)
+        if self._handler is not None:
+            value = self._handler(value)
+        return super().set(value, **kwargs)
+
+    def register_handler(self, handler_function=None):
+        """
+        Register the supplied function to be called
+        when this signal is to be written.  The function
+        accepts the default sample title as the only argument
+        and *must* return a string value (as shown in the
+        example above).
+        """
+        if handler_function is None:
+            # clear the handler
+            self._handler = None
+        else:
+            # Test the proposed handler before accepting it.
+            # Next call will raise exception if user code has an error.
+            test = handler_function("test")
+
+            # User function must return a str result.
+            if not isinstance(test, str):
+                raise ValueError(
+                    f"Sample name function '{handler_function.__name__}'"
+                    "must return 'string' type,"
+                    f" received {type(test).__name__}"
+                )
+
+            logger.debug(
+                "Accepted Sample name handler function: %s",
+                handler_function.__name__
+            )
+            self._handler = handler_function
+
+
 class UserDataDevice(Device):
     GUP_number = Component(EpicsSignal,         "9idcLAX:GUPNumber")
     macro_file = Component(EpicsSignal,         "9idcLAX:USAXS:macroFile")
     macro_file_time = Component(EpicsSignal,    "9idcLAX:USAXS:macroFileTime")
     run_cycle = Component(EpicsSignal,          "9idcLAX:RunCycle")
     sample_thickness = Component(EpicsSignal,   "9idcLAX:sampleThickness")
-    sample_title = Component(EpicsSignal,       "9idcLAX:sampleTitle", string=True)
+    sample_title = Component(EpicsSampleNameDevice, "9idcLAX:sampleTitle", string=True)
     scanning = Component(EpicsSignal,           "9idcLAX:USAXS:scanning")
     scan_macro = Component(EpicsSignal,         "9idcLAX:USAXS:scanMacro")
     spec_file = Component(EpicsSignal,          "9idcLAX:USAXS:specFile", string=True)
