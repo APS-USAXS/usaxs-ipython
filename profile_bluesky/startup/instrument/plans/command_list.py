@@ -424,6 +424,7 @@ def execute_command_list(filename, commands, md={}):
             pi_onf = PI_onF,
             pi_onr = PI_onR,
             preusaxstune = preUSAXStune,
+            run_python = run_python_file,
         )
 
         action = action.lower()
