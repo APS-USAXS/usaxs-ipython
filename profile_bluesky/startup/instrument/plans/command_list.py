@@ -56,16 +56,12 @@ from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
 def beforeScanComputeOtherStuff():
-    """
-    things to be computed and set before each data collection starts
-    """
+    """Actions before each data collection starts."""
     yield from bps.null()       # TODO: remove this once you add the "other stuff"
 
 
 def postCommandsListfile2WWW(commands):
-    """
-    post list of commands to WWW and archive the list for posterity
-    """
+    """Post list of commands to WWW and archive the list for posterity."""
     tbl_file = "commands.txt"
     tbl = command_list_as_table(commands)
     timestamp = datetime.datetime.now().isoformat().replace("T", " ")
@@ -95,9 +91,7 @@ def postCommandsListfile2WWW(commands):
 
 
 def before_command_list(md=None, commands=None):
-    """
-    things to be done before a command list is run
-    """
+    """Actions before a command list is run."""
     from .scans import preUSAXStune
 
     if md is None:
@@ -142,9 +136,7 @@ def before_command_list(md=None, commands=None):
 
 
 def after_command_list(md=None):
-    """
-    things to be done after a command list is run
-    """
+    """Actions after a command list is run."""
     if md is None:
         md = {}
     yield from bps.mv(
@@ -156,9 +148,7 @@ def after_command_list(md=None):
 
 
 def before_plan(md=None):
-    """
-    things to be done before every data collection plan
-    """
+    """Actions before every data collection plan."""
     if md is None:
         md = {}
     from .scans import preSWAXStune, preUSAXStune
@@ -175,9 +165,7 @@ def before_plan(md=None):
 
 
 def after_plan(weight=1, md=None):
-    """
-    things to be done after every data collection plan
-    """
+    """Actions after every data collection plan."""
     from .scans import preUSAXStune
 
     if md is None:
@@ -191,7 +179,7 @@ def after_plan(weight=1, md=None):
 
 def parse_Excel_command_file(filename):
     """
-    parse an Excel spreadsheet with commands, return as command list
+    Parse an Excel spreadsheet with commands, return as command list.
 
     TEXT view of spreadsheet (Excel file line numbers shown)::
 
@@ -243,7 +231,7 @@ def parse_Excel_command_file(filename):
 
 def parse_text_command_file(filename):
     """
-    parse a text file with commands, return as command list
+    Parse a text file with commands, return as command list.
 
     * The text file is interpreted line-by-line.
     * Blank lines are ignored.
@@ -307,9 +295,7 @@ def parse_text_command_file(filename):
 
 
 def command_list_as_table(commands):
-    """
-    format a command list as a pyRestTable.Table object
-    """
+    """Format a command list as a :class:`pyRestTable.Table()` object."""
     tbl = pyRestTable.Table()
     tbl.addLabel("line #")
     tbl.addLabel("action")
@@ -322,9 +308,7 @@ def command_list_as_table(commands):
 
 
 def get_command_list(filename):
-    """
-    Return command list from either text or Excel file.
-    """
+    """Return command list from either text or Excel file."""
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
     try:
@@ -335,9 +319,7 @@ def get_command_list(filename):
 
 
 def summarize_command_file(filename):
-    """
-    Print the command list from a text or Excel file.
-    """
+    """Print the command list from a text or Excel file."""
     commands = get_command_list(filename)
     logger.info(
         "Command file: %s\n%s",
@@ -483,7 +465,7 @@ def execute_command_list(filename, commands, md=None):
 
 def sync_order_numbers():
     """
-    synchronize the order numbers between the various detectors
+    Synchronize the order numbers between the various detectors.
 
     Pick the maximum order number from each detector (or
     supported scan technique) and set them all to that number.
