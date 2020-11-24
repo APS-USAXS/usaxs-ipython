@@ -94,11 +94,14 @@ def postCommandsListfile2WWW(commands):
 
 
 
-def before_command_list(md={}, commands=None):
+def before_command_list(md=None, commands=None):
     """
     things to be done before a command list is run
     """
     from .scans import preUSAXStune
+
+    if md is None:
+        md = {}
 
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
@@ -138,10 +141,12 @@ def before_command_list(md={}, commands=None):
     reset_manager()
 
 
-def after_command_list(md={}):
+def after_command_list(md=None):
     """
     things to be done after a command list is run
     """
+    if md is None:
+        md = {}
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "USAXS macro file done",  # exact text triggers the music
@@ -150,10 +155,12 @@ def after_command_list(md={}):
     )
 
 
-def before_plan(md={}):
+def before_plan(md=None):
     """
     things to be done before every data collection plan
     """
+    if md is None:
+        md = {}
     from .scans import preSWAXStune, preUSAXStune
 
     if terms.preUSAXStune.needed:
@@ -167,11 +174,14 @@ def before_plan(md={}):
             yield from preSWAXStune(md=md)
 
 
-def after_plan(weight=1, md={}):
+def after_plan(weight=1, md=None):
     """
     things to be done after every data collection plan
     """
     from .scans import preUSAXStune
+
+    if md is None:
+        md = {}
 
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
@@ -335,18 +345,20 @@ def summarize_command_file(filename):
     )
 
 
-def run_command_file(filename, md={}):
+def run_command_file(filename, md=None):
     """
     Plan: execute a list of commands from a text or Excel file.
 
     * Parse the file into a command list
     * yield the command list to the RunEngine (or other)
     """
+    if md is None:
+        md = {}
     commands = get_command_list(filename)
     yield from execute_command_list(filename, commands)
 
 
-def execute_command_list(filename, commands, md={}):
+def execute_command_list(filename, commands, md=None):
     """
     Plan: execute the command list.
 
@@ -380,6 +392,9 @@ def execute_command_list(filename, commands, md={}):
         ``SAXS 0 0 0 blank``
     """
     from .scans import preUSAXStune, SAXS, USAXSscan, WAXS
+
+    if md is None:
+        md = {}
 
     full_filename = os.path.abspath(filename)
 
@@ -486,13 +501,15 @@ def sync_order_numbers():
     )
 
 
-def run_python_file(filename, md={}):
+def run_python_file(filename, md=None):
     """
     Plan: load and run a Python file using the IPython `%mov` magic.
 
     * Parse the file into a command list
     * yield the command list to the RunEngine (or other)
     """
+    if md is None:
+        md = {}
     logger.info("Running Python file: %s", filename)
     get_ipython().run_line_magic("run", f"-i {filename}")
     yield from bps.null()
