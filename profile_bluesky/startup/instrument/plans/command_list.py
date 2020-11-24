@@ -424,7 +424,6 @@ def execute_command_list(filename, commands, md={}):
             pi_onf = PI_onF,
             pi_onr = PI_onR,
             preusaxstune = preUSAXStune,
-            run_python = run_python_file,
         )
 
         action = action.lower()
@@ -451,6 +450,10 @@ def execute_command_list(filename, commands, md={}):
             snm = args[3]
             _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
             yield from WAXS(sx, sy, sth, snm, md=_md)
+
+        elif action in ("run_python", "run"):
+            filename = float(args[0])
+            yield from run_python_file(filename, md={})
 
         elif action in simple_actions:
             yield from simple_actions[action](md=_md)
