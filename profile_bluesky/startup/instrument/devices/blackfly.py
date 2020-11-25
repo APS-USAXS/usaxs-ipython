@@ -115,12 +115,12 @@ class MyPointGreyDetectorTIFF(MyPointGreyDetector, AreaDetector):
     def image_file_name(self):
         return self.tiff1.full_file_name.get()
 
-    def image_prep(self, path, title, order_number):
+    def image_prep(self, path, filename_base, order_number):
         plugin = self.tiff1
         path = "/mnt" + os.path.abspath(path) + "/"  # MUST end with "/"
         yield from bps.mv(
             plugin.file_path, path,
-            plugin.file_name, title,
+            plugin.file_name, filename_base,
             plugin.file_number, order_number,
         )
 

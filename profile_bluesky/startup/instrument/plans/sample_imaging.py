@@ -16,7 +16,7 @@ from bluesky import plan_stubs as bps
 import os
 
 
-def record_sample_image_on_demand(technique_name, title, _md):
+def record_sample_image_on_demand(technique_name, filename_base, _md):
     """
     take an image of the sample
 
@@ -28,6 +28,9 @@ def record_sample_image_on_demand(technique_name, title, _md):
     technique_name
         *str* :
         Used to pick the subdirectory.  One of "saxs", "usaxs", or "waxs"
+    filename_base
+        *str* :
+        Base part of image file name
     _md
         *dict* :
         Metadata dictionary additions from the calling plan.
@@ -43,13 +46,15 @@ def record_sample_image_on_demand(technique_name, title, _md):
         )
         order_number = xref.get(technique_name, xref["usaxs"]).get()
 
-        yield from det.image_prep(path, title, order_number)
+        yield from det.image_prep(path, filename_base, order_number)
         yield from det.take_image()
 
         image_name = det.image_file_name
         if image_name.startswith("/mnt/share1"):
             image_name = image_name[4:]
         if os.path.exists(image_name):
+            # update the provided dictionary
             _md["sample_image_name"] = image_name
+            logger.info("sample image file: %s", image_name)
     else:
         yield from bps.null()
