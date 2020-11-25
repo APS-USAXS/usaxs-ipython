@@ -1,7 +1,5 @@
 
-"""
-Support for AD TIFF plugin
-"""
+"""Support for AD TIFF plugin."""
 
 __all__ = [
     "AD_EpicsTiffFileName",
@@ -80,7 +78,7 @@ class AD_EpicsTiffFileName(FileStorePluginBase):    # lgtm [py/missing-call-to-i
         return super().generate_datum(key, timestamp, datum_kwargs)
 
     def get_frames_per_point(self):
-        """overrides default behavior"""
+        """Overrides default behavior."""
         return self.num_capture.get()
 
     def stage(self):
