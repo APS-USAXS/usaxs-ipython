@@ -32,8 +32,11 @@ logger.info(__file__)
 
 from apstools.devices import AD_EpicsHdf5FileName
 from apstools.devices import AD_EpicsJpegFileName
+# TODO: from apstools.devices import AD_EpicsTiffFileName
+from .ad_tiff_upstream import AD_EpicsTiffFileName
 from ophyd import HDF5Plugin
 from ophyd import JPEGPlugin
+from ophyd import TIFFPlugin
 from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
 
 
@@ -67,3 +70,9 @@ class myJpegEpicsIterativeWriter(AD_EpicsJpegFileName,
 class myJpegFileNames(JPEGPlugin, myJpegEpicsIterativeWriter): ...
 class EpicsDefinesJpegFileNames(JPEGPlugin,
                                 myJpegEpicsIterativeWriter): ...
+
+class myTiffEpicsIterativeWriter(AD_EpicsTiffFileName,
+                                 FileStoreIterativeWrite): ...
+class myTiffFileNames(TIFFPlugin, myTiffEpicsIterativeWriter): ...
+class EpicsDefinesTiffFileNames(TIFFPlugin,
+                                myTiffEpicsIterativeWriter): ...

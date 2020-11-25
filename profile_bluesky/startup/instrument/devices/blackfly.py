@@ -13,7 +13,8 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from apstools.devices import AD_plugin_primed, AD_prime_plugin
+from apstools.devices import AD_plugin_primed
+# TODO: from apstools.devices import AD_prime_plugin
 from bluesky import plan_stubs as bps
 
 from ophyd import AreaDetector
@@ -29,6 +30,7 @@ from .area_detector_common import _validate_AD_FileWriter_path_
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import DATABROKER_ROOT_PATH
 from .area_detector_common import EpicsDefinesJpegFileNames
+from .area_detector_common import EpicsDefinesTiffFileNames
 
 
 RADIOGRAPHY_CAMERA = 'PointGrey BlackFly'                   # 9idFLY1:
@@ -76,8 +78,40 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
     trans1 = ADComponent(TransformPlugin, "Trans1:")
 
     @property
-    def should_save_jpeg(self):
-        return _flag_save_sample_image_jpeg_.get() in (1, "Yes")
+    def should_save_image(self):
+        return _flag_save_sample_image_.get() in (1, "Yes")
+
+    def take_image(self):
+        yield from bps.stage(self)
+        yield from bps.trigger(self, wait=True)
+        yield from bps.unstage(self)
+
+
+class MyPointGreyDetectorTIFF(MyPointGreyDetector, AreaDetector):
+    """
+    Variation to write image as TIFF
+
+    To save an image (using existing configuration)::
+
+        blackfly_optical.stage()
+        blackfly_optical.trigger()
+        blackfly_optical.unstage()
+
+    """
+
+    tiff1 = ADComponent(
+        EpicsDefinesTiffFileNames,
+        suffix = "TIFF1:",
+        root = DATABROKER_ROOT_PATH,
+        write_path_template = WRITE_IMAGE_FILE_PATH,
+        read_path_template = READ_IMAGE_FILE_PATH,
+        kind="normal",
+        )
+    trans1 = ADComponent(TransformPlugin, "Trans1:")
+
+    @property
+    def should_save_image(self):
+        return _flag_save_sample_image_.get() in (1, "Yes")
 
     def take_image(self):
         yield from bps.stage(self)
@@ -97,10 +131,10 @@ except TimeoutError as exc_obj:
     blackfly_det = None
 
 
-_flag_save_sample_image_jpeg_ = EpicsSignal(
+_flag_save_sample_image_ = EpicsSignal(
     "9idcLAX:saveFLY2Image",
     string=True,
-    name="_flag_save_sample_image_jpeg_",
+    name="_flag_save_sample_image_",
     )
 
 # temporary fix for apstools.device 1.3.8
@@ -123,16 +157,16 @@ def AD_prime_plugin(detector, detector_plugin):
 try:
     nm = OPTICAL_CAMERA
     prefix = area_detector_EPICS_PV_prefix[nm]
-    blackfly_optical = MyPointGreyDetectorJPEG(
+    blackfly_optical = MyPointGreyDetectorTIFF(
         prefix, name="blackfly_optical",
         labels=["camera", "area_detector"])
-    blackfly_optical.read_attrs.append("jpeg1")
-    blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
-    if not AD_plugin_primed(blackfly_optical.jpeg1):
+    blackfly_optical.read_attrs.append("tiff1")
+    blackfly_optical.tiff1.stage_sigs["file_write_mode"] = "Single"
+    if not AD_plugin_primed(blackfly_optical.tiff1):
         warnings.warn(
-            "NOTE: blackfly_optical.jpeg1 has not been primed yet."
+            "NOTE: blackfly_optical.tiff1 has not been primed yet."
             "  BEFORE using this detector in bluesky, call: "
-            "  AD_prime_plugin(blackfly_optical, blackfly_optical.jpeg1)"
+            "  AD_prime_plugin(blackfly_optical, blackfly_optical.tiff1)"
         )
 except TimeoutError as exc_obj:
     logger.warning(

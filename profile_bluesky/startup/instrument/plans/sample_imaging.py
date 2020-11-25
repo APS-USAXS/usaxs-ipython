@@ -32,7 +32,7 @@ def record_sample_image_on_demand(technique_name, title, _md):
         *dict* :
         Metadata dictionary additions from the calling plan.
     """
-    if blackfly_optical.should_save_jpeg:
+    if blackfly_optical.should_save_image:
         det = blackfly_optical  # define once here, in case it ever changes
         path = techniqueSubdirectory(technique_name)
 
