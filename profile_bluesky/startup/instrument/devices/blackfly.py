@@ -24,6 +24,8 @@ from ophyd import SingleTrigger, ImagePlugin
 from ophyd.areadetector import ADComponent
 from ophyd.areadetector.plugins import TransformPlugin
 
+import os
+
 import warnings
 
 from .area_detector_common import _validate_AD_FileWriter_path_
@@ -108,6 +110,19 @@ class MyPointGreyDetectorTIFF(MyPointGreyDetector, AreaDetector):
         kind="normal",
         )
     trans1 = ADComponent(TransformPlugin, "Trans1:")
+
+    @property
+    def image_file_name(self):
+        return self.tiff1.full_file_name.get()
+
+    def image_prep(self, path, title, order_number):
+        plugin = self.tiff1
+        path = "/mnt" + os.path.abspath(path) + "/"  # MUST end with "/"
+        yield from bps.mv(
+            plugin.file_path, path,
+            plugin.file_name, title,
+            plugin.file_number, order_number,
+        )
 
     @property
     def should_save_image(self):

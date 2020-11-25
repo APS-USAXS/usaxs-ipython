@@ -43,20 +43,13 @@ def record_sample_image_on_demand(technique_name, title, _md):
         )
         order_number = xref.get(technique_name, xref["usaxs"]).get()
 
-        yield from bps.mv(
-            det.jpeg1.file_path,
-            "/mnt" + os.path.abspath(path) + "/",  # MUST end with "/"
-
-            det.jpeg1.file_name, title,
-            det.jpeg1.file_number, order_number,
-            )
-
+        yield from det.image_prep(path, title, order_number)
         yield from det.take_image()
 
-        jpeg_name = det.jpeg1.full_file_name.get()
-        if jpeg_name.startswith("/mnt/share1"):
-            jpeg_name = jpeg_name[4:]
-        if os.path.exists(jpeg_name):
-            _md["sample_image_jpeg"] = jpeg_name
+        image_name = det.image_file_name
+        if image_name.startswith("/mnt/share1"):
+            image_name = image_name[4:]
+        if os.path.exists(image_name):
+            _md["sample_image_name"] = image_name
     else:
         yield from bps.null()
