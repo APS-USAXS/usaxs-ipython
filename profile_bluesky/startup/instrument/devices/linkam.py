@@ -181,7 +181,10 @@ class Linkam_T96(UsaxsProcessController):
     def record_signal(self):
         """write signal to the logger AND SPEC file"""
         global specwriter
-        msg = f"{self.controller_name} signal: {self.get():.2f}{self.units.get()}"
+        msg = (
+            f"{self.controller_name} signal:"
+            f" {self.value:.2f}{self.units.get()}"
+        )
         logger.info(msg)
         specwriter._cmt("event", msg)
         return msg
