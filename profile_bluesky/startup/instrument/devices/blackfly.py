@@ -17,12 +17,15 @@ from apstools.devices import AD_plugin_primed
 # TODO: from apstools.devices import AD_prime_plugin
 from bluesky import plan_stubs as bps
 
+from ophyd import ADComponent
 from ophyd import AreaDetector
-from ophyd import Component, EpicsSignal
+from ophyd import ColorConvPlugin
+from ophyd import Component
+from ophyd import EpicsSignal
+from ophyd import ImagePlugin
 from ophyd import PointGreyDetectorCam
-from ophyd import SingleTrigger, ImagePlugin
-from ophyd.areadetector import ADComponent
-from ophyd.areadetector.plugins import TransformPlugin
+from ophyd import SingleTrigger
+from ophyd import TransformPlugin
 
 import os
 
@@ -78,6 +81,20 @@ class MyPointGreyDetectorJPEG(MyPointGreyDetector, AreaDetector):
         kind="normal",
         )
     trans1 = ADComponent(TransformPlugin, "Trans1:")
+    cc1 = ADComponent(ColorConvPlugin, "CC1:")
+
+    @property
+    def image_file_name(self):
+        return self.jpeg1.full_file_name.get()
+
+    def image_prep(self, path, filename_base, order_number):
+        plugin = self.jpeg1
+        path = "/mnt" + os.path.abspath(path) + "/"  # MUST end with "/"
+        yield from bps.mv(
+            plugin.file_path, path,
+            plugin.file_name, filename_base,
+            plugin.file_number, order_number,
+        )
 
     @property
     def should_save_image(self):
@@ -110,6 +127,7 @@ class MyPointGreyDetectorTIFF(MyPointGreyDetector, AreaDetector):
         kind="normal",
         )
     trans1 = ADComponent(TransformPlugin, "Trans1:")
+    cc1 = ADComponent(ColorConvPlugin, "CC1:")
 
     @property
     def image_file_name(self):
@@ -172,16 +190,16 @@ def AD_prime_plugin(detector, detector_plugin):
 try:
     nm = OPTICAL_CAMERA
     prefix = area_detector_EPICS_PV_prefix[nm]
-    blackfly_optical = MyPointGreyDetectorTIFF(
+    blackfly_optical = MyPointGreyDetectorJPEG(
         prefix, name="blackfly_optical",
         labels=["camera", "area_detector"])
-    blackfly_optical.read_attrs.append("tiff1")
-    blackfly_optical.tiff1.stage_sigs["file_write_mode"] = "Single"
-    if not AD_plugin_primed(blackfly_optical.tiff1):
+    blackfly_optical.read_attrs.append("jpeg1")
+    blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
+    if not AD_plugin_primed(blackfly_optical.jpeg1):
         warnings.warn(
-            "NOTE: blackfly_optical.tiff1 has not been primed yet."
+            "NOTE: blackfly_optical.jpeg1 has not been primed yet."
             "  BEFORE using this detector in bluesky, call: "
-            "  AD_prime_plugin(blackfly_optical, blackfly_optical.tiff1)"
+            "  AD_prime_plugin(blackfly_optical, blackfly_optical.jpeg1)"
         )
 except TimeoutError as exc_obj:
     logger.warning(
