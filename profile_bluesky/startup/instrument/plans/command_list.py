@@ -92,7 +92,7 @@ def postCommandsListfile2WWW(commands):
 
 
 
-def before_command_list(md={}, commands=None):
+def before_command_list(commands=None, md={}):
     """
     things to be done before a command list is run
     """
