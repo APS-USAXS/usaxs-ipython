@@ -449,7 +449,7 @@ def execute_command_list(filename, commands, md=None):
             yield from WAXS(sx, sy, sth, snm, md=_md)
 
         elif action in ("run_python", "run"):
-            filename = float(args[0])
+            filename = args[0]
             yield from run_python_file(filename, md={})
 
         elif action in simple_actions:
