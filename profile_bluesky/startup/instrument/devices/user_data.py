@@ -102,7 +102,7 @@ class UserDataDevice(Device):
     # for GUI to know if user is collecting data: 0="On", 1="Off"
     collection_in_progress = Component(EpicsSignal, "9idcLAX:dataColInProgress")
 
-    def set_state_plan(self, msg, confirm=True):
+    def set_state_plan(self, msg, confirm=False):
         """plan: tell EPICS about what we are doing"""
         msg = trim_string_for_EPICS(msg)
         yield from bps.abs_set(self.state, msg, wait=confirm)
