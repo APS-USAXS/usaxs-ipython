@@ -473,13 +473,15 @@ def execute_command_list(filename, commands, md={}):
                     f" of command '{command}''"
                 )
                 body = (
-                    f"{subject}"
-                    f"\n  command file: {full_filename}"
-                    f"\n  line number: {i}"
-                    f"\n  command: {command}"
-                    f"\n  raw command: {raw_command}"
-                    f"\n  attempt: {attempt}"
-                    f"\n  exception: {exc}"
+                    f"subject: {subject}"
+                    f"\n"
+                    f"\ndate: {datetime.datetime.now().isoformat(' ')}"
+                    f"\ncommand file: {full_filename}"
+                    f"\nline number: {i}"
+                    f"\ncommand: {command}"
+                    f"\nraw command: {raw_command}"
+                    f"\nattempt: {attempt}"
+                    f"\nexception: {exc}"
                 )
                 logger.error("Exception %s\n%s", subject, body)
                 email_notices.send(subject, body)
