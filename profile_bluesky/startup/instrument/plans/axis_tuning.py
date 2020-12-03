@@ -254,7 +254,7 @@ def instrument_default_tune_ranges():
 
     elif 12.99 <= monochromator.dcm.energy.get() < 18.1:   # Si 220 crystals
         m_stage.r.tuner.width = 0.0030
-        a_stage.r.tuner.width = 0.0014
+        a_stage.r.tuner.width = 0.0017
         m_stage.r2p.tuner.width = 8
         a_stage.r2p.tuner.width = 5
         ms_stage.rp.tuner.width = 3
@@ -263,7 +263,7 @@ def instrument_default_tune_ranges():
 
     elif 18.1 <= monochromator.dcm.energy.get() < 20.8:   # Si 220 crystals
         m_stage.r.tuner.width = 0.0026
-        a_stage.r.tuner.width = 0.0012
+        a_stage.r.tuner.width = 0.0015
         m_stage.r2p.tuner.width = 8
         a_stage.r2p.tuner.width = 6
         ms_stage.rp.tuner.width = 3
@@ -272,7 +272,7 @@ def instrument_default_tune_ranges():
 
     elif 20.8 <= monochromator.dcm.energy.get():   # Si 220 crystals
         m_stage.r.tuner.width = 0.0025
-        a_stage.r.tuner.width = 0.0010
+        a_stage.r.tuner.width = 0.0013
         m_stage.r2p.tuner.width = 8
         a_stage.r2p.tuner.width = 5
         ms_stage.rp.tuner.width = 3
