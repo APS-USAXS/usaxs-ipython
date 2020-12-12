@@ -46,15 +46,25 @@ def record_sample_image_on_demand(technique_name, filename_base, _md):
         )
         order_number = xref.get(technique_name, xref["usaxs"]).get()
 
-        yield from det.image_prep(path, filename_base, order_number)
-        yield from det.take_image()
+        try:
+            yield from det.image_prep(path, filename_base, order_number)
+            yield from det.take_image()
 
-        image_name = det.image_file_name
-        if image_name.startswith("/mnt/share1"):
-            image_name = image_name[4:]
-        if os.path.exists(image_name):
-            # update the provided dictionary
-            _md["sample_image_name"] = image_name
-            logger.info("sample image file: %s", image_name)
+            image_name = det.image_file_name
+            if image_name.startswith("/mnt/share1"):
+                image_name = image_name[4:]
+            if os.path.exists(image_name):
+                # update the provided dictionary
+                _md["sample_image_name"] = image_name
+                logger.info("sample image file: %s", image_name)
+        except Exception as exc:
+            logger.warning(
+                (
+                    "Could not take sample image:"
+                    "path=%s, file=%s, order#=%d, exc=%s"
+                ),
+                path, filename_base, order_number,
+                exc
+            )
     else:
         yield from bps.null()
