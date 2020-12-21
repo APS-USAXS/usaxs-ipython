@@ -34,6 +34,7 @@ import os
 import pyRestTable
 
 from ..devices import constants
+from ..devices import email_notices
 from ..devices import measure_background
 from ..devices import saxs_det, waxs_det
 from ..devices import terms
@@ -423,36 +424,68 @@ def execute_command_list(filename, commands, md={}):
         )
 
         action = action.lower()
-        if action in ("flyscan", "usaxsscan"):
-            sx = float(args[0])
-            sy = float(args[1])
-            sth = float(args[2])
-            snm = args[3]
-            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
-            yield from USAXSscan(sx, sy, sth, snm, md=_md)  # either step or fly scan
 
-        elif action in ("saxs", "saxsexp"):
-            sx = float(args[0])
-            sy = float(args[1])
-            sth = float(args[2])
-            snm = args[3]
-            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
-            yield from SAXS(sx, sy, sth, snm, md=_md)
+        def _handle_actions_():
+            """Inner function to make try..except clause more clear."""
+            if action in ("flyscan", "usaxsscan"):
+                # handles either step or fly scan
+                sx = float(args[0])
+                sy = float(args[1])
+                sth = float(args[2])
+                snm = args[3]
+                _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
+                yield from USAXSscan(sx, sy, sth, snm, md=_md)
 
-        elif action in ("waxs", "waxsexp"):
-            sx = float(args[0])
-            sy = float(args[1])
-            sth = float(args[2])
-            snm = args[3]
-            _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
-            yield from WAXS(sx, sy, sth, snm, md=_md)
+            elif action in ("saxs", "saxsexp"):
+                sx = float(args[0])
+                sy = float(args[1])
+                sth = float(args[2])
+                snm = args[3]
+                _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
+                yield from SAXS(sx, sy, sth, snm, md=_md)
 
-        elif action in simple_actions:
-            yield from simple_actions[action](md=_md)
+            elif action in ("waxs", "waxsexp"):
+                sx = float(args[0])
+                sy = float(args[1])
+                sth = float(args[2])
+                snm = args[3]
+                _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
+                yield from WAXS(sx, sy, sth, snm, md=_md)
 
-        else:
-            logger.info(f"no handling for line {i}: {raw_command}")
-        logger.info("memory report: %s", rss_mem())
+            elif action in simple_actions:
+                yield from simple_actions[action](md=_md)
+
+            else:
+                logger.info(f"no handling for line {i}: {raw_command}")
+                yield from bps.null()
+            logger.info("memory report: %s", rss_mem())
+
+        attempt = 1  # count the number of attempts
+        while True:
+            try:
+                # call the inner function (above)
+                yield from _handle_actions_()
+                break  # leave the while loop
+            except Exception as exc:
+                subject = (
+                    f"{exc.__class__.__name__}"
+                    f" during attempt {attempt}"
+                    f" of command '{command}''"
+                )
+                body = (
+                    f"subject: {subject}"
+                    f"\n"
+                    f"\ndate: {datetime.datetime.now().isoformat(' ')}"
+                    f"\ncommand file: {full_filename}"
+                    f"\nline number: {i}"
+                    f"\ncommand: {command}"
+                    f"\nraw command: {raw_command}"
+                    f"\nattempt: {attempt}"
+                    f"\nexception: {exc}"
+                )
+                logger.error("Exception %s\n%s", subject, body)
+                email_notices.send(subject, body)
+                attempt += 1
 
     yield from after_command_list(md=md)
     logger.info("memory report: %s", rss_mem())
