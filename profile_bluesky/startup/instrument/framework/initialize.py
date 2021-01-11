@@ -3,14 +3,13 @@
 initialize the bluesky framework
 """
 
-__all__ = [
-    'RE', 'db', 'sd',
-    'bec', 'peaks',
-    'bp', 'bps', 'bpp',
-    'summarize_plan',
-    'np',
-    'callback_db',
-    ]
+__all__ = """
+    RE  db  sd  bec  peaks
+    bp  bps  bpp
+    summarize_plan
+    np
+    callback_db
+    """.split()
 
 from ..session_logs import logger
 logger.info(__file__)
@@ -34,9 +33,9 @@ from bluesky.simulators import summarize_plan
 from bluesky.utils import PersistentDict
 from bluesky.utils import ProgressBarManager
 from bluesky.utils import ts_msg_hook
-from databroker import Broker
 from IPython import get_ipython
 from ophyd.signal import EpicsSignalBase
+import databroker
 import ophyd
 import warnings
 
@@ -79,8 +78,8 @@ if old_md is not None:
 # keep track of callback subscriptions
 callback_db = {}
 
-# Set up a Broker.
-db = Broker.named('mongodb_config')
+# Connect with our mongodb database
+db = databroker.catalog["mongodb_config"].v1
 
 # Subscribe metadatastore to documents.
 # If this is removed, data is not saved to metadatastore.
