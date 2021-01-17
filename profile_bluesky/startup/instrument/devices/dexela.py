@@ -1,6 +1,4 @@
-"""
-Dexela area detector
-"""
+"""Dexela area detector."""
 
 __all__ = [
     "dexela_det",
@@ -12,8 +10,9 @@ logger.info(__file__)
 
 from ophyd import AreaDetector
 from ophyd import DexelaDetectorCam
-from ophyd import Component, Device, EpicsSignalWithRBV
-from ophyd import SingleTrigger, ImagePlugin, HDF5Plugin
+from ophyd import HDF5Plugin
+from ophyd import ImagePlugin
+from ophyd import SingleTrigger
 from ophyd.areadetector import ADComponent
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
 
@@ -41,10 +40,12 @@ _validate_AD_FileWriter_path_(
 
 
 class MyDexelaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
+
     """adapt HDF5 plugin for Dexela detector"""
 
 
 class MyDexelaDetector(SingleTrigger, AreaDetector):
+
     """Dexela detector(s) as used by 9-ID-C USAXS"""
 
     cam = ADComponent(DexelaDetectorCam, "cam1:")
@@ -67,6 +68,7 @@ try:
     )
     dexela_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
-    msg = f"Timeout connecting with {nm} ({prefix})"
-    logger.warning(msg)
+    logger.warning(
+        "Timeout connecting with %s (%s)", nm, prefix
+    )
     dexela_det = None
