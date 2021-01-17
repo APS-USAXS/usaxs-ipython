@@ -1,4 +1,4 @@
-"""Dexela area detector."""
+"""Dexela area detector(s)."""
 
 __all__ = [
     "dexela_det",
