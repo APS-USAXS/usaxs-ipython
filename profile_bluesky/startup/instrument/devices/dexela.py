@@ -1,13 +1,13 @@
-
 """
 Dexela area detector
 """
 
 __all__ = [
-    'dexela_det',
-    ]
+    "dexela_det",
+]
 
 from ..session_logs import logger
+
 logger.info(__file__)
 
 from ophyd import AreaDetector
@@ -29,7 +29,9 @@ from .area_detector_common import _validate_AD_FileWriter_path_
 # ---
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
-WRITE_HDF5_FILE_PATH_DEXELA = "/mnt/usaxscontrol/USAXS_data/test/dexela/%Y/%m/%d/"
+WRITE_HDF5_FILE_PATH_DEXELA = (
+    "/mnt/usaxscontrol/USAXS_data/test/dexela/%Y/%m/%d/"
+)
 # path seen by databroker
 READ_HDF5_FILE_PATH_DEXELA = "/share1/USAXS_data/test/dexela/%Y/%m/%d/"
 
@@ -50,18 +52,19 @@ class MyDexelaDetector(SingleTrigger, AreaDetector):
 
     hdf1 = ADComponent(
         EpicsDefinesHDF5FileNames,
-        suffix = "HDF1:",
-        root = DATABROKER_ROOT_PATH,
-        write_path_template = WRITE_HDF5_FILE_PATH_DEXELA,
-        read_path_template = READ_HDF5_FILE_PATH_DEXELA,
-        )
+        suffix="HDF1:",
+        root=DATABROKER_ROOT_PATH,
+        write_path_template=WRITE_HDF5_FILE_PATH_DEXELA,
+        read_path_template=READ_HDF5_FILE_PATH_DEXELA,
+    )
 
 
 try:
     nm = "Dexela 2315"
     prefix = area_detector_EPICS_PV_prefix[nm]
     dexela_det = MyDexelaDetector(
-        prefix, name="dexela_det", labels=["camera", "area_detector"])
+        prefix, name="dexela_det", labels=["camera", "area_detector"]
+    )
     dexela_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     msg = f"Timeout connecting with {nm} ({prefix})"
