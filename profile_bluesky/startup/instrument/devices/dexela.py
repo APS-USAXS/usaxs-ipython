@@ -40,12 +40,10 @@ _validate_AD_FileWriter_path_(
 
 
 class MyDexelaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
-
     """adapt HDF5 plugin for Dexela detector"""
 
 
 class MyDexelaDetector(SingleTrigger, AreaDetector):
-
     """Dexela detector(s) as used by 9-ID-C USAXS"""
 
     cam = ADComponent(DexelaDetectorCam, "cam1:")
@@ -69,6 +67,6 @@ try:
     dexela_det.read_attrs.append("hdf1")
 except TimeoutError as exc_obj:
     logger.warning(
-        "Timeout connecting with %s (%s)", nm, prefix
+        "Timeout connecting with %s (%s): %s", nm, prefix, exc_obj
     )
     dexela_det = None
