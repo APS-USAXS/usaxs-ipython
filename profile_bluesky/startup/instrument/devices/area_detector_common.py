@@ -51,6 +51,7 @@ area_detector_EPICS_PV_prefix = {
     'PointGrey BlackFly Optical' : '9idFLY2:',
     'Alta' : '9idalta:',
     'SimDetector' : '9idcSIM1:',
+    'Dexela 2315' : '9idcDEX:',
 }
 
 
