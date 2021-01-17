@@ -44,7 +44,7 @@ class MyDexelaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
 
 
 class MyDexelaDetector(SingleTrigger, AreaDetector):
-    """Dexela detector(s) as used by 9-ID-C USAXS"""
+    """Dexela detector(s) as used by 9-ID-C USAXS."""
 
     cam = ADComponent(DexelaDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
