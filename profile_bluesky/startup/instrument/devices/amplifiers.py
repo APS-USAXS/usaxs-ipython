@@ -326,12 +326,31 @@ class DetectorAmplifierAutorangeDevice(Device):
     """
 
     def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
-        # TODO: change these asserts into if, not good coding practice.
-        assert isinstance(nickname, str)
-        assert isinstance(scaler, ScalerCH)      # dropped EpicsScaler
-        assert isinstance(signal, ScalerChannel) # dropped EpicsSignalRO
-        assert isinstance(amplifier, FemtoAmplifierDevice)
-        assert isinstance(auto, AmplifierAutoDevice)
+        if not isinstance(nickname, str):
+            raise ValueError(
+                "'nickname' should be of 'str' type,"
+                f" received type: {type(nickname)}"
+            )
+        if not isinstance(scaler, ScalerCH):
+            raise ValueError(
+                "'scaler' should be of 'ScalerCH' type,"
+                f" received type: {type(scaler)}"
+            )
+        if not isinstance(signal, ScalerChannel):
+            raise ValueError(
+                "'signal' should be of 'ScalerChannel' type,"
+                f" received type: {type(signal)}"
+            )
+        if not isinstance(amplifier, FemtoAmplifierDevice):
+            raise ValueError(
+                "'amplifier' should be of 'FemtoAmplifierDevice' type,"
+                f" received type: {type(amplifier)}"
+            )
+        if not isinstance(auto, AmplifierAutoDevice):
+            raise ValueError(
+                "'auto' should be of 'AmplifierAutoDevice' type,"
+                f" received type: {type(auto)}"
+            )
         self.nickname = nickname
         self.scaler = scaler
         self.signal = signal
