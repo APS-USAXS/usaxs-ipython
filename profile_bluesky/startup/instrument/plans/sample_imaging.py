@@ -54,6 +54,6 @@ def record_sample_image_on_demand(technique_name, title, _md):
         yield from det.take_image()
 
         # expect this file to be written
-        jpeg_name = os.path.join(path, f"{title}_{order_number:04d}.jpg")
+        # jpeg_name = os.path.join(path, f"{title}_{order_number:04d}.jpg")
     else:
         yield from bps.null()

@@ -18,9 +18,10 @@ import apstools.utils
 from bluesky import plan_stubs as bps
 
 from ophyd import AreaDetector
-from ophyd import Component, DeviceStatus, EpicsSignal
+from ophyd import EpicsSignal
+from ophyd import ImagePlugin
 from ophyd import PointGreyDetectorCam
-from ophyd import SingleTrigger, ImagePlugin
+from ophyd import SingleTrigger
 from ophyd.areadetector import ADComponent
 from ophyd.areadetector.plugins import TransformPlugin
 
