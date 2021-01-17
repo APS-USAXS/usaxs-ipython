@@ -40,7 +40,7 @@ _validate_AD_FileWriter_path_(
 
 
 class MyDexelaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
-    """Adapt HDF5 plugin for Dexela detector."""
+    """Adapt HDF5 plugin for Dexela detector(s)."""
 
 
 class MyDexelaDetector(SingleTrigger, AreaDetector):
