@@ -570,18 +570,27 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
         yield from bps.mv(shutter, "open")
 
     for control_list in scaler_dict.values():
-        # do these in sequence, just in case same hardware used multiple times
+        # do amplifiers in sequence, in case same hardware used multiple times
         if len(control_list) > 0:
-            msg = "Autoscaling amplifier for: " + control_list[0].nickname
-            logger.info(msg)
+            logger.info(
+                "Autoscaling amplifier for: %s",
+                control_list[0].nickname
+            )
             try:
                 yield from _scaler_autoscale_(
                     control_list,
                     count_time=count_time,
                     max_iterations=max_iterations)
             except AutoscaleError as exc:
-                emsg = f"{exc} - will continue despite warning"
-                logger.warning(emsg)
+                logger.warning(
+                    "%s: %s - will continue despite warning",
+                    control_list[0].nickname, exc
+                )
+            except Exception as exc:
+                logger.error(
+                    "%s: %s - will continue anyway",
+                    control_list[0].nickname, exc,
+                )
 
 
 # ------------
