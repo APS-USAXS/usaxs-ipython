@@ -12,6 +12,7 @@ from ophyd import AreaDetector
 from ophyd import DexelaDetectorCam
 from ophyd import HDF5Plugin
 from ophyd import ImagePlugin
+from ophyd import ProcessPlugin
 from ophyd import SingleTrigger
 from ophyd.areadetector import ADComponent
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
@@ -29,13 +30,15 @@ from .area_detector_common import _validate_AD_FileWriter_path_
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
 WRITE_HDF5_FILE_PATH_DEXELA = (
-    "/mnt/usaxscontrol/USAXS_data/test/dexela/%Y/%m/%d/"
+    "W:\\USAXS_data\\test\\dexela\\%Y\\%m\\%d\\"
 )
 # path seen by databroker
 READ_HDF5_FILE_PATH_DEXELA = "/share1/USAXS_data/test/dexela/%Y/%m/%d/"
 
 _validate_AD_FileWriter_path_(
-    WRITE_HDF5_FILE_PATH_DEXELA, DATABROKER_ROOT_PATH
+    # usually, 2nd argument is DATABROKER_ROOT_PATH
+    # but this is Windows IOC and that needs this change
+    WRITE_HDF5_FILE_PATH_DEXELA, "W:\\USAXS_data"
 )
 
 
@@ -48,6 +51,7 @@ class MyDexelaDetector(SingleTrigger, AreaDetector):
 
     cam = ADComponent(DexelaDetectorCam, "cam1:")
     image = ADComponent(ImagePlugin, "image1:")
+    proc = ADComponent(ProcessPlugin, "Proc:")
 
     hdf1 = ADComponent(
         EpicsDefinesHDF5FileNames,
