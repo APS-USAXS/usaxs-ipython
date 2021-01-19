@@ -10,6 +10,7 @@ logger.info(__file__)
 
 from ophyd import AreaDetector
 from ophyd import DexelaDetectorCam
+from ophyd import EpicsSignalWithRBV
 from ophyd import HDF5Plugin
 from ophyd import ImagePlugin
 from ophyd import ProcessPlugin
@@ -42,8 +43,11 @@ _validate_AD_FileWriter_path_(
 )
 
 
-class MyDexelaHDF5Plugin(HDF5Plugin, FileStoreHDF5IterativeWrite):
+class MyDexelaHDF5Plugin(EpicsDefinesHDF5FileNames, FileStoreHDF5IterativeWrite):
     """Adapt HDF5 plugin for Dexela detector(s)."""
+
+    create_directory = ADComponent(EpicsSignalWithRBV, "CreateDirectory")
+    lazy_open = ADComponent(EpicsSignalWithRBV, "LazyOpen")
 
 
 class MyDexelaDetector(SingleTrigger, AreaDetector):
@@ -54,11 +58,12 @@ class MyDexelaDetector(SingleTrigger, AreaDetector):
     proc1 = ADComponent(ProcessPlugin, "Proc1:")
 
     hdf1 = ADComponent(
-        EpicsDefinesHDF5FileNames,
+        MyDexelaHDF5Plugin,
         suffix="HDF1:",
         root=DATABROKER_ROOT_PATH,
         write_path_template=WRITE_HDF5_FILE_PATH_DEXELA,
         read_path_template=READ_HDF5_FILE_PATH_DEXELA,
+        path_semantics="windows",
     )
 
 
@@ -74,6 +79,10 @@ try:
     proc_port = dexela_det.proc1.port_name.get()
     dexela_det.hdf1.nd_array_port.put(proc_port)
     # dexela_det.image.nd_array_port.put(proc_port)
+
+    # avoid the need to prime the plugin
+    dexela_det.hdf1.lazy_open.put(1)
+    dexela_det.hdf1.create_directory.put(-5)
 
 except TimeoutError as exc_obj:
     logger.warning(
