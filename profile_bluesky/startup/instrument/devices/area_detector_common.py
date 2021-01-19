@@ -85,8 +85,11 @@ class Override_AD_EpicsHdf5FileName(AD_EpicsHdf5FileName):
         # before capture mode is turned on. They will not be reset
         # on 'unstage' anyway.
 
-        if not write_path.endswith("/"):    # TODO: need to add into apstools!
-            write_path += "/"
+        if not (write_path.endswith("/") or write_path.endswith("\\")):
+            if write_path.find("\\") >= 0:
+                write_path += "\\"
+            else:
+                write_path += "/"
 
         set_and_wait(self.file_path, write_path)
         set_and_wait(self.file_name, filename)
