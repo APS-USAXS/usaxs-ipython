@@ -27,21 +27,18 @@ from .area_detector_common import _validate_AD_FileWriter_path_
 
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
-WRITE_HDF5_FILE_PATH_DEXELA = (
-    r"W:\\USAXS_data\\test\\dexela\\%Y\\%m\\%d\\"
-)
+WRITE_HDF5_FILE_PATH_DEXELA = r"W:\\USAXS_data\\test\\dexela\\%Y\\%m\\%d\\"
 # path seen by databroker
 READ_HDF5_FILE_PATH_DEXELA = "/share1/USAXS_data/test/dexela/%Y/%m/%d/"
 
+# usually, 2nd argument is DATABROKER_ROOT_PATH
+# but this is Windows IOC which needs this change
 _validate_AD_FileWriter_path_(
-    # usually, 2nd argument is DATABROKER_ROOT_PATH
-    # but this is Windows IOC and that needs this change
-    WRITE_HDF5_FILE_PATH_DEXELA, r"W:\\USAXS_data"
+    WRITE_HDF5_FILE_PATH_DEXELA, r"W:\\USAXS_data",
 )
 
 
 class MyHDF5Plugin(FileStoreHDF5IterativeWrite, HDF5Plugin_V34):
-
     def make_filename(self):
         """Override from AD.filestore_mixins.FileStorePluginBase."""
         # filename = new_short_uid()
@@ -56,7 +53,7 @@ class MyProcessPlugin(ProcessPlugin):
 
     pool_max_buffers = None
 
-    
+
 class MyDexelaDetector(SingleTrigger, DexelaDetector):
     """Dexela detector(s) as used by 9-ID-C USAXS."""
 
@@ -74,9 +71,7 @@ class MyDexelaDetector(SingleTrigger, DexelaDetector):
 try:
     nm = "Dexela 2315"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    dexela_det = MyDexelaDetector(
-        prefix, name="dexela_det", labels=["camera", "area_detector"]
-    )
+    dexela_det = MyDexelaDetector(prefix, name="dexela_det", labels=["camera", "area_detector"])
     dexela_det.read_attrs.append("hdf1")
 
     # configure the processing plugin into the chain for file writing
@@ -90,13 +85,11 @@ try:
 
 
 except TimeoutError as exc_obj:
-    logger.warning(
-        "Timeout connecting with %s (%s): %s", nm, prefix, exc_obj
-    )
+    logger.warning("Timeout connecting with %s (%s): %s", nm, prefix, exc_obj)
     dexela_det = None
 
 
-def acquire_Dexela_N(target_acquire_time_s):
+def _acquire_Dexela_N(target_acquire_time_s):
     """
     Save N frames from the Dexela as one image in an HDF file.
 
@@ -105,10 +98,7 @@ def acquire_Dexela_N(target_acquire_time_s):
     det = dexela_det
     fixed_acq_time = det.cam.acquire_time.get()
     num_frames = round(target_acquire_time_s / fixed_acq_time)
-    logger.info(
-        f"for acquire time of {target_acquire_time_s} s"
-        f", will acquire {num_frames} frames"
-    )
+    logger.info("acquire time of %f s" f", will acquire %d frames", target_acquire_time_s, num_frames)
 
     # remember the original staging
     # fmt: off
@@ -151,11 +141,11 @@ def acquire_Dexela_N(target_acquire_time_s):
     t0 = time.time()
     logger.debug("triggering ...")
     det.trigger()
-    logger.info(f"sleep: {target_acquire_time_s}")
+    logger.info("sleep: %f s", target_acquire_time_s)
     time.sleep(target_acquire_time_s)
     while det.cam.acquire.get() not in (0, "Stop", "Done"):
         time.sleep(0.02)
-    logger.info(f"acquire time: {time.time()-t0:.2f}")
+    logger.info("acquire time: %.2f s", (time.time() - t0))
     logger.debug("unstaging ...")
     det.unstage()
 
