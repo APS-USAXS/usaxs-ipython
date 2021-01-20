@@ -4,22 +4,21 @@ __all__ = [
     "dexela_det",
 ]
 
-from ..session_logs import logger
-
-logger.info(__file__)
-
 from collections import OrderedDict
 from ophyd import ADComponent
 from ophyd import DexelaDetector
-from ophyd import HDF5Plugin
+# from ophyd import HDF5Plugin
 from ophyd import ImagePlugin
 from ophyd import ProcessPlugin
 from ophyd import SingleTrigger
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
-from ophyd.areadetector.filestore_mixins import new_short_uid
+# from ophyd.areadetector.filestore_mixins import new_short_uid
 from ophyd.areadetector.plugins import HDF5Plugin_V34
 import datetime
 import time
+from ..session_logs import logger
+
+logger.info(__file__)
 
 from .area_detector_common import area_detector_EPICS_PV_prefix
 from .area_detector_common import _validate_AD_FileWriter_path_
@@ -71,7 +70,9 @@ class MyDexelaDetector(SingleTrigger, DexelaDetector):
 try:
     nm = "Dexela 2315"
     prefix = area_detector_EPICS_PV_prefix[nm]
-    dexela_det = MyDexelaDetector(prefix, name="dexela_det", labels=["camera", "area_detector"])
+    dexela_det = MyDexelaDetector(
+        prefix, name="dexela_det", labels=["camera", "area_detector"]
+    )
     dexela_det.read_attrs.append("hdf1")
 
     # configure the processing plugin into the chain for file writing
@@ -98,7 +99,11 @@ def _acquire_Dexela_N(target_acquire_time_s):
     det = dexela_det
     fixed_acq_time = det.cam.acquire_time.get()
     num_frames = round(target_acquire_time_s / fixed_acq_time)
-    logger.info("acquire time of %f s" f", will acquire %d frames", target_acquire_time_s, num_frames)
+    logger.info(
+        "acquire time of %f s, will acquire %d frames",
+        target_acquire_time_s,
+        num_frames,
+    )
 
     # remember the original staging
     # fmt: off
