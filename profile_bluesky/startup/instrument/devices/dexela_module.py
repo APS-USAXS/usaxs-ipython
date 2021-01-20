@@ -8,30 +8,27 @@ from ..session_logs import logger
 
 logger.info(__file__)
 
-from ophyd import AreaDetector
-from ophyd import DexelaDetectorCam
-from ophyd import EpicsSignalWithRBV
+from collections import OrderedDict
+from ophyd import ADComponent
+from ophyd import DexelaDetector
 from ophyd import HDF5Plugin
 from ophyd import ImagePlugin
 from ophyd import ProcessPlugin
 from ophyd import SingleTrigger
-from ophyd.areadetector import ADComponent
 from ophyd.areadetector.filestore_mixins import FileStoreHDF5IterativeWrite
+from ophyd.areadetector.filestore_mixins import new_short_uid
+from ophyd.areadetector.plugins import HDF5Plugin_V34
+import datetime
+import time
 
 from .area_detector_common import area_detector_EPICS_PV_prefix
-from .area_detector_common import DATABROKER_ROOT_PATH
-from .area_detector_common import EpicsDefinesHDF5FileNames
 from .area_detector_common import _validate_AD_FileWriter_path_
 
 
-# FIXME: can this be correct?
-# Dexela IOC is on Windows.
-# Is the file store drive mapped to usaxscontrol?
-# ---
 # path for HDF5 files (as seen by EPICS area detector HDF5 plugin)
 # path seen by detector IOC
 WRITE_HDF5_FILE_PATH_DEXELA = (
-    "W:\\USAXS_data\\test\\dexela\\%Y\\%m\\%d\\"
+    r"W:\\USAXS_data\\test\\dexela\\%Y\\%m\\%d\\"
 )
 # path seen by databroker
 READ_HDF5_FILE_PATH_DEXELA = "/share1/USAXS_data/test/dexela/%Y/%m/%d/"
@@ -39,32 +36,39 @@ READ_HDF5_FILE_PATH_DEXELA = "/share1/USAXS_data/test/dexela/%Y/%m/%d/"
 _validate_AD_FileWriter_path_(
     # usually, 2nd argument is DATABROKER_ROOT_PATH
     # but this is Windows IOC and that needs this change
-    WRITE_HDF5_FILE_PATH_DEXELA, "W:\\USAXS_data"
+    WRITE_HDF5_FILE_PATH_DEXELA, r"W:\\USAXS_data"
 )
 
 
-class MyDexelaHDF5Plugin(EpicsDefinesHDF5FileNames, FileStoreHDF5IterativeWrite):
-    """Adapt HDF5 plugin for Dexela detector(s)."""
+class MyHDF5Plugin(FileStoreHDF5IterativeWrite, HDF5Plugin_V34):
 
-    create_directory = ADComponent(EpicsSignalWithRBV, "CreateDirectory")
-    lazy_open = ADComponent(EpicsSignalWithRBV, "LazyOpen")
+    def make_filename(self):
+        """Override from AD.filestore_mixins.FileStorePluginBase."""
+        # filename = new_short_uid()
+        filename = self.file_name.get()  # get name from EPICS PV
+        now = datetime.datetime.now()
+        write_path = now.strftime(self.write_path_template) + "\\"  # the FIX!
+        read_path = now.strftime(self.read_path_template)
+        return filename, read_path, write_path
 
 
-class MyDexelaDetector(SingleTrigger, AreaDetector):
+class MyProcessPlugin(ProcessPlugin):
+
+    pool_max_buffers = None
+
+    
+class MyDexelaDetector(SingleTrigger, DexelaDetector):
     """Dexela detector(s) as used by 9-ID-C USAXS."""
 
-    cam = ADComponent(DexelaDetectorCam, "cam1:")
-    image = ADComponent(ImagePlugin, "image1:")
-    proc1 = ADComponent(ProcessPlugin, "Proc1:")
-
     hdf1 = ADComponent(
-        MyDexelaHDF5Plugin,
-        suffix="HDF1:",
-        root=DATABROKER_ROOT_PATH,
+        MyHDF5Plugin,
+        "HDF1:",
         write_path_template=WRITE_HDF5_FILE_PATH_DEXELA,
         read_path_template=READ_HDF5_FILE_PATH_DEXELA,
         path_semantics="windows",
     )
+    image = ADComponent(ImagePlugin, "image1:")
+    proc1 = ADComponent(MyProcessPlugin, "Proc1:")
 
 
 try:
@@ -78,11 +82,12 @@ try:
     # configure the processing plugin into the chain for file writing
     proc_port = dexela_det.proc1.port_name.get()
     dexela_det.hdf1.nd_array_port.put(proc_port)
-    # dexela_det.image.nd_array_port.put(proc_port)
 
-    # avoid the need to prime the plugin
-    dexela_det.hdf1.lazy_open.put(1)
+    # MUST come before staging writes file_path
     dexela_det.hdf1.create_directory.put(-5)
+
+    dexela_det.hdf1.file_name.put("bluesky")
+
 
 except TimeoutError as exc_obj:
     logger.warning(
@@ -100,13 +105,18 @@ def acquire_Dexela_N(target_acquire_time_s):
     det = dexela_det
     fixed_acq_time = det.cam.acquire_time.get()
     num_frames = round(target_acquire_time_s / fixed_acq_time)
+    logger.info(
+        f"for acquire time of {target_acquire_time_s} s"
+        f", will acquire {num_frames} frames"
+    )
 
     # remember the original staging
-    original_sigs = dict(
-        cam=dict(**det.cam.stage_sigs),
-        hdf1=dict(**det.hdf1.stage_sigs),
-        proc1=dict(**det.proc1.stage_sigs),
-    )
+    # fmt: off
+    original_sigs = {
+        k: dict(**getattr(det, k).stage_sigs)
+        for k in "cam hdf1 proc1".split()
+    }
+    # fmt: on
 
     # configure for acquisition
     det.proc1.stage_sigs["enable"] = 1  # Enable
@@ -117,14 +127,39 @@ def acquire_Dexela_N(target_acquire_time_s):
     det.proc1.stage_sigs["auto_reset_filter"] = 1
     det.proc1.stage_sigs["filter_callbacks"] = "Array N only"
 
+    det.hdf1.stage_sigs = OrderedDict()
+    det.hdf1.stage_sigs["enable"] = 1
+    det.hdf1.stage_sigs["blocking_callbacks"] = "Yes"
+    det.hdf1.stage_sigs["parent.cam.array_callbacks"] = 1
+    det.hdf1.stage_sigs["auto_increment"] = "Yes"
+    det.hdf1.stage_sigs["array_counter"] = 0
+    det.hdf1.stage_sigs["auto_save"] = "Yes"
+    det.hdf1.stage_sigs["num_capture"] = 0
+    det.hdf1.stage_sigs["file_template"] = "%s%s_%6.6d.h5"
+    det.hdf1.stage_sigs["file_write_mode"] = "Capture"
+    # avoid the need to prime the plugin
+    det.hdf1.stage_sigs["lazy_open"] = 1
+    det.hdf1.stage_sigs["compression"] = "LZ4"
+    det.hdf1.stage_sigs["capture"] = 1
+
     # HDF plugin should get processed image
     det.hdf1.nd_array_port.put(det.proc1.port_name.get())
     # other staging on HDF plugin is OK
 
-    # COUNT
+    logger.debug("staging ...")
     det.stage()
+    t0 = time.time()
+    logger.debug("triggering ...")
+    det.trigger()
+    logger.info(f"sleep: {target_acquire_time_s}")
+    time.sleep(target_acquire_time_s)
+    while det.cam.acquire.get() not in (0, "Stop", "Done"):
+        time.sleep(0.02)
+    logger.info(f"acquire time: {time.time()-t0:.2f}")
+    logger.debug("unstaging ...")
     det.unstage()
 
     # restore the staging back to original
     for k, v in original_sigs.items():
         getattr(det, k).stage_sigs = dict(**v)
+    logger.debug("acquire complete")
