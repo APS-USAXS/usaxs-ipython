@@ -14,7 +14,7 @@ from ..session_logs import logger
 logger.info(__file__)
 
 from apstools.devices import AD_plugin_primed
-from apstools.devices import AD_prime_plugin2
+# from apstools.devices import AD_prime_plugin2
 from bluesky import plan_stubs as bps
 
 from ophyd import ADComponent

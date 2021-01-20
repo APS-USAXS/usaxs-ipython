@@ -33,10 +33,11 @@ from .suspenders import *
 from .trajectories import *
 from .usaxs_fly_scan import *
 
-# finally these
-from .alta import *
-from .blackfly import *
-from .pilatus import *
+# finally these area detectors
+from .alta_module import *
+from .blackfly_module import *
+from .dexela_module import *
+from .pilatus_module import *
 # from .simdetector import *
 
 # and only when all devices are defined
