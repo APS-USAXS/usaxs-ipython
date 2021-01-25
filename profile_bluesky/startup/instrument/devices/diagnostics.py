@@ -19,16 +19,24 @@ from ..framework import sd
 
 class PSS_Parameters(Device):
     a_beam_active = Component(EpicsSignalRO, "PA:09ID:A_BEAM_ACTIVE.VAL", string=True)
+    a_shutter_open_chain_A_led = Component(EpicsSignalRO, "PA:09ID:STA_A_FES_OPEN_PL", string=True)
+
     b_beam_active = Component(EpicsSignalRO, "PA:09ID:B_BEAM_ACTIVE.VAL", string=True)
-    # does not connect: a_beam_ready = Component(EpicsSignalRO, "PA:09ID:A_BEAM_READY.VAL", string=True)
     b_beam_ready = Component(EpicsSignalRO, "PA:09ID:B_BEAM_READY.VAL", string=True)
-    a_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_A_FES_OPEN_PL", string=True)
-    b_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_B_FES_OPEN_PL", string=True)
-    # does not connect: a_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_A_SBS_CLSD_PL", string=True)
     b_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_B_SBS_CLSD_PL", string=True)
+    b_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_B_FES_OPEN_PL", string=True)
+
     c_shutter_closed_chain_A = Component(EpicsSignalRO, "PA:09ID:SCS_PS_CLSD_LS", string=True)
     c_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:SCS_PS_CLSD_LS", string=True)
     c_station_no_access_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_NO_ACCESS.VAL", string=True)
+
+    c_beam_ready_leds = Component(EpicsSignalRO, "PA:09ID:STA_C_BEAMREADY_PL", string=True)
+    c_station_door1_closed_switch_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_DR1_CLOSE_LS", string=True)
+    c_station_door1_closed_switch_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_C_DR1_CLOSE_LS", string=True)
+    c_station_door2_closed_switch_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_DR2_CLOSE_LS", string=True)
+    c_station_door2_closed_switch_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_C_DR2_CLOSE_LS", string=True)
+    c_station_no_access_sign = Component(EpicsSignalRO, "PA:09ID:STA_C_NO_ACCESS", string=True)
+
     # other signals?
 
     @property
@@ -54,6 +62,7 @@ class PSS_Parameters(Device):
 class BLEPS_Parameters(Device):
     """Beam Line Equipment Protection System"""
     red_light = Component(EpicsSignalRO, "9idBLEPS:RED_LIGHT")
+    station_shutter_b_permit = Component(EpicsSignalRO, "9idBLEPS:SBS_PERMIT", string=True)
     station_shutter_b = Component(EpicsSignalRO, "9idBLEPS:SBS_CLOSED", string=True)
     flow_1 = Component(EpicsSignalRO, "9idBLEPS:FLOW1_CURRENT")
     flow_2 = Component(EpicsSignalRO, "9idBLEPS:FLOW2_CURRENT")
