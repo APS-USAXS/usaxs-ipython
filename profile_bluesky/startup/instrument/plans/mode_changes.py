@@ -289,10 +289,8 @@ def mode_Radiography(md=None):
         )
         if mono_shutter.state == "open":
             logger.info("TV should now show Radiography CCD image.")
-        else:
-            logger.info("The mono shutter is closed now.  APS beam dump?")
             print(
-                "But before calling:"
+                "But before calling if you do not see an image:"
                 "\n - are you CERTAIN the sample is not blocking the beam?"
                 "\nMove sample out and try RE(preUSAXStune()) again."
                 "\n"
@@ -309,6 +307,8 @@ def mode_Radiography(md=None):
                 "\n"
                 "\nStill not working? Call Jan or Ivan."
             )
+        else:
+            logger.info("The mono shutter is closed now.  APS beam dump?")
 
 
 def mode_imaging(md=None):
