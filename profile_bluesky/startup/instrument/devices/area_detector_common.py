@@ -190,7 +190,8 @@ def Override_AD_prime_plugin2(plugin):
         time.sleep(0.1)  # abundance of caution
         set_and_wait(sig, val)
 
-    time.sleep(2)  # wait for acquisition
+    while plugin.parent.cam.acquire.get() not in (0, "Done"):
+        time.sleep(.05)  # wait for acquisition to finish
 
     for sig, val in reversed(list(original_vals.items())):
         time.sleep(0.1)
