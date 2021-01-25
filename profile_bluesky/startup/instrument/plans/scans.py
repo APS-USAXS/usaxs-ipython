@@ -50,6 +50,7 @@ from ..devices.suspenders import suspend_BeamInHutch
 from ..framework import bec, RE, specwriter
 from ..utils.cleanup_text import cleanupText
 from ..utils.setup_new_user import techniqueSubdirectory
+from ..utils.user_sample_title import getSampleTitle
 from .area_detector import areaDetectorAcquire
 from .axis_tuning import tune_ar, tune_a2rp, tune_asrp
 from .axis_tuning import tune_mr, tune_m2rp, tune_msrp
@@ -242,6 +243,7 @@ def USAXSscan(x, y, thickness_mm, title, md=None):
     """
     general scan macro for fly or step USAXS with 1D or 2D collimation
     """
+    title = getSampleTitle(title)
     _md = apsbss.update_MD(md or {})
     _md["sample_thickness_mm"] = thickness_mm
     _md["title"] = title
@@ -684,6 +686,7 @@ def SAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect SAXS data
     """
+    scan_title = getSampleTitle(scan_title)
     _md = apsbss.update_MD(md or {})
     _md["sample_thickness_mm"] = thickness
     _md["title"] = scan_title
@@ -858,6 +861,7 @@ def WAXS(pos_X, pos_Y, thickness, scan_title, md=None):
     """
     collect WAXS data
     """
+    scan_title = getSampleTitle(scan_title)
     _md = apsbss.update_MD(md or {})
     _md["sample_thickness_mm"] = thickness
     _md["title"] = scan_title

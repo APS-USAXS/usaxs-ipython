@@ -137,6 +137,12 @@ class OurCustomNXWriterBase(NXWriterAPS):
                         f"\n{exc}"
                     )
 
+    def h5string(self, text):
+        """Local fix for issue #459."""
+        if isinstance(text, (tuple, list)):
+            return [self.h5string(str(t)) for t in text]
+        text = text or ""
+        return text.encode("utf8")
 
 class NXWriterFlyScan(OurCustomNXWriterBase):
 

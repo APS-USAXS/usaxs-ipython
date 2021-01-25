@@ -33,6 +33,8 @@ logger.info(__file__)
 from apstools.devices import AD_EpicsHdf5FileName
 from apstools.devices import AD_EpicsJpegFileName
 # TODO: from apstools.devices import AD_EpicsTiffFileName
+from apstools.devices import AD_plugin_primed
+from collections import OrderedDict
 from .ad_tiff_upstream import AD_EpicsTiffFileName
 from ophyd import HDF5Plugin
 from ophyd import JPEGPlugin
@@ -41,6 +43,9 @@ from ophyd.areadetector.filestore_mixins import FileStoreBase
 from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
 from ophyd.utils import set_and_wait
 import itertools
+import numpy as np
+import time
+
 
 DATABROKER_ROOT_PATH = "/"
 
@@ -51,6 +56,7 @@ area_detector_EPICS_PV_prefix = {
     'PointGrey BlackFly Optical' : '9idFLY2:',
     'Alta' : '9idalta:',
     'SimDetector' : '9idcSIM1:',
+    'Dexela 2315' : '9idcDEX:',
 }
 
 
@@ -80,8 +86,11 @@ class Override_AD_EpicsHdf5FileName(AD_EpicsHdf5FileName):
         # before capture mode is turned on. They will not be reset
         # on 'unstage' anyway.
 
-        if not write_path.endswith("/"):    # TODO: need to add into apstools!
-            write_path += "/"
+        if not (write_path.endswith("/") or write_path.endswith("\\")):
+            if write_path.find("\\") >= 0:
+                write_path += "\\"
+            else:
+                write_path += "/"
 
         set_and_wait(self.file_path, write_path)
         set_and_wait(self.file_name, filename)
@@ -129,3 +138,61 @@ class myTiffEpicsIterativeWriter(AD_EpicsTiffFileName,
 class myTiffFileNames(TIFFPlugin, myTiffEpicsIterativeWriter): ...
 class EpicsDefinesTiffFileNames(TIFFPlugin,
                                 myTiffEpicsIterativeWriter): ...
+
+
+def Override_AD_plugin_primed(plugin):
+    """
+    Has area detector pushed an NDarray to the file writer plugin?
+    """
+    cam = plugin.parent.cam
+    tests = []
+
+    for obj in (cam, plugin):
+        test = np.array(obj.array_size.get()).sum() != 0
+        tests.append(test)
+        if not test:
+            logger.debug("'%s' image size is zero", obj.name)
+
+    checks = dict(array_size=False, color_mode=True,)
+    for key, as_string in checks.items():
+        c = getattr(cam, key).get(as_string=as_string)
+        p = getattr(plugin, key).get(as_string=as_string)
+        test = c == p
+        tests.append(test)
+        if not test:
+            logger.debug("%s does not match", key)
+
+    return False not in tests
+
+
+def Override_AD_prime_plugin2(plugin):
+    """Override faulty apstools implementation"""
+    if Override_AD_plugin_primed(plugin):
+        logger.debug("'%s' plugin is already primed", plugin.name)
+        return
+
+    sigs = OrderedDict(
+        [
+            (plugin.enable, 1),
+            (plugin.parent.cam.array_callbacks, 1),  # set by number
+            (plugin.parent.cam.image_mode, 0),  # Single, set by number
+            (plugin.parent.cam.trigger_mode, 0),  # set by number
+            # just in case the acquisition time is set very long...
+            (plugin.parent.cam.acquire_time, 1),
+            (plugin.parent.cam.acquire_period, 1),
+            (plugin.parent.cam.acquire, 1),  # set by number
+        ]
+    )
+
+    original_vals = {sig: sig.get() for sig in sigs}
+
+    for sig, val in sigs.items():
+        time.sleep(0.1)  # abundance of caution
+        set_and_wait(sig, val)
+
+    while plugin.parent.cam.acquire.get() not in (0, "Done"):
+        time.sleep(.05)  # wait for acquisition to finish
+
+    for sig, val in reversed(list(original_vals.items())):
+        time.sleep(0.1)
+        set_and_wait(sig, val)

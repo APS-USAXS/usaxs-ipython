@@ -326,12 +326,31 @@ class DetectorAmplifierAutorangeDevice(Device):
     """
 
     def __init__(self, nickname, scaler, signal, amplifier, auto, **kwargs):
-        # TODO: change these asserts into if, not good coding practice.
-        assert isinstance(nickname, str)
-        assert isinstance(scaler, ScalerCH)      # dropped EpicsScaler
-        assert isinstance(signal, ScalerChannel) # dropped EpicsSignalRO
-        assert isinstance(amplifier, FemtoAmplifierDevice)
-        assert isinstance(auto, AmplifierAutoDevice)
+        if not isinstance(nickname, str):
+            raise ValueError(
+                "'nickname' should be of 'str' type,"
+                f" received type: {type(nickname)}"
+            )
+        if not isinstance(scaler, ScalerCH):
+            raise ValueError(
+                "'scaler' should be of 'ScalerCH' type,"
+                f" received type: {type(scaler)}"
+            )
+        if not isinstance(signal, ScalerChannel):
+            raise ValueError(
+                "'signal' should be of 'ScalerChannel' type,"
+                f" received type: {type(signal)}"
+            )
+        if not isinstance(amplifier, FemtoAmplifierDevice):
+            raise ValueError(
+                "'amplifier' should be of 'FemtoAmplifierDevice' type,"
+                f" received type: {type(amplifier)}"
+            )
+        if not isinstance(auto, AmplifierAutoDevice):
+            raise ValueError(
+                "'auto' should be of 'AmplifierAutoDevice' type,"
+                f" received type: {type(auto)}"
+            )
         self.nickname = nickname
         self.scaler = scaler
         self.signal = signal
@@ -551,18 +570,27 @@ def autoscale_amplifiers(controls, shutter=None, count_time=0.05, max_iterations
         yield from bps.mv(shutter, "open")
 
     for control_list in scaler_dict.values():
-        # do these in sequence, just in case same hardware used multiple times
+        # do amplifiers in sequence, in case same hardware used multiple times
         if len(control_list) > 0:
-            msg = "Autoscaling amplifier for: " + control_list[0].nickname
-            logger.info(msg)
+            logger.info(
+                "Autoscaling amplifier for: %s",
+                control_list[0].nickname
+            )
             try:
                 yield from _scaler_autoscale_(
                     control_list,
                     count_time=count_time,
                     max_iterations=max_iterations)
             except AutoscaleError as exc:
-                emsg = f"{exc} - will continue despite warning"
-                logger.warning(emsg)
+                logger.warning(
+                    "%s: %s - will continue despite warning",
+                    control_list[0].nickname, exc
+                )
+            except Exception as exc:
+                logger.error(
+                    "%s: %s - will continue anyway",
+                    control_list[0].nickname, exc,
+                )
 
 
 # ------------

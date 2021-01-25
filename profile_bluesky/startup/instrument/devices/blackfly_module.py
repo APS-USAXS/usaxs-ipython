@@ -13,8 +13,8 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from apstools.devices import AD_plugin_primed
-# TODO: from apstools.devices import AD_prime_plugin
+from .area_detector_common import Override_AD_plugin_primed
+# from apstools.devices import AD_prime_plugin2
 from bluesky import plan_stubs as bps
 
 from ophyd import ADComponent
@@ -170,22 +170,6 @@ _flag_save_sample_image_ = EpicsSignal(
     name="_flag_save_sample_image_",
     )
 
-# temporary fix for apstools.device 1.3.8
-def AD_prime_plugin(detector, detector_plugin):
-    old_enable = detector_plugin.enable.get()
-    old_mode = detector_plugin.file_write_mode.get()
-
-    detector_plugin.enable.put(1)
-    # next step is important:
-    # SET the write mode to "Single" (0) or plugin's Capture=1 won't stay
-    detector_plugin.file_write_mode.put(0)
-    detector_plugin.capture.put(1)
-    detector.cam.acquire.put(1)
-
-    # reset things
-    detector_plugin.file_write_mode.put(old_mode)
-    detector_plugin.enable.put(old_enable)
-
 
 try:
     nm = OPTICAL_CAMERA
@@ -195,11 +179,11 @@ try:
         labels=["camera", "area_detector"])
     blackfly_optical.read_attrs.append("jpeg1")
     blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
-    if not AD_plugin_primed(blackfly_optical.jpeg1):
+    if not Override_AD_plugin_primed(blackfly_optical.jpeg1):
         warnings.warn(
             "NOTE: blackfly_optical.jpeg1 has not been primed yet."
             "  BEFORE using this detector in bluesky, call: "
-            "  AD_prime_plugin(blackfly_optical, blackfly_optical.jpeg1)"
+            "  AD_prime_plugin2(blackfly_optical.jpeg1)"
         )
 except TimeoutError as exc_obj:
     logger.warning(
