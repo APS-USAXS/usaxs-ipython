@@ -26,15 +26,14 @@ class PSS_Parameters(Device):
     b_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_B_SBS_CLSD_PL", string=True)
     b_shutter_open_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_B_FES_OPEN_PL", string=True)
 
+    c_beam_ready_leds = Component(EpicsSignalRO, "PA:09ID:STA_C_BEAMREADY_PL", string=True)
     c_shutter_closed_chain_A = Component(EpicsSignalRO, "PA:09ID:SCS_PS_CLSD_LS", string=True)
     c_shutter_closed_chain_B = Component(EpicsSignalRO, "PB:09ID:SCS_PS_CLSD_LS", string=True)
-    c_station_no_access_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_NO_ACCESS.VAL", string=True)
-
-    c_beam_ready_leds = Component(EpicsSignalRO, "PA:09ID:STA_C_BEAMREADY_PL", string=True)
     c_station_door1_closed_switch_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_DR1_CLOSE_LS", string=True)
     c_station_door1_closed_switch_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_C_DR1_CLOSE_LS", string=True)
     c_station_door2_closed_switch_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_DR2_CLOSE_LS", string=True)
     c_station_door2_closed_switch_chain_B = Component(EpicsSignalRO, "PB:09ID:STA_C_DR2_CLOSE_LS", string=True)
+    c_station_no_access_chain_A = Component(EpicsSignalRO, "PA:09ID:STA_C_NO_ACCESS.VAL", string=True)
     c_station_no_access_sign = Component(EpicsSignalRO, "PA:09ID:STA_C_NO_ACCESS", string=True)
 
     # other signals?
