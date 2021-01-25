@@ -43,6 +43,7 @@ from ophyd.areadetector.filestore_mixins import FileStoreBase
 from ophyd.areadetector.filestore_mixins import FileStoreIterativeWrite
 from ophyd.utils import set_and_wait
 import itertools
+import numpy as np
 import time
 
 
@@ -139,10 +140,34 @@ class EpicsDefinesTiffFileNames(TIFFPlugin,
                                 myTiffEpicsIterativeWriter): ...
 
 
+def Override_AD_plugin_primed(plugin):
+    """
+    Has area detector pushed an NDarray to the file writer plugin?
+    """
+    cam = plugin.parent.cam
+    tests = []
+
+    for obj in (cam, plugin):
+        test = np.array(obj.array_size.get()).sum() != 0
+        tests.append(test)
+        if not test:
+            logger.debug("'%s' image size is zero", obj.name)
+
+    checks = dict(array_size=False, color_mode=True,)
+    for key, as_string in checks.items():
+        c = getattr(cam, key).get(as_string=as_string)
+        p = getattr(plugin, key).get(as_string=as_string)
+        test = c == p
+        tests.append(test)
+        if not test:
+            logger.debug("%s does not match", key)
+
+    return False not in tests
+
 
 def Override_AD_prime_plugin2(plugin):
     """Override faulty apstools implementation"""
-    if AD_plugin_primed(plugin):
+    if Override_AD_plugin_primed(plugin):
         logger.debug("'%s' plugin is already primed", plugin.name)
         return
 

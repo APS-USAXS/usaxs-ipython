@@ -90,18 +90,25 @@ except TimeoutError as exc_obj:
     dexela_det = None
 
 
-def _acquire_Dexela_N(target_acquire_time_s):
+def _acquire_Dexela_N(target_time_s, exposure_control=True):
     """
     Save N frames from the Dexela as one image in an HDF file.
 
     ophyd code: NOT a bluesky plan
     """
     det = dexela_det
-    fixed_acq_time = det.cam.acquire_time.get()
-    num_frames = round(target_acquire_time_s / fixed_acq_time)
+    if exposure_control:
+        # this will control exposure time
+        fixed_acq_time = det.cam.acquire_time.get()
+        num_frames = round(target_time_s / fixed_acq_time)
+    else:
+        # this will control total duration
+        # note: additional ~1 s added by cam+hdf5
+        EMPIRICAL_DURATION = 1/8.0  # measured 8 frames/s
+        num_frames = round(target_time_s / EMPIRICAL_DURATION)
     logger.info(
         "acquire time of %f s, will acquire %d frames",
-        target_acquire_time_s,
+        target_time_s,
         num_frames,
     )
 
@@ -114,6 +121,9 @@ def _acquire_Dexela_N(target_acquire_time_s):
     # fmt: on
 
     # configure for acquisition
+    det.cam.stage_sigs["image_mode"] = 1  # "Multiple", must set by number!
+    det.cam.stage_sigs["num_images"] = num_frames
+
     det.proc1.stage_sigs["enable"] = 1  # Enable
     det.proc1.stage_sigs["enable_filter"] = 1  # Enable
     det.proc1.stage_sigs["num_filter"] = num_frames
@@ -133,7 +143,7 @@ def _acquire_Dexela_N(target_acquire_time_s):
     det.hdf1.stage_sigs["file_template"] = "%s%s_%6.6d.h5"
     det.hdf1.stage_sigs["file_write_mode"] = "Capture"
     # avoid the need to prime the plugin
-    det.hdf1.stage_sigs["lazy_open"] = 1
+    # det.hdf1.stage_sigs["lazy_open"] = 1
     det.hdf1.stage_sigs["compression"] = "LZ4"
     det.hdf1.stage_sigs["capture"] = 1
 
@@ -146,8 +156,11 @@ def _acquire_Dexela_N(target_acquire_time_s):
     t0 = time.time()
     logger.debug("triggering ...")
     det.trigger()
-    logger.info("sleep: %f s", target_acquire_time_s)
-    time.sleep(target_acquire_time_s)
+    m = "total duration"
+    if exposure_control:
+        m = "exposure time"
+    logger.info("sleep: %f s, based on %s", target_time_s, m)
+    time.sleep(target_time_s)
     while det.cam.acquire.get() not in (0, "Stop", "Done"):
         time.sleep(0.02)
     logger.info("acquire time: %.2f s", (time.time() - t0))

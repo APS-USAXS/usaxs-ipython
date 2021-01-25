@@ -13,7 +13,7 @@ __all__ = [
 from ..session_logs import logger
 logger.info(__file__)
 
-from apstools.devices import AD_plugin_primed
+from .area_detector_common import Override_AD_plugin_primed
 # from apstools.devices import AD_prime_plugin2
 from bluesky import plan_stubs as bps
 
@@ -179,7 +179,7 @@ try:
         labels=["camera", "area_detector"])
     blackfly_optical.read_attrs.append("jpeg1")
     blackfly_optical.jpeg1.stage_sigs["file_write_mode"] = "Single"
-    if not AD_plugin_primed(blackfly_optical.jpeg1):
+    if not Override_AD_plugin_primed(blackfly_optical.jpeg1):
         warnings.warn(
             "NOTE: blackfly_optical.jpeg1 has not been primed yet."
             "  BEFORE using this detector in bluesky, call: "
