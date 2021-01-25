@@ -8,6 +8,7 @@ not bluesky plans (no need to execute in RE() wrapper)
 # user support
 #-------------
 from .motors import *
+from .user_sample_title import *
 
 # called by other code
 # (no need to import into global namespace)
