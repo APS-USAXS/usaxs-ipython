@@ -24,6 +24,7 @@ from apstools.devices import SCALER_AUTOCOUNT_MODE
 from bluesky import plan_stubs as bps
 import datetime
 
+from ..devices.diagnostics import diagnostics
 from ..devices import blackfly_det
 from ..devices.stages import a_stage, d_stage, saxs_stage
 from ..devices.aps_source import aps
@@ -273,40 +274,41 @@ def mode_Radiography(md=None):
         user_data.time_stamp, ts,
         user_data.macro_file_time, ts,
         user_data.scanning, 0,
+        user_data.collection_in_progress, 0,
         )
 
     yield from user_data.set_state_plan("Radiography Mode")
+    logger.info("Instrument is configured for Radiography now.")
 
-    if aps.shutter_permit.get() in (1, 'PERMIT'):
+    if diagnostics.BL_EPS.station_shutter_b_permit.get() not in (1, 'GOOD'):
+        logger.warning("Not permitted to open mono shutter now.")
+        logger.info("Open the mono shutter manually when permitted.")
+    else:
         yield from bps.mv(
             mono_shutter, "open",
-            user_data.collection_in_progress, 0,
         )
-
-    if mono_shutter.state == "open":
-        msg = "TV should now show Radiography CCD image."
-    else:
-        msg = "The mono shutter is closed now.  APS beam dump?"
-
-    msg += """
-
-    But before calling - are you REALLY sure the sample is not blocking the beam?
-       Move sample out and try RE(preUSAXStune()) again.
-
-    If still no image on the CCD, check:
-
-    * TV on? Right TV input?
-    * Camera on (Blue button)?
-    * Beam on?
-    * Shutters opened?
-    * Sample/holder out of beam?
-
-    - if all is OK, try running RE(preUSAXStune()).
-    preUSAXStune worked? Run RE(mode_Radiography()).
-
-    Still not working? Call Jan or Ivan.
-    """
-    print(msg)
+        if mono_shutter.state == "open":
+            logger.info("TV should now show Radiography CCD image.")
+            print(
+                "But before calling if you do not see an image:"
+                "\n - are you CERTAIN the sample is not blocking the beam?"
+                "\nMove sample out and try RE(preUSAXStune()) again."
+                "\n"
+                "\nIf still no image on the CCD, check:"
+                "\n"
+                "\n* TV on? Right TV input?"
+                "\n* Camera on (Blue button)?"
+                "\n* Beam on?"
+                "\n* Shutters opened?"
+                "\n* Sample/holder out of beam?"
+                "\n"
+                "\nIf all is OK, try running RE(preUSAXStune())."
+                "\nIf preUSAXStune worked? Run RE(mode_Radiography())."
+                "\n"
+                "\nStill not working? Call Jan or Ivan."
+            )
+        else:
+            logger.info("The mono shutter is closed now.  APS beam dump?")
 
 
 def mode_imaging(md=None):
