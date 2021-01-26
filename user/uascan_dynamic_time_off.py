@@ -2,7 +2,11 @@
 """
 Turn off dynamic time in uascan.
 
-%run -i user/uascan_dynamic_time_off.py
+Command line::
+    %run -i user/uascan_dynamic_time_off.py
+
+In a command file::
+    run_python user/uascan_dynamic_time_off.py
 """
 
 from instrument.session_logs import logger

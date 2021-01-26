@@ -2,7 +2,11 @@
 """
 Turn on dynamic time in uascan.
 
-%run -i user/uascan_dynamic_time_on.py
+Command line::
+    %run -i user/uascan_dynamic_time_on.py
+
+In a command file::
+    run_python user/uascan_dynamic_time_on.py    
 """
 
 from instrument.session_logs import logger
