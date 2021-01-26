@@ -522,16 +522,23 @@ def run_python_file(filename, md=None):
     Plan: load and run a Python file using the IPython `%mov` magic.
 
     * look for the file relative to pwd or in sys.path
-    * load the file (by running it)
+    * %run -i the file (in the ipython shell namespace)
     """
     yield from bps.null()
-    # need a path to this file
-    candidates = [os.path.join(p, filename) for p in sys.path]
-    candidates.insert(0, filename)
-    found = False
+
+    # locate `filename` in one of the paths
+    candidates = [
+        os.path.abspath(os.path.join(p, filename))
+        for p in sys.path
+    ]
+    # first candidate is always relative to pwd
+    candidates.insert(0, os.path.abspath(filename))
+
     for f in candidates:
         if os.path.exists(f):
             logger.info("Running Python file: %s", f)
             get_ipython().run_line_magic("run", f"-i {f}")
             return
     logger.error("Could not find file '%s'", filename)
+    if not filename.endswith(".py"):
+        logger.warning("Did you forget the '.py' suffix on '%s'?", filename)
