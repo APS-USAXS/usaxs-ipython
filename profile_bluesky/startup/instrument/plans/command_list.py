@@ -523,8 +523,6 @@ def run_python_file(filename, md=None):
 
     * look for the file relative to pwd or in sys.path
     * load the file (by running it)
-    * TODO: Parse the file into a command list
-    * TODO: yield the command list to the RunEngine (or other)
     """
     yield from bps.null()
     # need a path to this file
