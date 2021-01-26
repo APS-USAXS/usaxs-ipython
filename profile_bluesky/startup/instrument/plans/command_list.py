@@ -522,8 +522,9 @@ def run_python_file(filename, md=None):
     Plan: load and run a Python file using the IPython `%mov` magic.
 
     * look for the file relative to pwd or in sys.path
-    * Parse the file into a command list
-    * yield the command list to the RunEngine (or other)
+    * load the file (by running it)
+    * TODO: Parse the file into a command list
+    * TODO: yield the command list to the RunEngine (or other)
     """
     yield from bps.null()
     # need a path to this file
