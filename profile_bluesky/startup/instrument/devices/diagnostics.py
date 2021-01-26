@@ -95,8 +95,8 @@ class BLEPS_Parameters(Device):
 class FEEPS_Parameters(Device):
     """Front End Equipment Protection System"""
     fe_permit = Component(EpicsSignalRO, "EPS:09:ID:FE:PERM", string=True)
-    major_fault = Component(EpicsSignalRO, "EPS:09:ID:Major", string=True)
-    minor_fault = Component(EpicsSignalRO, "EPS:09:ID:Minor", string=True)
+    # major_fault = Component(EpicsSignalRO, "EPS:09:ID:Major", string=True)
+    # minor_fault = Component(EpicsSignalRO, "EPS:09:ID:Minor", string=True)
     mps_permit = Component(EpicsSignalRO, "EPS:09:ID:MPS:RF:PERM", string=True)
     photon_shutter_1 = Component(EpicsSignalRO, "EPS:09:ID:PS1:POSITION", string=True)
     photon_shutter_2 = Component(EpicsSignalRO, "EPS:09:ID:PS2:POSITION", string=True)
