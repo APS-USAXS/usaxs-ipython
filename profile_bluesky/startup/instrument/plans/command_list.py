@@ -34,6 +34,7 @@ from usaxs_support.surveillance import instrument_archive
 import datetime
 import os
 import pyRestTable
+import sys
 
 from ..devices import constants
 from ..devices import email_notices
@@ -138,8 +139,8 @@ def before_command_list(md=None, commands=None):
 
 def after_command_list(md=None):
     """Actions after a command list is run."""
-    if md is None:
-        md = {}
+    # if md is None:
+    #     md = {}
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "USAXS macro file done",  # exact text triggers the music
@@ -169,8 +170,8 @@ def after_plan(weight=1, md=None):
     """Actions after every data collection plan."""
     from .scans import preUSAXStune
 
-    if md is None:
-        md = {}
+    # if md is None:
+    #     md = {}
 
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
@@ -338,7 +339,7 @@ def run_command_file(filename, md=None):
     if md is None:
         md = {}
     commands = get_command_list(filename)
-    yield from execute_command_list(filename, commands)
+    yield from execute_command_list(filename, commands, md=md)
 
 
 def execute_command_list(filename, commands, md=None):
@@ -452,6 +453,10 @@ def execute_command_list(filename, commands, md=None):
                 _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
                 yield from WAXS(sx, sy, sth, snm, md=_md)
 
+            elif action in ("run_python", "run"):
+                filename = args[0]
+                yield from run_python_file(filename, md={})
+
             elif action in simple_actions:
                 yield from simple_actions[action](md=_md)
 
@@ -460,8 +465,9 @@ def execute_command_list(filename, commands, md=None):
                 yield from bps.null()
             logger.info("memory report: %s", rss_mem())
 
-        attempt = 1  # count the number of attempts
-        while True:
+        attempt = 0  # count the number of attempts
+        maximum_attempts = 5  # set an upper limit
+        while attempt < maximum_attempts:
             try:
                 # call the inner function (above)
                 yield from _handle_actions_()
@@ -469,7 +475,7 @@ def execute_command_list(filename, commands, md=None):
             except Exception as exc:
                 subject = (
                     f"{exc.__class__.__name__}"
-                    f" during attempt {attempt}"
+                    f" during attempt {attempt+1} of {maximum_attempts}"
                     f" of command '{command}''"
                 )
                 body = (
@@ -480,7 +486,7 @@ def execute_command_list(filename, commands, md=None):
                     f"\nline number: {i}"
                     f"\ncommand: {command}"
                     f"\nraw command: {raw_command}"
-                    f"\nattempt: {attempt}"
+                    f"\nattempt: {attempt+1} of {maximum_attempts}"
                     f"\nexception: {exc}"
                 )
                 logger.error("Exception %s\n%s", subject, body)
@@ -515,12 +521,18 @@ def run_python_file(filename, md=None):
     """
     Plan: load and run a Python file using the IPython `%mov` magic.
 
+    * look for the file relative to pwd or in sys.path
     * Parse the file into a command list
     * yield the command list to the RunEngine (or other)
     """
-    if md is None:
-        md = {}
-    logger.info("Running Python file: %s", filename)
-    get_ipython().run_line_magic("run", f"-i {filename}")
     yield from bps.null()
-
+    # need a path to this file
+    candidates = [os.path.join(p, filename) for p in sys.path]
+    candidates.insert(0, filename)
+    found = False
+    for f in candidates:
+        if os.path.exists(f):
+            logger.info("Running Python file: %s", f)
+            get_ipython().run_line_magic("run", f"-i {f}")
+            return
+    logger.error("Could not find file '%s'", filename)
