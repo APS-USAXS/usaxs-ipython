@@ -4,19 +4,20 @@ run batch of scans from command list
 """
 
 __all__ = """
-    beforeScanComputeOtherStuff
-    postCommandsListfile2WWW
-    before_command_list
     after_command_list
-    before_plan
     after_plan
+    before_command_list
+    before_plan
+    beforeScanComputeOtherStuff
+    command_list_as_table
+    execute_command_list
+    get_command_list
     parse_Excel_command_file
     parse_text_command_file
-    command_list_as_table
-    get_command_list
-    summarize_command_file
+    postCommandsListfile2WWW
     run_command_file
-    execute_command_list
+    run_python_file
+    summarize_command_file
     sync_order_numbers
 """.split()
 
@@ -27,11 +28,13 @@ logger.info(__file__)
 from apstools.utils import ExcelDatabaseFileGeneric
 from apstools.utils import rss_mem
 from bluesky import plan_stubs as bps
+from IPython import get_ipython
 from usaxs_support.nexus import reset_manager
 from usaxs_support.surveillance import instrument_archive
 import datetime
 import os
 import pyRestTable
+import sys
 
 from ..devices import constants
 from ..devices import email_notices
@@ -55,16 +58,12 @@ from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
 def beforeScanComputeOtherStuff():
-    """
-    things to be computed and set before each data collection starts
-    """
+    """Actions before each data collection starts."""
     yield from bps.null()       # TODO: remove this once you add the "other stuff"
 
 
 def postCommandsListfile2WWW(commands):
-    """
-    post list of commands to WWW and archive the list for posterity
-    """
+    """Post list of commands to WWW and archive the list for posterity."""
     tbl_file = "commands.txt"
     tbl = command_list_as_table(commands)
     timestamp = datetime.datetime.now().isoformat().replace("T", " ")
@@ -93,11 +92,12 @@ def postCommandsListfile2WWW(commands):
 
 
 
-def before_command_list(commands=None, md={}):
-    """
-    things to be done before a command list is run
-    """
+def before_command_list(md=None, commands=None):
+    """Actions before a command list is run."""
     from .scans import preUSAXStune
+
+    if md is None:
+        md = {}
 
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
@@ -121,7 +121,9 @@ def before_command_list(commands=None, md={}):
     yield from beforeScanComputeOtherStuff()        # 41-commands.py
 
     if terms.preUSAXStune.run_tune_on_qdo.get():
-        logger.info("Runing preUSAXStune as requested at start of measurements")
+        logger.info(
+            "Running preUSAXStune as requested at start of measurements"
+        )
         yield from preUSAXStune(md=md)
 
     if constants["SYNC_ORDER_NUMBERS"]:
@@ -135,10 +137,10 @@ def before_command_list(commands=None, md={}):
     reset_manager()
 
 
-def after_command_list(md={}):
-    """
-    things to be done after a command list is run
-    """
+def after_command_list(md=None):
+    """Actions after a command list is run."""
+    # if md is None:
+    #     md = {}
     yield from bps.mv(
         user_data.time_stamp, str(datetime.datetime.now()),
         user_data.state, "USAXS macro file done",  # exact text triggers the music
@@ -147,10 +149,10 @@ def after_command_list(md={}):
     )
 
 
-def before_plan(md={}):
-    """
-    things to be done before every data collection plan
-    """
+def before_plan(md=None):
+    """Actions before every data collection plan."""
+    if md is None:
+        md = {}
     from .scans import preSWAXStune, preUSAXStune
 
     if terms.preUSAXStune.needed:
@@ -164,11 +166,12 @@ def before_plan(md={}):
             yield from preSWAXStune(md=md)
 
 
-def after_plan(weight=1, md={}):
-    """
-    things to be done after every data collection plan
-    """
+def after_plan(weight=1, md=None):
+    """Actions after every data collection plan."""
     from .scans import preUSAXStune
+
+    # if md is None:
+    #     md = {}
 
     yield from bps.mv(      # increment it
         terms.preUSAXStune.num_scans_last_tune,
@@ -178,7 +181,7 @@ def after_plan(weight=1, md={}):
 
 def parse_Excel_command_file(filename):
     """
-    parse an Excel spreadsheet with commands, return as command list
+    Parse an Excel spreadsheet with commands, return as command list.
 
     TEXT view of spreadsheet (Excel file line numbers shown)::
 
@@ -230,7 +233,7 @@ def parse_Excel_command_file(filename):
 
 def parse_text_command_file(filename):
     """
-    parse a text file with commands, return as command list
+    Parse a text file with commands, return as command list.
 
     * The text file is interpreted line-by-line.
     * Blank lines are ignored.
@@ -294,9 +297,7 @@ def parse_text_command_file(filename):
 
 
 def command_list_as_table(commands):
-    """
-    format a command list as a pyRestTable.Table object
-    """
+    """Format a command list as a :class:`pyRestTable.Table()` object."""
     tbl = pyRestTable.Table()
     tbl.addLabel("line #")
     tbl.addLabel("action")
@@ -309,9 +310,7 @@ def command_list_as_table(commands):
 
 
 def get_command_list(filename):
-    """
-    return command list from either text or Excel file
-    """
+    """Return command list from either text or Excel file."""
     full_filename = os.path.abspath(filename)
     assert os.path.exists(full_filename)
     try:
@@ -322,30 +321,30 @@ def get_command_list(filename):
 
 
 def summarize_command_file(filename):
-    """
-    print the command list from a text or Excel file
-    """
+    """Print the command list from a text or Excel file."""
     commands = get_command_list(filename)
-    logger.info((
-        f"Command file: {filename}\n"
-        f"{command_list_as_table(commands)}"
-    ))
+    logger.info(
+        "Command file: %s\n%s",
+        command_list_as_table(commands), filename
+    )
 
 
-def run_command_file(filename, md={}):
+def run_command_file(filename, md=None):
     """
-    plan: execute a list of commands from a text or Excel file
+    Plan: execute a list of commands from a text or Excel file.
 
     * Parse the file into a command list
     * yield the command list to the RunEngine (or other)
     """
+    if md is None:
+        md = {}
     commands = get_command_list(filename)
-    yield from execute_command_list(filename, commands)
+    yield from execute_command_list(filename, commands, md=md)
 
 
-def execute_command_list(filename, commands, md={}):
+def execute_command_list(filename, commands, md=None):
     """
-    plan: execute the command list
+    Plan: execute the command list.
 
     The command list is a tuple described below.
 
@@ -378,6 +377,9 @@ def execute_command_list(filename, commands, md={}):
     """
     from .scans import preUSAXStune, SAXS, USAXSscan, WAXS
 
+    if md is None:
+        md = {}
+
     full_filename = os.path.abspath(filename)
 
     if len(commands) == 0:
@@ -397,7 +399,7 @@ def execute_command_list(filename, commands, md={}):
     yield from before_command_list(md=md, commands=commands)
     for command in commands:
         action, args, i, raw_command = command
-        logger.info(f"file line {i}: {raw_command}")
+        logger.info("file line %d: %s", i, raw_command)
 
         _md = {}
         _md["full_filename"] = full_filename
@@ -409,6 +411,7 @@ def execute_command_list(filename, commands, md={}):
 
         _md.update(md or {})      # overlay with user-supplied metadata
 
+        action = action.lower()
         simple_actions = dict(
             # command names MUST be lower case!
             # TODO: all these should accept a `md` kwarg
@@ -422,8 +425,6 @@ def execute_command_list(filename, commands, md={}):
             pi_onr = PI_onR,
             preusaxstune = preUSAXStune,
         )
-
-        action = action.lower()
 
         def _handle_actions_():
             """Inner function to make try..except clause more clear."""
@@ -452,16 +453,21 @@ def execute_command_list(filename, commands, md={}):
                 _md.update(dict(sx=sx, sy=sy, thickness=sth, title=snm))
                 yield from WAXS(sx, sy, sth, snm, md=_md)
 
+            elif action in ("run_python", "run"):
+                filename = args[0]
+                yield from run_python_file(filename, md={})
+
             elif action in simple_actions:
                 yield from simple_actions[action](md=_md)
 
             else:
-                logger.info(f"no handling for line {i}: {raw_command}")
+                logger.info("no handling for line %d: %s", i, raw_command)
                 yield from bps.null()
             logger.info("memory report: %s", rss_mem())
 
-        attempt = 1  # count the number of attempts
-        while True:
+        attempt = 0  # count the number of attempts
+        maximum_attempts = 5  # set an upper limit
+        while attempt < maximum_attempts:
             try:
                 # call the inner function (above)
                 yield from _handle_actions_()
@@ -469,7 +475,7 @@ def execute_command_list(filename, commands, md={}):
             except Exception as exc:
                 subject = (
                     f"{exc.__class__.__name__}"
-                    f" during attempt {attempt}"
+                    f" during attempt {attempt+1} of {maximum_attempts}"
                     f" of command '{command}''"
                 )
                 body = (
@@ -480,7 +486,7 @@ def execute_command_list(filename, commands, md={}):
                     f"\nline number: {i}"
                     f"\ncommand: {command}"
                     f"\nraw command: {raw_command}"
-                    f"\nattempt: {attempt}"
+                    f"\nattempt: {attempt+1} of {maximum_attempts}"
                     f"\nexception: {exc}"
                 )
                 logger.error("Exception %s\n%s", subject, body)
@@ -493,7 +499,7 @@ def execute_command_list(filename, commands, md={}):
 
 def sync_order_numbers():
     """
-    synchronize the order numbers between the various detectors
+    Synchronize the order numbers between the various detectors.
 
     Pick the maximum order number from each detector (or
     supported scan technique) and set them all to that number.
@@ -509,3 +515,31 @@ def sync_order_numbers():
         saxs_det.hdf1.file_number, order_number,
         waxs_det.hdf1.file_number, order_number,
     )
+
+
+def run_python_file(filename, md=None):
+    """
+    Plan: load and run a Python file using the IPython `%mov` magic.
+
+    * look for the file relative to pwd or in sys.path
+    * %run -i the file (in the ipython shell namespace)
+    """
+    yield from bps.null()
+
+    # locate `filename` in one of the paths
+    candidates = [
+        os.path.abspath(os.path.join(p, filename))
+        for p in sys.path
+    ]
+    # first candidate is always relative to pwd
+    candidates.insert(0, os.path.abspath(filename))
+
+    for f in candidates:
+        if os.path.exists(f):
+            logger.info("Running Python file: %s", f)
+            get_ipython().run_line_magic("run", f"-i {f}")
+            return
+    logger.error("Could not find file '%s'", filename)
+    if not filename.endswith(".py"):
+        logger.warning("Did you forget the '.py' suffix on '%s'?", filename)
+ 
