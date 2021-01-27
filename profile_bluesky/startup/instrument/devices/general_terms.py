@@ -267,9 +267,19 @@ class Parameters_OutOfBeam(Device):
     pass
 
 
-class Parameters_User(Device):
-    linkam_trigger = Component(EpicsSignal, "9idcLAX:bit16", string=True)
+# keep in sync with usaxs_support.heater_profile_process
+class Parameters_HeaterProcess(Device):
+    # tell heater process to exit
+    linkam_exit = Component(EpicsSignal, "9idcLAX:bit14")
+
+    # heater process increments at 10 Hz
     linkam_pulse = Component(EpicsSignal, "9idcLAX:long16")
+
+    # heater process is ready
+    linkam_ready = Component(EpicsSignal, "9idcLAX:bit15")
+
+    # heater process should start
+    linkam_trigger = Component(EpicsSignal, "9idcLAX:bit16")
 
 
 class GeneralParameters(Device):
@@ -292,7 +302,7 @@ class GeneralParameters(Device):
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
 
-    User = Component(Parameters_User)
+    HeaterProcess = Component(Parameters_HeaterProcess)
 
 
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!
