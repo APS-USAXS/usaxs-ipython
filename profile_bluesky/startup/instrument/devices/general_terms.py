@@ -269,6 +269,7 @@ class Parameters_OutOfBeam(Device):
 
 class Parameters_User(Device):
     linkam_trigger = Component(EpicsSignal, "9idcLAX:bit16", string=True)
+    linkam_pulse = Component(EpicsSignal, "9idcLAX:long16")
 
 
 class GeneralParameters(Device):
