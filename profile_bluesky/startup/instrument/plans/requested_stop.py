@@ -42,8 +42,10 @@ def IfRequestedStopBeforeNextScan():
         open_the_shutter = True
 
     if terms.StopBeforeNextScan.get():
-        msg = "User requested stop data collection before next scan"
+        msg = "EPICS user requested stop data collection before next scan"
         logger.info(msg)
+        # the last line of text is overwritten after the run ends
+        logger.info("#"*10)  # sacrificial text line
         yield from bps.mv(
             ti_filter_shutter,                  "close",
             terms.StopBeforeNextScan,           0,
