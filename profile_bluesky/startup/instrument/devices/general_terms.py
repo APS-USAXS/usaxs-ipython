@@ -267,6 +267,10 @@ class Parameters_OutOfBeam(Device):
     pass
 
 
+class Parameters_User(Device):
+    linkam_trigger = Component(EpicsSignal, "9idcLAX:bit16", string=True)
+
+
 class GeneralParameters(Device):
     """
     cache of parameters to share with/from EPICS
@@ -286,6 +290,8 @@ class GeneralParameters(Device):
     # consider refactoring
     FlyScan = Component(FlyScanParameters)
     preUSAXStune = Component(PreUsaxsTuneParameters)
+
+    User = Component(Parameters_User)
 
 
 # NOTE: ALL referenced PVs **MUST** exist or get() operations will fail!
