@@ -473,6 +473,8 @@ def execute_command_list(filename, commands, md=None):
                 yield from _handle_actions_()
                 break  # leave the while loop
             except Exception as exc:
+                if exc.__class__.__name__ in ("RequestAbort",):
+                    break  # we requested abort from EPICS
                 subject = (
                     f"{exc.__class__.__name__}"
                     f" during attempt {attempt+1} of {maximum_attempts}"
