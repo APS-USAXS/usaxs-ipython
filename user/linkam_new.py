@@ -5,20 +5,32 @@ logger.info(__file__)
 
 
 from bluesky import plan_stubs as bps
+import subprocess
 import time
 
 from instrument.devices import linkam_ci94, linkam_tc1, terms
 from instrument.plans import SAXS, USAXSscan, WAXS
 from instrument.utils import getSampleTitle, resetSampleTitleFunction, setSampleTitleFunction
 
+HEATER_SCRIPT = "/home/beams/USAXS/bin/heater_profile_manager.sh"
 PULSE_MAX = 10000
 
-def countProcessesRunning():
-    """Watch the pulse and count how many 10 Hz processes running."""
-    pulse0 = terms.HeaterProcess.linkam_pulse.get()
-    time.sleep(10)  # watch for 10 s
-    pulses = (terms.HeaterProcess.linkam_pulse.get() - pulse0) % PULSE_MAX
-    return round(pulses / PULSE_MAX)
+
+def commandHeaterProcess(command="checkup"):
+    """
+    Send a command to the external heater process shell script.
+
+    * checkup - (default) start the process if not already running
+    * restart - stop (if running), then start the process
+    * start - start the process
+    * status - show process info if running
+    * stop - stop the process
+    """
+    response = subprocess.run(
+        f"{HEATER_SCRIPT} {command}".split(), capture_output=True
+    )
+    return response.stdout.decode().strip()
+
 
 def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     """
@@ -55,10 +67,11 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     t1 = time.time()
     yield from collectAllThree()
     
-    
-    # TODO: start the program
-    # TODO: We have to measure the pulse in a background thread.
-    # TODO: wait for number of processes to equal 1 (blocking so background thread)
+    # signal the (external) Linkam control python program to start
+    commandHeaterProcess("checkup")  # starts, if not already started
+    yield from bps.sleep(1)  # wait for the process to start
+    while terms.HeaterProcess.linkam_ready.get() != 1:
+        yield from bps.sleep(1)  # wait until process is ready
 
     # here we need to trigger the Linkam control python program...
     yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)
