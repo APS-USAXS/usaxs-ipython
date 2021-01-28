@@ -76,10 +76,8 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     logger.info("External Linkam is ready ...")
 
     # here we need to trigger the Linkam control python program...
-    logger.info("Stopping the External Linkam heating plan ...")
-    # TODO: choose orderly or abrupt
-    yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)  # orderly
-    # commandHeaterProcess("stop")  # abrupt
+    logger.info("Triggering (starting) the External Linkam heating plan ...")
+    yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)
 
     t1 = time.time()
     delay = delaymin * 60                                  # convert to seconds
@@ -90,7 +88,10 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     logger.info("Finished after %.3f seconds", delay)
 
     # tell the Linkam control python program to exit...
-    yield from bps.mv(terms.HeaterProcess.linkam_exit, 1)
+    logger.info("Stopping the External Linkam heating plan ...")
+    # TODO: choose orderly or abrupt exit
+    yield from bps.mv(terms.HeaterProcess.linkam_exit, 1)  # orderly
+    # commandHeaterProcess("stop")  # abrupt
 
     resetSampleTitleFunction()
 
