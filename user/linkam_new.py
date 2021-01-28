@@ -37,7 +37,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     collect RT USAXS/SAXS/WAXS
     change temperature T to temp1 with rate1
     collect USAXS/SAXS/WAXS while Linkam is runinng on its own
-    delaymin [minutes] is total time which the cycle should take. 
+    delaymin [minutes] is total time which the cycle should take.
     it will end after this time elapses...
 
     reload by
@@ -61,29 +61,35 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     #linkam = linkam_tc1
     linkam = linkam_ci94
     logger.info(f"Linkam controller PV prefix={linkam.prefix}")
-    
+
     setSampleTitleFunction(myTitleFunction)
 
-    t1 = time.time()
+    t1 = time.time()  # TODO: used?  (see below after trigger)
     yield from collectAllThree()
-    
+
     # signal the (external) Linkam control python program to start
+    logger.info("Starting external Linkam controller process ...")
     commandHeaterProcess("checkup")  # starts, if not already started
     yield from bps.sleep(1)  # wait for the process to start
     while terms.HeaterProcess.linkam_ready.get() != 1:
         yield from bps.sleep(1)  # wait until process is ready
+    logger.info("External Linkam is ready ...")
 
     # here we need to trigger the Linkam control python program...
-    yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)
+    logger.info("Stopping the External Linkam heating plan ...")
+    # TODO: choose orderly or abrupt
+    yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)  # orderly
+    # commandHeaterProcess("stop")  # abrupt
+
     t1 = time.time()
     delay = delaymin * 60                                  # convert to seconds
-    
+
     while time.time()-t1 < delay:                          # collects data for delay seconds
         yield from collectAllThree()
 
-    logger.info(f"Finished after {delay} seconds")
-    
-    # tell the Linkam control python program to exit... 
+    logger.info("Finished after %.3f seconds", delay)
+
+    # tell the Linkam control python program to exit...
     yield from bps.mv(terms.HeaterProcess.linkam_exit, 1)
 
     resetSampleTitleFunction()
