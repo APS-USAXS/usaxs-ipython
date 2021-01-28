@@ -1,4 +1,4 @@
-#!/usr/bin/env ipython
+#!/usr/bin/env python
 
 """
 Kickoff a temperature profile on the sample heater as a Bluesky plan.
@@ -18,26 +18,15 @@ the only output from this program is via EPICS PVs and log files.
 All configuration is communicated via EPICS PVs
 which are interfaced here as ophyd EpicsSignal objects.
 
-Also, this program manages a *pulse* PV that increments when
-the program is ready for operations.  The pulse increments at 10 Hz.
-This is useful in several ways:
-
-1. Pulse of ca. 0 Hz indicates *no* process is running.
-1. Pulse of ca. 10 Hz indicates the process is running.
-1. Pulse of n*10 Hz indicates n processes are running (an error condition).
-
 See https://github.com/APS-USAXS/ipython-usaxs/issues/482 for details.
 """
 
-from apstools.utils import run_in_thread
 from bluesky import plan_stubs as bps
 from bluesky import plans as bp
 from bluesky import RunEngine
 from ophyd import Component
 from ophyd import Device
 from ophyd import EpicsSignal
-# from ophyd import EpicsSignalRO
-# from ophyd import EpicsSignalWithRBV
 
 import os
 import stdlogpj
@@ -110,7 +99,17 @@ def countProcessesRunning():
 
 @run_in_thread
 def start10HzPulse():
-    """Start the 10 Hz pulse incrementer."""
+    """
+    Start the 10 Hz pulse incrementer.
+
+    Also, this program manages a *pulse* PV that increments when
+    the program is ready for operations.  The pulse increments at 10 Hz.
+    This is useful in several ways:
+
+    1. Pulse of ca. 0 Hz indicates *no* process is running.
+    1. Pulse of ca. 10 Hz indicates the process is running.
+    1. Pulse of n*10 Hz indicates n processes are running (an error condition).
+    """
     logger.info("Starting the 10 Hz pulse...")
     tPulse = time.time()
     while True:
@@ -136,6 +135,7 @@ def main():
 
     start10HzPulse()
 
+    print(f"{__file__} starting ...")
     logger.info("Watch for the EPICS trigger to start heater profile.")
     process_control.linkam_ready.put(True)
     while True:  # must run in main thread
