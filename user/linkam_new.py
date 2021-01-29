@@ -15,7 +15,6 @@ from instrument.utils import getSampleTitle, resetSampleTitleFunction, setSample
 HEATER_SCRIPT = "/home/beams/USAXS/bin/heater_profile_manager.sh"
 PULSE_MAX = 10000
 
-
 def commandHeaterProcess(command="checkup"):
     """
     Send a command to the external heater process shell script.
@@ -64,7 +63,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
 
     setSampleTitleFunction(myTitleFunction)
 
-    t1 = time.time()  # TODO: used?  (see below after trigger)
+    t1 = time.time()                                      # it is used in myTitileFunction
     yield from collectAllThree()
 
     # signal the (external) Linkam control python program to start
