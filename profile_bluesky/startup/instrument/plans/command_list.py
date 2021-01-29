@@ -54,6 +54,7 @@ from .mode_changes import mode_Radiography
 from .mode_changes import mode_SAXS
 from .mode_changes import mode_USAXS
 from .mode_changes import mode_WAXS
+from .requested_stop import RequestAbort
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
@@ -467,13 +468,15 @@ def execute_command_list(filename, commands, md=None):
 
         attempt = 0  # count the number of attempts
         maximum_attempts = 5  # set an upper limit
+        exit_requested = False
         while attempt < maximum_attempts:
             try:
                 # call the inner function (above)
                 yield from _handle_actions_()
                 break  # leave the while loop
             except Exception as exc:
-                if exc.__class__.__name__ in ("RequestAbort",):
+                if exc.__class__ in (RequestAbort,):
+                    exit_requested = True
                     break  # we requested abort from EPICS
                 subject = (
                     f"{exc.__class__.__name__}"
@@ -494,6 +497,9 @@ def execute_command_list(filename, commands, md=None):
                 logger.error("Exception %s\n%s", subject, body)
                 email_notices.send(subject, body)
                 attempt += 1
+
+        if exit_requested:
+            break
 
     yield from after_command_list(md=md)
     logger.info("memory report: %s", rss_mem())
