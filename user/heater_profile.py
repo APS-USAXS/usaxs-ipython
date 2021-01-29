@@ -22,14 +22,21 @@ from ophyd import EpicsSignalWithRBV
 from ophyd import PVPositioner
 from ophyd import Signal
 import datetime
+import os
 import time
 
 
-# FIXME: not important now, use print()
-# import logging
-# logger = logging.getLogger(__name__)
-# logger.info(__file__)
-# logger.setLevel("INFO")
+SECOND = 1
+MINUTE = 60*SECOND
+HOUR = 60*MINUTE
+
+# write output to log file in userDir, name=MMDD-HHmm-heater-log.txt
+user_dir = EpicsSignalRO("9idcLAX:userDir", name="user_dir", string=True)
+user_dir.wait_for_connection()
+log_file_name = os.path.join(
+    user_dir.get(),
+    datetime.datetime.now().strftime("%m%d-%H%M-heater-log.txt")
+)
 
 # Can't call the instrument package in this module.
 # Thus, we must re-define these devices here
@@ -73,16 +80,39 @@ class Linkam_T96_Device(FeatureMixin, PVPositioner):
     done = Component(EpicsSignalRO, "rampAtLimit_RBV", kind="omitted")
     heating_switch = Component(EpicsSignalWithRBV, "heating", kind="config")
 
+linkam_exit = EpicsSignal("9idcLAX:bit14", name="linkam_exit")
+linkam_ci94 = Linkam_CI94_Device("9idcLAX:ci94:", name="linkam_ci94", egu="C")
+linkam_tc1 = Linkam_T96_Device("9idcLINKAM:tc1:", name="linkam_tc1", egu="C")
+
+for o in (linkam_ci94, linkam_exit, linkam_tc1):
+    o.wait_for_connection()
+
+linkam = linkam_tc1     # choose which one
+
 
 def isotime():
+    """ISO-8601 format time, ms precision."""
     return datetime.datetime.now().isoformat(sep=" ", timespec='milliseconds')
 
 
+def log_it(text):
+    """Cheap, lazy way to add to log file.  Gotta be better way..."""
+    if not os.path.exists(log_file_name):
+        # create the file and header
+        with open(log_file_name, "w") as f:
+            f.write(f"# file: {log_file_name}\n")
+            f.write(f"# created: {datetime.datetime.now()}\n")
+            f.write(f"# from: {__file__}\n")
+    with open(log_file_name, "a") as f:
+        # write the payload
+        f.write(f"{isotime()}: {text}\n")
+
+
 def report():
-    for c in (linkam_ci94, linkam_tc1):
-        print(
-            f"{isotime()}:"
-            f" {c.name}"
+    """Report selected controller values now."""
+    for c in (linkam,):
+        log_it(
+            f"{c.name}"
             f" T={c.readback.get():.1f}{c.egu}"
             f" ramp:{c.ramp.get()}"
             f" settled: {c.settled}"
@@ -102,18 +132,21 @@ def planHeaterProcess():
 
     report()
 
+    yield from bps.mv(
+        linkam.ramp, 20,
+    )
+
     for temp in (43, 48, 40):
-        print(f"{isotime()}: Setting to {temp} C")
+        log_it(f"Setting to {temp} C")
         t0 = time.time()
         yield from bps.mv(
-            linkam_ci94, temp,
-            linkam_tc1, temp,
+            linkam, temp,
         )
         # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
-        print(f"{isotime()}: Done, that took {time.time()-t0:.2f}s")
+        log_it(f"Done, that took {time.time()-t0:.2f}s")
         report()
-        print(f"{isotime()}: Holding for 30 s")
-        yield from bps.sleep(30)
+        log_it(f"Holding for 30 s")
+        yield from bps.sleep(30)                           # two hours = 2 * HOUR
         report()
 
     # DEMO: signal for an orderly exit after first run
@@ -121,9 +154,3 @@ def planHeaterProcess():
     # -----------------------------------
 
 
-linkam_exit = EpicsSignal("9idcLAX:bit14", name="linkam_exit")
-linkam_ci94 = Linkam_CI94_Device("9idcLAX:ci94:", name="linkam_ci94", egu="C")
-linkam_tc1 = Linkam_T96_Device("9idcLINKAM:tc1:", name="linkam_tc1", egu="C")
-
-for o in (linkam_ci94, linkam_exit, linkam_tc1):
-    o.wait_for_connection()
