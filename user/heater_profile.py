@@ -56,7 +56,8 @@ class Linkam_CI94_Device(FeatureMixin, PVPositioner):
     done = Component(Signal, value=1, kind="omitted")
     done_value = True
     tolerance = Component(Signal, value=1, kind="config")
-    start_button = Component(EpicsSignal, "start.PROC", kind="omitted")
+    actuate = Component(EpicsSignal, "start.PROC", kind="omitted")
+    actuate_value = 1
     stop_button = Component(EpicsSignal, "stop.PROC", kind="omitted")
     status_message = Component(EpicsSignalRO, "status", kind="config")
 
