@@ -42,11 +42,19 @@ UsaxsSaxsModes = {
 
 def confirmUsaxsSaxsOutOfBeam():
     """raise ValueError if not"""
-    if terms.SAXS.UsaxsSaxsMode.get() != UsaxsSaxsModes["out of beam"]:
-        logger.warning("Found UsaxsSaxsMode = %s " % terms.SAXS.UsaxsSaxsMode.get())
-        msg = "Incorrect UsaxsSaxsMode mode found."
-        msg += " If SAXS, WAXS, and USAXS are out of beam, terms.SAXS.UsaxsSaxsMode.put(%d)"
-        raise ValueError(msg % UsaxsSaxsModes["out of beam"])
+    actual = terms.SAXS.UsaxsSaxsMode.get(
+        timeout=60, as_string=False, use_monitor=False
+    )
+    expected = UsaxsSaxsModes["out of beam"]
+    if actual != expected:
+        xref = {v: k for k, v in UsaxsSaxsModes.items()}
+        actual_str = xref.get(actual, "undefined")
+        logger.warning("Found UsaxsSaxsMode = %s (%s)", actual, actual_str)
+        raise ValueError(
+            f"Incorrect UsaxsSaxsMode mode found ({actual}, {actual_str})."
+            "  If SAXS, WAXS, and USAXS really are out of beam, type: "
+            f" terms.SAXS.UsaxsSaxsMode.put({expected})"
+        )
 
 
 def move_WAXSOut():
