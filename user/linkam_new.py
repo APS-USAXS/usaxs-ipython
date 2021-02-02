@@ -9,11 +9,16 @@ import subprocess
 import time
 
 from instrument.devices import linkam_ci94, linkam_tc1, terms
-from instrument.plans import SAXS, USAXSscan, WAXS
+from instrument.plans import SAXS, USAXSscan, WAXS, preUSAXStune
 from instrument.utils import getSampleTitle, resetSampleTitleFunction, setSampleTitleFunction
+from instrument.plans import before_command_list
+from instrument.plans import after_command_list
 
 HEATER_SCRIPT = "/home/beams/USAXS/bin/heater_profile_manager.sh"
 PULSE_MAX = 10000
+SECOND = 1
+MINUTE = 60*SECOND
+HOUR = 60*MINUTE
 
 def commandHeaterProcess(command="checkup"):
     """
@@ -31,7 +36,7 @@ def commandHeaterProcess(command="checkup"):
     return response.stdout.decode().strip()
 
 
-def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
+def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delayhours, md={}):
     """
     collect RT USAXS/SAXS/WAXS
     change temperature T to temp1 with rate1
@@ -40,13 +45,13 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     it will end after this time elapses...
 
     reload by
-    # %run -m linkam
+    # %run -m linkam_new
     """
 
     def myTitleFunction(title):
         return f"{title}_{linkam.value:.0f}C_{(time.time()-t1)/60:.0f}min"
 
-    def collectAllThree(debug=True):
+    def collectAllThree(debug=False):
         if debug:
             #for testing purposes, set debug=True
             sampleMod = myTitleFunction(scan_title)
@@ -61,6 +66,10 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     linkam = linkam_ci94
     logger.info(f"Linkam controller PV prefix={linkam.prefix}")
 
+    # this runs start of scan code...
+    yield from before_command_list(md={})
+    #yield from preUSAXStune()
+    
     setSampleTitleFunction(myTitleFunction)
 
     t1 = time.time()                                      # it is used in myTitileFunction
@@ -79,7 +88,7 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     yield from bps.mv(terms.HeaterProcess.linkam_trigger, 1)
 
     t1 = time.time()
-    delay = delaymin * 60                                  # convert to seconds
+    delay = delayhours * HOUR                         # convert to seconds
 
     while time.time()-t1 < delay:                          # collects data for delay seconds
         yield from collectAllThree()
@@ -91,6 +100,9 @@ def myLinkamPlan(pos_X, pos_Y, thickness, scan_title, delaymin, md={}):
     # TODO: choose orderly or abrupt exit
     yield from bps.mv(terms.HeaterProcess.linkam_exit, 1)  # orderly
     # commandHeaterProcess("stop")  # abrupt
+
+     # run endof scan code.
+    yield from after_command_list()
 
     resetSampleTitleFunction()
 

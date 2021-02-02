@@ -87,7 +87,8 @@ linkam_tc1 = Linkam_T96_Device("9idcLINKAM:tc1:", name="linkam_tc1", egu="C")
 for o in (linkam_ci94, linkam_exit, linkam_tc1):
     o.wait_for_connection()
 
-linkam = linkam_tc1     # choose which one
+#linkam = linkam_tc1     # choose which one
+linkam = linkam_ci94     # choose which one
 
 
 def isotime():
@@ -125,29 +126,42 @@ def planHeaterProcess():
     # run a temperature profile
     # -----------------------------------
     # this is an example:
-    # go to 43 C and hold for 30 s
-    # go to 48 C and hold for 30 s
-    # go to 40 C and hold for 30 s
+    # go to 60 C and hold for 10 min
+    # go to 80 C and ends
     # exit
 
     report()
 
     yield from bps.mv(
+        linkam.ramp, 10,
+    )
+    log_it(f"Changed rate to {linkam.ramp.get()} C/min")
+
+    log_it("Setting to 60 C")
+    t0 = time.time()
+    yield from bps.mv(
+        linkam, 60,
+    )
+    # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
+    log_it(f"Done, that took {time.time()-t0:.2f}s")
+    report()
+    log_it("Holding for 2 min")
+    yield from bps.sleep(2 * MINUTE)      # takes seconds, two hours = 2 * HOUR, two minutes = 2 * MINUTE
+    log_it("Holding period ended")
+    report()
+     # Change rate to 10 C/min :
+    log_it("Changing rate to 20 C/min")
+    yield from bps.mv(
         linkam.ramp, 20,
     )
-
-    for temp in (43, 48, 40):
-        log_it(f"Setting to {temp} C")
-        t0 = time.time()
-        yield from bps.mv(
-            linkam, temp,
-        )
-        # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
-        log_it(f"Done, that took {time.time()-t0:.2f}s")
-        report()
-        log_it(f"Holding for 30 s")
-        yield from bps.sleep(30)                           # two hours = 2 * HOUR
-        report()
+    log_it("Setting to 80 C")
+    t0 = time.time()
+    yield from bps.mv(
+        linkam, 80,
+    )
+    # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
+    log_it(f"Done, that took {time.time()-t0:.2f}s")
+    report()
 
     # DEMO: signal for an orderly exit after first run
     yield from bps.mv(linkam_exit, True)
