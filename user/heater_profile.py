@@ -80,7 +80,11 @@ class Linkam_T96_Device(FeatureMixin, PVPositioner):
     setpoint = Component(EpicsSignalWithRBV, "rampLimit", kind="omitted")
     ramp = Component(EpicsSignalWithRBV, "rampRate", kind="config")
     done = Component(EpicsSignalRO, "rampAtLimit_RBV", kind="omitted")
-    heating_switch = Component(EpicsSignalWithRBV, "heating", kind="config")
+    actuate = Component(EpicsSignalWithRBV, "heating", kind="config", string=True)
+    actuate_value = "On"
+    stop_signal = Component(EpicsSignalWithRBV, "heating", kind="config", string=True)
+    stop_value = "Off"
+
 
 linkam_exit = EpicsSignal("9idcLAX:bit14", name="linkam_exit")
 linkam_ci94 = Linkam_CI94_Device("9idcLAX:ci94:", name="linkam_ci94", egu="C")
@@ -112,55 +116,92 @@ def log_it(text):
 
 
 def report():
-    """Report selected controller values now."""
-    for c in (linkam,):
-        log_it(
-            f"{c.name}"
-            f" T={c.readback.get():.1f}{c.egu}"
-            f" ramp:{c.ramp.get()}"
-            f" settled: {c.settled}"
-            f" done: {c.done.get()}"
-        )
+    """Report current values for selected controller."""
+    c = linkam
+    log_it(
+        f"{c.name}"
+        f" T={c.readback.get():.1f}{c.egu}"
+        f" setpoint={c.setpoint.get():.1f}{c.egu}"
+        f" ramp:{c.ramp.get()}"
+        f" settled: {c.settled}"
+        f" done: {c.done.get()}"
+    )
 
 
 def planHeaterProcess():
-    """BS plan: Run a temperature profile on the sample heater."""
-    # run a temperature profile
-    # -----------------------------------
-    # this is an example:
-    # go to 60 C and hold for 10 min
-    # go to 80 C and ends
-    # exit
-
+    """BS plan: Run one temperature profile on the sample heater."""
+    log_it(f"Starting planHeaterProcess() for {linkam.name}")
     report()
 
     yield from bps.mv(
-        linkam.ramp, 10,
+        linkam.ramp, 3,
     )
-    log_it(f"Changed rate to {linkam.ramp.get()} C/min")
+    log_it(
+        f"Change {linkam.name.get()} rate to {linkam.ramp.get():.0f} C/min"
+    )
 
-    log_it("Setting to 60 C")
     t0 = time.time()
-    yield from bps.mv(
-        linkam, 60,
-    )
     # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
+    # bps.abs_set only _sets_ the setpoint, must wait in a later step
+    yield from bps.abs_set(
+        linkam, 1083,
+    )
+    log_it(
+        f"Change {linkam.name.get()} setpoint to {linkam.setpoint.get():.2f} C"
+    )
+    while linkam.done.get() not in (1, "Done"):
+        if linkam_exit.get():  # Watch for user exit while waiting
+            yield from bps.abs_set(linkam.stop_signal, linkam_stop_value)
+            log_it(
+                "User requested exit during set"
+                f" after {(time.time()-t0)/60:.2f}m."
+                " Stopping the heater."
+            )
+            report()
+            return
+        yield from bps.sleep(1)
     log_it(f"Done, that took {time.time()-t0:.2f}s")
     report()
-    log_it("Holding for 2 min")
-    yield from bps.sleep(2 * MINUTE)      # takes seconds, two hours = 2 * HOUR, two minutes = 2 * MINUTE
-    log_it("Holding period ended")
-    report()
-     # Change rate to 10 C/min :
-    log_it("Changing rate to 20 C/min")
-    yield from bps.mv(
-        linkam.ramp, 20,
-    )
-    log_it("Setting to 80 C")
+
+    # two hours = 2 * HOUR, two minutes = 2 * MINUTE
+    log_it("{linkam.name.get()} holding for 3 hours")
     t0 = time.time()
+    time_expires = t0 + 3 * HOUR
+    while time.time() < time_expires:
+        if linkam_exit.get():
+            yield from bps.abs_set(linkam.stop_signal, linkam_stop_value)
+            log_it(
+                "User requested exit during hold"
+                f" after {(time.time()-t0)/60:.2f}m."
+                " Stopping the heater."
+            )
+            report()
+            return
+        yield from bps.sleep(1)
+    log_it("{linkam.name.get()} holding period ended")
+    report()
+
+     # Change rate to 3 C/min :
     yield from bps.mv(
-        linkam, 80,
+        linkam.ramp, 3,
     )
+    log_it(f"Change {linkam.name.get()} rate to {linkam.ramp.get():.0f} C/min")
+    t0 = time.time()
+    yield from bps.abs_set(
+        linkam, 40,
+    )
+    log_it(f"Change {linkam.name.get()} setpoint to {linkam.setpoint.get():.2f} C")
+    while linkam.done.get() not in (1, "Done"):
+        if linkam_exit.get():  # Watch for user exit while waiting
+            yield from bps.abs_set(linkam.stop_signal, linkam_stop_value)
+            log_it(
+                "User requested exit during set"
+                f" after {(time.time()-t0)/60:.2f}m."
+                " Stopping the heater."
+            )
+            report()
+            return
+        yield from bps.sleep(1)
     # note: bps.mv waits until OBJECT.done.get() == 1 (just like a motor)
     log_it(f"Done, that took {time.time()-t0:.2f}s")
     report()
