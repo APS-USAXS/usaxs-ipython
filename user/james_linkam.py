@@ -1,6 +1,6 @@
 
 """
-Linkam plan for James Caokley experiments 2021-01.
+Linkam plan for James Coakley experiments 2021-01.
 
 Load this into a bluesky console session with::
 
