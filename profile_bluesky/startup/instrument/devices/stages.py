@@ -19,6 +19,7 @@ logger.info(__file__)
 
 from ophyd import Component, MotorBundle
 
+from ..framework import sd
 from .usaxs_motor_devices import UsaxsMotor
 from .usaxs_motor_devices import UsaxsMotorTunable
 
