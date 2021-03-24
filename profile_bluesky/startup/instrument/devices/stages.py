@@ -105,3 +105,8 @@ waxsx = UsaxsMotor(
     '9idcLAX:m58:c0:m4',
     name='waxsx',
     labels=("waxs", "motor"))  # WAXS X
+
+for _s in (s_stage, d_stage, a_stage, m_stage, saxs_stage):
+    sd.baseline.append(_s)
+
+sd.baseline.append(waxsx)
