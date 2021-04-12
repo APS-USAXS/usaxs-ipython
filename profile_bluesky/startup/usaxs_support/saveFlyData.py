@@ -102,9 +102,9 @@ class SaveFlyScan(object):
                 value = NOT_CONNECTED_TEXT
                 # continue
             elif pv_spec.as_string:
-                value = pv_spec.ophyd_signal.get(as_string=True)
+                value = pv_spec.ophyd_signal.get(as_string=True, timeout=10, use_monitor=False)
             else:
-                value = pv_spec.ophyd_signal.get()
+                value = pv_spec.ophyd_signal.get(timeout=10, use_monitor=False)
             if value is None:
                 value = NO_DATA_TEXT
             logger.debug("saveFile(): writing {pv_spec}")
