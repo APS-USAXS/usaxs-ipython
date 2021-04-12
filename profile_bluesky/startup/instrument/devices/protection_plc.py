@@ -86,7 +86,7 @@ class PlcProtectionDevice(Device):
             email_notices.send("!!! PLC protection Y0 tripped !!!", msg)
 
     def stop_in_suspender(self):
-        if self.operations_status.get() == 1:
+        if self.operations_status.get() == self.expected_value:
             msg = None
         else:
             msg = self.tripped_text
