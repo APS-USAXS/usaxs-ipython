@@ -110,7 +110,7 @@ class PlcProtectSuspendWhenChanged(SuspendWhenChanged):
     https://github.com/APS-USAXS/ipython-usaxs/blob/master/profile_bluesky/startup/notebooks/2018-12-05-USAXS-sim-plc-protect.ipynb
     """
 
-    justification_text = """.
+    justification_text = """
     Significant equipment problem.  Do these steps:
     1. ^C twice      # interrupt the ipython kernel
     2. RE.abort()    # finalize current data streams (if any)
@@ -129,7 +129,7 @@ class PlcProtectSuspendWhenChanged(SuspendWhenChanged):
         just += f' got "{self._sig.get()}",'
         just += f' expected "{self.expected_value}"'
         if not self.allow_resume:
-            just += "  " + self.justification_text
+            just += self.justification_text
             self._tripped_message = plc_protect.stop_in_suspender()
 
         return '\n----\n'.join(
