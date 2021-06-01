@@ -100,7 +100,7 @@ class UsaxsFlyScanDevice(Device):
             t = time.time()
             timeout = t + self.scan_time.get() + self.timeout_s # extra padded time
             startup = t + self.update_interval_s/2
-            while t < startup and not  self.flying.get():    # wait for flyscan to start
+            while t < startup and not self.flying.get():    # wait for flyscan to start
                 time.sleep(0.01)
             labels = ("flying, s", "ar, deg", "ay, mm", "dy, mm", "channel", "elapsed, s")
             logger.info("  ".join([f"{s:11}" for s in labels]))
@@ -184,7 +184,10 @@ class UsaxsFlyScanDevice(Device):
 
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
-        yield from bps.abs_set(self.flying, False)
+        if self.flying.get():
+            yield from bps.abs_set(self.flying, False)
+        else:
+            logger.warning("Was not flying but should be.")
 
         if bluesky_runengine_running:
             prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
@@ -201,10 +204,21 @@ class UsaxsFlyScanDevice(Device):
 
         if bluesky_runengine_running:
             progress_reporting()
-        yield from bps.abs_set(self.flying, True)
+
+        if self.flying._status is not None and not self.flying._status.done:
+            # per https://github.com/APS-USAXS/ipython-usaxs/issues/499
+            logger.warning("Clearing unfinished status object on 'usaxs_flyscan/flying'")
+            self.flying._status.set_finished()
+        if not self.flying.get():
+            yield from bps.abs_set(self.flying, True)
+        else:
+            logger.warning("Already flying, should not be flying now.")
 
         yield from bps.wait(group=g)
-        yield from bps.abs_set(self.flying, False)
+        if not self.flying.get():
+            yield from bps.abs_set(self.flying, False)
+        else:
+            logger.warning("Already flying (after wait), should not be flying now.")
         elapsed = time.time() - self.t0
         specwriter._cmt("stop", f"fly scan completed in {elapsed} s")
 
