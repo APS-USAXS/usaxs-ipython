@@ -58,6 +58,9 @@ from .requested_stop import RequestAbort
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
+MAXIMUM_ATTEMPTS = 1  # try command list item no more than this many attempts
+
+
 def beforeScanComputeOtherStuff():
     """Actions before each data collection starts."""
     yield from bps.null()       # TODO: remove this once you add the "other stuff"
@@ -467,7 +470,7 @@ def execute_command_list(filename, commands, md=None):
             logger.info("memory report: %s", rss_mem())
 
         attempt = 0  # count the number of attempts
-        maximum_attempts = 5  # set an upper limit
+        maximum_attempts = MAXIMUM_ATTEMPTS  # set an upper limit
         exit_requested = False
         while attempt < maximum_attempts:
             try:
