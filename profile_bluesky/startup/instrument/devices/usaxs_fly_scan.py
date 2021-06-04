@@ -61,6 +61,7 @@ class UsaxsFlyScanDevice(Device):
         self.fallback_dir = FALLBACK_DIR
         self.saveFlyData_HDF5_file ="sfs.h5"
         self._output_HDF5_file_ = None
+        self.flying._status = None  # issue #501
 
     def plan(self, md={}):
         """
