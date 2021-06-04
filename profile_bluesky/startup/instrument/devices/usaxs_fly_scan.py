@@ -15,6 +15,7 @@ from bluesky import plan_stubs as bps
 from collections import OrderedDict
 import datetime
 from ophyd import Component, Device, EpicsSignal, Signal
+from ophyd.status import Status
 import os
 import time
 import uuid
@@ -61,7 +62,8 @@ class UsaxsFlyScanDevice(Device):
         self.fallback_dir = FALLBACK_DIR
         self.saveFlyData_HDF5_file ="sfs.h5"
         self._output_HDF5_file_ = None
-        self.flying._status = None  # issue #501
+        self.flying._status = Status()  # issue #501
+        self.flying._status.set_finished()
 
     def plan(self, md={}):
         """
@@ -186,9 +188,8 @@ class UsaxsFlyScanDevice(Device):
         self.t0 = time.time()
         self.update_time = self.t0 + self.update_interval_s
         if self.flying.get():
+            logger.warning("Was flying.  Setting that signal to False now.")
             yield from bps.abs_set(self.flying, False)
-        else:
-            logger.warning("Was not flying but should be.")
 
         if bluesky_runengine_running:
             prepare_HDF5_file()      # prepare HDF5 file to save fly scan data (background thread)
@@ -216,10 +217,7 @@ class UsaxsFlyScanDevice(Device):
             logger.warning("Already flying, should not be flying now.")
 
         yield from bps.wait(group=g)
-        if not self.flying.get():
-            yield from bps.abs_set(self.flying, False)
-        else:
-            logger.warning("Already flying (after wait), should not be flying now.")
+        yield from bps.abs_set(self.flying, False)
         elapsed = time.time() - self.t0
         specwriter._cmt("stop", f"fly scan completed in {elapsed} s")
 
