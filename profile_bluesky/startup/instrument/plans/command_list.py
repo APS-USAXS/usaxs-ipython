@@ -58,7 +58,7 @@ from .requested_stop import RequestAbort
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
 
 
-MAXIMUM_ATTEMPTS = 1  # try command list item no more than this many attempts
+MAXIMUM_ATTEMPTS = 1  # (>=1): try command list item no more than this many attempts
 
 
 def beforeScanComputeOtherStuff():
@@ -472,11 +472,14 @@ def execute_command_list(filename, commands, md=None):
         attempt = 0  # count the number of attempts
         maximum_attempts = MAXIMUM_ATTEMPTS  # set an upper limit
         exit_requested = False
+
+        # see issue #502
         while attempt < maximum_attempts:
             try:
                 # call the inner function (above)
                 yield from _handle_actions_()
                 break  # leave the while loop
+            # TODO: need to handle some Exceptions, fail on others
             except Exception as exc:
                 if exc.__class__ in (RequestAbort,):
                     exit_requested = True
@@ -496,10 +499,13 @@ def execute_command_list(filename, commands, md=None):
                     f"\nraw command: {raw_command}"
                     f"\nattempt: {attempt+1} of {maximum_attempts}"
                     f"\nexception: {exc}"
+                    f"\n"
+                    f"Stopping further processing of this command list.\n"
                 )
                 logger.error("Exception %s\n%s", subject, body)
                 email_notices.send(subject, body)
                 attempt += 1
+                exit_requested = True  # issue #502: stop if an Exception was noted
 
         if exit_requested:
             break
@@ -553,4 +559,3 @@ def run_python_file(filename, md=None):
     logger.error("Could not find file '%s'", filename)
     if not filename.endswith(".py"):
         logger.warning("Did you forget the '.py' suffix on '%s'?", filename)
- 
