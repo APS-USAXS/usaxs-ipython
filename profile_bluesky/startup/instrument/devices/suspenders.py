@@ -16,16 +16,28 @@ from ..framework import RE, sd
 from .aps_source import aps
 from .permit import BeamInHutch
 from .shutters import mono_shutter
+from .white_beam_ready_calc import white_beam_ready
 
 
 if aps.inUserOperations:
     sd.monitors.append(aps.current)
-    # suspend when current < 2 mA
-    # resume 100s after current > 10 mA
-    logger.info("Installing suspender for low APS current.")
-    suspend_APS_current = bluesky.suspenders.SuspendFloor(
-        aps.current, 2, resume_thresh=10, sleep=100)
-    RE.install_suspender(suspend_APS_current)
+    # # suspend when current < 2 mA
+    # # resume 100s after current > 10 mA
+    # logger.info("Installing suspender for low APS current.")
+    # suspend_APS_current = bluesky.suspenders.SuspendFloor(
+    #     aps.current, 2, resume_thresh=10, sleep=100)
+    # RE.install_suspender(suspend_APS_current)
+
+    # suspend if we do not believe white beam is ready
+    # considers:
+    #   - APS storage ring current
+    #   - 9ID undulator
+    #   - white beam shutter
+    # Signal provided by 9idcLAX:userCalc9 PV (swait record)
+    suspender_white_beam_ready = bluesky.suspenders.SuspendBoolLow(
+        white_beam_ready.available, sleep=100
+    )
+    RE.install_suspender(suspender_white_beam_ready)
 
     # remove comment if likely to use this suspender (issue #170)
     # suspend_FE_shutter = bluesky.suspenders.SuspendFloor(FE_shutter.pss_state, 1)
