@@ -145,7 +145,9 @@ def before_command_list(md=None, commands=None):
 
 def verify_commands(commands):
     """Verifies command input parameters to check if they are valid"""
-    pass 
+    raise RuntimeError("Verify command file failed")
+    #this is the end of this routine
+    logger.info("Command file verified") 
 
 
 def after_command_list(md=None):
