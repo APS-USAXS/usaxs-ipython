@@ -367,7 +367,7 @@ def execute_command_list(filename, commands, md=None):
     where
 
     command : tuple
-        (action, OrderedDict, line_number, raw_command)
+        (action, parameters, line_number, raw_command)
     action: str
         names a known action to be handled
     parameters: list
