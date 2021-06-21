@@ -100,6 +100,8 @@ def before_command_list(md=None, commands=None):
     """Actions before a command list is run."""
     from .scans import preUSAXStune
 
+    verify_commands(commands)
+    
     if md is None:
         md = {}
 
@@ -139,6 +141,11 @@ def before_command_list(md=None, commands=None):
     # force the next FlyScan to reload the metadata configuration
     # which forces a (re)connection to the EPICS PVs
     reset_manager()
+
+
+def verify_commands(commands):
+    """Verifies command input parameters to check if they are valid"""
+    pass 
 
 
 def after_command_list(md=None):
