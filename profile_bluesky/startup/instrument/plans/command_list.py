@@ -56,6 +56,7 @@ from .mode_changes import mode_USAXS
 from .mode_changes import mode_WAXS
 from .requested_stop import RequestAbort
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
+from ..devices.stages import s_stage
 
 
 MAXIMUM_ATTEMPTS = 1  # (>=1): try command list item no more than this many attempts
@@ -100,6 +101,8 @@ def before_command_list(md=None, commands=None):
     """Actions before a command list is run."""
     from .scans import preUSAXStune
 
+    verify_commands(commands)
+
     if md is None:
         md = {}
 
@@ -139,6 +142,45 @@ def before_command_list(md=None, commands=None):
     # force the next FlyScan to reload the metadata configuration
     # which forces a (re)connection to the EPICS PVs
     reset_manager()
+
+
+def verify_commands(commands):
+    """Verifies command input parameters to check if they are valid"""
+    # create string for error logging
+    list_of_errors = []
+    # separate commands into individual components, see execute_command_list for details
+    scan_actions = "flyscan usaxsscan saxs saxsexp waxs waxsexp".split()
+    for command in commands:
+        action, args, i, raw_command = command
+        if action.lower() in scan_actions:
+            try:
+                sx = float(args[0])
+                sy = float(args[1])
+                sth = float(args[2])
+                snm = args[3]
+            except (IndexError,ValueError):
+                list_of_errors.append(f"line {i}: Improper command : {raw_command.strip()}")
+                continue
+            # check sx against travel limits
+            if sx < s_stage.x.low_limit :
+                list_of_errors.append(f"line {i}: SX low limit: value {sx} < low limit {s_stage.x.low_limit},  command: {raw_command.strip()}")
+            if sx > s_stage.x.high_limit :
+                list_of_errors.append(f"line {i}: SX high limit: value {sx} > high limit {s_stage.x.high_limit},  command: {raw_command.strip()}")
+            # check sy against travel limits
+            if sy < s_stage.y.low_limit :
+                list_of_errors.append(f"line {i}: SY low limit: value {sy} < low limit {s_stage.y.low_limit},  command: {raw_command.strip()}")
+            if sy > s_stage.y.high_limit :
+                list_of_errors.append(f"line {i}: SY high limit: value {sy} > high limit {s_stage.y.high_limit},  command: {raw_command.strip()}")
+            # check sth for reasonable sample thickness value
+            if sth.isnumeric() is False :
+                list_of_errors.append(f"line {i}: thickness incorrect for : {raw_command.strip()}")
+            # check snm for reasonable sample title value
+    if len(list_of_errors) > 0:
+        err_msg="Errors were found in command file. Cannot continue. List of errors:\n"+"\n".join(list_of_errors)
+        raise RuntimeError(err_msg)
+    #this is the end of this routine
+    #raise RuntimeError("Stop anyway")
+    logger.info("Command file verified")
 
 
 def after_command_list(md=None):
