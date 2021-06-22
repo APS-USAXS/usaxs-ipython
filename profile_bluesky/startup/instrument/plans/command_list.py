@@ -164,9 +164,9 @@ def verify_commands(commands):
                 list_of_errors.append(f"SX high limit of {sx} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
             # check sy against travel limits
             if sy < s_stage.y.low_limit :
-                list_of_errors.append(f"SY low limit of {sy} violated for sample: {snm}, {action},  line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"SY low limit of {sy} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
             if sy > s_stage.y.high_limit :
-                list_of_errors.append(f"SY high limit of {sy} violated for sample: {snm}, {action},  line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"SY high limit of {sy} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
             # check sth for reasonable sample thickness value
             # check snm for reasonable sample title value
     if len(list_of_errors) > 0:
