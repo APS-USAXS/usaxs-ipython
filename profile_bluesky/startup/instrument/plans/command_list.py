@@ -147,7 +147,7 @@ def before_command_list(md=None, commands=None):
 def verify_commands(commands):
     """Verifies command input parameters to check if they are valid"""
     # create string for error logging
-    ListOfErrors = []
+    list_of_errors = []
     # separate commands into individual components, see execute_command_list for details
     for command in commands:
         action, args, i, raw_command = command
@@ -159,18 +159,19 @@ def verify_commands(commands):
             snm = args[3] 
             # check sx against travel limits
             if sx < s_stage.x.low_limit :
-                ListOfErrors.append(F"SX low limit of {sx} violated for {action} for {snm}")
+                list_of_errors.append(f"SX low limit of {sx} violated for sample {action} {snm} line number {i} command {raw_command}")
             if sx > s_stage.x.high_limit :
-                ListOfErrors.append(F"SX high limit of {sx} violated for {action} for {snm}")
+                list_of_errors.append(f"SX high limit of {sx} violated for sample {action} {snm} line number {i} command {raw_command}")
             # check sy against travel limits
             if sy < s_stage.y.low_limit :
-                ListOfErrors.append(F"SY low limit of {sy} violated for {action} for {snm}")
+                list_of_errors.append(f"SY low limit of {sy} violated for sample {action} {snm} line number {i} command {raw_command}")
             if sy > s_stage.y.high_limit :
-                ListOfErrors.append(F"SY high limit of {sy} violated for {action} for {snm}")
+                list_of_errors.append(f"SY high limit of {sy} violated for sample {action} {snm} line number {i} command {raw_command}")
             # check sth for reasonable sample thickness value
             # check snm for reasonable sample title value
-    if len(ListOfErrors) > 0:
-        raise RuntimeError(ListOfErrors)
+    if len(list_of_errors) > 0:
+        err_msg="Errors were found in command file. Cannot continue. List of errors:"+"\n".join(list_of_errors)
+        raise RuntimeError(err_msg)
     #this is the end of this routine
     raise RuntimeError("Stop anyway")
     logger.info("Command file verified") 
