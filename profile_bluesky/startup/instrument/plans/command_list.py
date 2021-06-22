@@ -102,7 +102,7 @@ def before_command_list(md=None, commands=None):
     from .scans import preUSAXStune
 
     verify_commands(commands)
-    
+
     if md is None:
         md = {}
 
@@ -149,15 +149,15 @@ def verify_commands(commands):
     # create string for error logging
     list_of_errors = []
     # separate commands into individual components, see execute_command_list for details
+    scan_actions = "flyscan usaxsscan saxs saxsexp waxs waxsexp".split()
     for command in commands:
         action, args, i, raw_command = command
-        scan_actions = "flyscan usaxsscan saxs saxsexp waxs waxsexp".split()
         if action.lower() in scan_actions:
             try:
-                sx = float(args[0]) 
-                sy = float(args[1]) 
-                sth = float(args[2]) 
-                snm = args[3] 
+                sx = float(args[0])
+                sy = float(args[1])
+                sth = float(args[2])
+                snm = args[3]
             except (IndexError,ValueError):
                 list_of_errors.append(f"line {i}: Improper command : {raw_command.strip()}")
                 continue
@@ -180,7 +180,7 @@ def verify_commands(commands):
         raise RuntimeError(err_msg)
     #this is the end of this routine
     #raise RuntimeError("Stop anyway")
-    logger.info("Command file verified") 
+    logger.info("Command file verified")
 
 
 def after_command_list(md=None):
