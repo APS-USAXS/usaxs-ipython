@@ -153,23 +153,27 @@ def verify_commands(commands):
         action, args, i, raw_command = command
         scan_actions = "flyscan usaxsscan saxs saxsexp waxs waxsexp".split()
         if action.lower() in scan_actions:
-            sx = float(args[0]) 
-            sy = float(args[1]) 
-            sth = float(args[2]) 
-            snm = args[3] 
+            try:
+                sx = float(args[0]) 
+                sy = float(args[1]) 
+                sth = float(args[2]) 
+                snm = args[3] 
+            except (IndexError,ValueError):
+                list_of_errors.append(f"line {i}: Improper command : {raw_command.strip()}")
+                continue
             # check sx against travel limits
             if sx < s_stage.x.low_limit :
-                list_of_errors.append(f"SX low limit of {sx} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"line {i}: SX low limit: value {sx} < low limit {s_stage.x.low_limit},  command: {raw_command.strip()}")
             if sx > s_stage.x.high_limit :
-                list_of_errors.append(f"SX high limit of {sx} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"line {i}: SX high limit: value {sx} > high limit {s_stage.x.high_limit},  command: {raw_command.strip()}")
             # check sy against travel limits
             if sy < s_stage.y.low_limit :
-                list_of_errors.append(f"SY low limit of {sy} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"line {i}: SY low limit: value {sy} < low limit {s_stage.y.low_limit},  command: {raw_command.strip()}")
             if sy > s_stage.y.high_limit :
-                list_of_errors.append(f"SY high limit of {sy} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
+                list_of_errors.append(f"line {i}: SY high limit: value {sy} > high limit {s_stage.y.high_limit},  command: {raw_command.strip()}")
             # check sth for reasonable sample thickness value
-            if sth.isnumeric() is False:
-                list_of_errors.append(f"Thickness incorrect for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
+            if sth.isnumeric() is False :
+                list_of_errors.append(f"line {i}: thickness incorrect for : {raw_command.strip()}")
             # check snm for reasonable sample title value
     if len(list_of_errors) > 0:
         err_msg="Errors were found in command file. Cannot continue. List of errors:\n"+"\n".join(list_of_errors)
