@@ -168,6 +168,8 @@ def verify_commands(commands):
             if sy > s_stage.y.high_limit :
                 list_of_errors.append(f"SY high limit of {sy} violated for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
             # check sth for reasonable sample thickness value
+            if sth.isnumeric() is False:
+                list_of_errors.append(f"Thickness incorrect for sample: {snm}, {action}, line number: {i}, command: {raw_command}")
             # check snm for reasonable sample title value
     if len(list_of_errors) > 0:
         err_msg="Errors were found in command file. Cannot continue. List of errors:\n"+"\n".join(list_of_errors)
