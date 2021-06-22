@@ -56,6 +56,7 @@ from .mode_changes import mode_USAXS
 from .mode_changes import mode_WAXS
 from .requested_stop import RequestAbort
 from .sample_rotator_plans import PI_Off, PI_onF, PI_onR
+from ..devices.stages import s_stage
 
 
 MAXIMUM_ATTEMPTS = 1  # (>=1): try command list item no more than this many attempts
@@ -146,7 +147,7 @@ def before_command_list(md=None, commands=None):
 def verify_commands(commands):
     """Verifies command input parameters to check if they are valid"""
     # create string for error logging
-    ListOfErrors = None
+    ListOfErrors = []
     # separate commands into individual components, see execute_command_list for details
     for command in commands:
         action, args, i, raw_command = command
@@ -156,13 +157,19 @@ def verify_commands(commands):
             sy = float(args[1]) 
             sth = float(args[2]) 
             snm = args[3] 
-            # TODO: check sx against travel limits
+            # check sx against travel limits
             if sx < s_stage.x.low_limit :
-                ListOfErrors.append("Low limit violated for line " i )
-            # TODO: check sy against travel limits
-            # TODO: check sth for reasonable sample thickness value
-            # TODO: check snm for reasonable sample title value
-    if ListOfErrors is not None:
+                ListOfErrors.append(F"SX low limit of {sx} violated for {action} for {snm}")
+            if sx > s_stage.x.high_limit :
+                ListOfErrors.append(F"SX high limit of {sx} violated for {action} for {snm}")
+            # check sy against travel limits
+            if sy < s_stage.y.low_limit :
+                ListOfErrors.append(F"SY low limit of {sy} violated for {action} for {snm}")
+            if sy > s_stage.y.high_limit :
+                ListOfErrors.append(F"SY high limit of {sy} violated for {action} for {snm}")
+            # check sth for reasonable sample thickness value
+            # check snm for reasonable sample title value
+    if len(ListOfErrors) > 0:
         raise RuntimeError(ListOfErrors)
     #this is the end of this routine
     raise RuntimeError("Stop anyway")
