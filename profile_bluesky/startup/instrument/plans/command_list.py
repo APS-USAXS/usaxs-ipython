@@ -173,7 +173,7 @@ def verify_commands(commands):
         err_msg="Errors were found in command file. Cannot continue. List of errors:\n"+"\n".join(list_of_errors)
         raise RuntimeError(err_msg)
     #this is the end of this routine
-    raise RuntimeError("Stop anyway")
+    #raise RuntimeError("Stop anyway")
     logger.info("Command file verified") 
 
 
