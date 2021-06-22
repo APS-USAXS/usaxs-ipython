@@ -145,8 +145,27 @@ def before_command_list(md=None, commands=None):
 
 def verify_commands(commands):
     """Verifies command input parameters to check if they are valid"""
-    raise RuntimeError("Verify command file failed")
+    # create string for error logging
+    ListOfErrors = None
+    # separate commands into individual components, see execute_command_list for details
+    for command in commands:
+        action, args, i, raw_command = command
+        scan_actions = "flyscan usaxsscan saxs saxsexp waxs waxsexp".split()
+        if action.lower() in scan_actions:
+            sx = float(args[0]) 
+            sy = float(args[1]) 
+            sth = float(args[2]) 
+            snm = args[3] 
+            # TODO: check sx against travel limits
+            if sx < s_stage.x.low_limit :
+                ListOfErrors.append("Low limit violated for line " i )
+            # TODO: check sy against travel limits
+            # TODO: check sth for reasonable sample thickness value
+            # TODO: check snm for reasonable sample title value
+    if ListOfErrors is not None:
+        raise RuntimeError(ListOfErrors)
     #this is the end of this routine
+    raise RuntimeError("Stop anyway")
     logger.info("Command file verified") 
 
 
