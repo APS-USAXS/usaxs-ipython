@@ -16,7 +16,7 @@ from ophyd import Component, Device, EpicsSignal, EpicsSignalRO
 
 
 class LaserAR500(Device):
-     """
+    """
     temporary support for laser distacne meter AR500
     uses analog in and digital out from Galil
     uses userCalc7 in LAX to convert to real distace
