@@ -7,6 +7,7 @@ Support the different instrument modes
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
 __all__ = """
+    mode_Laser
     mode_BlackFly
     mode_imaging
     mode_OpenBeamPath
@@ -35,6 +36,7 @@ from ..devices.protection_plc import plc_protect
 from ..devices.scalers import scaler0
 from ..devices.general_terms import terms
 from ..devices.user_data import user_data
+from ..devices.laser import laser_distacne_meter
 from .filters import insertBlackflyFilters
 from .filters import insertRadiographyFilters
 from .filters import insertScanFilters
@@ -62,6 +64,25 @@ def confirm_instrument_mode(mode_name):
     return terms.SAXS.UsaxsSaxsMode.get() in (expected_mode, mode_name)
 
 
+def mode_Laser(md=None):
+    """
+    Sets to Laser distance meter mode, using AR500 laser.
+    """
+    yield from mode_OpenBeamPath()
+    yield from user_data.set_state_plan(
+        "Preparing for Laser distacne meter mode"
+        )
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        d_stage.x, laser_distacne_meter.dx.get(),
+        d_stage.y, laser_distacne_meter.dy.get(),
+        )
+    yield from bps.mv(
+        laser_distacne_meter.enable,  "Open",
+        )
+
+   
+
 def mode_BlackFly(md=None):
     """
     Sets to imaging mode, using BlackFly camera.
@@ -74,6 +95,7 @@ def mode_BlackFly(md=None):
 
     yield from bps.mv(
         ccd_shutter,        "close",
+        laser_distacne_meter.enable,  0,
         d_stage.x, terms.USAXS.blackfly.dx.get(),
         d_stage.y, terms.USAXS.blackfly.dy.get(),
     )
