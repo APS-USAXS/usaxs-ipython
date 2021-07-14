@@ -36,7 +36,7 @@ from ..devices.protection_plc import plc_protect
 from ..devices.scalers import scaler0
 from ..devices.general_terms import terms
 from ..devices.user_data import user_data
-from ..devices.laser import laser_distacne_meter
+from ..devices.laser import laser_distance_meter
 from .filters import insertBlackflyFilters
 from .filters import insertRadiographyFilters
 from .filters import insertScanFilters
@@ -74,11 +74,11 @@ def mode_Laser(md=None):
         )
     yield from bps.mv(
         ccd_shutter,        "close",
-        d_stage.x, laser_distacne_meter.dx.get(),
-        d_stage.y, laser_distacne_meter.dy.get(),
+        d_stage.x, laser_distance_meter.dx.get(),
+        d_stage.y, laser_distance_meter.dy.get(),
         )
     yield from bps.mv(
-        laser_distacne_meter.enable,  "Open",
+        laser_distance_meter.enable,  1,
         )
 
    
@@ -95,7 +95,7 @@ def mode_BlackFly(md=None):
 
     yield from bps.mv(
         ccd_shutter,        "close",
-        laser_distacne_meter.enable,  0,
+        laser_distance_meter.enable,  0,
         d_stage.x, terms.USAXS.blackfly.dx.get(),
         d_stage.y, terms.USAXS.blackfly.dy.get(),
     )
@@ -120,6 +120,7 @@ def mode_USAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser_distance_meter.enable,  0,
         d_stage.x, terms.USAXS.diode.dx.get(),
         d_stage.y, terms.USAXS.diode.dy.get(),
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
@@ -180,6 +181,7 @@ def mode_SAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser_distance_meter.enable,  0,
     )
 
     if not confirm_instrument_mode("SAXS in beam"):
@@ -207,6 +209,7 @@ def mode_WAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser_distance_meter.enable,  0,
     )
 
     if confirm_instrument_mode("WAXS in beam"):
@@ -272,6 +275,7 @@ def mode_Radiography(md=None):
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         ccd_shutter, "close",
+        laser_distance_meter.enable,  0,
         user_data.collection_in_progress, 1,
     )
 
@@ -349,6 +353,7 @@ def mode_OpenBeamPath(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser_distance_meter.enable,  0,
     )
 
     if not confirm_instrument_mode("out of beam"):
