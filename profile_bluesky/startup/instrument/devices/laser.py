@@ -21,9 +21,9 @@ class LaserAR500(Device):
     uses analog in and digital out from Galil
     uses userCalc7 in LAX to convert to real distace
     uses Galil userAve (2 seconds long) to average noise out.
-    read dsiatce use laser_distance_meter.distance.get()
-    laser_distance_meter.enable(1)
-    laser_distance_meter.enable(0)
+    to read distace use laser.distance.get()
+    laser.enable(1)
+    laser.enable(0)
     """
     distance    = Component(EpicsSignalRO, "9idcLAX:userCalc7.VAL")
     enable      = Component(EpicsSignal, "9idcRIO:Galil2bo1_CMD")
