@@ -26,7 +26,7 @@ class LaserAR500(Device):
     laser.enable(0)
     """
     distance    = Component(EpicsSignalRO, "9idcLAX:userCalc7.VAL")
-    enable      = Component(EpicsSignal, "9idcRIO:Galil2bo1_CMD")
+    enable      = Component(EpicsSignal, "9idcRIO:Galil2Bo1_CMD")
     dx_in       = Component(EpicsSignalRO, "9idcLAX:USAXS:Laser_dx")    
     dy_in       = Component(EpicsSignalRO, "9idcLAX:USAXS:Laser_dy")
 

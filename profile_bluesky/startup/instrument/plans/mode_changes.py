@@ -74,8 +74,8 @@ def mode_Laser(md=None):
         )
     yield from bps.mv(
         ccd_shutter,        "close",
-        d_stage.x, laser.dx.get(),
-        d_stage.y, laser.dy.get(),
+        d_stage.x, laser.dx_in.get(),
+        d_stage.y, laser.dy_in.get(),
         )
     yield from bps.mv(
         laser.enable,  1,
