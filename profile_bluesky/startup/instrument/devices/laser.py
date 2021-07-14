@@ -31,6 +31,6 @@ class LaserAR500(Device):
     dy_in       = Component(EpicsSignalRO, "9idcLAX:USAXS:Laser_dy")
 
 
-laser = LaserAR500("", name="LaserAR500")
+laser = LaserAR500("", name="laser")
 
 
