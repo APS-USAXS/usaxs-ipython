@@ -4,7 +4,7 @@ laser distance meter AR500 support
 """
 
 __all__ = [
-    'laser_distacne_meter',
+    'laser',
     ]
 
 from ..session_logs import logger
@@ -31,6 +31,6 @@ class LaserAR500(Device):
     dy_in       = Component(EpicsSignalRO, "9idcLAX:USAXS:Laser_dy")
 
 
-laser_distance_meter = LaserAR500("", name="LaserAR500")
+laser = LaserAR500("", name="LaserAR500")
 
 
