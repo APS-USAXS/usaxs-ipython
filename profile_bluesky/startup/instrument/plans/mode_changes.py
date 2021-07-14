@@ -7,8 +7,9 @@ Support the different instrument modes
 # see: https://subversion.xray.aps.anl.gov/spec/beamlines/USAXS/trunk/macros/local/usaxs_commands.mac
 
 __all__ = """
+    mode_Laser
     mode_BlackFly
-    mode_imaging
+    mode_Imaging
     mode_OpenBeamPath
     mode_Radiography
     mode_SAXS
@@ -35,6 +36,7 @@ from ..devices.protection_plc import plc_protect
 from ..devices.scalers import scaler0
 from ..devices.general_terms import terms
 from ..devices.user_data import user_data
+from ..devices.laser import laser
 from .filters import insertBlackflyFilters
 from .filters import insertRadiographyFilters
 from .filters import insertScanFilters
@@ -62,6 +64,25 @@ def confirm_instrument_mode(mode_name):
     return terms.SAXS.UsaxsSaxsMode.get() in (expected_mode, mode_name)
 
 
+def mode_Laser(md=None):
+    """
+    Sets to Laser distance meter mode, using AR500 laser.
+    """
+    yield from mode_OpenBeamPath()
+    yield from user_data.set_state_plan(
+        "Preparing for Laser distacne meter mode"
+        )
+    yield from bps.mv(
+        ccd_shutter,        "close",
+        d_stage.x, laser.dx_in.get(),
+        d_stage.y, laser.dy_in.get(),
+        )
+    yield from bps.mv(
+        laser.enable,  1,
+        )
+
+   
+
 def mode_BlackFly(md=None):
     """
     Sets to imaging mode, using BlackFly camera.
@@ -74,6 +95,7 @@ def mode_BlackFly(md=None):
 
     yield from bps.mv(
         ccd_shutter,        "close",
+        laser.enable,  0,
         d_stage.x, terms.USAXS.blackfly.dx.get(),
         d_stage.y, terms.USAXS.blackfly.dy.get(),
     )
@@ -98,6 +120,7 @@ def mode_USAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser.enable,  0,
         d_stage.x, terms.USAXS.diode.dx.get(),
         d_stage.y, terms.USAXS.diode.dy.get(),
         guard_slit.h_size,  terms.SAXS.usaxs_guard_h_size.get(),
@@ -158,6 +181,7 @@ def mode_SAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser.enable,  0,
     )
 
     if not confirm_instrument_mode("SAXS in beam"):
@@ -185,6 +209,7 @@ def mode_WAXS(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser.enable,  0,
     )
 
     if confirm_instrument_mode("WAXS in beam"):
@@ -250,6 +275,7 @@ def mode_Radiography(md=None):
     yield from bps.mv(
         monochromator.feedback.on, MONO_FEEDBACK_ON,
         ccd_shutter, "close",
+        laser.enable,  0,
         user_data.collection_in_progress, 1,
     )
 
@@ -311,7 +337,7 @@ def mode_Radiography(md=None):
             logger.info("The mono shutter is closed now.  APS beam dump?")
 
 
-def mode_imaging(md=None):
+def mode_Imaging(md=None):
     """
     prepare the instrument for USAXS imaging
     """
@@ -327,6 +353,7 @@ def mode_OpenBeamPath(md=None):
     yield from bps.mv(
         ccd_shutter,        "close",
         ti_filter_shutter,  "close",
+        laser.enable,  0,
     )
 
     if not confirm_instrument_mode("out of beam"):

@@ -32,6 +32,7 @@ from .struck3820 import *
 from .suspenders import *
 from .trajectories import *
 from .usaxs_fly_scan import *
+from .laser import *
 
 # finally these area detectors
 from .alta_module import *
